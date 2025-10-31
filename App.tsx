@@ -11,6 +11,8 @@ import { ScrollToTopButton } from './components/ScrollToTopButton';
 import { FavoritesHeader } from './components/FavoritesHeader';
 import { SettingsModal } from './components/SettingsModal';
 import ErrorBoundary from './components/ErrorBoundary';
+import { fetchArticlesFromFeeds } from './services/newsService';
+import { INITIAL_FEEDS } from './services/feeds';
 
 const ARTICLES_PER_PAGE = 32;
 
@@ -119,18 +121,15 @@ const AppContent: React.FC = () => {
         }
 
         try {
-            const response = await fetch('/api/get-news');
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `Request failed with status ${response.status}`);
-            }
-            const fetchedArticles: Article[] = await response.json();
+            // ✅ NEU: Fetche mit INITIAL_FEEDS
+            const fetchedArticles: Article[] = await fetchArticlesFromFeeds(INITIAL_FEEDS);
             setArticles(fetchedArticles);
+
         } catch (error) {
-            console.error("Failed to fetch articles from API:", error);
+            console.error("Failed to fetch articles:", error);
             const message = error instanceof Error ? error.message : "An unknown error occurred.";
 
-            // Use static cache as fallback on initial load failure
+            // Use static cache as fallback
             if (!isManualRefresh) {
                 try {
                     const response = await fetch('/news-cache.json');
@@ -145,7 +144,7 @@ const AppContent: React.FC = () => {
                     console.warn("Could not load static news cache.", e);
                     setError(message);
                 }
-            } else if (articles.length === 0) { // also set error on refresh if we have no articles to show
+            } else if (articles.length === 0) {
                 setError(message);
             }
 
