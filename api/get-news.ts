@@ -12,8 +12,6 @@ const BROWSER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKi
 
 function stripHtmlAndTruncate(html: string, length: number = 150): string {
     if (!html) return '';
-    // A simple regex might be more performant and safer on the server than a full DOM parser.
-    // However, since Edge functions support DOMParser, we can keep the logic for consistency.
     const doc = new DOMParser().parseFromString(html, 'text/html');
     doc.querySelectorAll('script, style').forEach(el => el.remove());
     let text = (doc.body.textContent || "").trim();
@@ -26,27 +24,31 @@ function stripHtmlAndTruncate(html: string, length: number = 150): string {
 }
 
 async function getOgImageFromUrl(url: string): Promise<string | null> {
-    // Server-side fetching doesn't need a CORS proxy.
-    try {
-        const response = await fetch(url, {
-            signal: AbortSignal.timeout(5000),
-            // Use a realistic browser User-Agent to avoid being blocked.
-            headers: { 'User-Agent': BROWSER_USER_AGENT }
-        });
-        if (!response.ok) return null;
+    const proxies = [
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    ];
 
-        const html = await response.text();
+    for (const proxyUrl of proxies) {
+        try {
+            const response = await fetch(proxyUrl, {
+                signal: AbortSignal.timeout(5000),
+                headers: { 'User-Agent': BROWSER_USER_AGENT }
+            });
+            if (!response.ok) continue;
 
-        // Use a regex for performance on the server; it's often faster than parsing a full DOM.
-        const ogImageMatch = html.match(/<meta\s+(?:name|property)\s*=\s*"(?:og:image|og:image:url|twitter:image)"\s+content\s*=\s*"([^"]+)"\s*\/?>/i);
+            const html = await response.text();
 
-        if (ogImageMatch && ogImageMatch[1]) {
-            const imageUrl = ogImageMatch[1];
-            // Resolve relative URLs to be absolute.
-            return new URL(imageUrl, url).href;
+            const ogImageMatch = html.match(/<meta\s+(?:name|property)\s*=\s*"(?:og:image|og:image:url|twitter:image)"\s+content\s*=\s*"([^"]+)"\s*\/?>/i);
+
+            if (ogImageMatch && ogImageMatch[1]) {
+                const imageUrl = ogImageMatch[1];
+                return new URL(imageUrl, url).href;
+            }
+        } catch (e) {
+            console.warn(`Error scraping OG Image for ${url} via proxy:`, e);
         }
-    } catch (e) {
-        console.warn(`Error fetching OG Image for ${url}:`, e);
     }
     return null;
 }
@@ -125,17 +127,35 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
 }
 
 async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
+    const proxies = (url: string) => [
+        `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    ];
+
     const fetchPromises = feeds.map(feed => (async () => {
-        try {
-            const response = await fetch(feed.url, { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': BROWSER_USER_AGENT }});
-            if (!response.ok) throw new Error(`Status ${response.status}`);
-            const xmlString = await response.text();
-            if (!xmlString || !xmlString.trim().startsWith('<')) throw new Error('Invalid XML');
-            return { ...parseRssXml(xmlString, feed.url), feed, status: 'ok' };
-        } catch (error) {
-            console.warn(`Failed to fetch feed ${feed.url}:`, error);
-            return null;
+        for (const proxyUrl of proxies(feed.url)) {
+            try {
+                const response = await fetch(proxyUrl, {
+                    signal: AbortSignal.timeout(8000),
+                    headers: { 'User-Agent': BROWSER_USER_AGENT }
+                });
+
+                if (!response.ok) {
+                    console.warn(`Proxy ${proxyUrl} for ${feed.url} returned status ${response.status}`);
+                    continue;
+                }
+                const xmlString = await response.text();
+                if (!xmlString || !xmlString.trim().startsWith('<')) {
+                    console.warn(`Proxy ${proxyUrl} for ${feed.url} returned invalid XML`);
+                    continue;
+                }
+                return { ...parseRssXml(xmlString, feed.url), feed, status: 'ok' };
+            } catch (error) {
+                console.warn(`Proxy ${proxyUrl} for ${feed.url} failed:`, error);
+            }
         }
+        console.error(`All proxies failed for feed ${feed.url}`);
+        return null;
     })());
 
     const results = await Promise.allSettled(fetchPromises);
@@ -191,7 +211,7 @@ async function runImageScraper(articles: Article[]): Promise<Article[]> {
     const articlesToScrape = articles.filter(a => a.needsScraping || a.imageUrl.includes('placehold.co'));
     if (articlesToScrape.length === 0) return articles;
 
-    const BATCH_SIZE = 10; // Can be larger on the server than in the browser
+    const BATCH_SIZE = 10;
     const updatedArticlesMap = new Map(articles.map(a => [a.id, a]));
 
     for (let i = 0; i < articlesToScrape.length; i += BATCH_SIZE) {
