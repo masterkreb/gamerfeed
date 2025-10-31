@@ -123,7 +123,7 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
         const itemElement = node as Element;
         let link: string | null | undefined = '';
         if (isAtom) {
-            const linkNode = (Array.from(itemElement.querySelectorAll('link')).find(l => l.getAttribute('rel') === 'alternate') || itemElement.querySelector('link')) as Element | null;
+            const linkNode = (Array.from(itemElement.querySelectorAll('link')).find(l => (l as Element).getAttribute('rel') === 'alternate') || itemElement.querySelector('link')) as Element | null;
             link = linkNode?.getAttribute('href');
         } else {
             link = getQueryText(itemElement, 'link');
