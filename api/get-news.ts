@@ -6,6 +6,8 @@ export const config = {
 import type { Article, FeedSource } from '../types';
 import { INITIAL_FEEDS } from '../services/feeds';
 
+const BROWSER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36';
+
 // --- Server-Side Implementations of News Service Logic ---
 
 function stripHtmlAndTruncate(html: string, length: number = 150): string {
@@ -28,8 +30,8 @@ async function getOgImageFromUrl(url: string): Promise<string | null> {
     try {
         const response = await fetch(url, {
             signal: AbortSignal.timeout(5000),
-            // Set a user-agent to be a good internet citizen.
-            headers: { 'User-Agent': 'GamerFeedBot/1.0 (+https://gamerfeed.dev/bot.html)' }
+            // Use a realistic browser User-Agent to avoid being blocked.
+            headers: { 'User-Agent': BROWSER_USER_AGENT }
         });
         if (!response.ok) return null;
 
@@ -125,7 +127,7 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
 async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
     const fetchPromises = feeds.map(feed => (async () => {
         try {
-            const response = await fetch(feed.url, { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'GamerFeedBot/1.0' }});
+            const response = await fetch(feed.url, { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': BROWSER_USER_AGENT }});
             if (!response.ok) throw new Error(`Status ${response.status}`);
             const xmlString = await response.text();
             if (!xmlString || !xmlString.trim().startsWith('<')) throw new Error('Invalid XML');
