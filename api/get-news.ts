@@ -1,8 +1,10 @@
-// Vercel Edge Functions are web-compatible, so we can use web APIs like DOMParser.
+// Vercel Edge Functions are web-compatible, but lack certain browser-specific APIs.
+// We import a lightweight polyfill for DOMParser to handle HTML/XML parsing.
 export const config = {
     runtime: 'edge',
 };
 
+import { DOMParser } from 'https://esm.sh/linkedom@0.16.11';
 import type { Article, FeedSource } from '../types';
 import { INITIAL_FEEDS } from '../services/feeds';
 
@@ -106,14 +108,18 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xmlString, "application/xml");
     const errorNode = doc.querySelector("parsererror");
-    if (errorNode) throw new Error(`Failed to parse XML for feed: ${feedUrl}`);
+    if (errorNode) {
+        // linkedom's parsererror might not have useful textContent, so we construct a more generic message.
+        console.error(`XML Parsing Error for feed: ${feedUrl}. The XML might be malformed.`);
+        throw new Error(`Failed to parse XML for feed: ${feedUrl}`);
+    }
 
     const isAtom = doc.documentElement.nodeName === 'feed';
     const getQueryText = (ctx: Element | Document, sel: string): string => ctx.querySelector(sel)?.textContent?.trim() || '';
     const items: any[] = [];
     doc.querySelectorAll(isAtom ? "entry" : "item").forEach(node => {
         let link = isAtom
-            ? (Array.from(node.querySelectorAll('link')).find(l => l.getAttribute('rel') === 'alternate') || node.querySelector('link'))?.getAttribute('href')
+            ? (Array.from(node.querySelectorAll('link')).find(l => l.getAttribute('rel') === 'alternate') || (node.querySelector('link') as Element | null))?.getAttribute('href')
             : getQueryText(node, 'link');
 
         const title = getQueryText(node, 'title');
@@ -125,8 +131,9 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
             guid: getQueryText(node, 'guid') || getQueryText(node, 'id') || link,
             description: getQueryText(node, 'description') || getQueryText(node, 'summary'),
             content: getQueryText(node, 'content\\:encoded') || getQueryText(node, 'content'),
-            'media:thumbnail': { url: node.querySelector('media\\:thumbnail, thumbnail[url]')?.getAttribute('url') },
-            enclosure: { link: node.querySelector('enclosure[url]')?.getAttribute('url'), type: node.querySelector('enclosure[url]')?.getAttribute('type') },
+            // FIX: Cast querySelector results to Element to handle type inference issues with linkedom in the Edge runtime.
+            'media:thumbnail': { url: (node.querySelector('media\\:thumbnail, thumbnail[url]') as Element | null)?.getAttribute('url') },
+            enclosure: { link: (node.querySelector('enclosure[url]') as Element | null)?.getAttribute('url'), type: (node.querySelector('enclosure[url]') as Element | null)?.getAttribute('type') },
         });
     });
     return { items };
