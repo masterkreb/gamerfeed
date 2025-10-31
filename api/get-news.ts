@@ -25,7 +25,6 @@ function stripHtmlAndTruncate(html: string, length: number = 150): string {
 
 async function getOgImageFromUrl(url: string): Promise<string | null> {
     const proxies = [
-        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
         `https://corsproxy.io/?${encodeURIComponent(url)}`,
         `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     ];
@@ -39,12 +38,18 @@ async function getOgImageFromUrl(url: string): Promise<string | null> {
             if (!response.ok) continue;
 
             const html = await response.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
 
-            const ogImageMatch = html.match(/<meta\s+(?:name|property)\s*=\s*"(?:og:image|og:image:url|twitter:image)"\s+content\s*=\s*"([^"]+)"\s*\/?>/i);
+            const ogImageMeta =
+                doc.querySelector('meta[property="og:image"]') ||
+                doc.querySelector('meta[property="og:image:url"]') ||
+                doc.querySelector('meta[name="twitter:image"]');
 
-            if (ogImageMatch && ogImageMatch[1]) {
-                const imageUrl = ogImageMatch[1];
-                return new URL(imageUrl, url).href;
+            if (ogImageMeta) {
+                const imageUrl = ogImageMeta.getAttribute('content');
+                if (imageUrl) {
+                    return new URL(imageUrl, url).href;
+                }
             }
         } catch (e) {
             console.warn(`Error scraping OG Image for ${url} via proxy:`, e);
@@ -52,6 +57,7 @@ async function getOgImageFromUrl(url: string): Promise<string | null> {
     }
     return null;
 }
+
 
 function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; needsScraping: boolean } {
     let imageUrl: string | undefined;
@@ -132,7 +138,10 @@ async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
         `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     ];
 
+    const feedErrors = new Map<string, string[]>();
+
     const fetchPromises = feeds.map(feed => (async () => {
+        const errorsForFeed: string[] = [];
         for (const proxyUrl of proxies(feed.url)) {
             try {
                 const response = await fetch(proxyUrl, {
@@ -141,20 +150,27 @@ async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
                 });
 
                 if (!response.ok) {
-                    console.warn(`Proxy ${proxyUrl} for ${feed.url} returned status ${response.status}`);
+                    const errorText = `status ${response.status}`;
+                    console.warn(`Proxy for ${feed.url} returned ${errorText}`);
+                    errorsForFeed.push(errorText);
                     continue;
                 }
                 const xmlString = await response.text();
                 if (!xmlString || !xmlString.trim().startsWith('<')) {
-                    console.warn(`Proxy ${proxyUrl} for ${feed.url} returned invalid XML`);
+                    const errorText = 'invalid XML content';
+                    console.warn(`Proxy for ${feed.url} returned ${errorText}`);
+                    errorsForFeed.push(errorText);
                     continue;
                 }
                 return { ...parseRssXml(xmlString, feed.url), feed, status: 'ok' };
             } catch (error) {
-                console.warn(`Proxy ${proxyUrl} for ${feed.url} failed:`, error);
+                const errorMessage = error instanceof Error ? (error.name === 'TimeoutError' || error.name === 'AbortError') ? 'timeout' : error.message : 'unknown error';
+                console.warn(`Proxy for ${feed.url} failed:`, errorMessage);
+                errorsForFeed.push(errorMessage);
             }
         }
         console.error(`All proxies failed for feed ${feed.url}`);
+        feedErrors.set(feed.name, errorsForFeed);
         return null;
     })());
 
@@ -179,7 +195,14 @@ async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
 
     const successfulFetches = results.filter(r => r.status === 'fulfilled' && r.value !== null).length;
     if (successfulFetches === 0 && feeds.length > 0) {
-        throw new Error("Could not fetch from any source.");
+        let errorSummary = "Could not fetch from any source. Diagnostics: ";
+        const errorEntries: string[] = [];
+        feedErrors.forEach((errors, feedName) => {
+            errorEntries.push(`${feedName} (${errors.join(", ")})`);
+        });
+        errorSummary += errorEntries.slice(0, 5).join('; '); // Limit to first 5 to avoid huge error messages
+        if (errorEntries.length > 5) errorSummary += '...';
+        throw new Error(errorSummary);
     }
 
     return allArticles;
