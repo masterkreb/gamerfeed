@@ -43,9 +43,9 @@ async function getOgImageFromUrl(url: string): Promise<string | null> {
             const doc = new DOMParser().parseFromString(html, 'text/html');
 
             const ogImageMeta =
-                doc.querySelector('meta[property="og:image"]') ||
-                doc.querySelector('meta[property="og:image:url"]') ||
-                doc.querySelector('meta[name="twitter:image"]');
+                doc.querySelector('meta[property="og:image"]') as Element | null ||
+                doc.querySelector('meta[property="og:image:url"]') as Element | null ||
+                doc.querySelector('meta[name="twitter:image"]') as Element | null;
 
             if (ogImageMeta) {
                 const imageUrl = ogImageMeta.getAttribute('content');
@@ -74,7 +74,7 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
         const content = item.content || item.description || '';
         if (content) {
             const doc = new DOMParser().parseFromString(content, 'text/html');
-            const img = doc.querySelector('img');
+            const img = doc.querySelector('img') as Element | null;
             if (img) imageUrl = img.getAttribute('src') || undefined;
         }
     }
@@ -118,22 +118,28 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
     const getQueryText = (ctx: Element | Document, sel: string): string => ctx.querySelector(sel)?.textContent?.trim() || '';
     const items: any[] = [];
     doc.querySelectorAll(isAtom ? "entry" : "item").forEach(node => {
-        let link = isAtom
-            ? (Array.from(node.querySelectorAll('link')).find(l => l.getAttribute('rel') === 'alternate') || (node.querySelector('link') as Element | null))?.getAttribute('href')
-            : getQueryText(node, 'link');
+        // FIX: In the edge runtime, `node` is not correctly typed as an Element due to the DOM polyfill.
+        // We cast it here to ensure properties like `querySelectorAll` and `getAttribute` are available.
+        const itemElement = node as Element;
+        let link: string | null | undefined = '';
+        if (isAtom) {
+            const linkNode = (Array.from(itemElement.querySelectorAll('link')).find(l => l.getAttribute('rel') === 'alternate') || itemElement.querySelector('link')) as Element | null;
+            link = linkNode?.getAttribute('href');
+        } else {
+            link = getQueryText(itemElement, 'link');
+        }
 
-        const title = getQueryText(node, 'title');
-        const pubDate = getQueryText(node, isAtom ? 'published' : 'pubDate') || getQueryText(node, 'updated');
+        const title = getQueryText(itemElement, 'title');
+        const pubDate = getQueryText(itemElement, isAtom ? 'published' : 'pubDate') || getQueryText(itemElement, 'updated');
         if (!title || !link || !pubDate) return;
 
         items.push({
             title, link, pubDate,
-            guid: getQueryText(node, 'guid') || getQueryText(node, 'id') || link,
-            description: getQueryText(node, 'description') || getQueryText(node, 'summary'),
-            content: getQueryText(node, 'content\\:encoded') || getQueryText(node, 'content'),
-            // FIX: Cast querySelector results to Element to handle type inference issues with linkedom in the Edge runtime.
-            'media:thumbnail': { url: (node.querySelector('media\\:thumbnail, thumbnail[url]') as Element | null)?.getAttribute('url') },
-            enclosure: { link: (node.querySelector('enclosure[url]') as Element | null)?.getAttribute('url'), type: (node.querySelector('enclosure[url]') as Element | null)?.getAttribute('type') },
+            guid: getQueryText(itemElement, 'guid') || getQueryText(itemElement, 'id') || link,
+            description: getQueryText(itemElement, 'description') || getQueryText(itemElement, 'summary'),
+            content: getQueryText(itemElement, 'content\\:encoded') || getQueryText(itemElement, 'content'),
+            'media:thumbnail': { url: (itemElement.querySelector('media\\:thumbnail, thumbnail[url]') as Element | null)?.getAttribute('url') },
+            enclosure: { link: (itemElement.querySelector('enclosure[url]') as Element | null)?.getAttribute('url'), type: (itemElement.querySelector('enclosure[url]') as Element | null)?.getAttribute('type') },
         });
     });
     return { items };
