@@ -1,48 +1,70 @@
-import { useLocalStorage } from './useLocalStorage';
-import { INITIAL_FEEDS } from '../services/feeds';
+import { useState, useEffect, useCallback } from 'react';
 import type { FeedSource } from '../types';
-import { useEffect } from 'react';
 
 export const useFeeds = () => {
-    const [feeds, setFeeds] = useLocalStorage<FeedSource[]>('app_feeds', INITIAL_FEEDS);
+    const [feeds, setFeeds] = useState<FeedSource[]>([]);
 
-    // One-time data migration for users with older versions of saved feeds.
-    useEffect(() => {
-        let needsUpdate = false;
-        const migratedFeeds = feeds.map(feed => {
-            // Check if 'update_interval' is missing, null, or not a number.
-            if (typeof feed.update_interval !== 'number') {
-                needsUpdate = true;
-                // Assign a sensible default value based on priority.
-                const defaultInterval = feed.priority === 'primary' ? 15 : 60;
-                return { ...feed, update_interval: defaultInterval };
+    const fetchFeeds = useCallback(async () => {
+        try {
+            const response = await fetch('/api/feeds');
+            if (!response.ok) {
+                throw new Error(`Failed to fetch feeds: ${response.statusText}`);
             }
-            return feed;
-        });
-
-        if (needsUpdate) {
-            console.log('Migrating old feed data to include update intervals.');
-            setFeeds(migratedFeeds);
+            const data: FeedSource[] = await response.json();
+            setFeeds(data);
+        } catch (error) {
+            console.error(error);
+            // In a real app, you might want to set an error state here
+            // to display a message to the user.
         }
-        // The empty dependency array ensures this effect runs only once on mount.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const addFeed = (feed: Omit<FeedSource, 'id'>) => {
-        const newFeed: FeedSource = {
-            ...feed,
-            id: `${feed.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
-        };
-        setFeeds(prev => [...prev, newFeed]);
-    };
+    useEffect(() => {
+        fetchFeeds();
+    }, [fetchFeeds]);
 
-    const updateFeed = (updatedFeed: FeedSource) => {
-        setFeeds(prev => prev.map(feed => feed.id === updatedFeed.id ? updatedFeed : feed));
-    };
+    const addFeed = useCallback(async (feed: Omit<FeedSource, 'id'>) => {
+        try {
+            const response = await fetch('/api/feeds', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(feed),
+            });
+            if (!response.ok) throw new Error('Failed to add feed');
+            const newFeed = await response.json();
+            setFeeds(prev => [...prev, newFeed]);
+        } catch (error) {
+            console.error('Error adding feed:', error);
+        }
+    }, []);
 
-    const deleteFeed = (feedId: string) => {
-        setFeeds(prev => prev.filter(feed => feed.id !== feedId));
-    };
+    const updateFeed = useCallback(async (updatedFeed: FeedSource) => {
+        try {
+            const response = await fetch(`/api/feeds`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedFeed),
+            });
+            if (!response.ok) throw new Error('Failed to update feed');
+            setFeeds(prev => prev.map(f => f.id === updatedFeed.id ? updatedFeed : f));
+        } catch (error) {
+            console.error('Error updating feed:', error);
+        }
+    }, []);
 
-    return { feeds, setFeeds, addFeed, updateFeed, deleteFeed };
+    const deleteFeed = useCallback(async (feedId: string) => {
+        try {
+            const response = await fetch(`/api/feeds`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: feedId }),
+            });
+            if (!response.ok) throw new Error('Failed to delete feed');
+            setFeeds(prev => prev.filter(f => f.id !== feedId));
+        } catch (error) {
+            console.error('Error deleting feed:', error);
+        }
+    }, []);
+
+    return { feeds, addFeed, updateFeed, deleteFeed };
 };

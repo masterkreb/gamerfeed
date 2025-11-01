@@ -11,8 +11,6 @@ import { ScrollToTopButton } from './components/ScrollToTopButton';
 import { FavoritesHeader } from './components/FavoritesHeader';
 import { SettingsModal } from './components/SettingsModal';
 import ErrorBoundary from './components/ErrorBoundary';
-import { fetchArticlesFromFeeds } from './services/newsService';
-import { INITIAL_FEEDS } from './services/feeds';
 
 const ARTICLES_PER_PAGE = 32;
 
@@ -121,8 +119,12 @@ const AppContent: React.FC = () => {
         }
 
         try {
-            // ✅ NEU: Fetche mit INITIAL_FEEDS
-            const fetchedArticles: Article[] = await fetchArticlesFromFeeds(INITIAL_FEEDS);
+            const response = await fetch('/api/get-news');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: `HTTP error! status: ${response.status}` }));
+                throw new Error(errorData.error);
+            }
+            const fetchedArticles: Article[] = await response.json();
             setArticles(fetchedArticles);
 
         } catch (error) {
