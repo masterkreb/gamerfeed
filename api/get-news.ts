@@ -183,11 +183,14 @@ async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
     const feedErrors = new Map<string, string[]>();
     const allArticles: Article[] = [];
 
-    // Process feeds in smaller batches to avoid rate limiting
-    const BATCH_SIZE = 3; // Reduced for faster response
+    // Process feeds in smaller batches to avoid timeout
+    const BATCH_SIZE = 2; // Very small for initial load
+    const MAX_FEEDS = 10; // Limit total feeds processed
 
-    for (let i = 0; i < feeds.length; i += BATCH_SIZE) {
-        const batch = feeds.slice(i, i + BATCH_SIZE);
+    const feedsToProcess = feeds.slice(0, MAX_FEEDS);
+
+    for (let i = 0; i < feedsToProcess.length; i += BATCH_SIZE) {
+        const batch = feedsToProcess.slice(i, i + BATCH_SIZE);
 
         const batchPromises = batch.map(feed => (async () => {
             const errorsForFeed: string[] = [];
@@ -273,7 +276,7 @@ async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
         });
 
         // Small delay between batches to avoid rate limiting
-        if (i + BATCH_SIZE < feeds.length) {
+        if (i + BATCH_SIZE < feedsToProcess.length) {
             await new Promise(resolve => setTimeout(resolve, 500));
         }
     }
