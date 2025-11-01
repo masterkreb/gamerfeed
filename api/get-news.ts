@@ -5,7 +5,7 @@ export const config = {
 import type { Article, FeedSource } from '../types';
 import { sql } from '@vercel/postgres';
 
-const BROWSER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36';
+const BROWSER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 // --- Helper Functions ---
 
@@ -13,60 +13,57 @@ function stripHtmlAndTruncate(html: string, length: number = 150): string {
     if (!html) return '';
 
     try {
-        // Use a more robust approach with try-catch
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = html;
+        // Simple regex-based HTML stripping
+        const stripped = html
+            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+            .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+            .replace(/<[^>]+>/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
 
-        // Remove script and style tags
-        const scripts = tempDiv.querySelectorAll('script, style');
-        scripts.forEach(el => el.remove());
-
-        let text = (tempDiv.textContent || tempDiv.innerText || "").trim();
-
-        if (text.length > length) {
-            const truncated = text.substring(0, length);
+        if (stripped.length > length) {
+            const truncated = stripped.substring(0, length);
             const lastSpace = truncated.lastIndexOf(' ');
             return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
         }
-        return text;
+        return stripped;
     } catch (e) {
         console.warn('Error stripping HTML:', e);
-        // Fallback: simple regex-based stripping
-        const stripped = html.replace(/<[^>]*>/g, '');
-        return stripped.substring(0, length) + (stripped.length > length ? '...' : '');
+        return '';
     }
 }
 
 async function getOgImageFromUrl(url: string): Promise<string | null> {
     const proxies = [
-        `https://corsproxy.io/?${encodeURIComponent(url)}`,
         `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        `https://corsproxy.io/?${encodeURIComponent(url)}`,
     ];
 
     for (const proxyUrl of proxies) {
         try {
             const response = await fetch(proxyUrl, {
                 signal: AbortSignal.timeout(5000),
-                headers: { 'User-Agent': BROWSER_USER_AGENT }
+                headers: {
+                    'User-Agent': BROWSER_USER_AGENT,
+                    'Accept': 'text/html,application/xhtml+xml'
+                }
             });
             if (!response.ok) continue;
 
             const html = await response.text();
 
-            // Use regex-based extraction instead of DOM parsing for OG images
             const ogImageMatch = html.match(/<meta\s+(?:property|name)=["'](?:og:image|twitter:image)["']\s+content=["']([^"']+)["']/i) ||
                 html.match(/<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["'](?:og:image|twitter:image)["']/i);
 
             if (ogImageMatch && ogImageMatch[1]) {
-                const imageUrl = ogImageMatch[1];
                 try {
-                    return new URL(imageUrl, url).href;
+                    return new URL(ogImageMatch[1], url).href;
                 } catch {
-                    return imageUrl;
+                    return ogImageMatch[1];
                 }
             }
         } catch (e) {
-            console.warn(`Error scraping OG Image for ${url} via proxy:`, e);
+            console.warn(`Error scraping OG Image for ${url}:`, e);
         }
     }
     return null;
@@ -75,7 +72,6 @@ async function getOgImageFromUrl(url: string): Promise<string | null> {
 function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; needsScraping: boolean } {
     let imageUrl: string | undefined;
 
-    // Try different image sources
     if (item.enclosure?.link && item.enclosure?.type?.startsWith('image')) {
         imageUrl = item.enclosure.link;
     } else if (item.thumbnail && typeof item.thumbnail === 'string') {
@@ -83,7 +79,6 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
     } else if (item['media:thumbnail']?.url) {
         imageUrl = item['media:thumbnail'].url;
     } else {
-        // Extract from content/description using regex
         const content = item.content || item.description || '';
         if (content) {
             const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/i);
@@ -100,7 +95,6 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
             let processedUrl = new URL(imageUrl, item.link).href;
             const urlObject = new URL(processedUrl);
 
-            // Domain-specific image optimization
             if (urlObject.hostname.includes('gamespot.com')) {
                 processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
             } else if (urlObject.hostname.includes('cgames.de') || feed.name.includes('GameStar') || feed.name.includes('GamePro')) {
@@ -122,13 +116,10 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
 
 function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
     try {
-        // Use regex-based parsing as fallback for Edge Runtime compatibility
         const items: any[] = [];
 
-        // Detect if it's Atom or RSS
         const isAtom = xmlString.includes('<feed') || xmlString.includes('xmlns="http://www.w3.org/2005/Atom"');
 
-        // Extract items using regex
         const itemPattern = isAtom
             ? /<entry[^>]*>([\s\S]*?)<\/entry>/gi
             : /<item[^>]*>([\s\S]*?)<\/item>/gi;
@@ -138,7 +129,6 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
         for (const match of itemMatches) {
             const itemXml = match[1];
 
-            // Extract fields using regex
             const titleMatch = itemXml.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/is);
             const linkMatch = isAtom
                 ? itemXml.match(/<link[^>]*href=["']([^"']+)["'][^>]*>/i) || itemXml.match(/<link[^>]*>([^<]+)<\/link>/i)
@@ -153,14 +143,14 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
             const contentMatch = itemXml.match(/<(?:content:encoded|content)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:content:encoded|content)>/is);
             const mediaThumbnailMatch = itemXml.match(/<media:thumbnail[^>]+url=["']([^"']+)["']/i) ||
                 itemXml.match(/<thumbnail[^>]+url=["']([^"']+)["']/i);
-            const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["'][^>]+type=["']([^"']+)["']/i);
+            const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["'][^>]*type=["']([^"']+)["']/i);
 
             const title = titleMatch ? titleMatch[1].trim() : '';
             const link = linkMatch ? linkMatch[1].trim() : '';
             const pubDate = pubDateMatch ? pubDateMatch[1].trim() : '';
 
             if (!title || !link || !pubDate) {
-                continue; // Skip invalid items
+                continue;
             }
 
             items.push({
@@ -190,99 +180,128 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
 }
 
 async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
-    const proxies = (url: string) => [
-        `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    ];
-
     const feedErrors = new Map<string, string[]>();
-
-    const fetchPromises = feeds.map(feed => (async () => {
-        const errorsForFeed: string[] = [];
-        for (const proxyUrl of proxies(feed.url)) {
-            try {
-                const response = await fetch(proxyUrl, {
-                    signal: AbortSignal.timeout(8000),
-                    headers: { 'User-Agent': BROWSER_USER_AGENT }
-                });
-
-                if (!response.ok) {
-                    const errorText = `status ${response.status}`;
-                    console.warn(`Proxy for ${feed.url} returned ${errorText}`);
-                    errorsForFeed.push(errorText);
-                    continue;
-                }
-
-                const xmlString = await response.text();
-                if (!xmlString || !xmlString.trim().startsWith('<')) {
-                    const errorText = 'invalid XML content';
-                    console.warn(`Proxy for ${feed.url} returned ${errorText}`);
-                    errorsForFeed.push(errorText);
-                    continue;
-                }
-
-                return { ...parseRssXml(xmlString, feed.url), feed, status: 'ok' };
-            } catch (error) {
-                const errorMessage = error instanceof Error
-                    ? (error.name === 'TimeoutError' || error.name === 'AbortError')
-                        ? 'timeout'
-                        : error.message
-                    : 'unknown error';
-                console.warn(`Proxy for ${feed.url} failed:`, errorMessage);
-                errorsForFeed.push(errorMessage);
-            }
-        }
-        console.error(`All proxies failed for feed ${feed.url}`);
-        feedErrors.set(feed.name, errorsForFeed);
-        return null;
-    })());
-
-    const results = await Promise.allSettled(fetchPromises);
     const allArticles: Article[] = [];
 
-    results.forEach(result => {
-        if (result.status === 'fulfilled' && result.value?.status === 'ok') {
-            const { feed, items } = result.value;
-            items.forEach((item: any) => {
-                if (!item.title || !item.link || !item.pubDate) return;
+    // Process feeds in smaller batches to avoid rate limiting
+    const BATCH_SIZE = 5;
 
-                const { imageUrl, needsScraping } = extractInitialData(item, feed);
+    for (let i = 0; i < feeds.length; i += BATCH_SIZE) {
+        const batch = feeds.slice(i, i + BATCH_SIZE);
 
-                allArticles.push({
-                    id: item.guid || item.link,
-                    title: item.title.trim(),
-                    source: feed.name,
-                    publicationDate: new Date(item.pubDate).toISOString(),
-                    summary: stripHtmlAndTruncate(item.description || item.content || ''),
-                    link: item.link,
-                    imageUrl,
-                    needsScraping,
-                    language: feed.language,
+        const batchPromises = batch.map(feed => (async () => {
+            const errorsForFeed: string[] = [];
+
+            // Strategy 1: Direct fetch (works for most feeds in Edge Runtime)
+            try {
+                const response = await fetch(feed.url, {
+                    signal: AbortSignal.timeout(10000),
+                    headers: {
+                        'User-Agent': BROWSER_USER_AGENT,
+                        'Accept': 'application/rss+xml, application/xml, text/xml, application/atom+xml',
+                        'Accept-Language': feed.language === 'de' ? 'de-DE,de;q=0.9,en;q=0.8' : 'en-US,en;q=0.9',
+                    }
                 });
-            });
-        }
-    });
 
-    const successfulFetches = results.filter(r => r.status === 'fulfilled' && r.value !== null).length;
-    if (successfulFetches === 0 && feeds.length > 0) {
+                if (response.ok) {
+                    const xmlString = await response.text();
+                    if (xmlString && xmlString.trim().startsWith('<')) {
+                        const parsed = parseRssXml(xmlString, feed.url);
+                        return { ...parsed, feed, status: 'ok' };
+                    }
+                }
+                errorsForFeed.push(`direct fetch: status ${response.status}`);
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : 'unknown error';
+                errorsForFeed.push(`direct fetch: ${errorMessage}`);
+            }
+
+            // Strategy 2: Try proxies as fallback
+            const proxies = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(feed.url)}`,
+                `https://corsproxy.io/?${encodeURIComponent(feed.url)}`,
+            ];
+
+            for (const proxyUrl of proxies) {
+                try {
+                    const response = await fetch(proxyUrl, {
+                        signal: AbortSignal.timeout(10000),
+                        headers: { 'User-Agent': BROWSER_USER_AGENT }
+                    });
+
+                    if (response.ok) {
+                        const xmlString = await response.text();
+                        if (xmlString && xmlString.trim().startsWith('<')) {
+                            const parsed = parseRssXml(xmlString, feed.url);
+                            return { ...parsed, feed, status: 'ok' };
+                        }
+                    }
+                    errorsForFeed.push(`${proxyUrl.split('?')[0]}: status ${response.status}`);
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : 'unknown';
+                    errorsForFeed.push(`proxy: ${errorMessage}`);
+                }
+            }
+
+            feedErrors.set(feed.name, errorsForFeed);
+            return null;
+        })());
+
+        const results = await Promise.allSettled(batchPromises);
+
+        results.forEach(result => {
+            if (result.status === 'fulfilled' && result.value?.status === 'ok') {
+                const { feed, items } = result.value;
+                items.forEach((item: any) => {
+                    if (!item.title || !item.link || !item.pubDate) return;
+
+                    const { imageUrl, needsScraping } = extractInitialData(item, feed);
+
+                    allArticles.push({
+                        id: item.guid || item.link,
+                        title: item.title.trim(),
+                        source: feed.name,
+                        publicationDate: new Date(item.pubDate).toISOString(),
+                        summary: stripHtmlAndTruncate(item.description || item.content || ''),
+                        link: item.link,
+                        imageUrl,
+                        needsScraping,
+                        language: feed.language,
+                    });
+                });
+            }
+        });
+
+        // Small delay between batches to avoid rate limiting
+        if (i + BATCH_SIZE < feeds.length) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+    }
+
+    // If we got at least some articles, return them
+    if (allArticles.length > 0) {
+        return allArticles;
+    }
+
+    // If we got nothing, build error message
+    if (feedErrors.size > 0) {
         let errorSummary = "Could not fetch from any source. Diagnostics: ";
         const errorEntries: string[] = [];
         feedErrors.forEach((errors, feedName) => {
-            errorEntries.push(`${feedName} (${errors.join(", ")})`);
+            errorEntries.push(`${feedName} (${errors.slice(0, 2).join(", ")})`);
         });
         errorSummary += errorEntries.slice(0, 5).join('; ');
         if (errorEntries.length > 5) errorSummary += '...';
         throw new Error(errorSummary);
     }
 
-    return allArticles;
+    throw new Error("No feeds could be fetched");
 }
 
 function processArticles(articles: Article[]): Article[] {
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const uniqueArticles = new Map<string, Article>();
 
-    // Deduplicate by title
     articles.forEach(article => {
         const normalizedTitle = article.title.toLowerCase().replace(/[^a-z0-9]/g, '');
         const key = normalizedTitle.substring(0, 80);
@@ -301,7 +320,7 @@ async function runImageScraper(articles: Article[]): Promise<Article[]> {
     const articlesToScrape = articles.filter(a => a.needsScraping || a.imageUrl.includes('placehold.co'));
     if (articlesToScrape.length === 0) return articles;
 
-    const BATCH_SIZE = 10;
+    const BATCH_SIZE = 5;
     const updatedArticlesMap = new Map(articles.map(a => [a.id, a]));
 
     for (let i = 0; i < articlesToScrape.length; i += BATCH_SIZE) {
@@ -322,7 +341,7 @@ async function runImageScraper(articles: Article[]): Promise<Article[]> {
             })
         );
         if (i + BATCH_SIZE < articlesToScrape.length) {
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await new Promise(resolve => setTimeout(resolve, 300));
         }
     }
     return Array.from(updatedArticlesMap.values());
@@ -334,7 +353,16 @@ export default async function handler(req: Request) {
     try {
         const { rows: feedsFromDb } = await sql<FeedSource>`SELECT * FROM feeds;`;
 
+        if (!feedsFromDb || feedsFromDb.length === 0) {
+            throw new Error("No feeds found in database");
+        }
+
         const articles = await fetchArticlesFromFeeds(feedsFromDb);
+
+        if (articles.length === 0) {
+            throw new Error("No articles could be fetched from any feed");
+        }
+
         const articlesWithImages = await runImageScraper(articles);
         const finalArticles = processArticles(articlesWithImages);
 
