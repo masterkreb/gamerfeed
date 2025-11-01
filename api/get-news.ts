@@ -184,7 +184,7 @@ async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
     const allArticles: Article[] = [];
 
     // Process feeds in smaller batches to avoid rate limiting
-    const BATCH_SIZE = 5;
+    const BATCH_SIZE = 3; // Reduced for faster response
 
     for (let i = 0; i < feeds.length; i += BATCH_SIZE) {
         const batch = feeds.slice(i, i + BATCH_SIZE);
@@ -195,7 +195,7 @@ async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
             // Strategy 1: Direct fetch (works for most feeds in Edge Runtime)
             try {
                 const response = await fetch(feed.url, {
-                    signal: AbortSignal.timeout(10000),
+                    signal: AbortSignal.timeout(5000), // Faster timeout
                     headers: {
                         'User-Agent': BROWSER_USER_AGENT,
                         'Accept': 'application/rss+xml, application/xml, text/xml, application/atom+xml',
@@ -225,7 +225,7 @@ async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
             for (const proxyUrl of proxies) {
                 try {
                     const response = await fetch(proxyUrl, {
-                        signal: AbortSignal.timeout(10000),
+                        signal: AbortSignal.timeout(5000), // Faster timeout
                         headers: { 'User-Agent': BROWSER_USER_AGENT }
                     });
 
