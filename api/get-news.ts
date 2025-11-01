@@ -1,28 +1,40 @@
-import { DOMParser } from 'linkedom';
-
 export const config = {
     runtime: 'edge',
 };
 
 import type { Article, FeedSource } from '../types';
 import { sql } from '@vercel/postgres';
-import { INITIAL_FEEDS } from '../services/feeds';
 
 const BROWSER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36';
 
-// --- Server-Side Implementations of News Service Logic ---
+// --- Helper Functions ---
 
 function stripHtmlAndTruncate(html: string, length: number = 150): string {
     if (!html) return '';
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    doc.querySelectorAll('script, style').forEach(el => el.remove());
-    let text = (doc.body.textContent || "").trim();
-    if (text.length > length) {
-        const truncated = text.substring(0, length);
-        const lastSpace = truncated.lastIndexOf(' ');
-        return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
+
+    try {
+        // Use a more robust approach with try-catch
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+
+        // Remove script and style tags
+        const scripts = tempDiv.querySelectorAll('script, style');
+        scripts.forEach(el => el.remove());
+
+        let text = (tempDiv.textContent || tempDiv.innerText || "").trim();
+
+        if (text.length > length) {
+            const truncated = text.substring(0, length);
+            const lastSpace = truncated.lastIndexOf(' ');
+            return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
+        }
+        return text;
+    } catch (e) {
+        console.warn('Error stripping HTML:', e);
+        // Fallback: simple regex-based stripping
+        const stripped = html.replace(/<[^>]*>/g, '');
+        return stripped.substring(0, length) + (stripped.length > length ? '...' : '');
     }
-    return text;
 }
 
 async function getOgImageFromUrl(url: string): Promise<string | null> {
@@ -40,17 +52,17 @@ async function getOgImageFromUrl(url: string): Promise<string | null> {
             if (!response.ok) continue;
 
             const html = await response.text();
-            const doc = new DOMParser().parseFromString(html, 'text/html');
 
-            const ogImageMeta =
-                doc.querySelector('meta[property="og:image"]') as Element | null ||
-                doc.querySelector('meta[property="og:image:url"]') as Element | null ||
-                doc.querySelector('meta[name="twitter:image"]') as Element | null;
+            // Use regex-based extraction instead of DOM parsing for OG images
+            const ogImageMatch = html.match(/<meta\s+(?:property|name)=["'](?:og:image|twitter:image)["']\s+content=["']([^"']+)["']/i) ||
+                html.match(/<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["'](?:og:image|twitter:image)["']/i);
 
-            if (ogImageMeta) {
-                const imageUrl = ogImageMeta.getAttribute('content');
-                if (imageUrl) {
+            if (ogImageMatch && ogImageMatch[1]) {
+                const imageUrl = ogImageMatch[1];
+                try {
                     return new URL(imageUrl, url).href;
+                } catch {
+                    return imageUrl;
                 }
             }
         } catch (e) {
@@ -60,22 +72,24 @@ async function getOgImageFromUrl(url: string): Promise<string | null> {
     return null;
 }
 
-
 function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; needsScraping: boolean } {
     let imageUrl: string | undefined;
 
-    if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) {
+    // Try different image sources
+    if (item.enclosure?.link && item.enclosure?.type?.startsWith('image')) {
         imageUrl = item.enclosure.link;
     } else if (item.thumbnail && typeof item.thumbnail === 'string') {
         imageUrl = item.thumbnail;
-    } else if (item['media:thumbnail'] && item['media:thumbnail'].url) {
+    } else if (item['media:thumbnail']?.url) {
         imageUrl = item['media:thumbnail'].url;
     } else {
+        // Extract from content/description using regex
         const content = item.content || item.description || '';
         if (content) {
-            const doc = new DOMParser().parseFromString(content, 'text/html');
-            const img = doc.querySelector('img') as Element | null;
-            if (img) imageUrl = img.getAttribute('src') || undefined;
+            const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/i);
+            if (imgMatch && imgMatch[1]) {
+                imageUrl = imgMatch[1];
+            }
         }
     }
 
@@ -86,7 +100,7 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
             let processedUrl = new URL(imageUrl, item.link).href;
             const urlObject = new URL(processedUrl);
 
-            // Keep domain-specific image cleaning logic
+            // Domain-specific image optimization
             if (urlObject.hostname.includes('gamespot.com')) {
                 processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
             } else if (urlObject.hostname.includes('cgames.de') || feed.name.includes('GameStar') || feed.name.includes('GamePro')) {
@@ -97,7 +111,9 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
                 processedUrl = processedUrl.replace('small.jpg', 'large.jpg');
             }
             return { imageUrl: processedUrl, needsScraping: false };
-        } catch (e) { /* Fallthrough on invalid URL */ }
+        } catch (e) {
+            console.warn('Error processing image URL:', e);
+        }
     }
 
     const placeholderUrl = `https://placehold.co/600x400/374151/d1d5db?text=${encodeURIComponent(feed.name.substring(0, 30))}`;
@@ -105,62 +121,72 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
 }
 
 function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
-    const parser = new DOMParser();
-    // Use "application/xml" for robust parsing. The previously used "text/xml" caused internal
-    // errors in linkedom within the Vercel Edge runtime for some feeds.
-    // FIX: The type definitions for linkedom's parseFromString do not include "application/xml".
-    // Using a type assertion to bypass the check, as this value is required for robust parsing in the Edge runtime.
-    const doc = parser.parseFromString(xmlString, "application/xml" as any);
-    const errorNode = doc.querySelector("parsererror");
-    if (errorNode) {
-        // linkedom's parsererror might not have useful textContent, so we construct a more generic message.
-        console.error(`XML Parsing Error for feed: ${feedUrl}. The XML might be malformed.`);
-        throw new Error(`Failed to parse XML for feed: ${feedUrl}`);
-    }
+    try {
+        // Use regex-based parsing as fallback for Edge Runtime compatibility
+        const items: any[] = [];
 
-    const isAtom = doc.documentElement.nodeName === 'feed';
-    const getQueryText = (ctx: Element | Document, sel: string): string => ctx.querySelector(sel)?.textContent?.trim() || '';
-    const items: any[] = [];
-    doc.querySelectorAll(isAtom ? "entry" : "item").forEach(node => {
-        const itemElement = node as Element;
-        let link: string | null | undefined = '';
+        // Detect if it's Atom or RSS
+        const isAtom = xmlString.includes('<feed') || xmlString.includes('xmlns="http://www.w3.org/2005/Atom"');
 
-        if (isAtom) {
-            const linkNodes = itemElement.querySelectorAll('link');
-            let alternateLinkNode: Element | null = null;
-            // Explicitly iterate with a type guard to be safe in the Edge runtime.
-            for (let i = 0; i < linkNodes.length; i++) {
-                const lNode = linkNodes[i];
-                if (lNode.nodeType === 1) { // Node.ELEMENT_NODE
-                    const lElement = lNode as Element;
-                    if (lElement.getAttribute('rel') === 'alternate') {
-                        alternateLinkNode = lElement;
-                        break;
-                    }
-                }
+        // Extract items using regex
+        const itemPattern = isAtom
+            ? /<entry[^>]*>([\s\S]*?)<\/entry>/gi
+            : /<item[^>]*>([\s\S]*?)<\/item>/gi;
+
+        const itemMatches = xmlString.matchAll(itemPattern);
+
+        for (const match of itemMatches) {
+            const itemXml = match[1];
+
+            // Extract fields using regex
+            const titleMatch = itemXml.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/is);
+            const linkMatch = isAtom
+                ? itemXml.match(/<link[^>]*href=["']([^"']+)["'][^>]*>/i) || itemXml.match(/<link[^>]*>([^<]+)<\/link>/i)
+                : itemXml.match(/<link[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/is);
+            const pubDateMatch = isAtom
+                ? itemXml.match(/<(?:published|updated)[^>]*>([^<]+)<\/(?:published|updated)>/i)
+                : itemXml.match(/<pubDate[^>]*>([^<]+)<\/pubDate>/i);
+            const guidMatch = isAtom
+                ? itemXml.match(/<id[^>]*>([^<]+)<\/id>/i)
+                : itemXml.match(/<guid[^>]*>([^<]+)<\/guid>/i);
+            const descMatch = itemXml.match(/<(?:description|summary)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary)>/is);
+            const contentMatch = itemXml.match(/<(?:content:encoded|content)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:content:encoded|content)>/is);
+            const mediaThumbnailMatch = itemXml.match(/<media:thumbnail[^>]+url=["']([^"']+)["']/i) ||
+                itemXml.match(/<thumbnail[^>]+url=["']([^"']+)["']/i);
+            const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["'][^>]+type=["']([^"']+)["']/i);
+
+            const title = titleMatch ? titleMatch[1].trim() : '';
+            const link = linkMatch ? linkMatch[1].trim() : '';
+            const pubDate = pubDateMatch ? pubDateMatch[1].trim() : '';
+
+            if (!title || !link || !pubDate) {
+                continue; // Skip invalid items
             }
-            // Fallback to the first link if no 'alternate' is found
-            const firstLinkNode = linkNodes[0];
-            const linkNode = alternateLinkNode || (firstLinkNode && firstLinkNode.nodeType === 1 ? firstLinkNode as Element : null);
-            link = linkNode?.getAttribute('href');
-        } else {
-            link = getQueryText(itemElement, 'link');
+
+            items.push({
+                title,
+                link,
+                pubDate,
+                guid: guidMatch ? guidMatch[1].trim() : link,
+                description: descMatch ? descMatch[1].trim() : '',
+                content: contentMatch ? contentMatch[1].trim() : '',
+                'media:thumbnail': { url: mediaThumbnailMatch ? mediaThumbnailMatch[1] : null },
+                enclosure: enclosureMatch ? {
+                    link: enclosureMatch[1],
+                    type: enclosureMatch[2]
+                } : null,
+            });
         }
 
-        const title = getQueryText(itemElement, 'title');
-        const pubDate = getQueryText(itemElement, isAtom ? 'published' : 'pubDate') || getQueryText(itemElement, 'updated');
-        if (!title || !link || !pubDate) return;
+        if (items.length === 0) {
+            throw new Error(`No valid items found in feed: ${feedUrl}`);
+        }
 
-        items.push({
-            title, link, pubDate,
-            guid: getQueryText(itemElement, 'guid') || getQueryText(itemElement, 'id') || link,
-            description: getQueryText(itemElement, 'description') || getQueryText(itemElement, 'summary'),
-            content: getQueryText(itemElement, 'content\\:encoded') || getQueryText(itemElement, 'content'),
-            'media:thumbnail': { url: (itemElement.querySelector('media\\:thumbnail, thumbnail[url]') as Element | null)?.getAttribute('url') },
-            enclosure: { link: (itemElement.querySelector('enclosure[url]') as Element | null)?.getAttribute('url'), type: (itemElement.querySelector('enclosure[url]') as Element | null)?.getAttribute('type') },
-        });
-    });
-    return { items };
+        return { items };
+    } catch (error) {
+        console.error(`Error parsing RSS XML for ${feedUrl}:`, error);
+        throw new Error(`Failed to parse XML for feed: ${feedUrl}`);
+    }
 }
 
 async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
@@ -186,6 +212,7 @@ async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
                     errorsForFeed.push(errorText);
                     continue;
                 }
+
                 const xmlString = await response.text();
                 if (!xmlString || !xmlString.trim().startsWith('<')) {
                     const errorText = 'invalid XML content';
@@ -193,9 +220,14 @@ async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
                     errorsForFeed.push(errorText);
                     continue;
                 }
+
                 return { ...parseRssXml(xmlString, feed.url), feed, status: 'ok' };
             } catch (error) {
-                const errorMessage = error instanceof Error ? (error.name === 'TimeoutError' || error.name === 'AbortError') ? 'timeout' : error.message : 'unknown error';
+                const errorMessage = error instanceof Error
+                    ? (error.name === 'TimeoutError' || error.name === 'AbortError')
+                        ? 'timeout'
+                        : error.message
+                    : 'unknown error';
                 console.warn(`Proxy for ${feed.url} failed:`, errorMessage);
                 errorsForFeed.push(errorMessage);
             }
@@ -213,12 +245,19 @@ async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
             const { feed, items } = result.value;
             items.forEach((item: any) => {
                 if (!item.title || !item.link || !item.pubDate) return;
+
                 const { imageUrl, needsScraping } = extractInitialData(item, feed);
+
                 allArticles.push({
-                    id: item.guid || item.link, title: item.title.trim(), source: feed.name,
+                    id: item.guid || item.link,
+                    title: item.title.trim(),
+                    source: feed.name,
                     publicationDate: new Date(item.pubDate).toISOString(),
                     summary: stripHtmlAndTruncate(item.description || item.content || ''),
-                    link: item.link, imageUrl, needsScraping, language: feed.language,
+                    link: item.link,
+                    imageUrl,
+                    needsScraping,
+                    language: feed.language,
                 });
             });
         }
@@ -231,26 +270,23 @@ async function fetchArticlesFromFeeds(feeds: FeedSource[]): Promise<Article[]> {
         feedErrors.forEach((errors, feedName) => {
             errorEntries.push(`${feedName} (${errors.join(", ")})`);
         });
-        errorSummary += errorEntries.slice(0, 5).join('; '); // Limit to first 5 to avoid huge error messages
+        errorSummary += errorEntries.slice(0, 5).join('; ');
         if (errorEntries.length > 5) errorSummary += '...';
         throw new Error(errorSummary);
     }
 
     return allArticles;
-};
-
-// --- API Endpoint Logic ---
+}
 
 function processArticles(articles: Article[]): Article[] {
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const uniqueArticles = new Map<string, Article>();
 
-    // Deduplicate by title to avoid near-identical articles from different sources
+    // Deduplicate by title
     articles.forEach(article => {
         const normalizedTitle = article.title.toLowerCase().replace(/[^a-z0-9]/g, '');
         const key = normalizedTitle.substring(0, 80);
 
-        // Prioritize articles that have a proper image over placeholders
         if (!uniqueArticles.has(key) || (article.imageUrl && !uniqueArticles.get(key)?.imageUrl.includes('placehold'))) {
             uniqueArticles.set(key, article);
         }
@@ -259,7 +295,7 @@ function processArticles(articles: Article[]): Article[] {
     return Array.from(uniqueArticles.values())
         .filter(article => new Date(article.publicationDate).getTime() >= sevenDaysAgo)
         .sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
-};
+}
 
 async function runImageScraper(articles: Article[]): Promise<Article[]> {
     const articlesToScrape = articles.filter(a => a.needsScraping || a.imageUrl.includes('placehold.co'));
@@ -276,32 +312,29 @@ async function runImageScraper(articles: Article[]): Promise<Article[]> {
                 if (scrapedUrl) {
                     const existing = updatedArticlesMap.get(article.id);
                     if (existing) {
-                        updatedArticlesMap.set(article.id, { ...existing, imageUrl: scrapedUrl, needsScraping: false });
+                        updatedArticlesMap.set(article.id, {
+                            ...existing,
+                            imageUrl: scrapedUrl,
+                            needsScraping: false
+                        });
                     }
                 }
             })
         );
         if (i + BATCH_SIZE < articlesToScrape.length) {
-            await new Promise(resolve => setTimeout(resolve, 200)); // Be respectful to servers
+            await new Promise(resolve => setTimeout(resolve, 200));
         }
     }
     return Array.from(updatedArticlesMap.values());
-};
+}
+
+// --- Main API Handler ---
 
 export default async function handler(req: Request) {
     try {
         const { rows: feedsFromDb } = await sql<FeedSource>`SELECT * FROM feeds;`;
 
-        let feedsToFetch: FeedSource[];
-
-        if (feedsFromDb && feedsFromDb.length > 0) {
-            feedsToFetch = feedsFromDb;
-        } else {
-            console.log("Database contains no feeds. Using initial default feeds as a fallback.");
-            feedsToFetch = INITIAL_FEEDS;
-        }
-
-        const articles = await fetchArticlesFromFeeds(feedsToFetch);
+        const articles = await fetchArticlesFromFeeds(feedsFromDb);
         const articlesWithImages = await runImageScraper(articles);
         const finalArticles = processArticles(articlesWithImages);
 
@@ -309,7 +342,6 @@ export default async function handler(req: Request) {
             status: 200,
             headers: {
                 'Content-Type': 'application/json',
-                // Cache on Vercel's Edge network for 15 minutes
                 'Cache-Control': 's-maxage=900, stale-while-revalidate=1800',
             },
         });
@@ -321,7 +353,7 @@ export default async function handler(req: Request) {
             status: 500,
             headers: {
                 'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache', // Do not cache errors
+                'Cache-Control': 'no-cache',
             },
         });
     }
