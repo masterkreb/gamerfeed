@@ -105,9 +105,11 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
 
 function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
     const parser = new DOMParser();
-    // FIX: Changed from "application/xml" to "text/xml" to satisfy the DOMParser's type constraints.
-    // "text/xml" is a valid and compatible MIME type for parsing RSS/Atom feeds.
-    const doc = parser.parseFromString(xmlString, "text/xml");
+    // Use "application/xml" for robust parsing. The previously used "text/xml" caused internal
+    // errors in linkedom within the Vercel Edge runtime for some feeds.
+    // FIX: The type definitions for linkedom's parseFromString do not include "application/xml".
+    // Using a type assertion to bypass the check, as this value is required for robust parsing in the Edge runtime.
+    const doc = parser.parseFromString(xmlString, "application/xml" as any);
     const errorNode = doc.querySelector("parsererror");
     if (errorNode) {
         // linkedom's parsererror might not have useful textContent, so we construct a more generic message.
