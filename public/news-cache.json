@@ -5550,16 +5550,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
-    "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
-    "source": "Eurogamer",
-    "publicationDate": "2025-11-01T09:00:00.000Z",
-    "summary": " Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod f&uuml;r Doom 2,",
-    "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
-    "imageUrl": "https://assetsio.gnwcdn.com/Catharsis---Akira-Yamaoka-(1)-gigapixel-low_res-scale-4_00x-cropped.jpg?width=690&quality=85&format=jpg&auto=webp",
-    "language": "de"
-  },
-  {
     "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
     "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
     "source": "Eurogamer",
@@ -5567,6 +5557,16 @@
     "summary": " ARC Raiders ist seit dieser Woche erh&auml;ltlich, und w&auml;hrend eine gro&szlig;e Zahl an Spielern zum Launch ins Spiel str&ouml;mt, ist es kein G",
     "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
     "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&quality=85&format=jpg&auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
+    "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-01T09:00:00.000Z",
+    "summary": " Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod f&uuml;r Doom 2,",
+    "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
+    "imageUrl": "https://assetsio.gnwcdn.com/Catharsis---Akira-Yamaoka-(1)-gigapixel-low_res-scale-4_00x-cropped.jpg?width=690&quality=85&format=jpg&auto=webp",
     "language": "de"
   },
   {
@@ -9380,22 +9380,22 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "\"Thief VR\" erscheint im Dezember: Kaum Unterschiede zwischen Quest 3 und PS VR2",
-    "source": "Heise Online",
-    "publicationDate": "2025-10-31T10:42:00.000Z",
-    "summary": "\"Thief VR\" hat nun einen konkreten Veröffentlichungstermin. Zwei neue Trailer zeigen kaum Unterschiede zwischen den Versionen für Quest 3 und PS VR2.",
-    "link": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/iPhone-17-Ersatzteile-fuer-neue-Apple-Handys-fuer-Bastler-verfuegbar-10965281.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "iPhone 17: Ersatzteile für neue Apple-Handys für Bastler verfügbar",
     "source": "Heise Online",
     "publicationDate": "2025-10-31T10:42:00.000Z",
     "summary": "Nach den Reparaturhandbüchern hat Apple nun auch das notwendige Material für alle neuen iPhones freigegeben. Wie üblich ein teurer Spaß.",
     "link": "https://www.heise.de/news/iPhone-17-Ersatzteile-fuer-neue-Apple-Handys-fuer-Bastler-verfuegbar-10965281.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "\"Thief VR\" erscheint im Dezember: Kaum Unterschiede zwischen Quest 3 und PS VR2",
+    "source": "Heise Online",
+    "publicationDate": "2025-10-31T10:42:00.000Z",
+    "summary": "\"Thief VR\" hat nun einen konkreten Veröffentlichungstermin. Zwei neue Trailer zeigen kaum Unterschiede zwischen den Versionen für Quest 3 und PS VR2.",
+    "link": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
     "language": "de"
   },
@@ -12040,6 +12040,16 @@
     "language": "de"
   },
   {
+    "id": "https://playfront.de/call-of-duty-entwickler-begruessen-game-pass-preiserhoehung-mehr-geld-weniger-frust/",
+    "title": "Call of Duty-Entwickler begrüßen Game Pass-Preiserhöhung – Mehr Geld, weniger Frust",
+    "source": "PlayFront",
+    "publicationDate": "2025-11-01T21:40:42.000Z",
+    "summary": "Die Game Pass-Preiserhöhung sorgt bei Call of Duty-Entwicklern überraschend für Jubel. Mehr Stabilität, mehr Boni – und neue Dynamik bei Activision.",
+    "link": "https://playfront.de/call-of-duty-entwickler-begruessen-game-pass-preiserhoehung-mehr-geld-weniger-frust/",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=PlayFront",
+    "language": "de"
+  },
+  {
     "id": "https://playfront.de/the-simpsons-treffen-fortnite-springfield-wird-zum-neuen-schlachtfeld-der-battle-royale-welt/",
     "title": "The Simpsons treffen Fortnite: Springfield wird zum neuen Schlachtfeld der Battle-Royale-Welt",
     "source": "PlayFront",
@@ -12126,16 +12136,6 @@
     "publicationDate": "2025-10-31T17:57:02.000Z",
     "summary": "Capcom bestätigt nächsten Resident Evil 9 Requiem Showcase für Anfang 2026. Fans erwarten Gameplay, Trailer und vielleicht Leon Kennedy.",
     "link": "https://playfront.de/resident-evil-9-requiem-capcom-kuendigt-naechsten-showcase-an/",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=PlayFront",
-    "language": "de"
-  },
-  {
-    "id": "https://playfront.de/frostpunk-2-dlc-fractured-utopias-erscheint-im-dezember/",
-    "title": "Frostpunk 2: DLC „Fractured Utopias“ erscheint im Dezember",
-    "source": "PlayFront",
-    "publicationDate": "2025-10-31T15:44:51.000Z",
-    "summary": "Frostpunk 2 DLC „Fractured Utopias“ erscheint am 8. Dezember. Baue deine Utopie, triff schwere Entscheidungen und forme die Zukunft deiner Stadt.",
-    "link": "https://playfront.de/frostpunk-2-dlc-fractured-utopias-erscheint-im-dezember/",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=PlayFront",
     "language": "de"
   },
