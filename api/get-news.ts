@@ -105,7 +105,8 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
 
 function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
     const parser = new DOMParser();
-    // FIX: The `DOMParser` from `linkedom` in this environment expects "text/xml" for XML parsing, not "application/xml".
+    // FIX: Changed from "application/xml" to "text/xml" to satisfy the DOMParser's type constraints.
+    // "text/xml" is a valid and compatible MIME type for parsing RSS/Atom feeds.
     const doc = parser.parseFromString(xmlString, "text/xml");
     const errorNode = doc.querySelector("parsererror");
     if (errorNode) {
