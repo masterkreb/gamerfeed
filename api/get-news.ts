@@ -1,4 +1,5 @@
-// Vercel Edge Functions are web-compatible and include a native DOMParser.
+import { DOMParser } from 'linkedom';
+
 export const config = {
     runtime: 'edge',
 };
@@ -104,7 +105,8 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
 
 function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(xmlString, "application/xml");
+    // FIX: The `DOMParser` from `linkedom` in this environment expects "text/xml" for XML parsing, not "application/xml".
+    const doc = parser.parseFromString(xmlString, "text/xml");
     const errorNode = doc.querySelector("parsererror");
     if (errorNode) {
         // linkedom's parsererror might not have useful textContent, so we construct a more generic message.
