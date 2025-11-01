@@ -1,5 +1,5 @@
 {
-  "name": "GamerFeed_2025_10_31",
+  "name": "GamerFeed",
   "description": "A sleek and modern gaming news aggregator that pulls from various sources. It features customizable views (grid, list, compact), light/dark modes, and filtering options by time, source, and favorites.",
   "requestFramePermissions": []
 }

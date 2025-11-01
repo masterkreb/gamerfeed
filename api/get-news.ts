@@ -6,6 +6,7 @@ export const config = {
 
 import type { Article, FeedSource } from '../types';
 import { sql } from '@vercel/postgres';
+import { INITIAL_FEEDS } from '../services/feeds';
 
 const BROWSER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36';
 
@@ -291,7 +292,16 @@ export default async function handler(req: Request) {
     try {
         const { rows: feedsFromDb } = await sql<FeedSource>`SELECT * FROM feeds;`;
 
-        const articles = await fetchArticlesFromFeeds(feedsFromDb);
+        let feedsToFetch: FeedSource[];
+
+        if (feedsFromDb && feedsFromDb.length > 0) {
+            feedsToFetch = feedsFromDb;
+        } else {
+            console.log("Database contains no feeds. Using initial default feeds as a fallback.");
+            feedsToFetch = INITIAL_FEEDS;
+        }
+
+        const articles = await fetchArticlesFromFeeds(feedsToFetch);
         const articlesWithImages = await runImageScraper(articles);
         const finalArticles = processArticles(articlesWithImages);
 
