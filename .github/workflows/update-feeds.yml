@@ -27,13 +27,11 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        # Run npm ci inside the app's directory
-        working-directory: ./gamerfeed-ab8b4bf171742057ac14da6c951cbd854a126617
+        # The working-directory is removed, assuming package.json is at the root.
         run: npm ci
 
       - name: Fetch and cache feeds
-        # Run the script from inside the app's directory
-        working-directory: ./gamerfeed-ab8b4bf171742057ac14da6c951cbd854a126617
+        # The working-directory is removed, assuming the scripts folder is at the root.
         env:
           # Vercel's Postgres SDK automatically reads this environment variable
           POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
@@ -44,8 +42,8 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Add the correctly pathed file
-          git add gamerfeed-ab8b4bf171742057ac14da6c951cbd854a126617/news-cache.json
+          # Add the cache file, now expected at the root.
+          git add news-cache.json
           
           # Check if there are staged changes, and only commit/push if there are.
           if ! git diff --staged --quiet; then
