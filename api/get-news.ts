@@ -1,10 +1,8 @@
-// Vercel Edge Functions are web-compatible, but lack certain browser-specific APIs.
-// We import a lightweight polyfill for DOMParser to handle HTML/XML parsing.
+// Vercel Edge Functions are web-compatible and include a native DOMParser.
 export const config = {
     runtime: 'edge',
 };
 
-import { DOMParser } from 'https://esm.sh/linkedom@0.16.11';
 import type { Article, FeedSource } from '../types';
 import { sql } from '@vercel/postgres';
 
