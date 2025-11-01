@@ -2,7 +2,7 @@ name: Update RSS Feeds Cache
 
 on:
   schedule:
-    # Alle 15 Minuten
+    # Run every 15 minutes
     - cron: '*/15 * * * *'
   workflow_dispatch:
 
@@ -17,6 +17,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # Fetch all history for a proper rebase
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -24,16 +27,32 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
+        # Run npm ci inside the app's directory
+        working-directory: ./gamerfeed-ab8b4bf171742057ac14da6c951cbd854a126617
         run: npm ci
 
       - name: Fetch and cache feeds
+        # Run the script from inside the app's directory
+        working-directory: ./gamerfeed-ab8b4bf171742057ac14da6c951cbd854a126617
         env:
+          # Vercel's Postgres SDK automatically reads this environment variable
           POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
         run: node scripts/fetch-feeds.js
 
       - name: Commit and push if changed
         run: |
           git config user.name "GitHub Actions Bot"
-          git config user.email "actions@github.com"
-          git add public/news-cache.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update news cache [skip ci]" && git push)
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Add the correctly pathed file
+          git add gamerfeed-ab8b4bf171742057ac14da6c951cbd854a126617/news-cache.json
+          
+          # Check if there are staged changes, and only commit/push if there are.
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update news cache [skip ci]"
+            # Pull the latest changes before pushing to avoid conflicts
+            git pull --rebase
+            git push
+          else
+            echo "No changes to the news cache. Skipping commit."
+          fi
