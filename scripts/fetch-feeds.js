@@ -206,7 +206,7 @@ async function fetchAndProcessFeed(feed) {
         const isAtom = !!doc.querySelector('feed');
 
         for (const item of items) {
-            const rawTitle = item.querySelector('title')?.innerHTML || '';
+            const rawTitle = item.querySelector('title')?.textContent || '';
             let link = '';
             if (isAtom) {
                 const linkNode = Array.from(item.querySelectorAll('link')).find(l => l.getAttribute('rel') === 'alternate' || !l.getAttribute('rel'));
@@ -221,7 +221,7 @@ async function fetchAndProcessFeed(feed) {
 
             if (!title || !link || !pubDate) continue;
 
-            const rawSummary = item.querySelector('description, summary, content\\:encoded')?.innerHTML || '';
+            const rawSummary = item.querySelector('description, summary, content\\:encoded')?.textContent || '';
             const summary = stripHtmlAndTruncate(rawSummary, 200);
 
             articles.push({
