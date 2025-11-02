@@ -270,6 +270,16 @@ async function fetchArticles() {
         const uniqueArticles = Array.from(new Map(allArticles.map(a => [a.id, a])).values());
         const sortedArticles = uniqueArticles.sort((a, b) => new Date(b.publicationDate) - new Date(a.publicationDate));
 
+        // --- SAFETY CHECK ---
+        // Prevents overwriting the cache with a bad fetch (e.g., due to proxy failures).
+        // If we get fewer than this many articles, something is likely wrong.
+        const MINIMUM_ARTICLES = 150;
+        if (sortedArticles.length < MINIMUM_ARTICLES) {
+            console.error(`\n❌ SAFETY CHECK FAILED: Fetched only ${sortedArticles.length} articles, which is below the threshold of ${MINIMUM_ARTICLES}.`);
+            console.error('Aborting to prevent overwriting the cache with incomplete data.');
+            process.exit(1); // Exit with a non-zero code to fail the GitHub Action.
+        }
+
         // Save to cache
         const cacheDir = path.join(process.cwd(), 'public');
         if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
