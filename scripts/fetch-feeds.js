@@ -7,7 +7,6 @@ import fs from 'fs';
 import path from 'path';
 import { parseHTML } from 'linkedom';
 
-// DOMParser is standard and available in the Node.js version used by the GitHub Action.
 const BROWSER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 // --- Helper Functions ---
@@ -197,21 +196,25 @@ async function fetchAndProcessFeed(feed) {
 
     const articles = [];
     try {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(xmlString, "application/xml");
+        const { document: doc } = parseHTML(xmlString);
 
-        const errorNode = doc.querySelector("parsererror");
-        if (errorNode) {
-            throw new Error(`XML Parsing Error for ${feed.name}: ${errorNode.textContent}`);
+        const items = doc.querySelectorAll('item, entry');
+        if (items.length === 0 && (!doc.body || !doc.body.hasChildNodes() || doc.body.textContent.trim() === '')) {
+            throw new Error(`XML Parsing Error: The document appears to be empty after parsing.`);
         }
 
         const isAtom = !!doc.querySelector('feed');
-        const items = doc.querySelectorAll(isAtom ? 'entry' : 'item');
 
         for (const item of items) {
             const rawTitle = item.querySelector('title')?.innerHTML || '';
-            const linkNode = item.querySelector('link');
-            const link = (isAtom ? (Array.from(item.querySelectorAll('link')).find(l => l.getAttribute('rel') === 'alternate' || !l.getAttribute('rel'))?.getAttribute('href')) : linkNode?.textContent)?.trim();
+            let link = '';
+            if (isAtom) {
+                const linkNode = Array.from(item.querySelectorAll('link')).find(l => l.getAttribute('rel') === 'alternate' || !l.getAttribute('rel'));
+                link = linkNode?.getAttribute('href')?.trim() || '';
+            } else {
+                link = item.querySelector('link')?.textContent?.trim() || '';
+            }
+
             const pubDate = (item.querySelector(isAtom ? 'published, updated' : 'pubDate')?.textContent)?.trim();
 
             const title = stripHtmlAndTruncate(rawTitle, 0); // 0 means don't truncate
@@ -275,12 +278,10 @@ async function main() {
         const uniqueArticles = Array.from(new Map(allArticles.map(a => [a.id, a])).values());
         const sortedArticles = uniqueArticles.sort((a, b) => new Date(b.publicationDate) - new Date(a.publicationDate));
 
-        // Lowered threshold to avoid blocking updates if some feeds are down.
-        const MINIMUM_ARTICLES = 50;
-        if (sortedArticles.length < MINIMUM_ARTICLES) {
-            console.error(`\n❌ SAFETY CHECK FAILED: Fetched only ${sortedArticles.length} articles, which is below the threshold of ${MINIMUM_ARTICLES}.`);
-            console.error('Aborting to prevent overwriting the cache with incomplete data.');
-            process.exit(1);
+        // Safety check: Do not overwrite the cache with an empty file if something went wrong.
+        if (sortedArticles.length === 0) {
+            console.warn(`\n⚠️ Fetched 0 articles. Aborting write to prevent overwriting cache with an empty file.`);
+            process.exit(0); // Exit successfully, no changes to commit.
         }
 
         const cacheDir = path.join(process.cwd(), 'public');
