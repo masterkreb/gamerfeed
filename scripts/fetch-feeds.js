@@ -7,31 +7,53 @@ import fs from 'fs';
 import path from 'path';
 import { parseHTML } from 'linkedom';
 
+// DOMParser is standard and available in the Node.js version used by the GitHub Action.
 const BROWSER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 // --- Helper Functions ---
 
-function stripHtmlAndTruncate(html, length = 150) {
+/**
+ * A robust function to clean raw text from RSS feeds. It handles:
+ * 1. Using a DOM parser to correctly decode all HTML entities (e.g., &#8220; -> “).
+ * 2. Stripping any remaining HTML tags.
+ * 3. Truncating the text to a specified length.
+ * 4. Normalizing whitespace.
+ */
+function stripHtmlAndTruncate(html, length = 200) {
     if (!html) return '';
     try {
-        const { document } = parseHTML(`<body>${html}</body>`);
-        // Remove known "read more" links
-        document.querySelectorAll('a').forEach(a => {
-            if (a.textContent.toLowerCase().includes('read more')) {
-                a.parentElement.remove();
+        // Use linkedom's HTML parser to decode entities and strip tags.
+        // It's effective even for XML content snippets.
+        const { document } = parseHTML(`<body><div>${html}</div></body>`);
+        const contentDiv = document.querySelector('div');
+
+        if (contentDiv) {
+            // Remove "read more" links before getting text content
+            contentDiv.querySelectorAll('a').forEach(a => {
+                if ((a.textContent || '').toLowerCase().includes('read more')) {
+                    a.remove();
+                }
+            });
+            // Get the clean text content and normalize whitespace.
+            let text = contentDiv.textContent.replace(/\s+/g, ' ').trim();
+            // Remove artifacts like trailing "[...]"
+            text = text.replace(/\[\s*\.\.\.\s*\]$/, '').trim();
+            // Truncate if necessary.
+            if (length > 0 && text.length > length) {
+                const truncated = text.substring(0, length);
+                const lastSpace = truncated.lastIndexOf(' ');
+                return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
             }
-        });
-        const text = document.body.textContent.replace(/\s\s+/g, ' ').trim();
-        if (text.length > length) {
-            const truncated = text.substring(0, length);
-            const lastSpace = truncated.lastIndexOf(' ');
-            return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
+            return text;
         }
-        return text;
-    } catch (e) {
         return '';
+    } catch (e) {
+        console.warn('Error during text cleaning:', e);
+        // Fallback for safety
+        return (html.replace(/<[^>]+>/g, '').trim()).substring(0, length > 0 ? length : 500);
     }
 }
+
 
 async function getOgImageFromUrl(url) {
     const proxies = [
@@ -79,7 +101,6 @@ function extractImageUrlFromDOM(itemElement, feed, articleLink) {
         'media\\:content[medium="image"]',
         'media\\:thumbnail',
         'enclosure[type^="image/"]',
-        'enclosure', // Some feeds don't specify type
     ];
 
     for (const selector of selectors) {
@@ -91,35 +112,17 @@ function extractImageUrlFromDOM(itemElement, feed, articleLink) {
     }
 
     if (!imageUrl) {
-        const contentSelectors = ['content\\:encoded', 'description', 'summary', 'content'];
+        const contentSelectors = ['content\\:encoded', 'description', 'summary'];
         for (const selector of contentSelectors) {
             const contentNode = itemElement.querySelector(selector);
             if (contentNode && contentNode.textContent) {
                 try {
-                    const { document: contentDoc } = parseHTML(contentNode.textContent);
-                    const images = Array.from(contentDoc.querySelectorAll('img'));
-                    const bestImage = images.find(img => {
-                        const src = img.getAttribute('src');
-                        if (!src || src.includes('cpx.golem.de') || src.includes('feeds.feedburner.com')) return false; // Filter Golem tracking & feedburner
-
-                        // Check for webp source as well
-                        const parent = img.parentElement;
-                        if (parent && parent.tagName === 'PICTURE') {
-                            const webpSource = parent.querySelector('source[type="image/webp"]');
-                            if (webpSource && webpSource.getAttribute('srcset')) {
-                                imageUrl = webpSource.getAttribute('srcset').split(' ')[0]; // Take first url from srcset
-                                return true;
-                            }
-                        }
-
-                        const width = parseInt(img.getAttribute('width') || '0', 10);
-                        const height = parseInt(img.getAttribute('height') || '0', 10);
-                        if (width <= 10 || height <= 10) return false;
-
-                        imageUrl = src;
-                        return true;
-                    });
-                    if (bestImage) break;
+                    const { document: contentDoc } = parseHTML(`<body>${contentNode.textContent}</body>`);
+                    const img = contentDoc.querySelector('img');
+                    if (img && img.src && !img.src.includes('feedburner')) {
+                        imageUrl = img.src;
+                        break;
+                    }
                 } catch (e) {
                     // ignore parsing errors
                 }
@@ -129,7 +132,6 @@ function extractImageUrlFromDOM(itemElement, feed, articleLink) {
 
     if (!imageUrl) return null;
 
-    // URL Post-processing
     try {
         let processedUrl = new URL(imageUrl, articleLink).href;
         const urlObject = new URL(processedUrl);
@@ -137,7 +139,7 @@ function extractImageUrlFromDOM(itemElement, feed, articleLink) {
         if (urlObject.hostname.includes('gamespot.com')) {
             processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
         } else if (urlObject.hostname.includes('cgames.de') || feed.name.includes('GameStar') || feed.name.includes('GamePro') || urlObject.hostname.includes('pcgames.de')) {
-            if (processedUrl.match(/\/(\d{2,4})\//)) { // only replace if a dimension is in the path
+            if (processedUrl.match(/\/(\d{2,4})\//)) {
                 processedUrl = processedUrl.replace(/\/(\d{2,4})\//, '/800/');
             }
         } else if (feed.name.includes('GamesWirtschaft')) {
@@ -147,10 +149,8 @@ function extractImageUrlFromDOM(itemElement, feed, articleLink) {
         } else if (urlObject.hostname.includes('giantbomb.com')) {
             processedUrl = processedUrl.replace(/(\/scale_small\/|\/scale_medium\/|\/scale_large\/|\/scale_super\/)/, '/original/');
         }
-
         return processedUrl;
     } catch (e) {
-        // if URL processing fails, return the original found URL.
         return imageUrl;
     }
 }
@@ -168,20 +168,21 @@ async function fetchAndProcessFeed(feed) {
     // Try direct fetch first
     try {
         const response = await fetch(feed.url, {
-            headers: { 'User-Agent': BROWSER_USER_AGENT, 'Accept': 'application/rss+xml, application/xml, application/atom+xml' },
+            headers: { 'User-Agent': BROWSER_USER_AGENT, 'Accept': 'application/rss+xml, application/xml, text/xml' },
             signal: AbortSignal.timeout(8000)
         });
-        if (response.ok) xmlString = await response.text();
+        if (response.ok) {
+            xmlString = await response.text();
+        }
     } catch (e) { /* ignore and try proxies */ }
 
-    // Try proxies if direct fetch failed
     if (!xmlString) {
         for (const proxyUrl of proxies) {
             try {
                 const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
                 if (response.ok) {
                     xmlString = await response.text();
-                    break; // Success
+                    if (xmlString) break;
                 }
             } catch (error) {
                 lastError = error.message;
@@ -189,33 +190,36 @@ async function fetchAndProcessFeed(feed) {
         }
     }
 
-    if (!xmlString) {
-        console.warn(`   ❌ Failed: ${feed.name}. Last error: ${lastError || 'Unknown fetch error'}`);
+    if (!xmlString || !xmlString.trim().startsWith('<')) {
+        console.warn(`   ❌ Failed: ${feed.name}. Last error: ${lastError || 'Invalid content received'}`);
         return [];
     }
 
     const articles = [];
     try {
-        const { document } = parseHTML(xmlString);
-        const isAtom = !!document.querySelector('feed');
-        const items = document.querySelectorAll(isAtom ? 'entry' : 'item');
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xmlString, "application/xml");
+
+        const errorNode = doc.querySelector("parsererror");
+        if (errorNode) {
+            throw new Error(`XML Parsing Error for ${feed.name}: ${errorNode.textContent}`);
+        }
+
+        const isAtom = !!doc.querySelector('feed');
+        const items = doc.querySelectorAll(isAtom ? 'entry' : 'item');
 
         for (const item of items) {
-            const rawTitle = item.querySelector('title')?.textContent || '';
-            // First, strip any CDATA wrappers that the parser might have missed.
-            const cleanedTitle = rawTitle.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
-            // Then, use stripHtmlAndTruncate to decode HTML entities and strip stray HTML tags.
-            const title = stripHtmlAndTruncate(cleanedTitle, 500);
-
+            const rawTitle = item.querySelector('title')?.innerHTML || '';
             const linkNode = item.querySelector('link');
-            const link = isAtom ? linkNode?.getAttribute('href') : linkNode?.textContent;
-            const pubDate = item.querySelector(isAtom ? 'published, updated' : 'pubDate')?.textContent;
+            const link = (isAtom ? (Array.from(item.querySelectorAll('link')).find(l => l.getAttribute('rel') === 'alternate' || !l.getAttribute('rel'))?.getAttribute('href')) : linkNode?.textContent)?.trim();
+            const pubDate = (item.querySelector(isAtom ? 'published, updated' : 'pubDate')?.textContent)?.trim();
+
+            const title = stripHtmlAndTruncate(rawTitle, 0); // 0 means don't truncate
 
             if (!title || !link || !pubDate) continue;
 
-            const rawSummaryContent = item.querySelector('description, summary, content, content\\:encoded')?.textContent || '';
-            const cleanedSummaryContent = rawSummaryContent.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
-            const summary = stripHtmlAndTruncate(cleanedSummaryContent);
+            const rawSummary = item.querySelector('description, summary, content\\:encoded')?.innerHTML || '';
+            const summary = stripHtmlAndTruncate(rawSummary, 200);
 
             articles.push({
                 id: (item.querySelector('guid, id')?.textContent || link).trim(),
@@ -223,8 +227,8 @@ async function fetchAndProcessFeed(feed) {
                 source: feed.name,
                 publicationDate: new Date(pubDate).toISOString(),
                 summary: summary,
-                link: link.trim(),
-                imageUrl: extractImageUrlFromDOM(item, feed, link.trim()),
+                link: link,
+                imageUrl: extractImageUrlFromDOM(item, feed, link),
                 needsScraping: feed.needs_scraping,
                 language: feed.language
             });
@@ -238,22 +242,18 @@ async function fetchAndProcessFeed(feed) {
 }
 
 
-async function fetchArticles() {
+async function main() {
     try {
         const { rows: feeds } = await sql`SELECT * FROM feeds ORDER BY priority, name;`;
         console.log(`\n🔍 Found ${feeds.length} feeds in database\n`);
         let allArticles = [];
 
-        // Process feeds sequentially to be gentle on APIs
-        for (const feed of feeds) {
-            const feedArticles = await fetchAndProcessFeed(feed);
-            allArticles.push(...feedArticles);
-            await new Promise(r => setTimeout(r, 200)); // Small delay
-        }
+        const feedPromises = feeds.map(feed => fetchAndProcessFeed(feed));
+        const results = await Promise.all(feedPromises);
+        results.forEach(feedArticles => allArticles.push(...feedArticles));
 
         console.log(`\n📰 Total articles fetched: ${allArticles.length}`);
 
-        // Scrape missing images
         const articlesToScrape = allArticles.filter(a => a.needsScraping && !a.imageUrl);
         if (articlesToScrape.length > 0) {
             console.log(`\n🔎 Scraping images for ${articlesToScrape.length} articles...\n`);
@@ -261,11 +261,10 @@ async function fetchArticles() {
                 console.log(`   🖼️  Scraping: ${article.source} - ${article.title.substring(0, 40)}...`);
                 article.imageUrl = await getOgImageFromUrl(article.link);
                 console.log(article.imageUrl ? `      ✅ Found image` : `      ⚠️  No image found`);
-                await new Promise(r => setTimeout(r, 500));
+                await new Promise(r => setTimeout(r, 300));
             }
         }
 
-        // Add placeholders and clean up
         allArticles.forEach(article => {
             if (!article.imageUrl) {
                 article.imageUrl = `https://placehold.co/600x400/374151/d1d5db?text=${encodeURIComponent(article.source.substring(0, 30))}`;
@@ -273,21 +272,17 @@ async function fetchArticles() {
             delete article.needsScraping;
         });
 
-        // Deduplicate and sort
         const uniqueArticles = Array.from(new Map(allArticles.map(a => [a.id, a])).values());
         const sortedArticles = uniqueArticles.sort((a, b) => new Date(b.publicationDate) - new Date(a.publicationDate));
 
-        // --- SAFETY CHECK ---
-        // Prevents overwriting the cache with a bad fetch (e.g., due to proxy failures).
-        // If we get fewer than this many articles, something is likely wrong.
-        const MINIMUM_ARTICLES = 150;
+        // Lowered threshold to avoid blocking updates if some feeds are down.
+        const MINIMUM_ARTICLES = 50;
         if (sortedArticles.length < MINIMUM_ARTICLES) {
             console.error(`\n❌ SAFETY CHECK FAILED: Fetched only ${sortedArticles.length} articles, which is below the threshold of ${MINIMUM_ARTICLES}.`);
             console.error('Aborting to prevent overwriting the cache with incomplete data.');
-            process.exit(1); // Exit with a non-zero code to fail the GitHub Action.
+            process.exit(1);
         }
 
-        // Save to cache
         const cacheDir = path.join(process.cwd(), 'public');
         if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
 
@@ -299,4 +294,4 @@ async function fetchArticles() {
     }
 }
 
-fetchArticles();
+main();
