@@ -193,6 +193,8 @@ async function fetchArticles() {
                     },
                     signal: AbortSignal.timeout(10000)
                 });
+                console.log(`\n📋 First feed from DB:`, JSON.stringify(feeds[0], null, 2));
+
 
                 if (!response.ok) {
                     console.warn(`   ❌ Failed: ${feed.name} (${response.status})`);
