@@ -54,7 +54,20 @@ async function fetchArticles() {
         }
 
         const cachePath = path.join(cacheDir, 'news-cache.json');
-        fs.writeFileSync(cachePath, JSON.stringify(articles, null, 2));
+
+        // Deduplizieren & nach Datum sortieren
+        const uniqueArticles = new Map();
+        articles.forEach(a => {
+            if (!uniqueArticles.has(a.id)) {
+                uniqueArticles.set(a.id, a);
+            }
+        });
+
+        const sortedArticles = Array.from(uniqueArticles.values())
+            .sort((a, b) => new Date(b.publicationDate) - new Date(a.publicationDate));
+
+        fs.writeFileSync(cachePath, JSON.stringify(sortedArticles, null, 2));
+
         console.log(`Saved to ${cachePath}`);
 
     } catch (error) {
