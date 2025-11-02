@@ -168,8 +168,13 @@ function extractImageUrl(itemXml, feed, articleLink) {
         else if (urlObject.hostname.includes('heise.de')) {
             processedUrl = processedUrl.replace(/\/geometry\/\d+\//, '/geometry/800/');
         }
-        else if (urlObject.hostname.includes('cgames.de') || urlObject.hostname.includes('pcgames.de')) {
+        else if (urlObject.hostname.includes('cgames.de')) {
+            // GameStar/GamePro
             processedUrl = processedUrl.replace(/\/\d{2,4}\//, '/800/');
+        }
+        else if (urlObject.hostname.includes('pcgames.de')) {
+            // PCGames: 970x546 → 1920x1080
+            processedUrl = processedUrl.replace(/\/\d+x\d+\//, '/1920x1080/');
         }
         else if (urlObject.hostname.includes('4players.de')) {
             processedUrl = processedUrl.replace(/\/\d+\//, '/800/');
