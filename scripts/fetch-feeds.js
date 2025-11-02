@@ -201,7 +201,12 @@ async function fetchAndProcessFeed(feed) {
         const items = document.querySelectorAll(isAtom ? 'entry' : 'item');
 
         for (const item of items) {
-            const title = (item.querySelector('title')?.textContent || '').trim();
+            let title = (item.querySelector('title')?.textContent || '').trim();
+            // Handle cases where the parser incorrectly includes CDATA tags in the text content.
+            if (title.startsWith('<![CDATA[') && title.endsWith(']]>')) {
+                title = title.substring(9, title.length - 3).trim();
+            }
+
             const linkNode = item.querySelector('link');
             const link = isAtom ? linkNode?.getAttribute('href') : linkNode?.textContent;
             const pubDate = item.querySelector(isAtom ? 'published, updated' : 'pubDate')?.textContent;
