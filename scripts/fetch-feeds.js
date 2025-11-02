@@ -49,7 +49,7 @@ async function getOgImageFromUrl(url) {
 function extractImageUrl(itemXml, feed, articleLink) {
     let imageUrl = null;
 
-    // 1. media:content - VERBESSERT für 4P
+    // 1. media:content
     const mediaContentPatterns = [
         /<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*medium=["']image["']/i,
         /<(?:media:)?content[^>]+medium=["']image["'][^>]*url=["']([^"']+)["']/i,
@@ -72,7 +72,7 @@ function extractImageUrl(itemXml, feed, articleLink) {
         }
     }
 
-    // 3. enclosure - OHNE type-Check für PCGames
+    // 3. enclosure
     if (!imageUrl) {
         const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
         if (enclosureMatch) {
@@ -110,7 +110,7 @@ function extractImageUrl(itemXml, feed, articleLink) {
             for (const imgMatch of imgMatches) {
                 const src = imgMatch[1];
 
-                // ERWEITERTE Tracking-Pixel-Erkennung
+                // Tracking-Filter
                 if (
                     src.includes('cpx.golem.de') ||
                     src.includes('feedburner.com') ||
@@ -132,12 +132,10 @@ function extractImageUrl(itemXml, feed, articleLink) {
                 const width = widthMatch ? parseInt(widthMatch[1]) : 200;
                 const height = heightMatch ? parseInt(heightMatch[1]) : 200;
 
-                // Skip 1x1 Pixel
                 if (width <= 1 || height <= 1) continue;
 
                 const size = width * height;
 
-                // Bevorzuge größere Bilder
                 if (size > maxSize) {
                     maxSize = size;
                     bestImage = src;
@@ -158,27 +156,21 @@ function extractImageUrl(itemXml, feed, articleLink) {
         let processedUrl = new URL(imageUrl, articleLink).href;
         const urlObject = new URL(processedUrl);
 
-        // Giant Bomb: Original
         if (urlObject.hostname.includes('giantbomb.com')) {
             processedUrl = processedUrl.replace(/\/[^\/]+_(\d+)\.(jpg|jpeg|png)/, '/original.$2');
         }
-        // GameSpot: Original
         else if (urlObject.hostname.includes('gamespot.com')) {
             processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
         }
-        // GamesWirtschaft: Größe entfernen
         else if (feed.name.includes('GamesWirtschaft') || urlObject.hostname.includes('gameswirtschaft.de')) {
             processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)($|\?))/i, '');
         }
-        // Heise: Höhere Auflösung
         else if (urlObject.hostname.includes('heise.de')) {
             processedUrl = processedUrl.replace(/\/geometry\/\d+\//, '/geometry/800/');
         }
-        // GameStar, GamePro, PCGames
         else if (urlObject.hostname.includes('cgames.de') || urlObject.hostname.includes('pcgames.de')) {
             processedUrl = processedUrl.replace(/\/\d{2,4}\//, '/800/');
         }
-        // 4Players
         else if (urlObject.hostname.includes('4players.de')) {
             processedUrl = processedUrl.replace(/\/\d+\//, '/800/');
         }
