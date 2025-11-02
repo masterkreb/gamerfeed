@@ -5,7 +5,7 @@
 import { sql } from '@vercel/postgres';
 import fs from 'fs';
 import path from 'path';
-import { parseHTML } from 'linkedom';
+import { parseHTML, parseXML } from 'linkedom';
 
 const BROWSER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
@@ -196,7 +196,7 @@ async function fetchAndProcessFeed(feed) {
 
     const articles = [];
     try {
-        const { document: doc } = parseHTML(xmlString);
+        const { document: doc } = parseXML(xmlString);
 
         const items = doc.querySelectorAll('item, entry');
         if (items.length === 0 && (!doc.body || !doc.body.hasChildNodes() || doc.body.textContent.trim() === '')) {
