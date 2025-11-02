@@ -73,10 +73,10 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
     let imageUrl: string | undefined;
 
     // More robust extraction order
-    if (item['media:content']?.url && item['media:content']?.medium === 'image') {
-        imageUrl = item['media:content'].url;
-    } else if (item.enclosure?.link && item.enclosure?.type?.startsWith('image')) {
+    if (item.enclosure?.link && item.enclosure?.type?.startsWith('image')) {
         imageUrl = item.enclosure.link;
+    } else if (item['media:content']?.url && item['media:content']?.medium === 'image') {
+        imageUrl = item['media:content'].url;
     } else if (item['media:thumbnail']?.url) {
         imageUrl = item['media:thumbnail'].url;
     } else if (item.thumbnail && typeof item.thumbnail === 'string') {
