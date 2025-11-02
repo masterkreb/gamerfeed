@@ -5,7 +5,7 @@ export const config = {
     matcher: '/admin.html',
 };
 
-export default function middleware(request: Request) {
+export default function middleware(request) {
     const basicAuth = request.headers.get('authorization');
 
     // Hole Admin-Credentials aus Environment Variables
