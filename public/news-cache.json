@@ -440,16 +440,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.pcgamer.com/games/debate-what-is-the-greatest-boss-theme-of-all-time/",
-    "title": "Debate: What is the greatest boss theme of all time?",
-    "source": "PC Gamer",
-    "publicationDate": "2025-11-02T17:00:00.000Z",
-    "summary": "",
-    "link": "https://www.pcgamer.com/games/debate-what-is-the-greatest-boss-theme-of-all-time/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/j6RTaMgBtEVnsM5yM43iiK-1280-80.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.pcgamer.com/games/mmo/final-fantasy-14-and-world-of-warcraft-are-starting-to-meet-in-the-middle-on-modding-and-its-a-strange-new-world-for-mmos-and-their-addon-communities/",
     "title": "Final Fantasy 14 and World of Warcraft are starting to meet in the middle on modding, and it's a strange new world for MMOs and their AddOn communities",
     "source": "PC Gamer",
@@ -457,6 +447,16 @@
     "summary": "",
     "link": "https://www.pcgamer.com/games/mmo/final-fantasy-14-and-world-of-warcraft-are-starting-to-meet-in-the-middle-on-modding-and-its-a-strange-new-world-for-mmos-and-their-addon-communities/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/zhaqJDzRctKwXpGPozbhQG-1280-80.png",
+    "language": "en"
+  },
+  {
+    "id": "https://www.pcgamer.com/games/debate-what-is-the-greatest-boss-theme-of-all-time/",
+    "title": "Debate: What is the greatest boss theme of all time?",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-02T17:00:00.000Z",
+    "summary": "",
+    "link": "https://www.pcgamer.com/games/debate-what-is-the-greatest-boss-theme-of-all-time/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/j6RTaMgBtEVnsM5yM43iiK-1280-80.jpg",
     "language": "en"
   },
   {
@@ -4380,16 +4380,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
-    "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
-    "source": "Eurogamer",
-    "publicationDate": "2025-11-01T09:00:00.000Z",
-    "summary": " ARC Raiders ist seit dieser Woche erh&auml;ltlich, und w&auml;hrend eine gro&szlig;e Zahl an Spielern zum Launch ins Spiel str&ouml;mt, ist es kein G",
-    "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
-    "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
-  },
-  {
     "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
     "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
     "source": "Eurogamer",
@@ -4397,6 +4387,16 @@
     "summary": " Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod f&uuml;r Doom 2,",
     "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
     "imageUrl": "https://assetsio.gnwcdn.com/Catharsis---Akira-Yamaoka-(1)-gigapixel-low_res-scale-4_00x-cropped.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
+    "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-01T09:00:00.000Z",
+    "summary": " ARC Raiders ist seit dieser Woche erh&auml;ltlich, und w&auml;hrend eine gro&szlig;e Zahl an Spielern zum Launch ins Spiel str&ouml;mt, ist es kein G",
+    "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
+    "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "de"
   },
   {
