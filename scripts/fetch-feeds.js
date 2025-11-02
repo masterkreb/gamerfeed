@@ -49,14 +49,18 @@ async function getOgImageFromUrl(url) {
 function extractImageUrl(itemXml, feed, articleLink) {
     let imageUrl = null;
 
-    // 1. Try media:content (used by many feeds)
-    const mediaContentMatch = itemXml.match(/<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*medium=["']image["']/i) ||
-        itemXml.match(/<(?:media:)?content[^>]+medium=["']image["'][^>]*url=["']([^"']+)["']/i);
-    if (mediaContentMatch) {
-        imageUrl = mediaContentMatch[1];
+    // 1. enclosure (Prioritized for feeds like pcgames.de)
+    if (!imageUrl) {
+        const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
+        if (enclosureMatch) {
+            const url = enclosureMatch[1];
+            if (url.match(/\.(jpg|jpeg|png|gif|webp)($|\?)/i)) {
+                imageUrl = url;
+            }
+        }
     }
 
-    // 2. Try media:thumbnail
+    // 2. media:thumbnail (Moved up for better accuracy with feeds like PlayStation.Blog)
     if (!imageUrl) {
         const mediaThumbnailMatch = itemXml.match(/<(?:media:)?thumbnail[^>]+url=["']([^"']+)["']/i);
         if (mediaThumbnailMatch) {
@@ -64,91 +68,120 @@ function extractImageUrl(itemXml, feed, articleLink) {
         }
     }
 
-    // 3. Try enclosure (accept any, not just image type)
+    // 3. media:content (Original position was #2)
     if (!imageUrl) {
-        const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
-        if (enclosureMatch) {
-            imageUrl = enclosureMatch[1];
-        }
-    }
+        const mediaContentPatterns = [
+            /<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*medium=["']image["']/i,
+            /<(?:media:)?content[^>]+medium=["']image["'][^>]*url=["']([^"']+)["']/i,
+            /<(?:media:)?content[^>]+url=["']([^"']+\.(?:jpg|jpeg|png|gif|webp)[^"']*)["']/i
+        ];
 
-    // 4. Parse HTML content for images
-    if (!imageUrl) {
-        const descMatch = itemXml.match(/<(?:description|summary|content)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary|content)>/is);
-        if (descMatch) {
-            let content = descMatch[1];
-
-            // Decode HTML entities
-            content = content
-                .replace(/&quot;/g, '"')
-                .replace(/&amp;/g, '&')
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/&#39;/g, "'");
-
-            const imgMatches = content.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi);
-
-            for (const imgMatch of imgMatches) {
-                const src = imgMatch[1];
-
-                // Skip tracking pixels
-                if (src.includes('cpx.golem.de') ||
-                    src.includes('1x1') ||
-                    src.includes('pixel') ||
-                    src.includes('count.php') ||
-                    src.includes('tracking')) {
-                    continue;
-                }
-
-                // Check dimensions
-                const widthMatch = imgMatch[0].match(/width=["']?(\d+)/i);
-                const heightMatch = imgMatch[0].match(/height=["']?(\d+)/i);
-                const width = widthMatch ? parseInt(widthMatch[1]) : 0;
-                const height = heightMatch ? parseInt(heightMatch[1]) : 0;
-
-                // Skip 1x1 tracking pixels
-                if ((width === 1 && height === 1) || (width <= 1 || height <= 1)) {
-                    continue;
-                }
-
-                imageUrl = src;
+        for (const pattern of mediaContentPatterns) {
+            const match = itemXml.match(pattern);
+            if (match) {
+                imageUrl = match[1];
                 break;
             }
         }
     }
 
+    // 4. HTML-Inhalt parsen
     if (!imageUrl) {
-        return null;
+        const contentMatches = [
+            itemXml.match(/<content(?::encoded)?[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/content(?::encoded)?>/is),
+            itemXml.match(/<(?:description|summary)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary)>/is)
+        ];
+
+        for (const match of contentMatches) {
+            if (!match) continue;
+            let content = match[1];
+
+            content = content
+                .replace(/&quot;/g, '"')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&#39;/g, "'")
+                .replace(/&apos;/g, "'");
+
+            const imgMatches = [...content.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi)];
+
+            let bestImage = null;
+            let maxSize = 0;
+
+            for (const imgMatch of imgMatches) {
+                const src = imgMatch[1];
+
+                // Tracking-Filter
+                if (
+                    src.includes('cpx.golem.de') ||
+                    src.includes('feedburner.com') ||
+                    src.includes('feedsportal.com') ||
+                    src.includes('tracking') ||
+                    src.includes('count.php') ||
+                    src.includes('vgc.php') ||
+                    src.includes('pixel') ||
+                    src.match(/[?&]width=1[&$]/) ||
+                    src.match(/[?&]height=1[&$]/) ||
+                    src.endsWith('1x1.gif') ||
+                    src.endsWith('1x1.png')
+                ) {
+                    continue;
+                }
+
+                const widthMatch = imgMatch[0].match(/width=["']?(\d+)/i);
+                const heightMatch = imgMatch[0].match(/height=["']?(\d+)/i);
+                const width = widthMatch ? parseInt(widthMatch[1]) : 200;
+                const height = heightMatch ? parseInt(heightMatch[1]) : 200;
+
+                if (width <= 1 || height <= 1) continue;
+
+                const size = width * height;
+
+                if (size > maxSize) {
+                    maxSize = size;
+                    bestImage = src;
+                }
+            }
+
+            if (bestImage) {
+                imageUrl = bestImage;
+                break;
+            }
+        }
     }
 
-    // === IMAGE URL OPTIMIZATION ===
+    if (!imageUrl) return null;
+
+    // URL-Optimierung
     try {
         let processedUrl = new URL(imageUrl, articleLink).href;
         const urlObject = new URL(processedUrl);
 
-        // GameSpot: Use 'original' quality
-        if (urlObject.hostname.includes('gamespot.com')) {
+        if (urlObject.hostname.includes('giantbomb.com')) {
+            processedUrl = processedUrl.replace(/\/[^\/]+_(\d+)\.(jpg|jpeg|png)/, '/original.$2');
+        }
+        else if (urlObject.hostname.includes('gamespot.com')) {
             processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
         }
-        // GameStar, GamePro: Use /800/ resolution
-        else if (urlObject.hostname.includes('cgames.de') || feed.name.includes('GameStar') || feed.name.includes('GamePro')) {
-            processedUrl = processedUrl.replace(/\/(\d{2,4})\//, '/800/');
+        else if (feed.name.includes('GamesWirtschaft') || urlObject.hostname.includes('gameswirtschaft.de')) {
+            processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)($|\?))/i, '');
         }
-        // GamesWirtschaft: Remove size suffix
-        else if (feed.name.includes('GamesWirtschaft')) {
-            processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)$)/i, '');
+        else if (urlObject.hostname.includes('heise.de')) {
+            processedUrl = processedUrl.replace(/\/geometry\/\d+\//, '/geometry/800/');
         }
-        // Nintendo Life: Use 'large' instead of 'small'
-        else if (urlObject.hostname.includes('nintendolife.com')) {
-            processedUrl = processedUrl.replace('small.jpg', 'large.jpg');
+        else if (urlObject.hostname.includes('pcgames.de')) {
+            // This rule is placed before the 'cgames.de' rule to prevent conflicts.
+            // The URL from pcgames.de is often correct, but was being broken by the
+            // .includes('cgames.de') check. This empty block ensures the original URL is preserved.
         }
-        // Eurogamer: Optimize image quality
-        else if (urlObject.hostname.includes('gnwcdn.com')) {
-            processedUrl = processedUrl.replace(/width=\d+/, 'width=800').replace(/quality=\d+/, 'quality=90');
+        else if (urlObject.hostname.includes('cgames.de')) {
+            // GameStar/GamePro: This rule can incorrectly modify pcgames.de URLs by replacing the year.
+            // The pcgames.de rule above now prevents this from running on the wrong URLs.
+            processedUrl = processedUrl.replace(/\/\d{2,4}\//, '/800/');
         }
-        // Giant Bomb: Use original image
-        else if (urlObject.hostname.includes('giantbomb.com')) {
-            processedUrl = processedUrl.replace(/\/[^\/]+_(\d+)\.jpg/, '/original.jpg');
+        else if (urlObject.hostname.includes('4players.de')) {
+            processedUrl = processedUrl.replace(/\/\d+\//, '/800/');
         }
 
         return processedUrl;
@@ -156,6 +189,7 @@ function extractImageUrl(itemXml, feed, articleLink) {
         return imageUrl;
     }
 }
+
 
 // === PARSE RSS/ATOM FEED ===
 function parseRssXml(xmlString, feed) {
