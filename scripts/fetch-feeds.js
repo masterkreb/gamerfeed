@@ -1,81 +1,136 @@
 // scripts/fetch-feeds.js
 // Fetches RSS feeds and saves to public/news-cache.json
+// WITH image optimization and scraping support
 
 import { sql } from '@vercel/postgres';
 import fs from 'fs';
 import path from 'path';
+import { parseHTML } from 'linkedom';
 
-// Import your RSS parsing logic (simplified version)
-async function fetchArticles() {
-    try {
-        // Get feeds from database
-        const { rows: feeds } = await sql`SELECT * FROM feeds;`;
-        console.log(`Found ${feeds.length} feeds in database`);
+// === IMAGE SCRAPING ===
+async function getOgImageFromUrl(url) {
+    const proxies = [
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    ];
 
-        const articles = [];
+    for (const proxyUrl of proxies) {
+        try {
+            const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(5000) });
+            if (!response.ok) continue;
 
-        // Process all feeds (no timeout limit in GitHub Actions!)
-        for (const feed of feeds) {
-            try {
-                console.log(`Fetching: ${feed.name}...`);
+            const html = await response.text();
+            const { document: doc } = parseHTML(html);
 
-                const response = await fetch(feed.url, {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                        'Accept': 'application/rss+xml, application/xml'
-                    },
-                    signal: AbortSignal.timeout(10000)
-                });
+            const ogImageMeta =
+                doc.querySelector('meta[property="og:image"]') ||
+                doc.querySelector('meta[property="og:image:url"]') ||
+                doc.querySelector('meta[name="twitter:image"]');
 
-                if (!response.ok) {
-                    console.warn(`Failed: ${feed.name} (${response.status})`);
+            if (ogImageMeta) {
+                const imageUrl = ogImageMeta.getAttribute('content');
+                if (imageUrl) {
+                    try {
+                        return new URL(imageUrl, url).href;
+                    } catch {
+                        return imageUrl;
+                    }
+                }
+            }
+        } catch (e) {
+            // Try next proxy
+        }
+    }
+    return null;
+}
+
+// === EXTRACT IMAGE FROM FEED ITEM ===
+function extractImageUrl(itemXml, feed, articleLink) {
+    let imageUrl = null;
+
+    // 1. Try media:thumbnail
+    const mediaThumbnailMatch = itemXml.match(/<media:thumbnail[^>]+url=["']([^"']+)["']/i);
+    if (mediaThumbnailMatch) {
+        imageUrl = mediaThumbnailMatch[1];
+    }
+
+    // 2. Try enclosure (image)
+    if (!imageUrl) {
+        const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["'][^>]*type=["']image/i);
+        if (enclosureMatch) {
+            imageUrl = enclosureMatch[1];
+        }
+    }
+
+    // 3. Try img tag in description/content
+    if (!imageUrl) {
+        const descMatch = itemXml.match(/<(?:description|summary|content)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary|content)>/is);
+        if (descMatch) {
+            const content = descMatch[1];
+            const imgMatches = content.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi);
+
+            for (const imgMatch of imgMatches) {
+                const src = imgMatch[1];
+                // Skip tracking pixels and tiny images
+                if (src.includes('cpx.golem.de') || src.includes('1x1') || src.includes('pixel')) {
                     continue;
                 }
 
-                const xmlString = await response.text();
-                const feedArticles = parseRssXml(xmlString, feed);
-                articles.push(...feedArticles);
-                console.log(`✓ ${feed.name}: ${feedArticles.length} articles`);
+                // Check for width/height attributes
+                const widthMatch = imgMatch[0].match(/width=["']?(\d+)/i);
+                const heightMatch = imgMatch[0].match(/height=["']?(\d+)/i);
+                const width = widthMatch ? parseInt(widthMatch[1]) : 0;
+                const height = heightMatch ? parseInt(heightMatch[1]) : 0;
 
-                // Small delay to be nice
-                await new Promise(r => setTimeout(r, 200));
+                // Skip tiny images (likely trackers)
+                if (width > 1 && height > 1) {
+                    imageUrl = src;
+                    break;
+                }
 
-            } catch (error) {
-                console.error(`Error fetching ${feed.name}:`, error.message);
+                // If no dimensions, take first non-tracker image
+                if (!width && !height && !imageUrl) {
+                    imageUrl = src;
+                }
             }
         }
+    }
 
-        console.log(`\nTotal articles fetched: ${articles.length}`);
+    // If no image found, return null (will need scraping or placeholder)
+    if (!imageUrl) {
+        return null;
+    }
 
-        // Save to cache file
-        const cacheDir = path.join(process.cwd(), 'public');
-        if (!fs.existsSync(cacheDir)) {
-            fs.mkdirSync(cacheDir, { recursive: true });
+    // === IMAGE URL OPTIMIZATION ===
+    try {
+        let processedUrl = new URL(imageUrl, articleLink).href;
+        const urlObject = new URL(processedUrl);
+
+        // GameSpot: Use 'original' quality
+        if (urlObject.hostname.includes('gamespot.com')) {
+            processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
+        }
+        // GameStar, GamePro: Use /800/ resolution
+        else if (urlObject.hostname.includes('cgames.de') || feed.name.includes('GameStar') || feed.name.includes('GamePro')) {
+            processedUrl = processedUrl.replace(/\/(\d{2,4})\//, '/800/');
+        }
+        // GamesWirtschaft: Remove size suffix
+        else if (feed.name.includes('GamesWirtschaft')) {
+            processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)$)/i, '');
+        }
+        // Nintendo Life: Use 'large' instead of 'small'
+        else if (urlObject.hostname.includes('nintendolife.com')) {
+            processedUrl = processedUrl.replace('small.jpg', 'large.jpg');
         }
 
-        const cachePath = path.join(cacheDir, 'news-cache.json');
-
-        // Deduplizieren & nach Datum sortieren
-        const uniqueArticles = new Map();
-        articles.forEach(a => {
-            if (!uniqueArticles.has(a.id)) {
-                uniqueArticles.set(a.id, a);
-            }
-        });
-
-        const sortedArticles = Array.from(uniqueArticles.values())
-            .sort((a, b) => new Date(b.publicationDate) - new Date(a.publicationDate));
-
-        fs.writeFileSync(cachePath, JSON.stringify(sortedArticles, null, 2));
-
-        console.log(`Saved to ${cachePath}`);
-
-    } catch (error) {
-        console.error('Fatal error:', error);
-        process.exit(1);
+        return processedUrl;
+    } catch (e) {
+        return imageUrl;
     }
 }
 
+// === PARSE RSS/ATOM FEED ===
 function parseRssXml(xmlString, feed) {
     const articles = [];
     const isAtom = xmlString.includes('<feed');
@@ -98,11 +153,8 @@ function parseRssXml(xmlString, feed) {
         const desc = itemXml.match(/<(?:description|summary)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary)>/is)?.[1]?.trim() || '';
         const summary = desc.replace(/<[^>]+>/g, '').substring(0, 150);
 
-        const imgMatch = itemXml.match(/<media:thumbnail[^>]+url=["']([^"']+)["']/i) ||
-            itemXml.match(/<enclosure[^>]+url=["']([^"']+)["'][^>]*type=["']image/i) ||
-            desc.match(/<img[^>]+src=["']([^"']+)["']/i);
-
-        const imageUrl = imgMatch?.[1] || `https://placehold.co/600x400/374151/d1d5db?text=${encodeURIComponent(feed.name.substring(0, 30))}`;
+        // Extract image
+        const imageUrl = extractImageUrl(itemXml, feed, link);
 
         articles.push({
             id: link,
@@ -111,12 +163,116 @@ function parseRssXml(xmlString, feed) {
             publicationDate: new Date(pubDate).toISOString(),
             summary,
             link,
-            imageUrl,
+            imageUrl: imageUrl || null, // null if needs scraping
+            needsScraping: !imageUrl && feed.needsScraping,
             language: feed.language
         });
     }
 
     return articles;
+}
+
+// === MAIN FETCH FUNCTION ===
+async function fetchArticles() {
+    try {
+        // Get feeds from database
+        const { rows: feeds } = await sql`SELECT * FROM feeds;`;
+        console.log(`\n🔍 Found ${feeds.length} feeds in database\n`);
+
+        let articles = [];
+
+        // STEP 1: Fetch all feeds
+        for (const feed of feeds) {
+            try {
+                console.log(`📡 Fetching: ${feed.name}...`);
+
+                const response = await fetch(feed.url, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'Accept': 'application/rss+xml, application/xml'
+                    },
+                    signal: AbortSignal.timeout(10000)
+                });
+
+                if (!response.ok) {
+                    console.warn(`   ❌ Failed: ${feed.name} (${response.status})`);
+                    continue;
+                }
+
+                const xmlString = await response.text();
+                const feedArticles = parseRssXml(xmlString, feed);
+                articles.push(...feedArticles);
+                console.log(`   ✅ ${feed.name}: ${feedArticles.length} articles`);
+
+                await new Promise(r => setTimeout(r, 200));
+
+            } catch (error) {
+                console.error(`   ❌ Error: ${feed.name} - ${error.message}`);
+            }
+        }
+
+        console.log(`\n📰 Total articles fetched: ${articles.length}`);
+
+        // STEP 2: Scrape missing images
+        const articlesNeedingScraping = articles.filter(a => a.needsScraping);
+        if (articlesNeedingScraping.length > 0) {
+            console.log(`\n🔎 Scraping images for ${articlesNeedingScraping.length} articles...\n`);
+
+            for (const article of articlesNeedingScraping) {
+                try {
+                    console.log(`   🖼️  Scraping: ${article.source} - ${article.title.substring(0, 40)}...`);
+                    const scrapedImage = await getOgImageFromUrl(article.link);
+
+                    if (scrapedImage) {
+                        article.imageUrl = scrapedImage;
+                        article.needsScraping = false;
+                        console.log(`      ✅ Found image`);
+                    } else {
+                        console.log(`      ⚠️  No image found, using placeholder`);
+                    }
+
+                    await new Promise(r => setTimeout(r, 500)); // Be nice to servers
+                } catch (error) {
+                    console.error(`      ❌ Scraping failed: ${error.message}`);
+                }
+            }
+        }
+
+        // STEP 3: Add placeholders for articles still without images
+        articles = articles.map(article => {
+            if (!article.imageUrl) {
+                article.imageUrl = `https://placehold.co/600x400/374151/d1d5db?text=${encodeURIComponent(article.source.substring(0, 30))}`;
+            }
+            delete article.needsScraping; // Remove flag before saving
+            return article;
+        });
+
+        // STEP 4: Deduplicate and sort
+        const uniqueArticles = new Map();
+        articles.forEach(a => {
+            if (!uniqueArticles.has(a.id)) {
+                uniqueArticles.set(a.id, a);
+            }
+        });
+
+        const sortedArticles = Array.from(uniqueArticles.values())
+            .sort((a, b) => new Date(b.publicationDate) - new Date(a.publicationDate));
+
+        // STEP 5: Save to cache
+        const cacheDir = path.join(process.cwd(), 'public');
+        if (!fs.existsSync(cacheDir)) {
+            fs.mkdirSync(cacheDir, { recursive: true });
+        }
+
+        const cachePath = path.join(cacheDir, 'news-cache.json');
+        fs.writeFileSync(cachePath, JSON.stringify(sortedArticles, null, 2));
+
+        console.log(`\n✅ Saved ${sortedArticles.length} articles to ${cachePath}\n`);
+
+    } catch (error) {
+        console.error('\n❌ Fatal error:', error);
+        process.exit(1);
+    }
 }
 
 fetchArticles();
