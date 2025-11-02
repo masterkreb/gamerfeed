@@ -49,40 +49,40 @@ async function getOgImageFromUrl(url) {
 function extractImageUrl(itemXml, feed, articleLink) {
     let imageUrl = null;
 
-    // 1. enclosure (PRIORITIZED)
-    const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
-    if (enclosureMatch) {
-        const url = enclosureMatch[1];
-        if (url.match(/\.(jpg|jpeg|png|gif|webp)($|\?)/i)) {
-            imageUrl = url;
+    // 1. media:content
+    const mediaContentPatterns = [
+        /<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*medium=["']image["']/i,
+        /<(?:media:)?content[^>]+medium=["']image["'][^>]*url=["']([^"']+)["']/i,
+        /<(?:media:)?content[^>]+url=["']([^"']+\.(?:jpg|jpeg|png|gif|webp)[^"']*)["']/i
+    ];
+
+    for (const pattern of mediaContentPatterns) {
+        const match = itemXml.match(pattern);
+        if (match) {
+            imageUrl = match[1];
+            break;
         }
     }
 
-    // 2. media:content
-    if (!imageUrl) {
-        const mediaContentPatterns = [
-            /<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*medium=["']image["']/i,
-            /<(?:media:)?content[^>]+medium=["']image["'][^>]*url=["']([^"']+)["']/i,
-            /<(?:media:)?content[^>]+url=["']([^"']+\.(?:jpg|jpeg|png|gif|webp)[^"']*)["']/i
-        ];
-
-        for (const pattern of mediaContentPatterns) {
-            const match = itemXml.match(pattern);
-            if (match) {
-                imageUrl = match[1];
-                break;
-            }
-        }
-    }
-
-
-    // 3. media:thumbnail
+    // 2. media:thumbnail
     if (!imageUrl) {
         const mediaThumbnailMatch = itemXml.match(/<(?:media:)?thumbnail[^>]+url=["']([^"']+)["']/i);
         if (mediaThumbnailMatch) {
             imageUrl = mediaThumbnailMatch[1];
         }
     }
+
+    // 3. enclosure
+    if (!imageUrl) {
+        const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
+        if (enclosureMatch) {
+            const url = enclosureMatch[1];
+            if (url.match(/\.(jpg|jpeg|png|gif|webp)($|\?)/i)) {
+                imageUrl = url;
+            }
+        }
+    }
+
 
     // 4. HTML-Inhalt parsen
     if (!imageUrl) {
