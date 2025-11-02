@@ -72,18 +72,26 @@ async function getOgImageFromUrl(url: string): Promise<string | null> {
 function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; needsScraping: boolean } {
     let imageUrl: string | undefined;
 
-    if (item.enclosure?.link && item.enclosure?.type?.startsWith('image')) {
+    // More robust extraction order
+    if (item['media:content']?.url && item['media:content']?.medium === 'image') {
+        imageUrl = item['media:content'].url;
+    } else if (item.enclosure?.link && item.enclosure?.type?.startsWith('image')) {
         imageUrl = item.enclosure.link;
-    } else if (item.thumbnail && typeof item.thumbnail === 'string') {
-        imageUrl = item.thumbnail;
     } else if (item['media:thumbnail']?.url) {
         imageUrl = item['media:thumbnail'].url;
+    } else if (item.thumbnail && typeof item.thumbnail === 'string') {
+        imageUrl = item.thumbnail;
     } else {
         const content = item.content || item.description || '';
         if (content) {
-            const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/i);
+            // A more robust regex that tries to avoid 1x1 tracking pixels and prefers images with some size attributes.
+            const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["'][^>]*?(width|height)=["']?((?!1)\d{2,})/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i);
+
             if (imgMatch && imgMatch[1]) {
-                imageUrl = imgMatch[1];
+                // Check against common tracking pixel domains
+                if (!imgMatch[1].includes('cpx.golem.de') && !imgMatch[1].includes('feedburner.com')) {
+                    imageUrl = imgMatch[1];
+                }
             }
         }
     }
@@ -141,6 +149,7 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
                 : itemXml.match(/<guid[^>]*>([^<]+)<\/guid>/i);
             const descMatch = itemXml.match(/<(?:description|summary)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary)>/is);
             const contentMatch = itemXml.match(/<(?:content:encoded|content)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:content:encoded|content)>/is);
+            const mediaContentMatch = itemXml.match(/<media:content[^>]+url=["']([^"']+)["'][^>]*medium=["']image["']/i);
             const mediaThumbnailMatch = itemXml.match(/<media:thumbnail[^>]+url=["']([^"']+)["']/i) ||
                 itemXml.match(/<thumbnail[^>]+url=["']([^"']+)["']/i);
             const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["'][^>]*type=["']([^"']+)["']/i);
@@ -160,6 +169,7 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
                 guid: guidMatch ? guidMatch[1].trim() : link,
                 description: descMatch ? descMatch[1].trim() : '',
                 content: contentMatch ? contentMatch[1].trim() : '',
+                'media:content': { url: mediaContentMatch ? mediaContentMatch[1] : null, medium: 'image' },
                 'media:thumbnail': { url: mediaThumbnailMatch ? mediaThumbnailMatch[1] : null },
                 enclosure: enclosureMatch ? {
                     link: enclosureMatch[1],
