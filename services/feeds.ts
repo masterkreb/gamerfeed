@@ -41,7 +41,7 @@ export const INITIAL_FEEDS: FeedSource[] = [
     { id: 'pixelcritics', url: 'https://pixelcritics.com/feed', name: 'PixelCritics', language: 'de', priority: 'secondary', update_interval: 60, needsScraping: true },
     { id: 'play3', url: 'https://www.play3.de/feed/rss/', name: 'Play3', language: 'de', priority: 'secondary', update_interval: 60, needsScraping: true },
     { id: 'playfront', url: 'https://playfront.de/feed/', name: 'PlayFront', language: 'de', priority: 'secondary', update_interval: 60, needsScraping: true },
-    { id: 'playstation-blog', url: 'https://blog.playstation.com/feed/', name: 'PlayStation.Blog', language: 'en', priority: 'secondary', update_interval: 60 },
+    { id: 'playstation-blog', url: 'https://blog.playstation.com/feed/', name: 'PlayStation.Blog', language: 'en', priority: 'secondary', update_interval: 60, needsScraping: true },
     { id: 'playstationinfo', url: 'https://www.playstationinfo.de/feed/', name: 'PlayStationInfo', language: 'de', priority: 'secondary', update_interval: 60, needsScraping: true },
     { id: 'rock-paper-shotgun', url: 'https://www.rockpapershotgun.com/feed', name: 'Rock Paper Shotgun', language: 'en', priority: 'secondary', update_interval: 60 },
     { id: 'vg247', url: 'https://vg247.com/feed', name: 'VG247', language: 'en', priority: 'secondary', update_interval: 60 },
