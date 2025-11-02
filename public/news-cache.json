@@ -1,5 +1,15 @@
 [
   {
+    "id": "https://www.pcgameshardware.de/Battlefield-6-Spiel-75270/News/Spieler-finden-geheimen-Raum-1485591/",
+    "title": "Battlefield 6&#x3a; Versteckter Raum auf dem Schie&#xdf;stand - Beginn der neuen Easter-Egg-Jagd",
+    "source": "PC Games Hardware",
+    "publicationDate": "2025-11-02T11:30:00.000Z",
+    "summary": "In Battlefield 6 haben Spieler einen versteckten Raum auf dem Schie&#xdf;stand entdeckt. Der Fund l&#xf6;st Spekulationen &#xfc;ber zuk&#xfc;nftige In",
+    "link": "https://www.pcgameshardware.de/Battlefield-6-Spiel-75270/News/Spieler-finden-geheimen-Raum-1485591/",
+    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/10/battlefield6-7-steam-pc-games.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://playfront.de/xbox-next-microsoft-wagt-den-mutigen-schritt-werden-playstation-und-nintendo-folgen/",
     "title": "Xbox Next: Microsoft wagt den mutigen Schritt, werden PlayStation und Nintendo folgen?",
     "source": "PlayFront",
@@ -2450,16 +2460,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.pcgameshardware.de/Star-Citizen-Spiel-3481/News/Rekordjahr-2025-gigantischer-Geldmagnet-1485569/",
-    "title": "Rekordjahr 2025&#x3a; Star Citizen bleibt ein gigantischer Geldmagnet",
-    "source": "PC Games Hardware",
-    "publicationDate": "2025-11-01T13:45:00.000Z",
-    "summary": "Star Citizen steuert 2025 auf ein weiteres Rekordjahr zu. Der bisherige H&#xf6;chstwert wird voraussichtlich deutlich &#xfc;berschritten, das Spiel bl",
-    "link": "https://www.pcgameshardware.de/Star-Citizen-Spiel-3481/News/Rekordjahr-2025-gigantischer-Geldmagnet-1485569/",
-    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/11/Star-Citizen-Rekordeinnahmen-Oktober-2025-pcgh.png",
-    "language": "de"
-  },
-  {
     "id": "https://www.playstationinfo.de/2025/11/01/deus-ex-remastered-original-art-director-kritisiert-neue-grafik/",
     "title": "Deus Ex Remastered: Original-Art Director kritisiert neue Grafik",
     "source": "PlayStationInfo",
@@ -2610,16 +2610,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamesradar.com/games/the-witcher/the-witcher-author-has-an-excellent-deal-with-the-witcher-4-devs-but-its-rare-for-cd-projekt-to-ask-him-for-advice-anymore/",
-    "title": "The Witcher author has an \"excellent\" deal with The Witcher 4 devs, but it's \"rare\" for CD Projekt to ask him for advice anymore",
-    "source": "GamesRadar+",
-    "publicationDate": "2025-11-01T13:00:00.000Z",
-    "summary": "",
-    "link": "https://www.gamesradar.com/games/the-witcher/the-witcher-author-has-an-excellent-deal-with-the-witcher-4-devs-but-its-rare-for-cd-projekt-to-ask-him-for-advice-anymore/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/dFfU3JzmjWSqiYjhb2qbSb-1280-80.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.gamesradar.com/games/horror/lethal-company-creator-has-thought-about-a-sequel-but-sees-a-lot-left-to-do-on-the-original-as-for-lethal-company-2-i-have-a-vision-for-what-that-ought-to-be-and-it-surpasses-my-own-ambition/",
     "title": "Lethal Company creator has thought about a sequel, but sees \"a lot left to do\" on the original: \"As for Lethal Company 2, I have a vision for what that ought to be, and it surpasses my own ambition\"",
     "source": "GamesRadar+",
@@ -2627,6 +2617,16 @@
     "summary": "",
     "link": "https://www.gamesradar.com/games/horror/lethal-company-creator-has-thought-about-a-sequel-but-sees-a-lot-left-to-do-on-the-original-as-for-lethal-company-2-i-have-a-vision-for-what-that-ought-to-be-and-it-surpasses-my-own-ambition/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/uZbrFmuFyM5T3BnkvPAvdS-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.gamesradar.com/games/the-witcher/the-witcher-author-has-an-excellent-deal-with-the-witcher-4-devs-but-its-rare-for-cd-projekt-to-ask-him-for-advice-anymore/",
+    "title": "The Witcher author has an \"excellent\" deal with The Witcher 4 devs, but it's \"rare\" for CD Projekt to ask him for advice anymore",
+    "source": "GamesRadar+",
+    "publicationDate": "2025-11-01T13:00:00.000Z",
+    "summary": "",
+    "link": "https://www.gamesradar.com/games/the-witcher/the-witcher-author-has-an-excellent-deal-with-the-witcher-4-devs-but-its-rare-for-cd-projekt-to-ask-him-for-advice-anymore/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/dFfU3JzmjWSqiYjhb2qbSb-1280-80.jpg",
     "language": "en"
   },
   {
@@ -6450,22 +6450,22 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "\"Thief VR\" erscheint im Dezember: Kaum Unterschiede zwischen Quest 3 und PS VR2",
-    "source": "Heise Online",
-    "publicationDate": "2025-10-31T10:42:00.000Z",
-    "summary": "\"Thief VR\" hat nun einen konkreten Veröffentlichungstermin. Zwei neue Trailer zeigen kaum Unterschiede zwischen den Versionen für Quest 3 und PS VR2.",
-    "link": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/iPhone-17-Ersatzteile-fuer-neue-Apple-Handys-fuer-Bastler-verfuegbar-10965281.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "iPhone 17: Ersatzteile für neue Apple-Handys für Bastler verfügbar",
     "source": "Heise Online",
     "publicationDate": "2025-10-31T10:42:00.000Z",
     "summary": "Nach den Reparaturhandbüchern hat Apple nun auch das notwendige Material für alle neuen iPhones freigegeben. Wie üblich ein teurer Spaß.",
     "link": "https://www.heise.de/news/iPhone-17-Ersatzteile-fuer-neue-Apple-Handys-fuer-Bastler-verfuegbar-10965281.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "\"Thief VR\" erscheint im Dezember: Kaum Unterschiede zwischen Quest 3 und PS VR2",
+    "source": "Heise Online",
+    "publicationDate": "2025-10-31T10:42:00.000Z",
+    "summary": "\"Thief VR\" hat nun einen konkreten Veröffentlichungstermin. Zwei neue Trailer zeigen kaum Unterschiede zwischen den Versionen für Quest 3 und PS VR2.",
+    "link": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
     "language": "de"
   },
