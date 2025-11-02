@@ -49,30 +49,7 @@ async function getOgImageFromUrl(url) {
 function extractImageUrl(itemXml, feed, articleLink) {
     let imageUrl = null;
 
-    // 1. media:content
-    const mediaContentPatterns = [
-        /<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*medium=["']image["']/i,
-        /<(?:media:)?content[^>]+medium=["']image["'][^>]*url=["']([^"']+)["']/i,
-        /<(?:media:)?content[^>]+url=["']([^"']+\.(?:jpg|jpeg|png|gif|webp)[^"']*)["']/i
-    ];
-
-    for (const pattern of mediaContentPatterns) {
-        const match = itemXml.match(pattern);
-        if (match) {
-            imageUrl = match[1];
-            break;
-        }
-    }
-
-    // 2. media:thumbnail
-    if (!imageUrl) {
-        const mediaThumbnailMatch = itemXml.match(/<(?:media:)?thumbnail[^>]+url=["']([^"']+)["']/i);
-        if (mediaThumbnailMatch) {
-            imageUrl = mediaThumbnailMatch[1];
-        }
-    }
-
-    // 3. enclosure
+    // 1. enclosure (Prioritized for feeds like pcgames.de)
     if (!imageUrl) {
         const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
         if (enclosureMatch) {
@@ -83,6 +60,30 @@ function extractImageUrl(itemXml, feed, articleLink) {
         }
     }
 
+    // 2. media:content
+    if (!imageUrl) {
+        const mediaContentPatterns = [
+            /<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*medium=["']image["']/i,
+            /<(?:media:)?content[^>]+medium=["']image["'][^>]*url=["']([^"']+)["']/i,
+            /<(?:media:)?content[^>]+url=["']([^"']+\.(?:jpg|jpeg|png|gif|webp)[^"']*)["']/i
+        ];
+
+        for (const pattern of mediaContentPatterns) {
+            const match = itemXml.match(pattern);
+            if (match) {
+                imageUrl = match[1];
+                break;
+            }
+        }
+    }
+
+    // 3. media:thumbnail
+    if (!imageUrl) {
+        const mediaThumbnailMatch = itemXml.match(/<(?:media:)?thumbnail[^>]+url=["']([^"']+)["']/i);
+        if (mediaThumbnailMatch) {
+            imageUrl = mediaThumbnailMatch[1];
+        }
+    }
 
     // 4. HTML-Inhalt parsen
     if (!imageUrl) {
@@ -169,13 +170,15 @@ function extractImageUrl(itemXml, feed, articleLink) {
         else if (urlObject.hostname.includes('heise.de')) {
             processedUrl = processedUrl.replace(/\/geometry\/\d+\//, '/geometry/800/');
         }
-        else if (urlObject.hostname.includes('cgames.de')) {
-            // GameStar/GamePro
-            processedUrl = processedUrl.replace(/\/\d{2,4}\//, '/800/');
-        }
         else if (urlObject.hostname.includes('pcgames.de')) {
-            // PCGames: 970x546 → 1920x1080
-            processedUrl = processedUrl.replace(/\/\d+x\d+\//, '/1920x1080/');
+            // FIX: This rule is placed before the 'cgames.de' rule to prevent conflicts.
+            // The URL from pcgames.de is often correct but was being broken by other
+            // optimization rules. This empty block ensures the original URL from the feed is preserved.
+        }
+        else if (urlObject.hostname.includes('cgames.de')) {
+            // GameStar/GamePro: This rule can incorrectly modify pcgames.de URLs by replacing the year.
+            // The pcgames.de rule above now prevents this from running on the wrong URLs.
+            processedUrl = processedUrl.replace(/\/\d{2,4}\//, '/800/');
         }
         else if (urlObject.hostname.includes('4players.de')) {
             processedUrl = processedUrl.replace(/\/\d+\//, '/800/');
@@ -186,6 +189,7 @@ function extractImageUrl(itemXml, feed, articleLink) {
         return imageUrl;
     }
 }
+
 
 // === PARSE RSS/ATOM FEED ===
 function parseRssXml(xmlString, feed) {
