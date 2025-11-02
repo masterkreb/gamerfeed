@@ -171,9 +171,9 @@ function extractImageUrl(itemXml, feed, articleLink) {
             processedUrl = processedUrl.replace(/\/geometry\/\d+\//, '/geometry/800/');
         }
         else if (urlObject.hostname.includes('pcgames.de')) {
-            // FIX: This rule is placed before the 'cgames.de' rule to prevent conflicts.
-            // The URL from pcgames.de is often correct but was being broken by other
-            // optimization rules. This empty block ensures the original URL from the feed is preserved.
+            // This rule is placed before the 'cgames.de' rule to prevent conflicts.
+            // The URL from pcgames.de is often correct, but was being broken by the
+            // .includes('cgames.de') check. This empty block ensures the original URL is preserved.
         }
         else if (urlObject.hostname.includes('cgames.de')) {
             // GameStar/GamePro: This rule can incorrectly modify pcgames.de URLs by replacing the year.
