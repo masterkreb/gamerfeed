@@ -119,42 +119,38 @@ const AppContent: React.FC = () => {
         }
 
         try {
-            const response = await fetch('/api/get-news');
+            // ALWAYS load from static cache first (updated by GitHub Actions every 15 min)
+            const response = await fetch('/news-cache.json?' + Date.now()); // Cache bust
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: `HTTP error! status: ${response.status}` }));
-                throw new Error(errorData.error);
+                throw new Error(`Failed to load news cache: ${response.status}`);
             }
             const fetchedArticles: Article[] = await response.json();
             setArticles(fetchedArticles);
+            console.log(`Loaded ${fetchedArticles.length} articles from cache`);
 
         } catch (error) {
-            console.error("Failed to fetch articles:", error);
+            console.error("Failed to fetch articles from cache:", error);
             const message = error instanceof Error ? error.message : "An unknown error occurred.";
 
-            // Use static cache as fallback
-            if (!isManualRefresh) {
-                try {
-                    const response = await fetch('/news-cache.json');
-                    if (response.ok) {
-                        const fallbackArticles: Article[] = await response.json();
-                        setArticles(fallbackArticles);
-                        showToast("Could not load live news. Showing cached version.", "info");
-                    } else {
-                        setError(message);
-                    }
-                } catch (e) {
-                    console.warn("Could not load static news cache.", e);
+            // Fallback to API only if cache fails
+            try {
+                console.log("Trying API fallback...");
+                const response = await fetch('/api/get-news');
+                if (response.ok) {
+                    const fallbackArticles: Article[] = await response.json();
+                    setArticles(fallbackArticles);
+                } else {
                     setError(message);
                 }
-            } else if (articles.length === 0) {
+            } catch (e) {
+                console.warn("API fallback also failed:", e);
                 setError(message);
             }
-
         } finally {
             setIsBlockingLoading(false);
             setIsRefreshing(false);
         }
-    }, [articles.length]); // depend on articles.length to avoid setting error if we have data
+    }, []);
 
     useEffect(() => {
         loadNews();

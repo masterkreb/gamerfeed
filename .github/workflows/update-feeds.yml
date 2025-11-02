@@ -42,8 +42,8 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Add the cache file, now expected at the root.
-          git add news-cache.json
+          # Add the cache file from the public directory
+          git add public/news-cache.json
           
           # Check if there are staged changes, and only commit/push if there are.
           if ! git diff --staged --quiet; then
