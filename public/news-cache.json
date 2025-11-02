@@ -1,5 +1,25 @@
 [
   {
+    "id": "https://www.xboxdynasty.de/news/fortnite/die-simpsons-landen-im-battle-royale/",
+    "title": "Fortnite: Die Simpsons landen im Battle Royale",
+    "source": "XboxDynasty",
+    "publicationDate": "2025-11-02T13:30:13.000Z",
+    "summary": "Willkommen in Springfield – Fortnite bringt euch direkt in die Welt der Simpsons mit ikonischen Schauplätzen und jeder Menge Nostalgie!",
+    "link": "https://www.xboxdynasty.de/news/fortnite/die-simpsons-landen-im-battle-royale/",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=XboxDynasty",
+    "language": "de"
+  },
+  {
+    "id": "https://www.computerbase.de/news/gaming/simpsons-event-in-fortnite-ueberleben-auf-der-springfield-insel.94883/",
+    "title": "Simpsons-Event in Fortnite: Überleben auf der Springfield-Insel",
+    "source": "ComputerBase",
+    "publicationDate": "2025-11-02T13:19:00.000Z",
+    "summary": "In Fortnite wird nun auf der Springfield-Insel mit gelben Charakteren ums Überleben gekämpft. Viele bekannte Figuren aus dem Simpsons-Universum und no",
+    "link": "https://www.computerbase.de/news/gaming/simpsons-event-in-fortnite-ueberleben-auf-der-springfield-insel.94883/",
+    "imageUrl": "https://pics.computerbase.de/1/1/9/9/5/3-f1471f1aa3aa052c/article-640x360.cf24aad6.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://www.xboxdynasty.de/news/xbox-series-x/top-20-der-meistgespielten-spiele-kw44-2025/",
     "title": "Xbox Series X: Top 20 der meistgespielten Spiele KW44/2025",
     "source": "XboxDynasty",
@@ -71,7 +91,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/The-Witcher-4-Spiel-73629/News/Andrezj-Sapkowski-Autor-von-The-Witcher-wird-nicht-oft-von-CDPR-kontaktiert-1485596/",
-    "title": "The Witcher 4&#x3a; CDPR greift nur noch selten auf die Expertise des Autos der Romane zur&#xfc;ck",
+    "title": "The Witcher 4&#x3a; CDPR greift nur noch selten auf die Expertise des Autors der Romane zur&#xfc;ck",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-02T13:00:00.000Z",
     "summary": "Andrzej Sapkowski bezeichnet seine aktuelle Vereinbarung mit CD Projekt Red als &#x22;ausgezeichnet&#x22;, wird jedoch kaum noch in die Entwicklung vo",
@@ -1438,16 +1458,6 @@
     "link": "https://www.nintendolife.com/news/2025/11/fortnites-simpsons-collab-is-now-live-watch-new-mini-episodes-every-week",
     "imageUrl": "https://images.nintendolife.com/6741e417c1bff/small.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://www.xboxdynasty.de/news/warhammer-40-000-boltgun-2/zorn-des-imperators-mit-neuen-spielbaren-charakteren-entfesselt/",
-    "title": "Warhammer 40.000: Boltgun 2: Zorn des Imperators mit neuen spielbaren Charakteren entfesselt",
-    "source": "XboxDynasty",
-    "publicationDate": "2025-11-02T05:00:16.000Z",
-    "summary": "Warhammer 40,000: Boltgun 2 entfesselt den Zorn des Imperators mit neuen spielbaren Charakteren!",
-    "link": "https://www.xboxdynasty.de/news/warhammer-40-000-boltgun-2/zorn-des-imperators-mit-neuen-spielbaren-charakteren-entfesselt/",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=XboxDynasty",
-    "language": "de"
   },
   {
     "id": "https://www.gamepro.de/artikel/pokemon-legenden-z-a-endivie-tausch-fail-mit-community-happy-end,3441952.html",
@@ -6610,22 +6620,22 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "\"Thief VR\" erscheint im Dezember: Kaum Unterschiede zwischen Quest 3 und PS VR2",
-    "source": "Heise Online",
-    "publicationDate": "2025-10-31T10:42:00.000Z",
-    "summary": "\"Thief VR\" hat nun einen konkreten Veröffentlichungstermin. Zwei neue Trailer zeigen kaum Unterschiede zwischen den Versionen für Quest 3 und PS VR2.",
-    "link": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/iPhone-17-Ersatzteile-fuer-neue-Apple-Handys-fuer-Bastler-verfuegbar-10965281.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "iPhone 17: Ersatzteile für neue Apple-Handys für Bastler verfügbar",
     "source": "Heise Online",
     "publicationDate": "2025-10-31T10:42:00.000Z",
     "summary": "Nach den Reparaturhandbüchern hat Apple nun auch das notwendige Material für alle neuen iPhones freigegeben. Wie üblich ein teurer Spaß.",
     "link": "https://www.heise.de/news/iPhone-17-Ersatzteile-fuer-neue-Apple-Handys-fuer-Bastler-verfuegbar-10965281.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "\"Thief VR\" erscheint im Dezember: Kaum Unterschiede zwischen Quest 3 und PS VR2",
+    "source": "Heise Online",
+    "publicationDate": "2025-10-31T10:42:00.000Z",
+    "summary": "\"Thief VR\" hat nun einen konkreten Veröffentlichungstermin. Zwei neue Trailer zeigen kaum Unterschiede zwischen den Versionen für Quest 3 und PS VR2.",
+    "link": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
     "language": "de"
   },
@@ -10218,16 +10228,6 @@
     "link": "https://www.vg247.com/battlefield-redsec-steam-numbers-battlefield-6",
     "imageUrl": "https://assetsio.gnwcdn.com/battlefield-redsec-launch-screen-4.jpeg?width=690&quality=85&format=jpg&auto=webp",
     "language": "en"
-  },
-  {
-    "id": "https://www.computerbase.de/news/tablets/statt-lcd-apple-plant-oled-fuer-mehr-geraete-und-wasserfestes-ipad-mini.94833/",
-    "title": "Statt LCD: Apple plant OLED für mehr Geräte und wasserfestes iPad mini",
-    "source": "ComputerBase",
-    "publicationDate": "2025-10-29T09:20:00.000Z",
-    "summary": "Selbstleuchtende OLED-Panels sollen in mehr Geräten von Apple Einzug halten, angefangen mit dem übernächsten MacBook Pro, das dann auch den M6 erhalte",
-    "link": "https://www.computerbase.de/news/tablets/statt-lcd-apple-plant-oled-fuer-mehr-geraete-und-wasserfestes-ipad-mini.94833/",
-    "imageUrl": "https://pics.computerbase.de/1/1/9/8/9/9-5ba91c1be27a3f05/article-640x360.d30acfa1.jpg",
-    "language": "de"
   },
   {
     "id": "https://www.heise.de/news/Exportschranken-fuer-Seltene-Erden-Chipmangel-in-der-deutschen-Industrie-waechst-10962707.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
