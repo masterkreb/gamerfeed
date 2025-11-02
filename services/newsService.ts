@@ -5,21 +5,18 @@ function stripHtmlAndTruncate(html: string, length: number = 150): string {
     const doc = new DOMParser().parseFromString(html, 'text/html');
 
     // Security hardening: explicitly remove script and style tags
-    // to prevent any possibility of XSS if this function's output were ever mishandled.
     doc.querySelectorAll('script, style').forEach(el => el.remove());
 
-    // Remove any "read more" links entirely, as they are not part of the summary.
+    // Remove any "read more" links entirely
     doc.querySelectorAll('a').forEach(a => {
         const linkText = a.textContent?.toLowerCase() || '';
         if (linkText.includes('continue reading') || linkText.includes('read more')) {
-            // Remove the whole paragraph containing the link, as it's usually boilerplate.
             a.closest('p')?.remove();
         }
     });
 
     let text = (doc.body.textContent || "").trim();
 
-    // If, after cleaning, the text is just '...' or empty, return an empty string.
     if (text === '...') {
         return '';
     }
@@ -66,45 +63,71 @@ export async function getOgImageFromUrl(url: string): Promise<string | null> {
 function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; needsScraping: boolean } {
     let imageUrl: string | undefined;
 
-    if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) {
+    // 1. Try media:content (used by many feeds like GameSpot, IGN, Rock Paper Shotgun, VG247, etc.)
+    if (item['media:content'] && item['media:content'].url) {
+        imageUrl = item['media:content'].url;
+    }
+    // 2. Try enclosure tag (used by PCGames, IGN, etc.)
+    else if (item.enclosure && item.enclosure.link) {
+        // Accept any enclosure, not just images
         imageUrl = item.enclosure.link;
     }
-    else if (item.thumbnail && typeof item.thumbnail === 'string') {
-        imageUrl = item.thumbnail;
-    }
+    // 3. Try media:thumbnail
     else if (item['media:thumbnail'] && item['media:thumbnail'].url) {
         imageUrl = item['media:thumbnail'].url;
     }
+    // 4. Try thumbnail attribute
+    else if (item.thumbnail && typeof item.thumbnail === 'string') {
+        imageUrl = item.thumbnail;
+    }
+    // 5. Parse HTML content for images
     else {
-        const content = item.content || item.description || '';
+        const content = item.content || item.description || item.summary || '';
         if (content) {
             try {
-                const doc = new DOMParser().parseFromString(content, 'text/html');
+                // Decode HTML entities first (for feeds like GamersGlobal, Golem, Heise)
+                const decodedContent = content
+                    .replace(/&quot;/g, '"')
+                    .replace(/&amp;/g, '&')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&#39;/g, "'");
+
+                const doc = new DOMParser().parseFromString(decodedContent, 'text/html');
                 const images = Array.from(doc.querySelectorAll('img'));
 
-                // Find the first image that is likely a real content image, not a tracking pixel.
+                // Find the first valid content image
                 const bestImage = images.find(img => {
                     const src = img.getAttribute('src');
-                    if (!src || src.includes('cpx.golem.de')) {
-                        return false; // No src or it's a known tracking domain.
+                    if (!src) return false;
+
+                    // Filter out known tracking pixels
+                    if (src.includes('cpx.golem.de') ||
+                        src.includes('count.php') ||
+                        src.includes('tracking')) {
+                        return false;
                     }
-                    // Parse width/height, defaulting to 0. This way, images without dimensions are filtered out.
+
+                    // Parse dimensions
                     const width = parseInt(img.getAttribute('width') || '0', 10);
                     const height = parseInt(img.getAttribute('height') || '0', 10);
 
-                    // Ignore tiny images which are likely trackers (e.g., 1x1, 0x0).
-                    if (width <= 1 || height <= 1) {
+                    // Filter out 1x1 tracking pixels
+                    if ((width === 1 && height === 1) || (width <= 1 || height <= 1)) {
                         return false;
                     }
+
                     return true;
                 });
 
                 if (bestImage) {
-                    const src = bestImage.getAttribute('data-src') || bestImage.getAttribute('data-lazy-src') || bestImage.getAttribute('src');
-                    if(src) imageUrl = src;
+                    const src = bestImage.getAttribute('data-src') ||
+                        bestImage.getAttribute('data-lazy-src') ||
+                        bestImage.getAttribute('src');
+                    if (src) imageUrl = src;
                 }
             } catch (e) {
-                console.warn("DOMParser failed for content, scraping will be attempted.", e);
+                console.warn("DOMParser failed for content:", e);
             }
         }
     }
@@ -113,31 +136,38 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
 
     if (imageUrl) {
         try {
+            // Handle relative URLs (e.g., GamersGlobal)
             let processedUrl = new URL(imageUrl, item.link).href;
             const urlObject = new URL(processedUrl);
 
+            // GameSpot: Use original quality
             if (urlObject.hostname.includes('gamespot.com')) {
-                // Replace any resolution-specific path segment like 'square_small' or 'square_avatar'
-                // with 'original' for the highest quality image.
                 processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
-            } else if (urlObject.hostname.includes('pcgames.de') && !urlObject.hostname.includes('pcgameshardware.de')) {
-                // pcgames.de doesn't support /800/ resize - leave as-is
-            } else if (urlObject.hostname.includes('pcgameshardware.de')) {
-                // pcgameshardware.de also doesn't need /800/ - leave as-is
-            } else if (urlObject.hostname.includes('cgames.de') || feed.name.includes('GameStar') || feed.name.includes('GamePro')) {
+            }
+            // GameStar, GamePro: Use 800px resolution
+            else if (urlObject.hostname.includes('cgames.de') || feed.name.includes('GameStar') || feed.name.includes('GamePro')) {
                 processedUrl = processedUrl.replace(/\/(\d{2,4})\//, '/800/');
             }
-            if (feed.name.includes('GamesWirtschaft')) {
+            // GamesWirtschaft: Remove size suffix
+            else if (feed.name.includes('GamesWirtschaft')) {
                 processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)$)/i, '');
             }
-            if (urlObject.hostname.includes('nintendolife.com')) {
-                // Thumbnails in the feed are often low-res (e.g., small.jpg).
-                // Attempt to get a larger version. 'large.jpg' is typically available and better quality.
+            // Nintendo Life: Use large instead of small
+            else if (urlObject.hostname.includes('nintendolife.com')) {
                 processedUrl = processedUrl.replace('small.jpg', 'large.jpg');
             }
+            // Eurogamer: Optimize image quality
+            else if (urlObject.hostname.includes('gnwcdn.com')) {
+                processedUrl = processedUrl.replace(/width=\d+/, 'width=800').replace(/quality=\d+/, 'quality=90');
+            }
+            // Giant Bomb: Use original image
+            else if (urlObject.hostname.includes('giantbomb.com')) {
+                processedUrl = processedUrl.replace(/\/[^\/]+_(\d+)\.jpg/, '/original.jpg');
+            }
+
             return { imageUrl: processedUrl, needsScraping: false };
         } catch (e) {
-            // Fallthrough to placeholder on error
+            console.warn('Error processing image URL:', e);
         }
     }
 
@@ -158,14 +188,11 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
     const isAtom = doc.documentElement.nodeName === 'feed';
 
     const getQueryText = (context: Element | Document, selector: string): string => {
-        // Using textContent is robust: it works for regular text nodes and decodes entities automatically.
         return context.querySelector(selector)?.textContent?.trim() || '';
     };
 
     const getHtmlContent = (node: Element, selector: string): string => {
         const el = node.querySelector(selector);
-        // Using textContent is robust: it correctly decodes HTML entities from the XML
-        // and also correctly reads content from CDATA sections, providing the raw HTML string for parsing.
         return el?.textContent?.trim() || '';
     };
 
@@ -185,13 +212,14 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
         const pubDate = getQueryText(node, isAtom ? 'published' : 'pubDate') || getQueryText(node, 'updated');
 
         if (!title || !link || !pubDate) {
-            return; // Skip items with missing essential fields
+            return;
         }
 
         const description = getHtmlContent(node, 'description') || getHtmlContent(node, 'summary');
         const contentEncoded = getHtmlContent(node, 'content\\:encoded') || getHtmlContent(node, 'content');
 
         const mediaThumbnail = node.querySelector('media\\:thumbnail, thumbnail[url]');
+        const mediaContent = node.querySelector('media\\:content, content[url]');
         const enclosure = node.querySelector('enclosure[url]');
 
         items.push({
@@ -201,8 +229,12 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
             guid: getQueryText(node, 'guid') || getQueryText(node, 'id') || link,
             description: description,
             content: contentEncoded || description,
+            summary: description,
             'media:thumbnail': {
                 url: mediaThumbnail?.getAttribute('url'),
+            },
+            'media:content': {
+                url: mediaContent?.getAttribute('url'),
             },
             enclosure: {
                 link: enclosure?.getAttribute('url'),

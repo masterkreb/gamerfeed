@@ -49,55 +49,74 @@ async function getOgImageFromUrl(url) {
 function extractImageUrl(itemXml, feed, articleLink) {
     let imageUrl = null;
 
-    // 1. Try media:thumbnail
-    const mediaThumbnailMatch = itemXml.match(/<media:thumbnail[^>]+url=["']([^"']+)["']/i);
-    if (mediaThumbnailMatch) {
-        imageUrl = mediaThumbnailMatch[1];
+    // 1. Try media:content (used by many feeds)
+    const mediaContentMatch = itemXml.match(/<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*medium=["']image["']/i) ||
+        itemXml.match(/<(?:media:)?content[^>]+medium=["']image["'][^>]*url=["']([^"']+)["']/i);
+    if (mediaContentMatch) {
+        imageUrl = mediaContentMatch[1];
     }
 
-    // 2. Try enclosure (image)
+    // 2. Try media:thumbnail
     if (!imageUrl) {
-        const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["'][^>]*type=["']image/i);
+        const mediaThumbnailMatch = itemXml.match(/<(?:media:)?thumbnail[^>]+url=["']([^"']+)["']/i);
+        if (mediaThumbnailMatch) {
+            imageUrl = mediaThumbnailMatch[1];
+        }
+    }
+
+    // 3. Try enclosure (accept any, not just image type)
+    if (!imageUrl) {
+        const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
         if (enclosureMatch) {
             imageUrl = enclosureMatch[1];
         }
     }
 
-    // 3. Try img tag in description/content
+    // 4. Parse HTML content for images
     if (!imageUrl) {
         const descMatch = itemXml.match(/<(?:description|summary|content)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary|content)>/is);
         if (descMatch) {
-            const content = descMatch[1];
+            let content = descMatch[1];
+
+            // Decode HTML entities
+            content = content
+                .replace(/&quot;/g, '"')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&#39;/g, "'");
+
             const imgMatches = content.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi);
 
             for (const imgMatch of imgMatches) {
                 const src = imgMatch[1];
-                // Skip tracking pixels and tiny images
-                if (src.includes('cpx.golem.de') || src.includes('1x1') || src.includes('pixel')) {
+
+                // Skip tracking pixels
+                if (src.includes('cpx.golem.de') ||
+                    src.includes('1x1') ||
+                    src.includes('pixel') ||
+                    src.includes('count.php') ||
+                    src.includes('tracking')) {
                     continue;
                 }
 
-                // Check for width/height attributes
+                // Check dimensions
                 const widthMatch = imgMatch[0].match(/width=["']?(\d+)/i);
                 const heightMatch = imgMatch[0].match(/height=["']?(\d+)/i);
                 const width = widthMatch ? parseInt(widthMatch[1]) : 0;
                 const height = heightMatch ? parseInt(heightMatch[1]) : 0;
 
-                // Skip tiny images (likely trackers)
-                if (width > 1 && height > 1) {
-                    imageUrl = src;
-                    break;
+                // Skip 1x1 tracking pixels
+                if ((width === 1 && height === 1) || (width <= 1 || height <= 1)) {
+                    continue;
                 }
 
-                // If no dimensions, take first non-tracker image
-                if (!width && !height && !imageUrl) {
-                    imageUrl = src;
-                }
+                imageUrl = src;
+                break;
             }
         }
     }
 
-    // If no image found, return null (will need scraping or placeholder)
     if (!imageUrl) {
         return null;
     }
@@ -122,6 +141,14 @@ function extractImageUrl(itemXml, feed, articleLink) {
         // Nintendo Life: Use 'large' instead of 'small'
         else if (urlObject.hostname.includes('nintendolife.com')) {
             processedUrl = processedUrl.replace('small.jpg', 'large.jpg');
+        }
+        // Eurogamer: Optimize image quality
+        else if (urlObject.hostname.includes('gnwcdn.com')) {
+            processedUrl = processedUrl.replace(/width=\d+/, 'width=800').replace(/quality=\d+/, 'quality=90');
+        }
+        // Giant Bomb: Use original image
+        else if (urlObject.hostname.includes('giantbomb.com')) {
+            processedUrl = processedUrl.replace(/\/[^\/]+_(\d+)\.jpg/, '/original.jpg');
         }
 
         return processedUrl;
@@ -163,7 +190,7 @@ function parseRssXml(xmlString, feed) {
             publicationDate: new Date(pubDate).toISOString(),
             summary,
             link,
-            imageUrl: imageUrl || null, // null if needs scraping
+            imageUrl: imageUrl || null,
             needsScraping: !imageUrl && feed.needs_scraping,
             language: feed.language
         });
@@ -193,8 +220,6 @@ async function fetchArticles() {
                     },
                     signal: AbortSignal.timeout(10000)
                 });
-                console.log(`\n📋 First feed from DB:`, JSON.stringify(feeds[0], null, 2));
-
 
                 if (!response.ok) {
                     console.warn(`   ❌ Failed: ${feed.name} (${response.status})`);
@@ -233,7 +258,7 @@ async function fetchArticles() {
                         console.log(`      ⚠️  No image found, using placeholder`);
                     }
 
-                    await new Promise(r => setTimeout(r, 500)); // Be nice to servers
+                    await new Promise(r => setTimeout(r, 500));
                 } catch (error) {
                     console.error(`      ❌ Scraping failed: ${error.message}`);
                 }
@@ -245,7 +270,7 @@ async function fetchArticles() {
             if (!article.imageUrl) {
                 article.imageUrl = `https://placehold.co/600x400/374151/d1d5db?text=${encodeURIComponent(article.source.substring(0, 30))}`;
             }
-            delete article.needsScraping; // Remove flag before saving
+            delete article.needsScraping;
             return article;
         });
 
