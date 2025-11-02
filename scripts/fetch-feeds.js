@@ -83,6 +83,19 @@ function extractImageUrl(itemXml, feed, articleLink) {
         }
     }
 
+    // 3.5 GOLEM SPEZIAL: Bild aus Artikel-ID konstruieren
+    if (!imageUrl && feed.name.includes('Golem')) {
+        const linkMatch = itemXml.match(/<link[^>]*href=["']([^"']+)["']/i);
+        if (linkMatch) {
+            const articleUrl = linkMatch[1];
+            const idMatch = articleUrl.match(/-(\d{6})\.html$/);
+            if (idMatch) {
+                const articleId = idMatch[1];
+                imageUrl = `https://www.golem.de/2511/${articleId}-307444-307443_rc.jpg`;
+            }
+        }
+    }
+
     // 4. HTML-Inhalt parsen
     if (!imageUrl) {
         const contentMatches = [
