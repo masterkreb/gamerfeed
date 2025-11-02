@@ -1,5 +1,45 @@
 [
   {
+    "id": "https://playfront.de/battlefield-6-casual-breakthrough-bringt-den-entspannungsmodus-fuer-gestresste-spieler/",
+    "title": "Battlefield 6: Casual Breakthrough bringt den „Entspannungsmodus“ für gestresste Spieler",
+    "source": "PlayFront",
+    "publicationDate": "2025-11-02T15:15:31.000Z",
+    "summary": "Mit Casual Breakthrough bietet Battlefield 6 endlich einen entspannteren Modus für Spieler, die Fortschritt wollen, ohne das Chaos voller PvP-Schwitze",
+    "link": "https://playfront.de/battlefield-6-casual-breakthrough-bringt-den-entspannungsmodus-fuer-gestresste-spieler/",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=PlayFront",
+    "language": "de"
+  },
+  {
+    "id": "https://www.pcgameshardware.de/Windows-Software-277633/News/11-Fehlercode-0x80070103-Jahren-endlich-angegangen-1485599/",
+    "title": "Windows 11&#x3a; Fehlercode 0x80070103 wird nach Jahren endlich angegangen",
+    "source": "PC Games Hardware",
+    "publicationDate": "2025-11-02T15:15:00.000Z",
+    "summary": "Nach jahrelanger Wartezeit geht Microsoft mit einem neuen Update endlich gegen den Fehlercode 0x80070103 in Windows 11 vor. Ganz konnte das damit besc",
+    "link": "https://www.pcgameshardware.de/Windows-Software-277633/News/11-Fehlercode-0x80070103-Jahren-endlich-angegangen-1485599/",
+    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/06/Windows-11-pcgh.png",
+    "language": "de"
+  },
+  {
+    "id": "https://www.4p.de/news/playstation-5-gleich-15-neue-spiele-in-der-naechsten-woche-auf-eines-warten-fans-seit-vier-jahren-unfassbar/3355329",
+    "title": "PlayStation 5: Gleich 15 neue Spiele in der nächsten Woche – auf eines warten Fans seit vier Jahren",
+    "source": "4P",
+    "publicationDate": "2025-11-02T15:09:46.000Z",
+    "summary": "Wieder einmal gibt es bald viele neue Spiele für die PlayStation 5. Ein Titel sticht demnächst aber noch einmal ganz besonders heraus.",
+    "link": "https://www.4p.de/news/playstation-5-gleich-15-neue-spiele-in-der-naechsten-woche-auf-eines-warten-fans-seit-vier-jahren-unfassbar/3355329",
+    "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/10/ps5-neuespiele-kw45.jpg?w=1200&#038;h=900&#038;crop=1",
+    "language": "de"
+  },
+  {
+    "id": "https://www.eurogamer.de/fbc-firebreak-reit-loch-in-die-kasse-remedy-meldet-32-umsatzruckgang-blickt-aber-optimistisch-nach-vorne",
+    "title": "FBC: Firebreak reißt Loch in die Kasse: Remedy meldet 32% Umsatzrückgang, blickt aber optimistisch nach vorne",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-02T15:09:00.000Z",
+    "summary": " Beim Alan Wake-Entwicklerstudio Remedy Entertainment ist man angesichts der j&uuml;ngsten Gesch&auml;ftszahlen nicht zufrieden. Mehr",
+    "link": "https://www.eurogamer.de/fbc-firebreak-reit-loch-in-die-kasse-remedy-meldet-32-umsatzruckgang-blickt-aber-optimistisch-nach-vorne",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Eurogamer",
+    "language": "de"
+  },
+  {
     "id": "https://www.xboxdynasty.de/news/battlefield-6/casual-breakthrough-modus-fuer-entspannteres-gameplay/",
     "title": "Battlefield 6: Casual Breakthrough-Modus für entspannteres Gameplay",
     "source": "XboxDynasty",
@@ -207,6 +247,26 @@
     "summary": "Wenn Cheater in Arc Raiders eure Beute &#x22;stehlen&#x22;, bekommt ihr sie offenbar automatisch zur&#xfc;ck. Embark Studios hat ein System eingericht",
     "link": "https://www.pcgames.de/Arc-Raiders-Spiel-73530/News/Automatische-Entschaedigung-Items-betrogene-Spieler-Cheater-Hacker-1485602/",
     "imageUrl": "https://www.pcgames.de/screenshots/970x546/800/10/arc-raiders-screen2-steam-pc-games.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamezone.de/Arc-Raiders-Spiel-73530/News/Automatische-Entschaedigung-Items-betrogene-Spieler-Cheater-Hacker-1485602/",
+    "title": "Arc Raiders gibt euch eure Items ungefragt zur&#xfc;ck, wenn euch Cheater und Hacker ausnehmen",
+    "source": "GameZone",
+    "publicationDate": "2025-11-02T13:34:00.000Z",
+    "summary": "Wenn Cheater in Arc Raiders eure Beute &#x22;stehlen&#x22;, bekommt ihr sie offenbar automatisch zur&#xfc;ck. Embark Studios hat ein System eingericht",
+    "link": "https://www.gamezone.de/Arc-Raiders-Spiel-73530/News/Automatische-Entschaedigung-Items-betrogene-Spieler-Cheater-Hacker-1485602/",
+    "imageUrl": "https://www.gamezone.de/screenshots/970x546/2025/10/arc-raiders-screen2-steam-pc-games.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.videogameszone.de/Arc-Raiders-Spiel-73530/News/Automatische-Entschaedigung-Items-betrogene-Spieler-Cheater-Hacker-1485602/",
+    "title": "Arc Raiders gibt euch eure Items ungefragt zur&#xfc;ck, wenn euch Cheater und Hacker ausnehmen",
+    "source": "Video Games Zone",
+    "publicationDate": "2025-11-02T13:34:00.000Z",
+    "summary": "Wenn Cheater in Arc Raiders eure Beute &#x22;stehlen&#x22;, bekommt ihr sie offenbar automatisch zur&#xfc;ck. Embark Studios hat ein System eingericht",
+    "link": "https://www.videogameszone.de/Arc-Raiders-Spiel-73530/News/Automatische-Entschaedigung-Items-betrogene-Spieler-Cheater-Hacker-1485602/",
+    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/10/arc-raiders-screen2-steam-pc-games.jpg",
     "language": "de"
   },
   {
@@ -1260,16 +1320,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.videogameszone.de/Pokemon-TCG-Pocket-Spiel-74987/News/Download-Kostenlos-Mikrotransaktionen-1485586/",
-    "title": "Pok&#xe9;mon TCG Pocket&#x3a; Mobiles Kartenspiel bringt im ersten Jahr &#xfc;ber eine Milliarde US-Dollar ein",
-    "source": "Video Games Zone",
-    "publicationDate": "2025-11-02T09:00:00.000Z",
-    "summary": "Mit Pok&#xe9;mon TCG Pocket konnte die Marke das bislang erfolgreichste Mobile-Spiel rund um die Taschenmonster verbuchen.",
-    "link": "https://www.videogameszone.de/Pokemon-TCG-Pocket-Spiel-74987/News/Download-Kostenlos-Mikrotransaktionen-1485586/",
-    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2024/11/Pokemon-TCG-Pocket-buffed.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.videogameszone.de/Spiele-Thema-239104/Specials/shooter-story-singleplayer-einzelspieler-liste-empfehlung-1484878/",
     "title": "Laden, entsichern, staunen&#x3a; Wir k&#xfc;ren die zehn besten Story-Shooter, die ihr 2025 zocken k&#xf6;nnt&#x21;",
     "source": "Video Games Zone",
@@ -1277,6 +1327,16 @@
     "summary": "Hirnlos ballern k&#xf6;nnt ihr woanders, denn diese Shooter legen ihren Fokus auf interessante Settings und spannende Geschichten&#x3a; Wir stellen eu",
     "link": "https://www.videogameszone.de/Spiele-Thema-239104/Specials/shooter-story-singleplayer-einzelspieler-liste-empfehlung-1484878/",
     "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/10/Story-Shooter-2025-Aufmacher-pc-games.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.videogameszone.de/Pokemon-TCG-Pocket-Spiel-74987/News/Download-Kostenlos-Mikrotransaktionen-1485586/",
+    "title": "Pok&#xe9;mon TCG Pocket&#x3a; Mobiles Kartenspiel bringt im ersten Jahr &#xfc;ber eine Milliarde US-Dollar ein",
+    "source": "Video Games Zone",
+    "publicationDate": "2025-11-02T09:00:00.000Z",
+    "summary": "Mit Pok&#xe9;mon TCG Pocket konnte die Marke das bislang erfolgreichste Mobile-Spiel rund um die Taschenmonster verbuchen.",
+    "link": "https://www.videogameszone.de/Pokemon-TCG-Pocket-Spiel-74987/News/Download-Kostenlos-Mikrotransaktionen-1485586/",
+    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2024/11/Pokemon-TCG-Pocket-buffed.jpg",
     "language": "de"
   },
   {
@@ -2110,16 +2170,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.pcgameshardware.de/Geforce-RTX-5070-Ti-Grafikkarte-281031/Specials/kaufen-Test-Preis-Release-Asus-MSI-Gigabyte-Zotac-PNY-1466874/",
-    "title": "&#x5b;PLUS&#x5d; Geforce RTX 5070 Ti&#x3a; Sechs Custom-Modelle auf Temperatur und Lautst&#xe4;rke gepr&#xfc;ft",
-    "source": "PC Games Hardware",
-    "publicationDate": "2025-11-01T18:45:00.000Z",
-    "summary": "Wir haben sechs Custom-Designs der Geforce RTX 5070 Ti auf Temperaturen und Lautheit gepr&#xfc;ft und verraten, welches Modell von f&#xfc;nf unterschi",
-    "link": "https://www.pcgameshardware.de/Geforce-RTX-5070-Ti-Grafikkarte-281031/Specials/kaufen-Test-Preis-Release-Asus-MSI-Gigabyte-Zotac-PNY-1466874/",
-    "imageUrl": "https://www.pcgameshardware.de/screenshots/original/2025/03/2-Tabelle-5070-Ti-V2-pcgh.png",
-    "language": "de"
-  },
-  {
     "id": "https://www.gamestar.de/artikel/lego-inflation-teurer,3442227.html",
     "title": "Special: Klemmbausteine - Wird Lego wirklich immer teurer? Die Antwort ist nicht so eindeutig, wie ihr vielleicht denkt",
     "source": "GameStar",
@@ -2367,6 +2417,26 @@
     "summary": "Mit Update 1.3.0 f&#xfc;hrt Civilization 7 die gr&#xf6;&#xdf;te &#xdc;berarbeitung seiner Marine seit Serienbeginn an. &#x22;Seeschlacht 2.0&#x22; tre",
     "link": "https://www.pcgames.de/Civilization-7-Spiel-74716/News/Update-1-3-0-Seeschlachten-Tides-of-Power-1485578/",
     "imageUrl": "https://www.pcgames.de/screenshots/970x546/800/01/Civilization-VII-Hawai_i-Civ-pc-games.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamezone.de/Civilization-7-Spiel-74716/News/Update-1-3-0-Seeschlachten-Tides-of-Power-1485578/",
+    "title": "Civilization 7&#x3a; Update 1.3.0. krempelt die Seeschlachten um und kommt zeitgleich mit Tides of Power",
+    "source": "GameZone",
+    "publicationDate": "2025-11-01T17:05:00.000Z",
+    "summary": "Mit Update 1.3.0 f&#xfc;hrt Civilization 7 die gr&#xf6;&#xdf;te &#xdc;berarbeitung seiner Marine seit Serienbeginn an. &#x22;Seeschlacht 2.0&#x22; tre",
+    "link": "https://www.gamezone.de/Civilization-7-Spiel-74716/News/Update-1-3-0-Seeschlachten-Tides-of-Power-1485578/",
+    "imageUrl": "https://www.gamezone.de/screenshots/970x546/2025/01/Civilization-VII-Hawai_i-Civ-pc-games.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.videogameszone.de/Civilization-7-Spiel-74716/News/Update-1-3-0-Seeschlachten-Tides-of-Power-1485578/",
+    "title": "Civilization 7&#x3a; Update 1.3.0. krempelt die Seeschlachten um und kommt zeitgleich mit Tides of Power",
+    "source": "Video Games Zone",
+    "publicationDate": "2025-11-01T17:05:00.000Z",
+    "summary": "Mit Update 1.3.0 f&#xfc;hrt Civilization 7 die gr&#xf6;&#xdf;te &#xdc;berarbeitung seiner Marine seit Serienbeginn an. &#x22;Seeschlacht 2.0&#x22; tre",
+    "link": "https://www.videogameszone.de/Civilization-7-Spiel-74716/News/Update-1-3-0-Seeschlachten-Tides-of-Power-1485578/",
+    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/01/Civilization-VII-Hawai_i-Civ-pc-games.jpg",
     "language": "de"
   },
   {
@@ -3510,16 +3580,6 @@
     "language": "de"
   },
   {
-    "id": "https://playfront.de/arknights-endfield-zweite-beta-mit-neuem-story-kapitel-und-ueberarbeitetem-kampfsystem-angekuendigt/",
-    "title": "Arknights: Endfield – Zweite Beta mit neuem Story-Kapitel und überarbeitetem Kampfsystem angekündigt",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-01T10:51:41.000Z",
-    "summary": "Die zweite Beta von Arknights: Endfield startet am 28. November mit neuer Story, Region, Charakteren und überarbeitetem Kampfsystem.",
-    "link": "https://playfront.de/arknights-endfield-zweite-beta-mit-neuem-story-kapitel-und-ueberarbeitetem-kampfsystem-angekuendigt/",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=PlayFront",
-    "language": "de"
-  },
-  {
     "id": "https://www.eurogamer.de/gta-6-entwickler-rockstar-games-entlasst-zahlreiche-mitarbeiter",
     "title": "GTA 6-Entwickler Rockstar Games entlässt zahlreiche Mitarbeiter",
     "source": "Eurogamer",
@@ -3720,26 +3780,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamezone.de/Arc-Raiders-Spiel-73530/Tests/test-review-wertung-extraction-shooter-multiplayer-1485250/",
-    "title": "So gut ist ARC Raiders wirklich&#x3a; Spannung, Atmosph&#xe4;re, Adrenalin&#x21;",
-    "source": "GameZone",
-    "publicationDate": "2025-11-01T09:33:00.000Z",
-    "summary": "ARC Raiders mischt das Shooter-Genre auf&#x21; Der neue Sci-Fi-Extraction-Shooter der Ex-Battlefield-Macher bietet packende Gefechte, dichte Atmosph&#",
-    "link": "https://www.gamezone.de/Arc-Raiders-Spiel-73530/Tests/test-review-wertung-extraction-shooter-multiplayer-1485250/",
-    "imageUrl": "https://www.gamezone.de/screenshots/970x546/2025/10/arc-raiders-screen2-steam-pc-games.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.videogameszone.de/Arc-Raiders-Spiel-73530/Tests/test-review-wertung-extraction-shooter-multiplayer-1485250/",
-    "title": "So gut ist ARC Raiders wirklich&#x3a; Spannung, Atmosph&#xe4;re, Adrenalin&#x21;",
-    "source": "Video Games Zone",
-    "publicationDate": "2025-11-01T09:33:00.000Z",
-    "summary": "ARC Raiders mischt das Shooter-Genre auf&#x21; Der neue Sci-Fi-Extraction-Shooter der Ex-Battlefield-Macher bietet packende Gefechte, dichte Atmosph&#",
-    "link": "https://www.videogameszone.de/Arc-Raiders-Spiel-73530/Tests/test-review-wertung-extraction-shooter-multiplayer-1485250/",
-    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/10/arc-raiders-screen2-steam-pc-games.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.gamespot.com/articles/borderlands-4-shift-codes-all-active-keys-and-how-to-redeem-them/1100-6533833/?ftag=CAD-01-10abi2f",
     "title": "Borderlands 4 Shift Codes: All Active Keys And How To Redeem Them",
     "source": "GameSpot",
@@ -3820,26 +3860,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.gamezone.de/PC-Games-Podcast-Brands-279138/News/Halloween-Horrorspiele-Indies-Talk-Diskussion-1485443/",
-    "title": "PC Games Podcast &#x23;192&#x3a; Wir verraten euch, welche Horrorspiele perfekt rund um Halloween geeignet sind&#x21;",
-    "source": "GameZone",
-    "publicationDate": "2025-11-01T09:02:00.000Z",
-    "summary": "Halloween ist zwar schon vorbei, aber die dunkle Jahreszeit hat begonnen. In Folge 192 des PC Games Podcast dreht sich alles um unsere Lieblings-Horro",
-    "link": "https://www.gamezone.de/PC-Games-Podcast-Brands-279138/News/Halloween-Horrorspiele-Indies-Talk-Diskussion-1485443/",
-    "imageUrl": "https://www.gamezone.de/screenshots/970x546/2025/10/PCG-Podcast-192-1--pc-games.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.videogameszone.de/PC-Games-Podcast-Brands-279138/News/Halloween-Horrorspiele-Indies-Talk-Diskussion-1485443/",
-    "title": "PC Games Podcast &#x23;192&#x3a; Wir verraten euch, welche Horrorspiele perfekt rund um Halloween geeignet sind&#x21;",
-    "source": "Video Games Zone",
-    "publicationDate": "2025-11-01T09:02:00.000Z",
-    "summary": "Halloween ist zwar schon vorbei, aber die dunkle Jahreszeit hat begonnen. In Folge 192 des PC Games Podcast dreht sich alles um unsere Lieblings-Horro",
-    "link": "https://www.videogameszone.de/PC-Games-Podcast-Brands-279138/News/Halloween-Horrorspiele-Indies-Talk-Diskussion-1485443/",
-    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/10/PCG-Podcast-192-1--pc-games.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.gamepro.de/artikel/kolumne-pokemon-legenden-z-a-fans-verdienen-bessere-grafik,3442129.html",
     "title": "Kolumne: Die Grafik von Pokémon-Legenden Z-A zeigt mal wieder: Fans haben etwas Besseres verdient",
     "source": "GamePro",
@@ -3870,22 +3890,22 @@
     "language": "de"
   },
   {
-    "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
-    "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
-    "source": "Eurogamer",
-    "publicationDate": "2025-11-01T09:00:00.000Z",
-    "summary": " Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod f&uuml;r Doom 2,",
-    "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Eurogamer",
-    "language": "de"
-  },
-  {
     "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
     "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
     "source": "Eurogamer",
     "publicationDate": "2025-11-01T09:00:00.000Z",
     "summary": " ARC Raiders ist seit dieser Woche erh&auml;ltlich, und w&auml;hrend eine gro&szlig;e Zahl an Spielern zum Launch ins Spiel str&ouml;mt, ist es kein G",
     "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Eurogamer",
+    "language": "de"
+  },
+  {
+    "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
+    "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-01T09:00:00.000Z",
+    "summary": " Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod f&uuml;r Doom 2,",
+    "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Eurogamer",
     "language": "de"
   },
@@ -6767,16 +6787,6 @@
     "summary": "Der neue Sci-Fi-Shooter Arc Raiders kommt gut an: Auf Steam und Playstation fallen die ersten Bewertungen überwiegend positiv aus. (&lt;a href=&quot;h",
     "link": "https://www.golem.de/news/extraction-shooter-spieler-loben-atmosphaere-und-gunplay-von-arc-raiders-2510-201715.html",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
-    "language": "de"
-  },
-  {
-    "id": "https://www.4p.de/news/nintendo-switch-neue-ankuendigung-spaltet-die-fans-das-sieht-echt-scheisse-aus/3355400",
-    "title": "Nintendo Switch 2: Neue Ankündigung spaltet die Fans – &#8222;sieht echt sch**** aus&#8220;",
-    "source": "4P",
-    "publicationDate": "2025-10-31T10:05:05.000Z",
-    "summary": "Einigkeit herrscht selten bei neuen Ankündigungen, aber hier sind beide Seiten laut vertreten.",
-    "link": "https://www.4p.de/news/nintendo-switch-neue-ankuendigung-spaltet-die-fans-das-sieht-echt-scheisse-aus/3355400",
-    "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/04/nintendo-switch-2-empoerung-1.jpg?w=1200&#038;h=900&#038;crop=1",
     "language": "de"
   },
   {
@@ -10947,16 +10957,6 @@
     "summary": "&lt;img src=\"https://sm.ign.com/t/ign_de/video/a/arc-raider/arc-raiders-official-launch-trailer_nzca.640.jpg\" width=\"120\" hspace=\"5\" alt=\"\" vspace=\"5\"",
     "link": "https://de.ign.com/arc-raiders/149494/video/arc-raiders-offizieller-launch-trailer",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=IGN",
-    "language": "de"
-  },
-  {
-    "id": "https://www.eurogamer.de/starfinder-afterlight-stellt-neues-crewmitglied-vor-neil-newbon-ubernimmt-rolle-des-mystischen-preach",
-    "title": "Starfinder: Afterlight stellt neues Crewmitglied vor – Neil Newbon übernimmt Rolle des mystischen Preach",
-    "source": "Eurogamer",
-    "publicationDate": "2025-10-27T15:45:52.000Z",
-    "summary": " Starfinder: Afterlight stellt ein weiteres Mitglied seiner Crew vor. Der neue Charakter tr&auml;gt den Namen Preach und ist ein Shirren-Mystiker. Doc",
-    "link": "https://www.eurogamer.de/starfinder-afterlight-stellt-neues-crewmitglied-vor-neil-newbon-ubernimmt-rolle-des-mystischen-preach",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Eurogamer",
     "language": "de"
   },
   {
