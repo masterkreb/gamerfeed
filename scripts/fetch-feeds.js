@@ -201,11 +201,11 @@ async function fetchAndProcessFeed(feed) {
         const items = document.querySelectorAll(isAtom ? 'entry' : 'item');
 
         for (const item of items) {
-            let title = (item.querySelector('title')?.textContent || '').trim();
-            // Handle cases where the parser incorrectly includes CDATA tags in the text content.
-            if (title.startsWith('<![CDATA[') && title.endsWith(']]>')) {
-                title = title.substring(9, title.length - 3).trim();
-            }
+            const rawTitle = item.querySelector('title')?.textContent || '';
+            // First, strip any CDATA wrappers that the parser might have missed.
+            const cleanedTitle = rawTitle.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
+            // Then, use stripHtmlAndTruncate to decode HTML entities and strip stray HTML tags.
+            const title = stripHtmlAndTruncate(cleanedTitle, 500);
 
             const linkNode = item.querySelector('link');
             const link = isAtom ? linkNode?.getAttribute('href') : linkNode?.textContent;
@@ -213,14 +213,16 @@ async function fetchAndProcessFeed(feed) {
 
             if (!title || !link || !pubDate) continue;
 
-            const summaryContent = item.querySelector('description, summary, content, content\\:encoded')?.textContent || '';
+            const rawSummaryContent = item.querySelector('description, summary, content, content\\:encoded')?.textContent || '';
+            const cleanedSummaryContent = rawSummaryContent.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
+            const summary = stripHtmlAndTruncate(cleanedSummaryContent);
 
             articles.push({
                 id: (item.querySelector('guid, id')?.textContent || link).trim(),
                 title,
                 source: feed.name,
                 publicationDate: new Date(pubDate).toISOString(),
-                summary: stripHtmlAndTruncate(summaryContent),
+                summary: summary,
                 link: link.trim(),
                 imageUrl: extractImageUrlFromDOM(item, feed, link.trim()),
                 needsScraping: feed.needs_scraping,
