@@ -12,7 +12,7 @@ export const INITIAL_FEEDS: FeedSource[] = [
     { id: 'gamepro', url: 'https://www.gamepro.de/rss/gamepro.rss', name: 'GamePro', language: 'de', priority: 'primary', update_interval: 15 },
     { id: 'gamespot', url: 'https://www.gamespot.com/feeds/mashup', name: 'GameSpot', language: 'en', priority: 'primary', update_interval: 15 },
     { id: 'gamestar', url: 'https://www.gamestar.de/rss/gamestar.rss', name: 'GameStar', language: 'de', priority: 'primary', update_interval: 15 },
-    { id: 'gematsu', url: 'https://www.gematsu.com/feed', name: 'Gematsu', language: 'en', priority: 'primary', update_interval: 15 },
+    { id: 'gematsu', url: 'https://www.gematsu.com/feed', name: 'Gematsu', language: 'en', priority: 'primary', update_interval: 15, needsScraping: true },
     { id: 'ign-de', url: 'https://de.ign.com/feed.xml', name: 'IGN', language: 'de', priority: 'primary', update_interval: 15 },
     { id: 'kotaku', url: 'https://kotaku.com/rss', name: 'Kotaku', language: 'en', priority: 'primary', update_interval: 15 },
     { id: 'mein-mmo', url: 'https://mein-mmo.de/feed/', name: 'Mein-MMO', language: 'de', priority: 'primary', update_interval: 15 },
