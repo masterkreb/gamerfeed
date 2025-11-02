@@ -49,14 +49,14 @@ async function getOgImageFromUrl(url) {
 function extractImageUrl(itemXml, feed, articleLink) {
     let imageUrl = null;
 
-    // 1. Try media:content (used by many feeds)
-    const mediaContentMatch = itemXml.match(/<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*medium=["']image["']/i) ||
-        itemXml.match(/<(?:media:)?content[^>]+medium=["']image["'][^>]*url=["']([^"']+)["']/i);
+    // 1. media:content (für GameSpot, Giant Bomb)
+    const mediaContentMatch = itemXml.match(/<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*(?:medium=["']image["']|type=["']image)/i) ||
+        itemXml.match(/<(?:media:)?content[^>]*(?:medium=["']image["']|type=["']image)[^>]*url=["']([^"']+)["']/i);
     if (mediaContentMatch) {
         imageUrl = mediaContentMatch[1];
     }
 
-    // 2. Try media:thumbnail
+    // 2. media:thumbnail
     if (!imageUrl) {
         const mediaThumbnailMatch = itemXml.match(/<(?:media:)?thumbnail[^>]+url=["']([^"']+)["']/i);
         if (mediaThumbnailMatch) {
@@ -64,21 +64,26 @@ function extractImageUrl(itemXml, feed, articleLink) {
         }
     }
 
-    // 3. Try enclosure (accept any, not just image type)
+    // 3. enclosure (für PCGames) - WICHTIG: Auch ohne type=image
     if (!imageUrl) {
-        const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
+        const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+\.(?:jpg|jpeg|png|gif|webp))["']/i);
         if (enclosureMatch) {
             imageUrl = enclosureMatch[1];
         }
     }
 
-    // 4. Parse HTML content for images
+    // 4. HTML-Inhalt parsen (für alle anderen)
     if (!imageUrl) {
-        const descMatch = itemXml.match(/<(?:description|summary|content)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary|content)>/is);
-        if (descMatch) {
-            let content = descMatch[1];
+        const contentMatches = [
+            itemXml.match(/<content[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/content>/is),
+            itemXml.match(/<(?:description|summary)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary)>/is)
+        ];
 
-            // Decode HTML entities
+        for (const match of contentMatches) {
+            if (!match) continue;
+            let content = match[1];
+
+            // HTML entities dekodieren
             content = content
                 .replace(/&quot;/g, '"')
                 .replace(/&amp;/g, '&')
@@ -86,7 +91,11 @@ function extractImageUrl(itemXml, feed, articleLink) {
                 .replace(/&gt;/g, '>')
                 .replace(/&#39;/g, "'");
 
-            const imgMatches = content.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi);
+            // Bilder finden - priorisiere größere Bilder
+            const imgMatches = [...content.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi)];
+
+            let bestImage = null;
+            let maxSize = 0;
 
             for (const imgMatch of imgMatches) {
                 const src = imgMatch[1];
@@ -96,59 +105,55 @@ function extractImageUrl(itemXml, feed, articleLink) {
                     src.includes('1x1') ||
                     src.includes('pixel') ||
                     src.includes('count.php') ||
-                    src.includes('tracking')) {
+                    src.includes('vgc.php') ||
+                    src.match(/width=1|height=1/)) {
                     continue;
                 }
 
-                // Check dimensions
+                // Dimensionen extrahieren
                 const widthMatch = imgMatch[0].match(/width=["']?(\d+)/i);
                 const heightMatch = imgMatch[0].match(/height=["']?(\d+)/i);
                 const width = widthMatch ? parseInt(widthMatch[1]) : 0;
                 const height = heightMatch ? parseInt(heightMatch[1]) : 0;
 
-                // Skip 1x1 tracking pixels
-                if ((width === 1 && height === 1) || (width <= 1 || height <= 1)) {
-                    continue;
-                }
+                if (width <= 1 || height <= 1) continue;
 
-                imageUrl = src;
+                const size = width * height;
+                if (size > maxSize) {
+                    maxSize = size;
+                    bestImage = src;
+                }
+            }
+
+            if (bestImage) {
+                imageUrl = bestImage;
                 break;
             }
         }
     }
 
-    if (!imageUrl) {
-        return null;
-    }
+    if (!imageUrl) return null;
 
-    // === IMAGE URL OPTIMIZATION ===
+    // URL-Optimierung
     try {
         let processedUrl = new URL(imageUrl, articleLink).href;
         const urlObject = new URL(processedUrl);
 
-        // GameSpot: Use 'original' quality
-        if (urlObject.hostname.includes('gamespot.com')) {
+        // Giant Bomb: Original-Qualität
+        if (urlObject.hostname.includes('giantbomb.com')) {
+            processedUrl = processedUrl.replace(/\/[^\/]+_(\d+)\.(jpg|jpeg|png)/, '/original.$2');
+        }
+        // GameSpot
+        else if (urlObject.hostname.includes('gamespot.com')) {
             processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
         }
-        // GameStar, GamePro: Use /800/ resolution
-        else if (urlObject.hostname.includes('cgames.de') || feed.name.includes('GameStar') || feed.name.includes('GamePro')) {
+        // Heise: Höhere Qualität
+        else if (urlObject.hostname.includes('heise.de')) {
+            processedUrl = processedUrl.replace(/\/geometry\/\d+\//, '/geometry/800/');
+        }
+        // Andere (wie vorher)
+        else if (urlObject.hostname.includes('cgames.de') || urlObject.hostname.includes('pcgames.de')) {
             processedUrl = processedUrl.replace(/\/(\d{2,4})\//, '/800/');
-        }
-        // GamesWirtschaft: Remove size suffix
-        else if (feed.name.includes('GamesWirtschaft')) {
-            processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)$)/i, '');
-        }
-        // Nintendo Life: Use 'large' instead of 'small'
-        else if (urlObject.hostname.includes('nintendolife.com')) {
-            processedUrl = processedUrl.replace('small.jpg', 'large.jpg');
-        }
-        // Eurogamer: Optimize image quality
-        else if (urlObject.hostname.includes('gnwcdn.com')) {
-            processedUrl = processedUrl.replace(/width=\d+/, 'width=800').replace(/quality=\d+/, 'quality=90');
-        }
-        // Giant Bomb: Use original image
-        else if (urlObject.hostname.includes('giantbomb.com')) {
-            processedUrl = processedUrl.replace(/\/[^\/]+_(\d+)\.jpg/, '/original.jpg');
         }
 
         return processedUrl;
