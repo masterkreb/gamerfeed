@@ -164,7 +164,7 @@ function parseRssXml(xmlString, feed) {
             summary,
             link,
             imageUrl: imageUrl || null, // null if needs scraping
-            needsScraping: !imageUrl && feed.needsScraping,
+            needsScraping: !imageUrl && feed.needs_scraping,
             language: feed.language
         });
     }
