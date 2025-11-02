@@ -500,16 +500,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.pcgamer.com/games/debate-what-is-the-greatest-boss-theme-of-all-time/",
-    "title": "Debate: What is the greatest boss theme of all time?",
-    "source": "PC Gamer",
-    "publicationDate": "2025-11-02T17:00:00.000Z",
-    "summary": "",
-    "link": "https://www.pcgamer.com/games/debate-what-is-the-greatest-boss-theme-of-all-time/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/j6RTaMgBtEVnsM5yM43iiK-1280-80.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.pcgamer.com/games/mmo/final-fantasy-14-and-world-of-warcraft-are-starting-to-meet-in-the-middle-on-modding-and-its-a-strange-new-world-for-mmos-and-their-addon-communities/",
     "title": "Final Fantasy 14 and World of Warcraft are starting to meet in the middle on modding, and it's a strange new world for MMOs and their AddOn communities",
     "source": "PC Gamer",
@@ -517,6 +507,16 @@
     "summary": "",
     "link": "https://www.pcgamer.com/games/mmo/final-fantasy-14-and-world-of-warcraft-are-starting-to-meet-in-the-middle-on-modding-and-its-a-strange-new-world-for-mmos-and-their-addon-communities/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/zhaqJDzRctKwXpGPozbhQG-1280-80.png",
+    "language": "en"
+  },
+  {
+    "id": "https://www.pcgamer.com/games/debate-what-is-the-greatest-boss-theme-of-all-time/",
+    "title": "Debate: What is the greatest boss theme of all time?",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-02T17:00:00.000Z",
+    "summary": "",
+    "link": "https://www.pcgamer.com/games/debate-what-is-the-greatest-boss-theme-of-all-time/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/j6RTaMgBtEVnsM5yM43iiK-1280-80.jpg",
     "language": "en"
   },
   {
