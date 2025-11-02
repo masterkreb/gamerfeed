@@ -49,11 +49,19 @@ async function getOgImageFromUrl(url) {
 function extractImageUrl(itemXml, feed, articleLink) {
     let imageUrl = null;
 
-    // 1. media:content (für GameSpot, Giant Bomb)
-    const mediaContentMatch = itemXml.match(/<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*(?:medium=["']image["']|type=["']image)/i) ||
-        itemXml.match(/<(?:media:)?content[^>]*(?:medium=["']image["']|type=["']image)[^>]*url=["']([^"']+)["']/i);
-    if (mediaContentMatch) {
-        imageUrl = mediaContentMatch[1];
+    // 1. media:content - VERBESSERT für 4P
+    const mediaContentPatterns = [
+        /<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*medium=["']image["']/i,
+        /<(?:media:)?content[^>]+medium=["']image["'][^>]*url=["']([^"']+)["']/i,
+        /<(?:media:)?content[^>]+url=["']([^"']+\.(?:jpg|jpeg|png|gif|webp)[^"']*)["']/i
+    ];
+
+    for (const pattern of mediaContentPatterns) {
+        const match = itemXml.match(pattern);
+        if (match) {
+            imageUrl = match[1];
+            break;
+        }
     }
 
     // 2. media:thumbnail
@@ -64,15 +72,18 @@ function extractImageUrl(itemXml, feed, articleLink) {
         }
     }
 
-    // 3. enclosure (für PCGames) - WICHTIG: Auch ohne type=image
+    // 3. enclosure - OHNE type-Check für PCGames
     if (!imageUrl) {
-        const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+\.(?:jpg|jpeg|png|gif|webp))["']/i);
+        const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
         if (enclosureMatch) {
-            imageUrl = enclosureMatch[1];
+            const url = enclosureMatch[1];
+            if (url.match(/\.(jpg|jpeg|png|gif|webp)($|\?)/i)) {
+                imageUrl = url;
+            }
         }
     }
 
-    // 4. HTML-Inhalt parsen (für alle anderen)
+    // 4. HTML-Inhalt parsen
     if (!imageUrl) {
         const contentMatches = [
             itemXml.match(/<content[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/content>/is),
@@ -83,15 +94,14 @@ function extractImageUrl(itemXml, feed, articleLink) {
             if (!match) continue;
             let content = match[1];
 
-            // HTML entities dekodieren
             content = content
                 .replace(/&quot;/g, '"')
                 .replace(/&amp;/g, '&')
                 .replace(/&lt;/g, '<')
                 .replace(/&gt;/g, '>')
-                .replace(/&#39;/g, "'");
+                .replace(/&#39;/g, "'")
+                .replace(/&apos;/g, "'");
 
-            // Bilder finden - priorisiere größere Bilder
             const imgMatches = [...content.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi)];
 
             let bestImage = null;
@@ -100,25 +110,34 @@ function extractImageUrl(itemXml, feed, articleLink) {
             for (const imgMatch of imgMatches) {
                 const src = imgMatch[1];
 
-                // Skip tracking pixels
-                if (src.includes('cpx.golem.de') ||
-                    src.includes('1x1') ||
-                    src.includes('pixel') ||
+                // ERWEITERTE Tracking-Pixel-Erkennung
+                if (
+                    src.includes('cpx.golem.de') ||
+                    src.includes('feedburner.com') ||
+                    src.includes('feedsportal.com') ||
+                    src.includes('tracking') ||
                     src.includes('count.php') ||
                     src.includes('vgc.php') ||
-                    src.match(/width=1|height=1/)) {
+                    src.includes('pixel') ||
+                    src.match(/[?&]width=1[&$]/) ||
+                    src.match(/[?&]height=1[&$]/) ||
+                    src.endsWith('1x1.gif') ||
+                    src.endsWith('1x1.png')
+                ) {
                     continue;
                 }
 
-                // Dimensionen extrahieren
                 const widthMatch = imgMatch[0].match(/width=["']?(\d+)/i);
                 const heightMatch = imgMatch[0].match(/height=["']?(\d+)/i);
-                const width = widthMatch ? parseInt(widthMatch[1]) : 0;
-                const height = heightMatch ? parseInt(heightMatch[1]) : 0;
+                const width = widthMatch ? parseInt(widthMatch[1]) : 200;
+                const height = heightMatch ? parseInt(heightMatch[1]) : 200;
 
+                // Skip 1x1 Pixel
                 if (width <= 1 || height <= 1) continue;
 
                 const size = width * height;
+
+                // Bevorzuge größere Bilder
                 if (size > maxSize) {
                     maxSize = size;
                     bestImage = src;
@@ -139,21 +158,29 @@ function extractImageUrl(itemXml, feed, articleLink) {
         let processedUrl = new URL(imageUrl, articleLink).href;
         const urlObject = new URL(processedUrl);
 
-        // Giant Bomb: Original-Qualität
+        // Giant Bomb: Original
         if (urlObject.hostname.includes('giantbomb.com')) {
             processedUrl = processedUrl.replace(/\/[^\/]+_(\d+)\.(jpg|jpeg|png)/, '/original.$2');
         }
-        // GameSpot
+        // GameSpot: Original
         else if (urlObject.hostname.includes('gamespot.com')) {
             processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
         }
-        // Heise: Höhere Qualität
+        // GamesWirtschaft: Größe entfernen
+        else if (feed.name.includes('GamesWirtschaft') || urlObject.hostname.includes('gameswirtschaft.de')) {
+            processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)($|\?))/i, '');
+        }
+        // Heise: Höhere Auflösung
         else if (urlObject.hostname.includes('heise.de')) {
             processedUrl = processedUrl.replace(/\/geometry\/\d+\//, '/geometry/800/');
         }
-        // Andere (wie vorher)
+        // GameStar, GamePro, PCGames
         else if (urlObject.hostname.includes('cgames.de') || urlObject.hostname.includes('pcgames.de')) {
-            processedUrl = processedUrl.replace(/\/(\d{2,4})\//, '/800/');
+            processedUrl = processedUrl.replace(/\/\d{2,4}\//, '/800/');
+        }
+        // 4Players
+        else if (urlObject.hostname.includes('4players.de')) {
+            processedUrl = processedUrl.replace(/\/\d+\//, '/800/');
         }
 
         return processedUrl;
