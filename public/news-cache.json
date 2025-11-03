@@ -1,5 +1,15 @@
 [
   {
+    "id": "https://www.gamestar.de/artikel/battlestar-galactica-katee-sackhoff-unbeliebt,3442270.html",
+    "title": "News: Battlestar Galactica - Heute zählt sie zu den besten Sci-Fi-Serien überhaupt, doch vor mehr als 20 Jahren wurde einer der Stars dafür noch öffentlich ausgebuht",
+    "source": "GameStar",
+    "publicationDate": "2025-11-03T04:21:00.000Z",
+    "summary": "Zum Start der Neuauflage von Battlestar Galactica waren viele Fans nicht zufrieden. Grund dafür war die Besetzung eines bestimmten Charakters.",
+    "link": "https://www.gamestar.de/artikel/battlestar-galactica-katee-sackhoff-unbeliebt,3442270.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/battlestar-galactica-katee-sackhoff-teaser-gs_6383915.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://www.heise.de/news/SpaceX-deutet-nach-verzoegerten-Plaenen-fuer-Mondlandung-einfacheres-Starship-an-10966325.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "SpaceX deutet nach verzögerten Plänen für Mondlandung \"einfacheres\" Starship an",
     "source": "Heise Online",
@@ -2680,16 +2690,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamestar.de/artikel/gangster-open-world-spiel-ps5-mafia-guenstig,3442254.html",
-    "title": "Deals: König der Unterwelt - Dieses PS5-Spiel lässt euch zum gefürchteten Mafia-Boss aufsteigen - und kostet gerade deutlich weniger [Anzeige]",
-    "source": "GameStar",
-    "publicationDate": "2025-11-02T05:07:00.000Z",
-    "summary": "In einem düsteren Spiel erlebt ihr den Aufstieg in einer Mafia-Familie hautnah und bekommt eine spannende Story rund um Ehre und Verrat!",
-    "link": "https://www.gamestar.de/artikel/gangster-open-world-spiel-ps5-mafia-guenstig,3442254.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/mafia-the-old-country_6383872.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.nintendolife.com/news/2025/11/fortnites-simpsons-collab-is-now-live-watch-new-mini-episodes-every-week",
     "title": "Fortnite&#039;s Simpsons Collab Is Now Live, Watch New &quot;Mini Episodes&quot; Every Week",
     "source": "Nintendo Life",
@@ -4570,16 +4570,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
-    "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
-    "source": "Eurogamer",
-    "publicationDate": "2025-11-01T09:00:00.000Z",
-    "summary": " ARC Raiders ist seit dieser Woche erh&auml;ltlich, und w&auml;hrend eine gro&szlig;e Zahl an Spielern zum Launch ins Spiel str&ouml;mt, ist es kein G",
-    "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
-    "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
-  },
-  {
     "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
     "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
     "source": "Eurogamer",
@@ -4587,6 +4577,16 @@
     "summary": " Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod f&uuml;r Doom 2,",
     "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
     "imageUrl": "https://assetsio.gnwcdn.com/Catharsis---Akira-Yamaoka-(1)-gigapixel-low_res-scale-4_00x-cropped.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
+    "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-01T09:00:00.000Z",
+    "summary": " ARC Raiders ist seit dieser Woche erh&auml;ltlich, und w&auml;hrend eine gro&szlig;e Zahl an Spielern zum Launch ins Spiel str&ouml;mt, ist es kein G",
+    "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
+    "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "de"
   },
   {
