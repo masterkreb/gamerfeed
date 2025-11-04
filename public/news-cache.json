@@ -1,5 +1,15 @@
 [
   {
+    "id": "https://www.heise.de/news/OpenAI-bestellt-auch-bei-AWS-Rechenleistung-11016446.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "OpenAI bestellt auch bei AWS Rechenleistung",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-04T04:32:00.000Z",
+    "summary": "Nach Oracle und Microsoft wird auch Amazon.com Dienstleister OpenAIs für deren KI-Berechnungen. Amazons AWS spielt jedoch nur zweite Geige.",
+    "link": "https://www.heise.de/news/OpenAI-bestellt-auch-bei-AWS-Rechenleistung-11016446.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/9/5/5/9/shutterstock_2305366297-1833a4d5dde25f56.jpeg",
+    "language": "de"
+  },
+  {
     "id": "https://www.gematsu.com/2025/11/darwins-paradox-drops-switch-version-for-switch-2-delayed-to-2026",
     "title": "Darwin&#8217;s Paradox! drops Switch version for Switch 2, delayed to 2026",
     "source": "Gematsu",
@@ -3610,16 +3620,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamesradar.com/games/rpg/i-love-that-the-outer-worlds-2s-flaw-system-calls-me-out-on-my-rpg-behavior-and-then-asks-me-to-double-down-on-it-because-flaws-are-optional-we-knew-we-could-actually-push-them-a-little-bit-harder/",
-    "title": "I love that The Outer Worlds 2's Flaw system calls me out on my RPG behavior and then asks me to double-down on it: \"Because flaws are optional, we knew we could actually push them a little bit harder\"",
-    "source": "GamesRadar+",
-    "publicationDate": "2025-11-03T14:00:00.000Z",
-    "summary": "",
-    "link": "https://www.gamesradar.com/games/rpg/i-love-that-the-outer-worlds-2s-flaw-system-calls-me-out-on-my-rpg-behavior-and-then-asks-me-to-double-down-on-it-because-flaws-are-optional-we-knew-we-could-actually-push-them-a-little-bit-harder/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/UVQuQCZXw5Fa9rPfBVMLUj-1280-80.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.gamesradar.com/games/resident-evil-royalty-will-host-the-golden-joystick-awards-2025-with-ultimate-game-of-the-year-voting-now-open/",
     "title": "Resident Evil royalty will host the Golden Joystick Awards 2025, with Ultimate Game of the Year voting now open",
     "source": "GamesRadar+",
@@ -3637,6 +3637,16 @@
     "summary": "",
     "link": "https://www.gamesradar.com/tabletop-gaming/behold-the-worlds-first-godzilla-rpg-revealed-exclusively-here/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/tQoAjGyvZSJJkskb4UKUPL-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.gamesradar.com/games/rpg/i-love-that-the-outer-worlds-2s-flaw-system-calls-me-out-on-my-rpg-behavior-and-then-asks-me-to-double-down-on-it-because-flaws-are-optional-we-knew-we-could-actually-push-them-a-little-bit-harder/",
+    "title": "I love that The Outer Worlds 2's Flaw system calls me out on my RPG behavior and then asks me to double-down on it: \"Because flaws are optional, we knew we could actually push them a little bit harder\"",
+    "source": "GamesRadar+",
+    "publicationDate": "2025-11-03T14:00:00.000Z",
+    "summary": "",
+    "link": "https://www.gamesradar.com/games/rpg/i-love-that-the-outer-worlds-2s-flaw-system-calls-me-out-on-my-rpg-behavior-and-then-asks-me-to-double-down-on-it-because-flaws-are-optional-we-knew-we-could-actually-push-them-a-little-bit-harder/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/UVQuQCZXw5Fa9rPfBVMLUj-1280-80.jpg",
     "language": "en"
   },
   {
@@ -10377,16 +10387,6 @@
     "summary": "In Leipzig hat die erste Fabrik Europas für Solarmodule für Autos, Busse und Lkws eröffnet. Der Solarstrom soll zu mehr Nachhaltigkeit im Verkehr beit",
     "link": "https://www.heise.de/news/Europaweit-erste-Fabrik-fuer-fahrzeugintegrierte-Photovoltaik-eroeffnet-10964020.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/7/0/0/6/OPES_Halle_1-1-10c2d1f026390054.jpeg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.heise.de/news/Bildbarbeitung-GIMP-Version-3-0-6-schliesst-Codeschmuggel-Lecks-10964002.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "GIMP: Manipulierte Bilder können Schadcode einschmuggeln",
-    "source": "Heise Online",
-    "publicationDate": "2025-10-30T09:10:00.000Z",
-    "summary": "Die GIMP-Version 3.0.6 schließt einige hochriskante Sicherheitslücken. Angreifer können mit präparierten Bildern Malware einschleusen.",
-    "link": "https://www.heise.de/news/Bildbarbeitung-GIMP-Version-3-0-6-schliesst-Codeschmuggel-Lecks-10964002.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/6/9/9/7/2025-10-30-GIMP-3-156806eef67d4260.png",
     "language": "de"
   },
   {
