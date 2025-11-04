@@ -245,7 +245,8 @@ function parseRssXml(xmlString, feed) {
         if (!title || !link || !pubDate) continue;
 
         const desc = itemXml.match(/<(?:description|summary)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary)>/is)?.[1]?.trim() || '';
-        const summary = desc.replace(/<[^>]+>/g, '').substring(0, 150);
+        const summaryRaw = desc.replace(/<[^>]+>/g, '').substring(0, 150);
+        const summary = decodeHtmlEntities(summaryRaw);  // <-- NEU
 
         // Extract image
         const imageUrl = extractImageUrl(itemXml, feed, link);
