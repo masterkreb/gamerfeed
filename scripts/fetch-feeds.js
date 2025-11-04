@@ -9,6 +9,7 @@ import { parseHTML } from 'linkedom';
 
 // === HTML ENTITY DECODING ===
 // === HTML ENTITY DECODING ===
+// === HTML ENTITY DECODING ===
 function decodeHtmlEntities(text) {
     if (!text) return text;
 
@@ -20,15 +21,27 @@ function decodeHtmlEntities(text) {
         '&#39;': "'",
         '&apos;': "'",
         '&nbsp;': ' ',
-        '&rsquo;': "'",   // <-- NEU (right single quote)
-        '&lsquo;': "'",   // <-- NEU (left single quote)
-        '&rdquo;': '"',   // <-- NEU (right double quote)
-        '&ldquo;': '"',   // <-- NEU (left double quote)
-        '&ndash;': '–',   // <-- NEU (en dash)
-        '&mdash;': '—',   // <-- NEU (em dash)
+        '&rsquo;': "'",
+        '&lsquo;': "'",
+        '&rdquo;': '"',
+        '&ldquo;': '"',
+        '&ndash;': '–',
+        '&mdash;': '—',
+        // Deutsche Umlaute
+        '&auml;': 'ä',
+        '&ouml;': 'ö',
+        '&uuml;': 'ü',
+        '&Auml;': 'Ä',
+        '&Ouml;': 'Ö',
+        '&Uuml;': 'Ü',
+        '&szlig;': 'ß',
     };
 
     let decoded = text;
+
+    // CDATA-Marker entfernen (beide)
+    decoded = decoded.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '');
+
     for (const [entity, char] of Object.entries(entities)) {
         decoded = decoded.replaceAll(entity, char);
     }
@@ -40,9 +53,6 @@ function decodeHtmlEntities(text) {
     decoded = decoded.replace(/&#x([0-9a-f]+);/gi, (match, hex) =>
         String.fromCharCode(parseInt(hex, 16))
     );
-
-    // CDATA-Marker entfernen
-    decoded = decoded.replace(/\]\]>/g, '');  // <-- NEU
 
     return decoded;
 }
