@@ -245,8 +245,12 @@ function parseRssXml(xmlString, feed) {
         if (!title || !link || !pubDate) continue;
 
         const desc = itemXml.match(/<(?:description|summary)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary)>/is)?.[1]?.trim() || '';
-        const summaryRaw = desc.replace(/<[^>]+>/g, '').substring(0, 150);
-        const summary = decodeHtmlEntities(summaryRaw);  // <-- NEU
+        const decodedDesc = decodeHtmlEntities(desc);  // Erst dekodieren
+        const summary = decodedDesc
+            .replace(/<[^>]+>/g, '')  // Dann HTML-Tags entfernen
+            .replace(/\s+/g, ' ')      // Mehrfache Leerzeichen zu einem
+            .trim()                    // Trimmen
+            .substring(0, 150);        // Dann kürzen
 
         // Extract image
         const imageUrl = extractImageUrl(itemXml, feed, link);
