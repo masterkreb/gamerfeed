@@ -1,5 +1,25 @@
 [
   {
+    "id": "https://www.giga.de/games/null-fehler-in-diesem-darts-game-habt-ihr-das-zeug-zum-liga-champion--01K8JZZMTH560G1QACDX843Y3J",
+    "title": "Null Fehler in diesem Darts Game: Habt ihr das Zeug zum Liga-Champion?",
+    "source": "GIGA Games",
+    "publicationDate": "2025-11-04T11:45:01.000Z",
+    "summary": "Schon als Kind habt ihr gerne mit Dart-Pfeilen auf die Zielscheibe geworfen? Bei diesem Online-Spiel könnt ihr euch bis an die Spitze spielen.",
+    "link": "https://www.giga.de/games/null-fehler-in-diesem-darts-game-habt-ihr-das-zeug-zum-liga-champion--01K8JZZMTH560G1QACDX843Y3J",
+    "imageUrl": "https://static.giga.de/8d/8e/86/aea2728e3d81127c1f588ab41c_cmUgMTkyMCADOGVhMjhkMWM1YTE=.png",
+    "language": "de"
+  },
+  {
+    "id": "https://www.pcgameshardware.de/AMD-Zen-Architektur-261795/News/CPUs-mit-kritischem-RDSEED-Fehler-1485724/",
+    "title": "Zen 5: AMDs CPUs haben kritischen RDSEED-Fehler",
+    "source": "PC Games Hardware",
+    "publicationDate": "2025-11-04T11:45:00.000Z",
+    "summary": "Es klafft eine kritische Sicherheitsl&#xfc;cke im hardwarebasierten Zufallszahlengenerator RDSEED von AMDs Zen-5-Prozessoren. AGESA-Updates sollen nac",
+    "link": "https://www.pcgameshardware.de/AMD-Zen-Architektur-261795/News/CPUs-mit-kritischem-RDSEED-Fehler-1485724/",
+    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2023/08/AMD-Zen-5-Special-pcgh.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://www.giga.de/games/auf-steam-wird-gerade-eine-neue-fantasy-simulation-gefeiert-in-der-ihr-eure-eigene-mittelalter-taverne-eroeffnet--01K97AQMRHD27ZDNYVQNSH6FG1",
     "title": "Auf Steam wird gerade eine neue Fantasy-Simulation gefeiert, in der ihr eure eigene Mittelalter-Taverne eröffnet",
     "source": "GIGA Games",
@@ -10,8 +30,18 @@
     "language": "de"
   },
   {
+    "id": "https://www.pcgamer.com/games/fps/legendary-fps-maker-john-romero-delivers-the-objectively-correct-answer-when-voting-for-the-most-satisfying-weapon-in-gaming-history-i-strongly-agree-mr-romero/",
+    "title": "Legendary FPS maker John Romero delivers the objectively correct answer when voting for the most satisfying weapon in gaming history: 'I strongly agree, Mr Romero'",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-04T11:41:13.000Z",
+    "summary": "",
+    "link": "https://www.pcgamer.com/games/fps/legendary-fps-maker-john-romero-delivers-the-objectively-correct-answer-when-voting-for-the-most-satisfying-weapon-in-gaming-history-i-strongly-agree-mr-romero/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/XUibMxV6viKMp8vQzgpUSc-1280-80.jpg",
+    "language": "en"
+  },
+  {
     "id": "https://www.play3.de/2025/11/04/playstation-adventskalender-2025-offiziell-angekuendigt-details-inhalte-teilnehmende-haendler/",
-    "title": "PlayStation Adventskalender 2025: Offiziell angekündigt &#8211; Preis, Inhalte &#038; teilnehmende Händler",
+    "title": "PlayStation Adventskalender 2025: Offiziell angekündigt – Preis, Inhalte & teilnehmende Händler",
     "source": "Play3",
     "publicationDate": "2025-11-04T11:36:14.000Z",
     "summary": "Wie Sony auf dem offiziellen PlayStation Blog bekannt gab, kehrt mit dem PlayStation Guthaben Adventskalender 2025 eine lieb gewonnene Tradition [&#82",
@@ -20,8 +50,28 @@
     "language": "de"
   },
   {
+    "id": "https://www.heise.de/news/Angriffe-beobachtet-Luecke-in-WordPress-Post-SMTP-Plug-in-ermoeglicht-Uebernahme-11044198.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Angriffe beobachtet: Lücke in WordPress-Post-SMTP-Plug-in ermöglicht Übernahme",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-04T11:36:00.000Z",
+    "summary": "Attacken auf eine Sicherheitslücke im WordPress -Plug-in Post SMTP laufen. Sie erlaubt unangemeldeten Angreifern die Übernahme der Instanz.",
+    "link": "https://www.heise.de/news/Angriffe-beobachtet-Luecke-in-WordPress-Post-SMTP-Plug-in-ermoeglicht-Uebernahme-11044198.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/1/2/1/shutterstock_1730894533-299e01249019fa73.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Nach-Apple-Quartalszahlen-Analysten-erhoehen-Kursziel-10988484.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Nach Apple-Quartalszahlen: Analysten erhöhen Kursziel",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-04T11:34:00.000Z",
+    "summary": "Die Banker von JP Morgan und zwei weiteren Aktienhäusern rechnen damit, dass sich die Apple-Anteilsscheine weiter verteuern – wenn auch unterschiedlic",
+    "link": "https://www.heise.de/news/Nach-Apple-Quartalszahlen-Analysten-erhoehen-Kursziel-10988484.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/9/0/1/0/Apples-keynote-event_Tim_Cook-03252019-80752c7b0141bf13.png",
+    "language": "de"
+  },
+  {
     "id": "https://www.pcgames.de/Just-Cause-4-Spiel-9785/News/Fortsetzung-Just-Cause-5-eingestellt-1485727/",
-    "title": "Just Cause 5&#x3a; Von dieser Fortsetzung sollten sich Fans besser verabschieden",
+    "title": "Just Cause 5: Von dieser Fortsetzung sollten sich Fans besser verabschieden",
     "source": "PC Games",
     "publicationDate": "2025-11-04T11:32:00.000Z",
     "summary": "Der Release von Just Cause 4 liegt mittlerweile sieben Jahre zur&#xfc;ck. Gro&#xdf;e Hoffnungen auf einen weiteren Ableger gibt es offenbar nicht.",
@@ -31,7 +81,7 @@
   },
   {
     "id": "https://www.gamezone.de/Just-Cause-4-Spiel-9785/News/Fortsetzung-Just-Cause-5-eingestellt-1485727/",
-    "title": "Just Cause 5&#x3a; Von dieser Fortsetzung sollten sich Fans besser verabschieden",
+    "title": "Just Cause 5: Von dieser Fortsetzung sollten sich Fans besser verabschieden",
     "source": "GameZone",
     "publicationDate": "2025-11-04T11:32:00.000Z",
     "summary": "Der Release von Just Cause 4 liegt mittlerweile sieben Jahre zur&#xfc;ck. Gro&#xdf;e Hoffnungen auf einen weiteren Ableger gibt es offenbar nicht.",
@@ -41,7 +91,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Just-Cause-4-Spiel-9785/News/Fortsetzung-Just-Cause-5-eingestellt-1485727/",
-    "title": "Just Cause 5&#x3a; Von dieser Fortsetzung sollten sich Fans besser verabschieden",
+    "title": "Just Cause 5: Von dieser Fortsetzung sollten sich Fans besser verabschieden",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-04T11:32:00.000Z",
     "summary": "Der Release von Just Cause 4 liegt mittlerweile sieben Jahre zur&#xfc;ck. Gro&#xdf;e Hoffnungen auf einen weiteren Ableger gibt es offenbar nicht.",
@@ -71,12 +121,22 @@
   },
   {
     "id": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/Gehirnwaesche-durch-Influencer-wie-Blizzard-auf-das-immer-gleiche-Feedback-reagiert-1485722/",
-    "title": "WoW&#x3a; Gehirnw&#xe4;sche durch Influencer - wie Blizzard auf das Feedback der &#x22;Spieler&#x22; reagiert",
+    "title": "WoW: Gehirnwäsche durch Influencer - wie Blizzard auf das Feedback der \"Spieler\" reagiert",
     "source": "Buffed",
     "publicationDate": "2025-11-04T11:30:00.000Z",
     "summary": "Laut Game Designer Ion Hazzikostas hat sich das Feedback der WoW-Spieler in den letzten Jahren stark ver&#xe4;ndert.",
     "link": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/Gehirnwaesche-durch-Influencer-wie-Blizzard-auf-das-immer-gleiche-Feedback-reagiert-1485722/",
     "imageUrl": "https://www.buffed.de/screenshots/970x546/2023/05/WoW-Twitch-Streamer-Asmongold-erstaunt-ueber-Aberrus-Finale-Cinematic-Sarkareth-1-buffed.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Walk-Me-Toyota-zeigt-laufenden-Roboterstuhl-11046811.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "\"Walk Me\": Toyota zeigt laufenden Roboterstuhl",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-04T11:30:00.000Z",
+    "summary": "\"Walk Me\" soll Menschen auf vier Beinen transportieren, die nicht mehr so gut laufen können. Der Roboterstuhl funktioniert zwar, ist jedoch noch eine ",
+    "link": "https://www.heise.de/news/Walk-Me-Toyota-zeigt-laufenden-Roboterstuhl-11046811.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/2/7/7/Walkme-a1850e7a27b61eb5.jpeg",
     "language": "de"
   },
   {
@@ -151,7 +211,7 @@
   },
   {
     "id": "https://www.nintendolife.com/news/2025/11/im-running-on-fumes-digital-eclipse-is-scrambling-to-address-issues-with-mortal-kombat-legacy-kollection",
-    "title": "&quot;I&#039;m Running On Fumes&quot; - Digital Eclipse Is Scrambling To Address Issues With Mortal Kombat: Legacy Kollection",
+    "title": "\"I'm Running On Fumes\" - Digital Eclipse Is Scrambling To Address Issues With Mortal Kombat: Legacy Kollection",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-04T11:15:00.000Z",
     "summary": "Some PS5 players are even getting refunds.Mortal Kombat: Legacy Kollection has not launched in the best state.Indeed, while we heaped praise on the ga",
@@ -161,7 +221,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/RAM-Hardware-154108/News/DDR5-Preise-explodieren-1485720/",
-    "title": "DDR5&#x3a; Preise f&#xfc;r Arbeitsspeicher explodieren immer weiter",
+    "title": "DDR5: Preise für Arbeitsspeicher explodieren immer weiter",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-04T11:15:00.000Z",
     "summary": "Die Preise f&#xfc;r DDR5-Arbeitsspeicher der aktuellen Generation steigen aufgrund der enormen Nachfrage aus dem KI-Segment immer weiter und haben mit",
@@ -251,7 +311,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/Nvidia-Geforce-Grafikkarte-255598/Specials/RTX-Remix-Call-of-Duty-2-Unreal-Performance-Grafik-Test-1481419/",
-    "title": "&#x5b;PLUS&#x5d; RTX Remix im Grafik- und Performance-Test&#x3a; Call of Duty 2 und Unreal auf Pathtracing",
+    "title": "[PLUS] RTX Remix im Grafik- und Performance-Test: Call of Duty 2 und Unreal auf Pathtracing",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-04T11:01:00.000Z",
     "summary": "Nvidia veranstaltete einen mit insgesamt 50.000 US-Dollar dotierten Wettkampf um das Modding- und Pathtracing-Tool RTX Remix. Zur Gamescom wurden die ",
@@ -291,7 +351,7 @@
   },
   {
     "id": "https://www.buffed.de/Spiele-Thema-239104/News/ghost-mmo-entwicklung-studio-schliesst-1485705/",
-    "title": "Fantastic Pixel Castle gescheitert - Das steckt hinter dem &#x22;Ghostcrawler-MMO&#x22;-Aus",
+    "title": "Fantastic Pixel Castle gescheitert - Das steckt hinter dem \"Ghostcrawler-MMO\"-Aus",
     "source": "Buffed",
     "publicationDate": "2025-11-04T11:00:00.000Z",
     "summary": "Ein neues Online-Rollenspiel, entwickelt von einem der bekanntesten K&#xf6;pfe hinter WoW und LoL, wird nie erscheinen - das Studio ist pleite, bevor ",
@@ -341,7 +401,7 @@
   },
   {
     "id": "https://www.pcgames.de/Nintendo-Switch-2-Konsolen-280469/News/preis-pro-controller-Resident-Evil-Requiem-Edition-vorbestellen-1485706/",
-    "title": "Switch 2&#x3a; Nintendos Preispolitik schl&#xe4;gt wieder zu - Preis des Pro Controller Resident Evil Requiem-Edition deutlich h&#xf6;her als beim Standardmodell",
+    "title": "Switch 2: Nintendos Preispolitik schlägt wieder zu - Preis des Pro Controller Resident Evil Requiem-Edition deutlich höher als beim Standardmodell",
     "source": "PC Games",
     "publicationDate": "2025-11-04T10:57:00.000Z",
     "summary": "Nintendo schl&#xe4;gt mit seiner Preispolitik in Sachen Switch 2 mal wieder dem Fass den Boden aus.",
@@ -351,7 +411,7 @@
   },
   {
     "id": "https://www.gamezone.de/Nintendo-Switch-2-Konsolen-280469/News/preis-pro-controller-Resident-Evil-Requiem-Edition-vorbestellen-1485706/",
-    "title": "Switch 2&#x3a; Nintendos Preispolitik schl&#xe4;gt wieder zu - Preis des Pro Controller Resident Evil Requiem-Edition deutlich h&#xf6;her als beim Standardmodell",
+    "title": "Switch 2: Nintendos Preispolitik schlägt wieder zu - Preis des Pro Controller Resident Evil Requiem-Edition deutlich höher als beim Standardmodell",
     "source": "GameZone",
     "publicationDate": "2025-11-04T10:57:00.000Z",
     "summary": "Nintendo schl&#xe4;gt mit seiner Preispolitik in Sachen Switch 2 mal wieder dem Fass den Boden aus.",
@@ -361,7 +421,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Nintendo-Switch-2-Konsolen-280469/News/preis-pro-controller-Resident-Evil-Requiem-Edition-vorbestellen-1485706/",
-    "title": "Switch 2&#x3a; Nintendos Preispolitik schl&#xe4;gt wieder zu - Preis des Pro Controller Resident Evil Requiem-Edition deutlich h&#xf6;her als beim Standardmodell",
+    "title": "Switch 2: Nintendos Preispolitik schlägt wieder zu - Preis des Pro Controller Resident Evil Requiem-Edition deutlich höher als beim Standardmodell",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-04T10:57:00.000Z",
     "summary": "Nintendo schl&#xe4;gt mit seiner Preispolitik in Sachen Switch 2 mal wieder dem Fass den Boden aus.",
@@ -451,13 +511,23 @@
   },
   {
     "id": "https://www.pcgameshardware.de/Intel-Arc-Grafikkarte-267650/Tests/Pro-B60-vs-B580-vs-RTX-5060-Ti-vs-RX-9060-XT-Preis-Benchmark-24GB-1485345/",
-    "title": "Arc Pro B60 im Test mit 40 Spielen&#x3a; Was kann eine Arc B580 mit 24 GiByte&#x3f;",
+    "title": "Arc Pro B60 im Test mit 40 Spielen: Was kann eine Arc B580 mit 24 GiByte?",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-04T10:45:00.000Z",
     "summary": "Eine Profi-Grafikkarte zum Spielen&#x3a; dekadent, aber m&#xf6;glich. Heute sehen wir uns die Intel Arc Pro B60 an, welche einer &#x22;Arc B580 24GB&#",
     "link": "https://www.pcgameshardware.de/Intel-Arc-Grafikkarte-267650/Tests/Pro-B60-vs-B580-vs-RTX-5060-Ti-vs-RX-9060-XT-Preis-Benchmark-24GB-1485345/",
     "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/10/Sparkle-Intel-Arc-Pro-B60-24GB-pcgh.jpg",
     "language": "de"
+  },
+  {
+    "id": "https://www.pcgamesn.com/world-of-warcraft/brutosaur-mount-comeback-leak",
+    "title": "World of Warcraft's most expensive mount ever may be making a comeback, and I can already smell the backlash",
+    "source": "PCGamesN",
+    "publicationDate": "2025-11-04T10:42:18.000Z",
+    "summary": "The Brutosaur, one of World of Warcraft's most expensive (and controversial) mounts may be making a return, so you'd better get saving.\n\t\t\t]]>",
+    "link": "https://www.pcgamesn.com/world-of-warcraft/brutosaur-mount-comeback-leak",
+    "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/11/world-of-warcraft-wow-brutosaur-mount-comback-leak.jpg",
+    "language": "en"
   },
   {
     "id": "https://www.gamepro.de/artikel/one-punch-man-season-3-wann-erscheint-naechste-episode,3440792.html",
@@ -491,7 +561,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/civilization-vii/update-testing-firaxis-feature-workshop-revealed",
-    "title": "Civilization 7&#039;s new initiative lets you test features before they go live, including the one you&#039;ve all been asking for",
+    "title": "Civilization 7's new initiative lets you test features before they go live, including the one you've all been asking for",
     "source": "PCGamesN",
     "publicationDate": "2025-11-04T10:36:14.000Z",
     "summary": "Civilization 7's creative director, Ed Beach, reveals a new community playtesting scheme that fans of the series can sign up for right now.\n\t\t\t]]>",
@@ -531,7 +601,7 @@
   },
   {
     "id": "https://www.pcgames.de/Clair-Obscur-Expedition-33-Spiel-75130/News/Historischer-Tiefpreis-bei-Steam-1485717/",
-    "title": "Clair Obscur Expedition 33&#x3a; RPG-Meisterwerk im Sonderangebot",
+    "title": "Clair Obscur Expedition 33: RPG-Meisterwerk im Sonderangebot",
     "source": "PC Games",
     "publicationDate": "2025-11-04T10:31:00.000Z",
     "summary": "Die Rollenspiel-Fans k&#xf6;nnen sich aktuell ein absolutes Meisterwerk zum bisher niedrigsten Preis aller Zeiten schnappen. Allerdings m&#xfc;sst ihr",
@@ -541,7 +611,7 @@
   },
   {
     "id": "https://www.gamezone.de/Clair-Obscur-Expedition-33-Spiel-75130/News/Historischer-Tiefpreis-bei-Steam-1485717/",
-    "title": "Clair Obscur Expedition 33&#x3a; RPG-Meisterwerk im Sonderangebot",
+    "title": "Clair Obscur Expedition 33: RPG-Meisterwerk im Sonderangebot",
     "source": "GameZone",
     "publicationDate": "2025-11-04T10:31:00.000Z",
     "summary": "Die Rollenspiel-Fans k&#xf6;nnen sich aktuell ein absolutes Meisterwerk zum bisher niedrigsten Preis aller Zeiten schnappen. Allerdings m&#xfc;sst ihr",
@@ -571,7 +641,7 @@
   },
   {
     "id": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/Kommt-WoW-endlich-fuer-Konsole-Ion-Hazzikostas-findet-klare-Worte-1485715/",
-    "title": "Kommt WoW endlich f&#xfc;r Konsole&#x3f; Ion Hazzikostas findet klare Worte",
+    "title": "Kommt WoW endlich für Konsole? Ion Hazzikostas findet klare Worte",
     "source": "Buffed",
     "publicationDate": "2025-11-04T10:30:00.000Z",
     "summary": "Die Ger&#xfc;chte &#xfc;ber eine Konsolenversion von World of Warcraft verdichten sich immer mehr - jetzt meldete sich Ion Hazzikostas zu Wort.",
@@ -621,7 +691,7 @@
   },
   {
     "id": "https://www.play3.de/2025/11/04/arc-raiders-andrang-zwang-server-in-die-knie-entwickler-kuendigen-entschaedigung-an/",
-    "title": "Arc Raiders: Andrang zwang Server in die Knie &#8211; Entwickler kündigen Entschädigung an",
+    "title": "Arc Raiders: Andrang zwang Server in die Knie – Entwickler kündigen Entschädigung an",
     "source": "Play3",
     "publicationDate": "2025-11-04T10:25:42.000Z",
     "summary": "Mit &#8222;Arc Raiders&#8220; veröffentlichte Embark, das Studio hinter &#8222;The Finals&#8220;, in der vergangenen Woche seinen neuesten Shooter, de",
@@ -671,7 +741,7 @@
   },
   {
     "id": "https://www.4p.de/news/playstation-plus-essential-gratis-spiele-november-mit-cyberpunk-highlight-froh/3354805",
-    "title": "PlayStation Plus: Das sind die drei neuen Gratis-Spiele im November – &#8222;Bin froh, dass ich gewartet habe&#8220;",
+    "title": "PlayStation Plus: Das sind die drei neuen Gratis-Spiele im November – „Bin froh, dass ich gewartet habe“",
     "source": "4P",
     "publicationDate": "2025-11-04T10:21:00.000Z",
     "summary": "Im November lädt euch PlayStation Plus zu drei neuen Gratis-Spielen ein. Mit dabei ist dieses Mal ein echtes Cyberpunk-Highlight.",
@@ -721,7 +791,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/Red-Dead-Redemption-2-Spiel-59923/News/Einmalige-Einblicke-in-die-Entwicklung-durch-Dan-Houser-1485716/",
-    "title": "RDR2&#x3a; Einmalige Einblicke in die Entwicklung durch Dan Houser - &#x22;Wir lagen massiv &#xfc;ber dem Budget&#x22;",
+    "title": "RDR2: Einmalige Einblicke in die Entwicklung durch Dan Houser - \"Wir lagen massiv über dem Budget\"",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-04T10:15:00.000Z",
     "summary": "In einem neuen Interview mit Lex Fridman spricht Ex-Rockstar-Chefautor Dan Houser offen &#xfc;ber die schwierige Entwicklung von Red Dead Redemption 2",
@@ -761,7 +831,7 @@
   },
   {
     "id": "https://www.4p.de/news/red-dead-redemption-2-erfinder-dan-houser-haette-lieber-keinen-nachfolger-waere-traurig/3355836",
-    "title": "Red Dead Redemption 3: &#8222;Wäre traurig&#8220; – Darum will der Erfinder niemals einen Nachfolger sehen",
+    "title": "Red Dead Redemption 3: „Wäre traurig“ – Darum will der Erfinder niemals einen Nachfolger sehen",
     "source": "4P",
     "publicationDate": "2025-11-04T10:11:36.000Z",
     "summary": "Ob Red Dead Redemption 2 jemals eine Fortsetzung erhält, steht in den Sternen. Der Erfinder würde aber am liebsten darauf verzichten.",
@@ -811,7 +881,7 @@
   },
   {
     "id": "https://www.giga.de/tipp/afk-journey-alle-codes-fuer-gold-diamanten/",
-    "title": "AFK Journey: Alle Codes für Gold &amp; Diamanten (November 2025)",
+    "title": "AFK Journey: Alle Codes für Gold & Diamanten (November 2025)",
     "source": "GIGA Games",
     "publicationDate": "2025-11-04T10:08:55.000Z",
     "summary": "Mit unseren Codes für AFK Journey startet ihr eure Reise ins Rollenspiel mit jeder Menge Gold und Diamanten. Oder ihr holt euch dank unserer aktuellen",
@@ -871,7 +941,7 @@
   },
   {
     "id": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/WoW-Midnight-erfuellt-Fan-Traeume-Alte-Blutelfen-Waffen-in-neuem-Look-1485711/",
-    "title": "WoW&#x3a; Midnight erf&#xfc;llt Fan-Tr&#xe4;ume - Alte Blutelfen-Waffen in neuem Look",
+    "title": "WoW: Midnight erfüllt Fan-Träume - Alte Blutelfen-Waffen in neuem Look",
     "source": "Buffed",
     "publicationDate": "2025-11-04T10:00:00.000Z",
     "summary": "WoW&#x3a; Midnight wird f&#xfc;r Transmog-Fans ein echtes Highlight&#x21; Heute zeigen wir euch ein paar neue Waffenmodelle, die ihr schon bald als sc",
@@ -961,7 +1031,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/Grafikkarten-Grafikkarte-97980/News/Asus-ROG-XG-Mobile-eGPU-RTX-50-1485698/",
-    "title": "Externe Grafikeinheit im Taschenformat&#x3a; Asus ROG XG Mobile &#x28;2025&#x29; startet",
+    "title": "Externe Grafikeinheit im Taschenformat: Asus ROG XG Mobile (2025) startet",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-04T09:45:00.000Z",
     "summary": "Asus pr&#xe4;sentiert die ROG XG Mobile &#x28;2025&#x29;, eine externe Grafikeinheit im Kompaktformat mit Thunderbolt 5 und Nvidias RTX-50-Serie. Die ",
@@ -1031,7 +1101,7 @@
   },
   {
     "id": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/wow-hotfixes-the-war-within-priester-legion-remix-mop-classic-1485713/",
-    "title": "WoW&#x3a; Diszi-Priester, Legion Remix und MoP Classic - Hotfixes vom 4. November",
+    "title": "WoW: Diszi-Priester, Legion Remix und MoP Classic - Hotfixes vom 4. November",
     "source": "Buffed",
     "publicationDate": "2025-11-04T09:30:00.000Z",
     "summary": "In den aktuellen WoW Hotfixes bekommt der Disziplin-Priester einige der seltenen Balancing-Anpassungen. Auch der Legion Remix und MoP sind dabei.",
@@ -1061,7 +1131,7 @@
   },
   {
     "id": "https://pixelcritics.com/world-of-tanks-trifft-auf-the-walking-dead-holt-euch-rick-daryl-als-besatzung/",
-    "title": "World of Tanks trifft auf The Walking Dead: Holt euch Rick &#038; Daryl als Besatzung!",
+    "title": "World of Tanks trifft auf The Walking Dead: Holt euch Rick & Daryl als Besatzung!",
     "source": "PixelCritics",
     "publicationDate": "2025-11-04T09:30:00.000Z",
     "summary": "Im Rahmen eines epischen Crossovers mit AMCs The Walking Dead können Spieler von World of Tanks vom 6. bis 17. November legendäre Charaktere wie Rick ",
@@ -1081,7 +1151,7 @@
   },
   {
     "id": "https://www.pcgames.de/Battlefield-6-Spiel-75270/News/XP-Exploit-in-Strikepoint-1485710/",
-    "title": "Battlefield 6 Season 1&#x3a; Entwickler reagieren auf massiven XP-Exploit",
+    "title": "Battlefield 6 Season 1: Entwickler reagieren auf massiven XP-Exploit",
     "source": "PC Games",
     "publicationDate": "2025-11-04T09:29:00.000Z",
     "summary": "Im erst k&#xfc;rzlich ver&#xf6;ffentlichten Strikepoint-Modus von Battlefield 6 gibt es eine L&#xfc;cke, die zahlreiche Fans ausnutzen. Das sorgt f&#x",
@@ -1091,7 +1161,7 @@
   },
   {
     "id": "https://www.gamezone.de/Battlefield-6-Spiel-75270/News/XP-Exploit-in-Strikepoint-1485710/",
-    "title": "Battlefield 6 Season 1&#x3a; Entwickler reagieren auf massiven XP-Exploit",
+    "title": "Battlefield 6 Season 1: Entwickler reagieren auf massiven XP-Exploit",
     "source": "GameZone",
     "publicationDate": "2025-11-04T09:29:00.000Z",
     "summary": "Im erst k&#xfc;rzlich ver&#xf6;ffentlichten Strikepoint-Modus von Battlefield 6 gibt es eine L&#xfc;cke, die zahlreiche Fans ausnutzen. Das sorgt f&#x",
@@ -1101,7 +1171,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Battlefield-6-Spiel-75270/News/XP-Exploit-in-Strikepoint-1485710/",
-    "title": "Battlefield 6 Season 1&#x3a; Entwickler reagieren auf massiven XP-Exploit",
+    "title": "Battlefield 6 Season 1: Entwickler reagieren auf massiven XP-Exploit",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-04T09:29:00.000Z",
     "summary": "Im erst k&#xfc;rzlich ver&#xf6;ffentlichten Strikepoint-Modus von Battlefield 6 gibt es eine L&#xfc;cke, die zahlreiche Fans ausnutzen. Das sorgt f&#x",
@@ -1171,7 +1241,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/Playstation-5-Konsolen-265878/News/Tiny-PS5-Redux-Not-From-Concentrate-3D-Druck-Vorlage-1485649/",
-    "title": "&#x22;Tiny PS5 Redux&#x22;&#x3a; Modder schrumpft Playstation 5 auf 6 Liter und verkauft die Vorlage",
+    "title": "\"Tiny PS5 Redux\": Modder schrumpft Playstation 5 auf 6 Liter und verkauft die Vorlage",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-04T09:15:00.000Z",
     "summary": "Der Modder &#x22;Not From Concentrate&#x22; &#xfc;berarbeitet die &#x22;Tiny PS5&#x22; mit einer Redux-Version, die zwar gr&#xf6;&#xdf;er als das ursp",
@@ -1311,7 +1381,7 @@
   },
   {
     "id": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/spielerzahlen-rekord-analyse-2025-1485702/",
-    "title": "WoW erreicht neuen H&#xf6;hepunkt - Analyst enth&#xfc;llt beeindruckende Zahlen",
+    "title": "WoW erreicht neuen Höhepunkt - Analyst enthüllt beeindruckende Zahlen",
     "source": "Buffed",
     "publicationDate": "2025-11-04T09:00:00.000Z",
     "summary": "Wie gut geht es WoW nach &#xfc;ber 20 Jahren&#x3f; Neue Daten deuten auf ein absolutes Rekordhoch f&#xfc;r den MMO-K&#xf6;nig - was steckt dahinter&#x",
@@ -1321,7 +1391,7 @@
   },
   {
     "id": "https://www.nintendolife.com/news/2025/11/switch-is-poised-to-be-nintendos-best-selling-console-of-all-time",
-    "title": "Switch Is Poised To Be Nintendo&#039;s Best-Selling Console Of All Time",
+    "title": "Switch Is Poised To Be Nintendo's Best-Selling Console Of All Time",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-04T09:00:00.000Z",
     "summary": "Only 10,000 units separate it from the DS.We've been positively itching to see the latest financial report from Nintendo, as we had expected the Switc",
@@ -1461,7 +1531,7 @@
   },
   {
     "id": "https://www.pcgames.de/Spiele-Thema-239104/News/Release-von-I-Hate-This-Place-verschoben-1485701/",
-    "title": "I Hate This Place&#x3a; Release des Survival-Horrorspiels verschoben",
+    "title": "I Hate This Place: Release des Survival-Horrorspiels verschoben",
     "source": "PC Games",
     "publicationDate": "2025-11-04T08:32:00.000Z",
     "summary": "Zahlreiche Fans warten bereits seit einiger Zeit auf den Release eines vielversprechenden Survival-Horrorspiels. Doch kurz vor der geplanten Ver&#xf6;",
@@ -1471,7 +1541,7 @@
   },
   {
     "id": "https://www.gamezone.de/Spiele-Thema-239104/News/Release-von-I-Hate-This-Place-verschoben-1485701/",
-    "title": "I Hate This Place&#x3a; Release des Survival-Horrorspiels verschoben",
+    "title": "I Hate This Place: Release des Survival-Horrorspiels verschoben",
     "source": "GameZone",
     "publicationDate": "2025-11-04T08:32:00.000Z",
     "summary": "Zahlreiche Fans warten bereits seit einiger Zeit auf den Release eines vielversprechenden Survival-Horrorspiels. Doch kurz vor der geplanten Ver&#xf6;",
@@ -1481,7 +1551,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/Spiele-Entwicklung-Thema-35261/News/Nachfolger-JC5-No-Go-Sundberg-1485661/",
-    "title": "Just Cause&#x3a; Ein f&#xfc;nfter Teil w&#xe4;re laut Studiogr&#xfc;nder ein &#x22;No-Go&#x22;",
+    "title": "Just Cause: Ein fünfter Teil wäre laut Studiogründer ein \"No-Go\"",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-04T08:31:00.000Z",
     "summary": "Just Cause 5 wird laut dem Gr&#xfc;nder des verantwortlichen Entwicklerstudios Avalanche wohl nie erscheinen. Ein neuer Teil w&#xe4;re nach den zahlre",
@@ -1531,7 +1601,7 @@
   },
   {
     "id": "https://www.4p.de/news/mortal-kombat-legacy-kollection-versagt-auf-steam-von-fans-zerrissen/3355697",
-    "title": "Steam: Neuer Release von beliebter Reihe wird von Fans zerrissen – &#8222;das schlechteste Spiel, das je erschienen ist&#8220;",
+    "title": "Steam: Neuer Release von beliebter Reihe wird von Fans zerrissen – „das schlechteste Spiel, das je erschienen ist“",
     "source": "4P",
     "publicationDate": "2025-11-04T08:29:32.000Z",
     "summary": "Griff ins Klo statt in den Goldtopf: Langjährige Fans zeigen sich von diesem Release auf Steam gerade ziemlich enttäuscht.",
@@ -1591,7 +1661,7 @@
   },
   {
     "id": "https://www.4p.de/news/playstation-plus-alle-gratis-spiele-des-jahres-hitzige-debatte-waren-muell/3355757",
-    "title": "PlayStation Plus: User zeigt alle Gratis-Spiele des Jahres und sorgt für hitzige Debatte – &#8222;die meisten waren Müll&#8220;",
+    "title": "PlayStation Plus: User zeigt alle Gratis-Spiele des Jahres und sorgt für hitzige Debatte – „die meisten waren Müll“",
     "source": "4P",
     "publicationDate": "2025-11-04T08:25:26.000Z",
     "summary": "Wie gut fandet ihr die PlayStation Plus-Spiele dieses Jahr? Darüber diskutieren jetzt zahlreiche Mitglieder des Abonnenments.",
@@ -1621,7 +1691,7 @@
   },
   {
     "id": "https://www.buffed.de/GTA-6-Spiel-55239/News/gta-london-amerika-dan-houser-1485655/",
-    "title": "Gro&#xdf;er Wunsch der GTA-Fans wird nicht erf&#xfc;llt&#x3a; &#x22;Das wird sich niemals &#xe4;ndern&#x22;",
+    "title": "Großer Wunsch der GTA-Fans wird nicht erfüllt: \"Das wird sich niemals ändern\"",
     "source": "Buffed",
     "publicationDate": "2025-11-04T08:23:00.000Z",
     "summary": "Entwickler von GTA geht auf einen der gro&#xdf;en W&#xfc;nsche der Community ein und erkl&#xe4;rt, warum der wohl nie in Erf&#xfc;llung gehen w&#xfc;r",
@@ -1631,7 +1701,7 @@
   },
   {
     "id": "https://www.4p.de/news/steam-neuer-shooter-hit-bringt-die-server-zum-rauchen-alles-passt-perfekt-zusammen-arc-raiders/3355694",
-    "title": "Steam: Neuer Shooter-Hit bringt die Server zum Rauchen – &#8222;Alles passt perfekt zusammen&#8220;",
+    "title": "Steam: Neuer Shooter-Hit bringt die Server zum Rauchen – „Alles passt perfekt zusammen“",
     "source": "4P",
     "publicationDate": "2025-11-04T08:21:38.000Z",
     "summary": "Shooter-Hit feiert großen Erfolg am Wochenende.",
@@ -1651,7 +1721,7 @@
   },
   {
     "id": "https://www.playstationinfo.de/2025/11/04/playstation-plus-essential-sony-veroeffentlicht-die-spiele-fuer-november-2025/",
-    "title": "PlayStation Plus Essential &#8211; Sony veröffentlicht die Spiele für November 2025",
+    "title": "PlayStation Plus Essential – Sony veröffentlicht die Spiele für November 2025",
     "source": "PlayStationInfo",
     "publicationDate": "2025-11-04T08:19:31.000Z",
     "summary": "PlayStation Plus Essential &#8211; Sony veröffentlicht die Spiele für November 2025\nPlayStation Info\nInhaber einer gültigen PlayStation Plus Essential",
@@ -1701,7 +1771,7 @@
   },
   {
     "id": "https://www.play3.de/2025/11/04/switch-2-switch-beeindruckende-verkaufszahlen-verkuendet-das-sind-die-erfolgreichsten-spiele/",
-    "title": "Switch 2 &#038; Switch: Beeindruckende Verkaufszahlen verkündet – das sind die erfolgreichsten Spiele",
+    "title": "Switch 2 & Switch: Beeindruckende Verkaufszahlen verkündet – das sind die erfolgreichsten Spiele",
     "source": "Play3",
     "publicationDate": "2025-11-04T08:15:03.000Z",
     "summary": "Schon wenige Tage nach dem Launch kristallisierte sich heraus, dass Nintendo mit der Switch 2 nicht weniger als den erfolgreichsten [&#8230;]\nDer Beit",
@@ -1731,7 +1801,7 @@
   },
   {
     "id": "https://www.4p.de/news/resident-evil-9-crossover-fan-albtraum-einfach-nur-mist-fortnite-epic-games-store/3355704",
-    "title": "Neues Resident Evil-Crossover ist ein einziger Fan-Albtraum – &#8222;einfach nur Mist&#8220;",
+    "title": "Neues Resident Evil-Crossover ist ein einziger Fan-Albtraum – „einfach nur Mist“",
     "source": "4P",
     "publicationDate": "2025-11-04T08:13:00.000Z",
     "summary": "Grace Ashcrofts Taschenlampe wippt hin und her – da rückt in den Lichtkegel ... ein quietschbunter Charakter? Episches für Resident Evil Requiem.",
@@ -1761,7 +1831,7 @@
   },
   {
     "id": "https://www.4p.de/news/half-life-3-erster-trailer-in-aussicht-lasst-uns-beten-tyler-mcvicker-hlx-files/3355780",
-    "title": "Half-Life 3: Erster Trailer endlich in Aussicht – &#8222;Lasst uns beten&#8220;",
+    "title": "Half-Life 3: Erster Trailer endlich in Aussicht – „Lasst uns beten“",
     "source": "4P",
     "publicationDate": "2025-11-04T08:11:00.000Z",
     "summary": "Abgestandener Geschmack aus der Gerüchteküche – oder schwingt Gordon tatsächlich bald die Brechstange? Half-Life 3 lebt ... also, vielleicht.",
@@ -1771,7 +1841,7 @@
   },
   {
     "id": "https://www.play3.de/2025/11/04/ea-sports-fc-27-playtest-gestartet-open-world-modus-geplant/",
-    "title": "EA Sports FC 27: Playtest gestartet &#8211; Open-World-Modus geplant?",
+    "title": "EA Sports FC 27: Playtest gestartet – Open-World-Modus geplant?",
     "source": "Play3",
     "publicationDate": "2025-11-04T08:10:03.000Z",
     "summary": "Electronic Arts arbeitet am Live-Service von „EA Sports FC 26“ und erprobt zugleich neue Funktionen, die für spätere Teile der [&#8230;]\nDer Beitrag E",
@@ -1791,7 +1861,7 @@
   },
   {
     "id": "https://www.4p.de/news/gta-6-droht-die-naechste-verschiebung-insider-bringt-fans-ins-schwitzen-koennte-zu-verzoegerungen-kommen/3355809",
-    "title": "GTA 6: Droht die nächste Verschiebung? Insider bringt Fans ins Schwitzen – &#8222;Könnte zu Verzögerungen kommen&#8220;",
+    "title": "GTA 6: Droht die nächste Verschiebung? Insider bringt Fans ins Schwitzen – „Könnte zu Verzögerungen kommen“",
     "source": "4P",
     "publicationDate": "2025-11-04T08:08:51.000Z",
     "summary": "Erscheint GTA 6 nun im Mai oder nicht? Laut einem neuen Insider könnte sich der Release des Open World-Krachers doch noch verzögern.",
@@ -1871,7 +1941,7 @@
   },
   {
     "id": "https://www.pcgames.de/Game-of-Thrones-Serie-259930/News/hbo-max-game-of-thrones-a-knight-of-the-seven-kingdoms-streamen-deutsch-1485700/",
-    "title": "Aus f&#xfc;r Game of Thrones und House of the Dragon auf Sky und Wow TV - HBO Max startet in Deutschland in weniger als 100 Tagen",
+    "title": "Aus für Game of Thrones und House of the Dragon auf Sky und Wow TV - HBO Max startet in Deutschland in weniger als 100 Tagen",
     "source": "PC Games",
     "publicationDate": "2025-11-04T07:57:00.000Z",
     "summary": "Die neue Game of Thrones-Serie und viele weitere Serien und Filme kann man k&#xfc;nftig nicht mehr auf Sky und Wow TV streamen.",
@@ -1881,7 +1951,7 @@
   },
   {
     "id": "https://www.gamezone.de/Game-of-Thrones-Serie-259930/News/hbo-max-game-of-thrones-a-knight-of-the-seven-kingdoms-streamen-deutsch-1485700/",
-    "title": "Aus f&#xfc;r Game of Thrones und House of the Dragon auf Sky und Wow TV - HBO Max startet in Deutschland in weniger als 100 Tagen",
+    "title": "Aus für Game of Thrones und House of the Dragon auf Sky und Wow TV - HBO Max startet in Deutschland in weniger als 100 Tagen",
     "source": "GameZone",
     "publicationDate": "2025-11-04T07:57:00.000Z",
     "summary": "Die neue Game of Thrones-Serie und viele weitere Serien und Filme kann man k&#xfc;nftig nicht mehr auf Sky und Wow TV streamen.",
@@ -1891,7 +1961,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Game-of-Thrones-Serie-259930/News/hbo-max-game-of-thrones-a-knight-of-the-seven-kingdoms-streamen-deutsch-1485700/",
-    "title": "Aus f&#xfc;r Game of Thrones und House of the Dragon auf Sky und Wow TV - HBO Max startet in Deutschland in weniger als 100 Tagen",
+    "title": "Aus für Game of Thrones und House of the Dragon auf Sky und Wow TV - HBO Max startet in Deutschland in weniger als 100 Tagen",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-04T07:57:00.000Z",
     "summary": "Die neue Game of Thrones-Serie und viele weitere Serien und Filme kann man k&#xfc;nftig nicht mehr auf Sky und Wow TV streamen.",
@@ -1931,7 +2001,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/Geforce-RTX-4090-Grafikkarte-279170/News/Reparatur-Bericht-1485632/",
-    "title": "Geforce RTX 4090&#x3a; Reparaturbericht einer misshandelten Grafikkarte",
+    "title": "Geforce RTX 4090: Reparaturbericht einer misshandelten Grafikkarte",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-04T07:45:00.000Z",
     "summary": "Der Youtube-Kanal Northwest Repair zeigt in einem aktuellen Video, wie er sich einer besonders &#xfc;bel zugerichteten Geforce RTX 4090 annimmt. Ein s",
@@ -2061,7 +2131,7 @@
   },
   {
     "id": "https://jpgames.de/2025/11/unfassbare-zahlen-nintendo-legt-switch-2-verkaeufe-vor-und-muss-die-prognosen-korrigieren/",
-    "title": "Unfassbare Zahlen: Nintendo legt &#8222;Switch 2&#8220;-Verkäufe vor und muss die Prognosen korrigieren",
+    "title": "Unfassbare Zahlen: Nintendo legt „Switch 2“-Verkäufe vor und muss die Prognosen korrigieren",
     "source": "JPGames",
     "publicationDate": "2025-11-04T07:10:00.000Z",
     "summary": "Es läuft ganz gut.\nDer Beitrag Unfassbare Zahlen: Nintendo legt &#8222;Switch 2&#8220;-Verkäufe vor und muss die Prognosen korrigieren erschien zuerst",
@@ -2111,7 +2181,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/GTA-6-Spiel-55239/News/Erfinder-Dan-Houser-darum-wird-Grand-Theft-Auto-nie-Europa-erobern-1485677/",
-    "title": "Dan Houser erkl&#xe4;rt, warum GTA nur in Amerika funktioniert - und sich trotzdem immer neu erfindet",
+    "title": "Dan Houser erklärt, warum GTA nur in Amerika funktioniert - und sich trotzdem immer neu erfindet",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-04T07:01:00.000Z",
     "summary": "Ex-Rockstar-Chefautor Dan Houser spricht &#xfc;ber die kreative DNA von Grand Theft Auto - warum die Serie nur in den USA funktioniert und wie sie es ",
@@ -2141,7 +2211,7 @@
   },
   {
     "id": "https://www.pcgames.de/Steam-Software-69900/News/Warhammer-Vermintide-2-gratis-bei-Steam-1485699/",
-    "title": "Koop-Hit Warhammer Vermintide 2 k&#xf6;nnte bald gratis sein",
+    "title": "Koop-Hit Warhammer Vermintide 2 könnte bald gratis sein",
     "source": "PC Games",
     "publicationDate": "2025-11-04T06:59:00.000Z",
     "summary": "Derzeit deutet einiges darauf hin, dass ihr euch schon bald ein gro&#xdf;artiges Spielegeschenk bei Steam erwartet. Gerade Fans von z&#xfc;nftiger Act",
@@ -2151,7 +2221,7 @@
   },
   {
     "id": "https://www.gamezone.de/Steam-Software-69900/News/Warhammer-Vermintide-2-gratis-bei-Steam-1485699/",
-    "title": "Koop-Hit Warhammer Vermintide 2 k&#xf6;nnte bald gratis sein",
+    "title": "Koop-Hit Warhammer Vermintide 2 könnte bald gratis sein",
     "source": "GameZone",
     "publicationDate": "2025-11-04T06:59:00.000Z",
     "summary": "Derzeit deutet einiges darauf hin, dass ihr euch schon bald ein gro&#xdf;artiges Spielegeschenk bei Steam erwartet. Gerade Fans von z&#xfc;nftiger Act",
@@ -2201,7 +2271,7 @@
   },
   {
     "id": "https://www.4p.de/news/steam-verschenkt-vier-neue-spiele-eines-davon-ist-ein-echter-knaller/3355123",
-    "title": "Steam verschenkt vier neue Spiele – eines davon ist ein &#8222;echter Knaller&#8220;",
+    "title": "Steam verschenkt vier neue Spiele – eines davon ist ein „echter Knaller“",
     "source": "4P",
     "publicationDate": "2025-11-04T06:31:34.000Z",
     "summary": "Gratis macht hellhörig: Auf Steam bekommt ihr derzeit wieder vier Spiele einfach geschenkt. Und eines davon ist sogar richtig gut.",
@@ -2291,7 +2361,7 @@
   },
   {
     "id": "https://www.pcgames.de/Spider-Man-Brands-144260/News/teil-4-kinostart-mobber-Flash-Thompson-schauspieler-Tony-Revolori-1485628/",
-    "title": "Spider-Man 4&#x3a; Schr&#xe4;ger Schulhof-Mobber Flash Thompson kehrt zur&#xfc;ck - Ger&#xfc;cht",
+    "title": "Spider-Man 4: Schräger Schulhof-Mobber Flash Thompson kehrt zurück - Gerücht",
     "source": "PC Games",
     "publicationDate": "2025-11-04T06:02:00.000Z",
     "summary": "Ein kontroverser Charakter der letzten Spider-Man-Trilogie soll angeblich zur&#xfc;ckkehren.",
@@ -2301,7 +2371,7 @@
   },
   {
     "id": "https://www.gamezone.de/Spider-Man-Brands-144260/News/teil-4-kinostart-mobber-Flash-Thompson-schauspieler-Tony-Revolori-1485628/",
-    "title": "Spider-Man 4&#x3a; Schr&#xe4;ger Schulhof-Mobber Flash Thompson kehrt zur&#xfc;ck - Ger&#xfc;cht",
+    "title": "Spider-Man 4: Schräger Schulhof-Mobber Flash Thompson kehrt zurück - Gerücht",
     "source": "GameZone",
     "publicationDate": "2025-11-04T06:02:00.000Z",
     "summary": "Ein kontroverser Charakter der letzten Spider-Man-Trilogie soll angeblich zur&#xfc;ckkehren.",
@@ -2311,7 +2381,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Spider-Man-Brands-144260/News/teil-4-kinostart-mobber-Flash-Thompson-schauspieler-Tony-Revolori-1485628/",
-    "title": "Spider-Man 4&#x3a; Schr&#xe4;ger Schulhof-Mobber Flash Thompson kehrt zur&#xfc;ck - Ger&#xfc;cht",
+    "title": "Spider-Man 4: Schräger Schulhof-Mobber Flash Thompson kehrt zurück - Gerücht",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-04T06:02:00.000Z",
     "summary": "Ein kontroverser Charakter der letzten Spider-Man-Trilogie soll angeblich zur&#xfc;ckkehren.",
@@ -2331,7 +2401,7 @@
   },
   {
     "id": "https://www.play3.de/2025/11/04/arc-raiders-presse-spieler-begeistert-darum-kommt-der-extraction-shooter-so-gut-an/",
-    "title": "ARC Raiders: Presse &#038; Spieler begeistert – darum kommt der Extraction-Shooter so gut an",
+    "title": "ARC Raiders: Presse & Spieler begeistert – darum kommt der Extraction-Shooter so gut an",
     "source": "Play3",
     "publicationDate": "2025-11-04T06:00:00.000Z",
     "summary": "Wenige Tage nach dem Release von &#8222;ARC Raiders&#8220; sind nun auf Metacritic die ersten Testwertungen verfügbar – genau genommen fünf [&#8230;]\n",
@@ -2341,7 +2411,7 @@
   },
   {
     "id": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/So-schoen-ist-Silbermond-in-WoW-Midnight-mit-Video-1485647/",
-    "title": "So sch&#xf6;n ist Silbermond in WoW&#x3a; Midnight - mit Video&#x21;",
+    "title": "So schön ist Silbermond in WoW: Midnight - mit Video!",
     "source": "Buffed",
     "publicationDate": "2025-11-04T06:00:00.000Z",
     "summary": "Wenn ihr neugierig seid, wie sich Silbermond in der kommenden WoW-Erweiterung ver&#xe4;ndert, solltet ihr euch dieses spannende Video nicht entgehen l",
@@ -2391,7 +2461,7 @@
   },
   {
     "id": "https://www.pcgames.de/Godzilla-Thema-277631/News/wo-streamen-teaser-trailer-zweiter-Teil-1485617/",
-    "title": "Erster Teaser-Trailer&#x3a; Godzilla Minus One erh&#xe4;lt Fortsetzung, Titel bekannt",
+    "title": "Erster Teaser-Trailer: Godzilla Minus One erhält Fortsetzung, Titel bekannt",
     "source": "PC Games",
     "publicationDate": "2025-11-04T05:42:00.000Z",
     "summary": "Der erste Teaser-Trailer zur Fortsetzung des bestbewerteten Godzilla-Films der letzten Jahre verr&#xe4;t den Filmtitel.",
@@ -2401,7 +2471,7 @@
   },
   {
     "id": "https://www.gamezone.de/Godzilla-Thema-277631/News/wo-streamen-teaser-trailer-zweiter-Teil-1485617/",
-    "title": "Erster Teaser-Trailer&#x3a; Godzilla Minus One erh&#xe4;lt Fortsetzung, Titel bekannt",
+    "title": "Erster Teaser-Trailer: Godzilla Minus One erhält Fortsetzung, Titel bekannt",
     "source": "GameZone",
     "publicationDate": "2025-11-04T05:42:00.000Z",
     "summary": "Der erste Teaser-Trailer zur Fortsetzung des bestbewerteten Godzilla-Films der letzten Jahre verr&#xe4;t den Filmtitel.",
@@ -2411,7 +2481,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Godzilla-Thema-277631/News/wo-streamen-teaser-trailer-zweiter-Teil-1485617/",
-    "title": "Erster Teaser-Trailer&#x3a; Godzilla Minus One erh&#xe4;lt Fortsetzung, Titel bekannt",
+    "title": "Erster Teaser-Trailer: Godzilla Minus One erhält Fortsetzung, Titel bekannt",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-04T05:42:00.000Z",
     "summary": "Der erste Teaser-Trailer zur Fortsetzung des bestbewerteten Godzilla-Films der letzten Jahre verr&#xe4;t den Filmtitel.",
@@ -2431,7 +2501,7 @@
   },
   {
     "id": "https://www.buffed.de/Disney-Plus-Brands-276487/Specials/Predator-Badlands-Yautja-Saga-Kino-Release-1485671/",
-    "title": "Predator Badlands&#x3a; Das n&#xe4;chste Kapitel der Yautja-Saga erscheint am 6. November im Kino",
+    "title": "Predator Badlands: Das nächste Kapitel der Yautja-Saga erscheint am 6. November im Kino",
     "source": "Buffed",
     "publicationDate": "2025-11-04T05:30:00.000Z",
     "summary": "Am 6. November 2025 startet in Deutschland der n&#xe4;chste gro&#xdf;e Teil der Predator-Reihe, Predator&#x3a; Badlands, in den Kinos. Unter der Regie",
@@ -2511,7 +2581,7 @@
   },
   {
     "id": "https://www.nintendolife.com/news/2025/11/street-fighter-6-x-ghosts-n-goblins-collab-announced-includes-classic-game-and-more",
-    "title": "Street Fighter 6 X Ghosts &#039;n Goblins Collab Announced, Includes Classic Game And More",
+    "title": "Street Fighter 6 X Ghosts 'n Goblins Collab Announced, Includes Classic Game And More",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-04T05:00:00.000Z",
     "summary": "Ghouls 'n Ghosts returns.Following Halloween last week, Capcom has now released a Ghosts 'n Goblins Gala Fighter Pass for Street Fighter 6.This pass (",
@@ -2541,7 +2611,7 @@
   },
   {
     "id": "https://www.gematsu.com/2025/11/darwins-paradox-drops-switch-version-for-switch-2-delayed-to-2026",
-    "title": "Darwin&#8217;s Paradox! drops Switch version for Switch 2, delayed to 2026",
+    "title": "Darwin’s Paradox! drops Switch version for Switch 2, delayed to 2026",
     "source": "Gematsu",
     "publicationDate": "2025-11-04T04:21:30.000Z",
     "summary": "Publisher Konami and developer ZeDrimeTim have delayed action adventure platformer Darwin&#8217;s Paradox! from its previously &#8230;\nSource",
@@ -2551,7 +2621,7 @@
   },
   {
     "id": "https://www.gameswirtschaft.de/wirtschaft/saturn-filialen-deutschland-liste-mediamarkt-umbau-041125/",
-    "title": "Saturn-Ticker: Wo es noch Saturn-Märkte gibt &#8211; Stand: Oktober 2025",
+    "title": "Saturn-Ticker: Wo es noch Saturn-Märkte gibt – Stand: Oktober 2025",
     "source": "GamesWirtschaft",
     "publicationDate": "2025-11-04T04:10:09.000Z",
     "summary": "Bis Ende 2025 wird es keine 60 Saturn-Märkte mehr in Deutschland geben: Allein in diesem Jahr wurden 30 Filialen geschlossen oder zum MediaMarkt umgeb",
@@ -2591,7 +2661,7 @@
   },
   {
     "id": "https://www.nintendolife.com/news/2025/11/kirby-64-and-kirbys-dream-land-3-switch-online-icons-now-available",
-    "title": "Kirby 64 And Kirby&#039;s Dream Land 3 Switch Online Icons Now Available",
+    "title": "Kirby 64 And Kirby's Dream Land 3 Switch Online Icons Now Available",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-04T03:30:00.000Z",
     "summary": "\"Play to unlock\".If you're a fan of the pink puffball Kirby, you won't want to miss the latest Switch Online icons. Nintendo is now offering new desig",
@@ -2621,7 +2691,7 @@
   },
   {
     "id": "https://www.gematsu.com/2025/11/kowloons-gate-suzaku-for-switch-physical-edition-crowdfunding-campaign-launches-november-11",
-    "title": "Kowloon&#8217;s Gate: Suzaku for Switch physical edition crowdfunding campaign launches November 11",
+    "title": "Kowloon’s Gate: Suzaku for Switch physical edition crowdfunding campaign launches November 11",
     "source": "Gematsu",
     "publicationDate": "2025-11-04T02:37:46.000Z",
     "summary": "JETMAN has officially announced the Switch version of Kowloon&#8217;s Gate: Suzaku, which was first confirmed &#8230;\nSource",
@@ -2641,7 +2711,7 @@
   },
   {
     "id": "https://www.nintendolife.com/news/2025/11/nintendo-music-updated-with-animal-crossings-3ds-soundtrack",
-    "title": "Nintendo Music Updated With Animal Crossing&#039;s 3DS Soundtrack",
+    "title": "Nintendo Music Updated With Animal Crossing's 3DS Soundtrack",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-04T01:30:00.000Z",
     "summary": "Nearly five hours of music.Last week, Nintendo surprised fans with the announcement Animal Crossing: New Horizons would be getting a 3.0 Update and Sw",
@@ -2681,7 +2751,7 @@
   },
   {
     "id": "https://kotaku.com/apples-official-partner-selling-off-24000mah-power-bank-now-going-for-mere-pennies-2000640848",
-    "title": "Apple&#8217;s Official Partner Selling Off 24,000mAh Power Bank, Now Going for Mere Pennies",
+    "title": "Apple’s Official Partner Selling Off 24,000mAh Power Bank, Now Going for Mere Pennies",
     "source": "Kotaku",
     "publicationDate": "2025-11-04T00:44:57.000Z",
     "summary": "\nKeeping your devices charged on the go has never been easier.\nThe post Apple&#8217;s Official Partner Selling Off 24,000mAh Power Bank, Now Going for",
@@ -2701,7 +2771,7 @@
   },
   {
     "id": "https://www.nintendolife.com/news/2025/11/mario-kart-world-and-donkey-kong-bananza-shortlisted-for-console-game-of-the-year",
-    "title": "Mario Kart World And Donkey Kong Bananza Shortlisted For &#039;Console Game Of The Year&#039;",
+    "title": "Mario Kart World And Donkey Kong Bananza Shortlisted For 'Console Game Of The Year'",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-04T00:30:00.000Z",
     "summary": "Update: DK is in the running for 'Ultimate GOTY'.The Switch 2 game library has already scooped up some awards this year, and now that we're at the tai",
@@ -2741,7 +2811,7 @@
   },
   {
     "id": "https://kotaku.com/ipads-meet-real-competition-amazons-fire-max-11-now-selling-for-pennies-2000640865",
-    "title": "iPads Meet Real Competition, Amazon&#8217;s Fire Max 11 Now Selling for Pennies",
+    "title": "iPads Meet Real Competition, Amazon’s Fire Max 11 Now Selling for Pennies",
     "source": "Kotaku",
     "publicationDate": "2025-11-04T00:05:34.000Z",
     "summary": "\nWhether you're looking to tackle some deadlines on the go or want to keep your kids entertained on the road, the Amazon Fire Max 11 tablet does it al",
@@ -2767,16 +2837,6 @@
     "summary": "\nStay productive on the go with this 11-inch Apple iPad, now going for less.\nThe post Apple Has Dropped Its 11-inch iPad a New Record Low, Practically",
     "link": "https://kotaku.com/apple-has-dropped-its-11-inch-ipad-a-new-record-low-practically-giving-it-away-2000640860",
     "imageUrl": "https://kotaku.com/app/uploads/2025/11/11-ipad-deal-1280x853.jpg",
-    "language": "en"
-  },
-  {
-    "id": "https://www.polygon.com/ea-creative-control-saudi-arabia-private-equity-new-owners/",
-    "title": "EA will 'maintain creative control' under new owners",
-    "source": "Polygon",
-    "publicationDate": "2025-11-03T23:30:18.000Z",
-    "summary": "Electronic Arts updated employees on possible culture change under Saudi and private equity ownership.",
-    "link": "https://www.polygon.com/ea-creative-control-saudi-arabia-private-equity-new-owners/",
-    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/chorus/uploads/chorus_asset/file/22652623/GettyImages_970613538.jpg",
     "language": "en"
   },
   {
@@ -2811,7 +2871,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/Retrospektive-Thema-214694/News/Der-erste-tragbare-PC-und-die-Dell-Gruendung-PCGH-Retro-04-November-665670/",
-    "title": "Der erste tragbare PC, die Dell-Gr&#xfc;ndung und der Origin-Shitstorm &#x28;PCGH-Retro, 04. November&#x29;",
+    "title": "Der erste tragbare PC, die Dell-Gründung und der Origin-Shitstorm (PCGH-Retro, 04. November)",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-03T23:01:00.000Z",
     "summary": "Der Origin-Shitstorm, der erste tragbare PC und die Geburt der &#x22;IBM-Kompatiblen&#x22; - das geschah am 4. November. Jeden Tag wirft PC Games Hard",
@@ -2871,7 +2931,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/RAM-Hardware-154108/News/DDR6-vielleicht-erst-2030-1485696/",
-    "title": "DDR6&#x3a; Arbeitsspeicher der n&#xe4;chsten Generation erst 2030&#x3f;",
+    "title": "DDR6: Arbeitsspeicher der nächsten Generation erst 2030?",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-03T22:45:00.000Z",
     "summary": "DDR6-Arbeitsspeicher der n&#xe4;chsten Generation wird wenig &#xfc;berraschend deutlich schneller als aktueller DDR5-Arbeitsspeicher, doch k&#xf6;nnte",
@@ -2911,7 +2971,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/the-sims/creative-director-interview-ea-buyout",
-    "title": "After the EA buyout, The Sims &quot;must remain a faithful canvas&quot; for player expression, former creative director says",
+    "title": "After the EA buyout, The Sims \"must remain a faithful canvas\" for player expression, former creative director says",
     "source": "PCGamesN",
     "publicationDate": "2025-11-03T22:35:35.000Z",
     "summary": "A former designer and creative director on The Sims games says being “a medium of self-expression” is \"existential\" for the series and EA.\n\t\t\t]]>",
@@ -2951,7 +3011,7 @@
   },
   {
     "id": "https://kotaku.com/fortnite-fans-beg-each-other-not-to-buy-sidekicks-the-greed-on-display-is-disgusting-2000640910",
-    "title": "Fortnite Fans Beg Each Other Not To Buy Sidekicks: &#8216;The Greed On Display Is Disgusting&#8217;",
+    "title": "Fortnite Fans Beg Each Other Not To Buy Sidekicks: ‘The Greed On Display Is Disgusting’",
     "source": "Kotaku",
     "publicationDate": "2025-11-03T22:06:13.000Z",
     "summary": "\nThe cool new feature has stoked a surprising amount of controversy\nThe post &lt;i&gt;Fortnite&lt;/i&gt; Fans Beg Each Other Not To Buy Sidekicks: &#8",
@@ -3080,16 +3140,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.polygon.com/netease-mmo-fantastic-pixel-castle-ghostcrawler-greg-street/",
-    "title": "NetEase closing MMO studio from ex-World of Warcraft designer",
-    "source": "Polygon",
-    "publicationDate": "2025-11-03T21:13:40.000Z",
-    "summary": "Greg Street's MMO studio Fantastic Pixel Castle is shutting down, the latest painful cut from publisher NetEase.",
-    "link": "https://www.polygon.com/netease-mmo-fantastic-pixel-castle-ghostcrawler-greg-street/",
-    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/2025/11/fpc_mmo.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.gamesradar.com/games/mmo/another-mmo-dead-ex-world-of-warcraft-and-league-of-legends-leads-new-studio-will-close-its-doors-this-month-without-releasing-its-flagship-game-ghost/",
     "title": "Another MMO dead: ex-World of Warcraft and League of Legends lead's new studio \"will close its doors\" this month without releasing its flagship game Ghost",
     "source": "GamesRadar+",
@@ -3121,7 +3171,7 @@
   },
   {
     "id": "https://www.destructoid.com/some-bf6-players-annoyed-bait-switch-focus-redsec/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=some-bf6-players-annoyed-bait-switch-focus-redsec",
-    "title": "&#8216;A CoD game with a Battlefield skin&#8217;: Some BF6 players are annoyed with EA&#8217;s &#8216;bait and switch&#8217; focus on REDSEC",
+    "title": "‘A CoD game with a Battlefield skin’: Some BF6 players are annoyed with EA’s ‘bait and switch’ focus on REDSEC",
     "source": "Destructoid",
     "publicationDate": "2025-11-03T20:52:48.000Z",
     "summary": "\n\nIt's been less than a week since Battlefield's free-to-play REDSEC battle royale mode launched, but players of the paid Battlefield 6 game are not a",
@@ -3180,18 +3230,8 @@
     "language": "en"
   },
   {
-    "id": "https://www.polygon.com/fortnite-sidekick-vbucks-peels-controversy-appearance-customization/",
-    "title": "Fortnite fans are riled up over 'greedy' sidekick pets",
-    "source": "Polygon",
-    "publicationDate": "2025-11-03T20:33:51.000Z",
-    "summary": "Epic Games tests the limits of how many V-Bucks fans are willing to buy to change the appearance of their animal friends",
-    "link": "https://www.polygon.com/fortnite-sidekick-vbucks-peels-controversy-appearance-customization/",
-    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/2025/11/fortnite-peels-sidekick.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.nintendolife.com/news/2025/11/persona-5-series-sales-just-wont-slow-down-as-games-soar-past-13-million",
-    "title": "Persona 5 Series Sales Just Won&#039;t Slow Down As Games Soar Past 13 Million",
+    "title": "Persona 5 Series Sales Just Won't Slow Down As Games Soar Past 13 Million",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-03T20:15:00.000Z",
     "summary": "It's a show to remember.We're all waiting for the next mainline Persona game, but there's a reason SEGA and Atlus have sat pretty with Persona 5 for s",
@@ -3280,18 +3320,8 @@
     "language": "de"
   },
   {
-    "id": "https://www.polygon.com/yakuza-3-remake-kiwami-teruyuki-kagawa-controversy-sega/",
-    "title": "Yakuza 3 remake fans want Goh Hamazaki actor replaced after sexual harassment allegations surface",
-    "source": "Polygon",
-    "publicationDate": "2025-11-03T19:55:24.000Z",
-    "summary": "Players want Yakuza Kiwami 3 & Dark Ties actor Teruyuki Kagawa replaced due to his history of sexual misconduct",
-    "link": "https://www.polygon.com/yakuza-3-remake-kiwami-teruyuki-kagawa-controversy-sega/",
-    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/2025/11/yakuza-3.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://kotaku.com/fortnite-simpsons-mini-season-review-changes-new-map-short-2000640868",
-    "title": "Fortnite&#8217;s New Simpsons Season Is An Incredible Treat For Fans Of The Show",
+    "title": "Fortnite’s New Simpsons Season Is An Incredible Treat For Fans Of The Show",
     "source": "Kotaku",
     "publicationDate": "2025-11-03T19:51:36.000Z",
     "summary": "\nIt ain't Hit and Run 2, but it's probably the closest to a new Simpsons video game we'll get anytime soon\nThe post &lt;i&gt;Fortnite&#8217;s&lt;/i&gt",
@@ -3301,7 +3331,7 @@
   },
   {
     "id": "https://www.gamespot.com/articles/battlefield-6-removes-wicked-grin-skin-after-pushback-from-players/1100-6535891/?ftag=CAD-01-10abi2f",
-    "title": "Battlefield 6 Removes &quot;Wicked Grin&quot; Skin After Pushback From Players",
+    "title": "Battlefield 6 Removes \"Wicked Grin\" Skin After Pushback From Players",
     "source": "GameSpot",
     "publicationDate": "2025-11-03T19:51:00.000Z",
     "summary": "One of the recurring themes from a vocal segment of Battlefield 6 fans before and after launch was a desire to see the game free of Call of Duty-style",
@@ -3311,7 +3341,7 @@
   },
   {
     "id": "https://www.gamespot.com/articles/souljaboys-new-game-console-is-a-rebranded-retroid-being-sold-without-permission/1100-6535896/?ftag=CAD-01-10abi2f",
-    "title": "SouljaBoy&#039;s New Game Console Is A Rebranded Retroid Being Sold &quot;Without Permission&quot;",
+    "title": "SouljaBoy's New Game Console Is A Rebranded Retroid Being Sold \"Without Permission\"",
     "source": "GameSpot",
     "publicationDate": "2025-11-03T19:50:00.000Z",
     "summary": "Rapper Soulja Boy is once again trying to sell a game console, this time selling what looks to be a rebranded Retroid Pocket Flip 2 under the name Sou",
@@ -3381,7 +3411,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/The-Crew-Motorfest-Spiel-74185/News/Season-8-wird-Steam-Deck-Verified-1485692/",
-    "title": "The Crew Motorfest&#x3a; Season 8 wird Steam Deck Verified",
+    "title": "The Crew Motorfest: Season 8 wird Steam Deck Verified",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-03T19:30:00.000Z",
     "summary": "The Crew Motorfest startet am 5. November in die Season 8 und wird zu diesem Zeitpunkt auch erstmals Steam Deck Verified sein, wie Ubisoft jetzt offiz",
@@ -3421,7 +3451,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/Linux-Software-26761/News/SUSE-Linux-16-setzt-voll-auf-KI-Integration-1485653/",
-    "title": "SUSE Linux 16&#x3a; Distribution setzt voll auf KI-Integration",
+    "title": "SUSE Linux 16: Distribution setzt voll auf KI-Integration",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-03T19:15:00.000Z",
     "summary": "SUSE Linux Enterprise Server &#x28;&#x22;SLES&#x22;&#x29; 16 soll als erste Enterprise-Distribution voll auf die Integration K&#xfc;nstlicher Intellig",
@@ -3501,7 +3531,7 @@
   },
   {
     "id": "https://www.buffed.de/YouTube-Thema-163920/News/bud-spencer-terence-hill-youtube-spencerhillvideo-1485679/",
-    "title": "Gratis und legal&#x3a; Bud Spencer &#x26; Terence Hill - Klassiker nur noch kurze Zeit online",
+    "title": "Gratis und legal: Bud Spencer & Terence Hill - Klassiker nur noch kurze Zeit online",
     "source": "Buffed",
     "publicationDate": "2025-11-03T19:00:00.000Z",
     "summary": "Ihr seid eingefleischte Fans von Bud Spencer und Terence Hill&#x3f; Dann habt ihr Gl&#xfc;ck, denn auf YouTube k&#xf6;nnt ihr die besten Filme des Duo",
@@ -3541,7 +3571,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/CPU-CPU-154106/Specials/CPU-Benchmarks-2025-1483032/",
-    "title": "&#x5b;PLUS&#x5d; Kaufberatung f&#xfc;r Gaming-CPUs&#x3a; Neuer Testparcours entlarvt St&#xe4;rken und Schw&#xe4;chen",
+    "title": "[PLUS] Kaufberatung für Gaming-CPUs: Neuer Testparcours entlarvt Stärken und Schwächen",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-03T18:45:00.000Z",
     "summary": "PCGH Plus&#x3a; Ein neuer Testparcours f&#xfc;r CPUs offenbart St&#xe4;rken und Schw&#xe4;chen aktueller Prozessoren auf dem Markt. Wir haben eine umf",
@@ -3601,7 +3631,7 @@
   },
   {
     "id": "https://www.gamespot.com/articles/arc-raiders-wont-add-novelty-skins-to-protect-games-visual-identity/1100-6535892/?ftag=CAD-01-10abi2f",
-    "title": "Arc Raiders Won&#039;t Add &quot;Novelty&quot; Skins To Protect Game&#039;s Visual Identity",
+    "title": "Arc Raiders Won't Add \"Novelty\" Skins To Protect Game's Visual Identity",
     "source": "GameSpot",
     "publicationDate": "2025-11-03T18:26:00.000Z",
     "summary": "If you had any concerns that developer Embark Studios would embrace the Call of Duty-like goofy costumes for its stylish extraction shooter Arc Raider",
@@ -3611,7 +3641,7 @@
   },
   {
     "id": "https://www.gameswirtschaft.de/wirtschaft/ubisoft-aktie-bricht-ein-boersenwert-1-milliarde-031125/",
-    "title": "Ubisoft-Aktie bricht ein &#8211; Börsenwert jetzt unter 1 Milliarde Euro",
+    "title": "Ubisoft-Aktie bricht ein – Börsenwert jetzt unter 1 Milliarde Euro",
     "source": "GamesWirtschaft",
     "publicationDate": "2025-11-03T18:25:02.000Z",
     "summary": "Was ist bei Ubisoft los? Der Aktienkurs des französischen Spiele-Konzerns verliert an einem einzigen Tag mehr als 10 Prozent. Im Vorfeld der Halbjahre",
@@ -3841,7 +3871,7 @@
   },
   {
     "id": "https://www.gamersglobal.de/news/333941/gewinnspiel-super-mario-galaxy-super-mario-galaxy-2-switch-lite-beendet",
-    "title": "Gewinnspiel: Super Mario Galaxy + Super Mario Galaxy 2 &amp; Switch Lite [Beendet]",
+    "title": "Gewinnspiel: Super Mario Galaxy + Super Mario Galaxy 2 & Switch Lite [Beendet]",
     "source": "GamersGlobal",
     "publicationDate": "2025-11-03T17:53:10.000Z",
     "summary": "&lt;div class=&quot;field field-type-filefield field-field-teaser-bild&quot;&gt;\n    &lt;div class=&quot;field-items&quot;&gt;\n            &lt;div cla",
@@ -3861,7 +3891,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/Gehaeuse-Hardware-213436/News/Endorfy-Arx-500-White-ARGB-1485683/",
-    "title": "Endorfy Arx 500 White ARGB&#x3a; Polnischer Hersteller bietet neues Modell in Wei&#xdf;",
+    "title": "Endorfy Arx 500 White ARGB: Polnischer Hersteller bietet neues Modell in Weiß",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-03T17:45:00.000Z",
     "summary": "Der polnische Hersteller Endorfy bietet ein neues Modell seiner Arx-500-Serie an. Das Geh&#xe4;use ist in Wei&#xdf; gehalten und bietet Platz f&#xfc;r",
@@ -3871,7 +3901,7 @@
   },
   {
     "id": "https://playfront.de/resident-evil-9-requiem-collectors-edition-sorgt-sofort-fuer-enttaeuschung/",
-    "title": "Resident Evil 9 Requiem &#8211; Collector’s Edition sorgt sofort für Enttäuschung",
+    "title": "Resident Evil 9 Requiem – Collector’s Edition sorgt sofort für Enttäuschung",
     "source": "PlayFront",
     "publicationDate": "2025-11-03T17:42:54.000Z",
     "summary": "Capcom zeigt die Collector’s Edition von Resident Evil 9 Requiem, und enttäuscht Fans mit Minimalinhalt. Eine echte Premium-Version könnte folgen.",
@@ -3931,7 +3961,7 @@
   },
   {
     "id": "https://www.pcgames.de/GTA-6-Spiel-55239/News/Setting-ausserhalb-von-Amerika-1485680/",
-    "title": "GTA au&#xdf;erhalb von Amerika&#x3f; Studio-Mitbegr&#xfc;nder &#xe4;u&#xdf;ert sich zum Setting",
+    "title": "GTA außerhalb von Amerika? Studio-Mitbegründer äußert sich zum Setting",
     "source": "PC Games",
     "publicationDate": "2025-11-03T17:32:00.000Z",
     "summary": "Viele Fans w&#xfc;nschen sich seit Jahren ein GTA, das auf einem anderen Kontinent spielt. Einer der Rockstar-Gr&#xfc;nder verr&#xe4;t, warum es dazu ",
@@ -3941,7 +3971,7 @@
   },
   {
     "id": "https://www.gamezone.de/GTA-6-Spiel-55239/News/Setting-ausserhalb-von-Amerika-1485680/",
-    "title": "GTA au&#xdf;erhalb von Amerika&#x3f; Studio-Mitbegr&#xfc;nder &#xe4;u&#xdf;ert sich zum Setting",
+    "title": "GTA außerhalb von Amerika? Studio-Mitbegründer äußert sich zum Setting",
     "source": "GameZone",
     "publicationDate": "2025-11-03T17:32:00.000Z",
     "summary": "Viele Fans w&#xfc;nschen sich seit Jahren ein GTA, das auf einem anderen Kontinent spielt. Einer der Rockstar-Gr&#xfc;nder verr&#xe4;t, warum es dazu ",
@@ -3951,7 +3981,7 @@
   },
   {
     "id": "https://www.videogameszone.de/GTA-6-Spiel-55239/News/Setting-ausserhalb-von-Amerika-1485680/",
-    "title": "GTA au&#xdf;erhalb von Amerika&#x3f; Studio-Mitbegr&#xfc;nder &#xe4;u&#xdf;ert sich zum Setting",
+    "title": "GTA außerhalb von Amerika? Studio-Mitbegründer äußert sich zum Setting",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T17:32:00.000Z",
     "summary": "Viele Fans w&#xfc;nschen sich seit Jahren ein GTA, das auf einem anderen Kontinent spielt. Einer der Rockstar-Gr&#xfc;nder verr&#xe4;t, warum es dazu ",
@@ -4051,7 +4081,7 @@
   },
   {
     "id": "https://www.play3.de/2025/11/03/screamer-sync-und-entropy-mit-gameplay-vorgestellt-fokus-auf-das-echo-system/",
-    "title": "Screamer: Sync und Entropy mit Gameplay vorgestellt &#8211; Fokus auf das Echo-System",
+    "title": "Screamer: Sync und Entropy mit Gameplay vorgestellt – Fokus auf das Echo-System",
     "source": "Play3",
     "publicationDate": "2025-11-03T17:20:13.000Z",
     "summary": "Game Director Federico Cardini und Development &#38; Creative Director Michele Caletti erläutern in einem neuen Video zu „Screamer“ anhand von [&#8230",
@@ -4121,7 +4151,7 @@
   },
   {
     "id": "https://kotaku.com/souljaboy-is-selling-someone-elses-retro-handhelds-for-as-much-as-a-switch-2-he-does-not-have-permission-2000640828",
-    "title": "SouljaBoy Is Selling Someone Else&#8217;s Retro Handhelds Again [Update]",
+    "title": "SouljaBoy Is Selling Someone Else’s Retro Handhelds Again [Update]",
     "source": "Kotaku",
     "publicationDate": "2025-11-03T17:15:32.000Z",
     "summary": "\nThe SouljaGame Flip is just a Retroid Pocket Flip 2\nThe post SouljaBoy Is Selling Someone Else&#8217;s Retro Handhelds Again [Update] appeared first ",
@@ -4131,7 +4161,7 @@
   },
   {
     "id": "https://www.nintendolife.com/news/2025/11/poll-what-review-score-would-you-give-dragon-quest-i-and-ii-hd-2d-remake",
-    "title": "Poll: What Review Score Would You Give Dragon Quest I &amp; II HD-2D Remake?",
+    "title": "Poll: What Review Score Would You Give Dragon Quest I & II HD-2D Remake?",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-03T17:15:00.000Z",
     "summary": "Two quests worth taking?How many of you spent your spooky weekend in Alefgard? Dragon Quest I &amp; II HD-2D Remake landed right before Halloween, bri",
@@ -4141,7 +4171,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/Spiele-Thema-239104/News/Darum-scheiterte-der-geheime-PS3-Titel-Agent-1485672/",
-    "title": "Dan Houser enth&#xfc;llt&#x3a; Warum Rockstars geheimer PS3-Titel &#x22;Agent&#x22; nie das Licht der Welt erblickte",
+    "title": "Dan Houser enthüllt: Warum Rockstars geheimer PS3-Titel \"Agent\" nie das Licht der Welt erblickte",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-03T17:15:00.000Z",
     "summary": "Rockstar-Mitgr&#xfc;nder Dan Houser spricht erstmals offen &#xfc;ber das Scheitern von &#x22;Agent&#x22;. Das geplante Spionage-Spiel im James-Bond-St",
@@ -4181,7 +4211,7 @@
   },
   {
     "id": "https://www.playstationinfo.de/2025/11/03/gta-6-die-grosse-frage-wann-kommt-trailer-3-und-was-zeigt-er/",
-    "title": "GTA 6 &#8211; Die große Frage: Wann kommt Trailer 3 – und was zeigt er?",
+    "title": "GTA 6 – Die große Frage: Wann kommt Trailer 3 – und was zeigt er?",
     "source": "PlayStationInfo",
     "publicationDate": "2025-11-03T17:03:00.000Z",
     "summary": "GTA 6 &#8211; Die große Frage: Wann kommt Trailer 3 – und was zeigt er?\nPlayStation Info\nKaum ein Spiel wird derzeit so heiß erwartet wie Grand Theft ",
@@ -4271,7 +4301,7 @@
   },
   {
     "id": "https://www.buffed.de/Diablo-4-Spiel-55956/News/diablo-4-chaosruestung-season-11-1485626/",
-    "title": "Diablo 4&#x3a; Fans schlagen Alarm - verlangen beliebtes Feature zur&#xfc;ck",
+    "title": "Diablo 4: Fans schlagen Alarm - verlangen beliebtes Feature zurück",
     "source": "Buffed",
     "publicationDate": "2025-11-03T17:00:00.000Z",
     "summary": "Fans von Diablo 4 vermissen eine der beliebtesten Mechaniken aus Season 10. Jetzt fordern sie lautstark die R&#xfc;ckkehr der Chaosr&#xfc;stung.",
@@ -4291,7 +4321,7 @@
   },
   {
     "id": "https://www.pcgames.de/Henry-Cavill-Person-236517/News/henry-cavill-superman-neues-bild-1485670/",
-    "title": "Henry Cavill als Superman&#x3a; Zack Snyder teilt neues, unver&#xf6;ffentlichtes Bild",
+    "title": "Henry Cavill als Superman: Zack Snyder teilt neues, unveröffentlichtes Bild",
     "source": "PC Games",
     "publicationDate": "2025-11-03T16:57:00.000Z",
     "summary": "Der ehemalige Filmemacher des Marvel-Konkurrenten DC Extended Universe triggert schon wieder die Fans.",
@@ -4301,7 +4331,7 @@
   },
   {
     "id": "https://www.gamezone.de/Henry-Cavill-Person-236517/News/henry-cavill-superman-neues-bild-1485670/",
-    "title": "Henry Cavill als Superman&#x3a; Zack Snyder teilt neues, unver&#xf6;ffentlichtes Bild",
+    "title": "Henry Cavill als Superman: Zack Snyder teilt neues, unveröffentlichtes Bild",
     "source": "GameZone",
     "publicationDate": "2025-11-03T16:57:00.000Z",
     "summary": "Der ehemalige Filmemacher des Marvel-Konkurrenten DC Extended Universe triggert schon wieder die Fans.",
@@ -4311,7 +4341,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Henry-Cavill-Person-236517/News/henry-cavill-superman-neues-bild-1485670/",
-    "title": "Henry Cavill als Superman&#x3a; Zack Snyder teilt neues, unver&#xf6;ffentlichtes Bild",
+    "title": "Henry Cavill als Superman: Zack Snyder teilt neues, unveröffentlichtes Bild",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T16:57:00.000Z",
     "summary": "Der ehemalige Filmemacher des Marvel-Konkurrenten DC Extended Universe triggert schon wieder die Fans.",
@@ -4360,18 +4390,8 @@
     "language": "de"
   },
   {
-    "id": "https://www.polygon.com/black-ops-7-not-releasing-early-vault-edition/",
-    "title": "No, Black Ops 7 is not releasing three days early",
-    "source": "Polygon",
-    "publicationDate": "2025-11-03T16:49:48.000Z",
-    "summary": "Even if you buy the vault edition, Call of Duty: Black Ops 7 is not releasing early.",
-    "link": "https://www.polygon.com/black-ops-7-not-releasing-early-vault-edition/",
-    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/2025/11/black-ops-7-not-launching-early.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.play3.de/2025/11/03/golden-joystick-awards-2025-rennen-um-das-ultimate-game-of-the-year-hat-begonnen-stimmt-jetzt-mit-ab/",
-    "title": "Golden Joystick Awards 2025: Rennen um das Ultimate Game of the Year hat begonnen &#8211; Stimmt jetzt mit ab",
+    "title": "Golden Joystick Awards 2025: Rennen um das Ultimate Game of the Year hat begonnen – Stimmt jetzt mit ab",
     "source": "Play3",
     "publicationDate": "2025-11-03T16:46:11.000Z",
     "summary": "Am 20. November finden die Golden Joystick Awards 2025 statt und nachdem Spieler auf der ganzen Welt zuletzt fast vier [&#8230;]\nDer Beitrag Golden Jo",
@@ -4401,7 +4421,7 @@
   },
   {
     "id": "https://www.nintendolife.com/news/2025/11/co-op-rpg-nicktoons-and-the-dice-of-destiny-scores-free-switch-2-upgrade-next-month",
-    "title": "Co-Op RPG &#039;Nicktoons &amp; The Dice Of Destiny&#039; Scores Free Switch 2 Upgrade Next Month",
+    "title": "Co-Op RPG 'Nicktoons & The Dice Of Destiny' Scores Free Switch 2 Upgrade Next Month",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-03T16:45:00.000Z",
     "summary": "You want to know what's better than 30fps?GameMill Entertainment has today announced that the family-friendly co-op RPG Nicktoons &amp; The Dice of De",
@@ -4411,7 +4431,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/The-Elder-Scrolls-4-Oblivion-Spiel-37433/News/Bruma-Unreal-Engine-5-4K-Nachbau-1485665/",
-    "title": "16-mal mehr Details und in 4K&#x3a; Bruma aus Oblivion ist in der Unreal Engine 5 gigantisch",
+    "title": "16-mal mehr Details und in 4K: Bruma aus Oblivion ist in der Unreal Engine 5 gigantisch",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-03T16:45:00.000Z",
     "summary": "Der Youtuber und Modder L.Torres hat ein weiteres Projekt seiner Nachbaureihe von The-Elder-Scrolls-Schaupl&#xe4;tzen ver&#xf6;ffentlicht. Dieses Mal ",
@@ -4461,7 +4481,7 @@
   },
   {
     "id": "https://www.play3.de/2025/11/03/olympische-e-sport-spiele-ioc-beendet-saudi-partnerschaft-neue-ausrichtung-geplant/",
-    "title": "Olympische E-Sport-Spiele: IOC beendet Saudi-Partnerschaft &#8211; neue Ausrichtung geplant",
+    "title": "Olympische E-Sport-Spiele: IOC beendet Saudi-Partnerschaft – neue Ausrichtung geplant",
     "source": "Play3",
     "publicationDate": "2025-11-03T16:41:32.000Z",
     "summary": "Nach nur einem Jahr zieht sich das Internationale Olympische Komitee (IOC) aus der Partnerschaft mit Saudi-Arabien zurück. Die zuvor beschlossene [&#8",
@@ -4511,7 +4531,7 @@
   },
   {
     "id": "https://www.destructoid.com/arc-raiders-encouraged-to-use-my-mic-again/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=arc-raiders-encouraged-to-use-my-mic-again",
-    "title": "ARC Raiders did the impossible: I&#8217;m now feeling encouraged to use my mic again in multiplayer games",
+    "title": "ARC Raiders did the impossible: I’m now feeling encouraged to use my mic again in multiplayer games",
     "source": "Destructoid",
     "publicationDate": "2025-11-03T16:32:15.000Z",
     "summary": "\n\nAntisocial gamers, stand up and listen. I am one of you, but I can feel my ways changing in real time, and it's all due to ARC Raiders.\n\n\nI used to ",
@@ -4531,7 +4551,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/PC-Games-Hardware-Brands-18366/Specials/PCGH-12-2025-Magazin-302-DVD-Download-PDF-1485459/",
-    "title": "Aufr&#xfc;stpflicht dank Anno 117 und Battlefield 6&#x3f; PCGH 12&#x2f;2025 schl&#xfc;sselt auf",
+    "title": "Aufrüstpflicht dank Anno 117 und Battlefield 6? PCGH 12/2025 schlüsselt auf",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-03T16:31:00.000Z",
     "summary": "Die PCGH-Ausgabe 12&#x2f;2025 bietet das ganze Paket&#x21; Mit Markt&#xfc;bersichten zu externen SSDs, Voodoo-GPU-R&#xfc;ckblick, Komponenten-Empfehlu",
@@ -4541,7 +4561,7 @@
   },
   {
     "id": "https://www.buffed.de/Guild-Wars-2-Spiel-17072/News/Erfolg-Spielerzahlen-1485687/",
-    "title": "GW2 floriert jetzt und Leute schieben es direkt auf New World - stimmt das&#x3f;",
+    "title": "GW2 floriert jetzt und Leute schieben es direkt auf New World - stimmt das?",
     "source": "Buffed",
     "publicationDate": "2025-11-03T16:30:00.000Z",
     "summary": "Die Spielerzahlen von Guild Wars 2 erreichen einen neuen H&#xf6;hepunkt auf Steam und f&#xfc;r viele Gamer gibt es einen klaren Grund&#x3a; Das Ende v",
@@ -4561,7 +4581,7 @@
   },
   {
     "id": "https://www.pcgames.de/Assassins-Creed-Shadows-Spiel-74683/News/Verkaufszahlen-November-2025-1485685/",
-    "title": "War Assassin&#x27;s Creed Shadows ein Flop&#x3f; Verkaufszahlen sprechen eine deutliche Sprache",
+    "title": "War Assassin's Creed Shadows ein Flop? Verkaufszahlen sprechen eine deutliche Sprache",
     "source": "PC Games",
     "publicationDate": "2025-11-03T16:29:00.000Z",
     "summary": "Neue Verkaufsdaten zeichnen ein ern&#xfc;chterndes Bild&#x3a; Assassin&#x27;s Creed&#x3a; Shadows soll nur rund 4,3 Mio. Einheiten verkauft haben und ",
@@ -4571,7 +4591,7 @@
   },
   {
     "id": "https://www.gamezone.de/Assassins-Creed-Shadows-Spiel-74683/News/Verkaufszahlen-November-2025-1485685/",
-    "title": "War Assassin&#x27;s Creed Shadows ein Flop&#x3f; Verkaufszahlen sprechen eine deutliche Sprache",
+    "title": "War Assassin's Creed Shadows ein Flop? Verkaufszahlen sprechen eine deutliche Sprache",
     "source": "GameZone",
     "publicationDate": "2025-11-03T16:29:00.000Z",
     "summary": "Neue Verkaufsdaten zeichnen ein ern&#xfc;chterndes Bild&#x3a; Assassin&#x27;s Creed&#x3a; Shadows soll nur rund 4,3 Mio. Einheiten verkauft haben und ",
@@ -4581,7 +4601,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Assassins-Creed-Shadows-Spiel-74683/News/Verkaufszahlen-November-2025-1485685/",
-    "title": "War Assassin&#x27;s Creed Shadows ein Flop&#x3f; Verkaufszahlen sprechen eine deutliche Sprache",
+    "title": "War Assassin's Creed Shadows ein Flop? Verkaufszahlen sprechen eine deutliche Sprache",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T16:29:00.000Z",
     "summary": "Neue Verkaufsdaten zeichnen ein ern&#xfc;chterndes Bild&#x3a; Assassin&#x27;s Creed&#x3a; Shadows soll nur rund 4,3 Mio. Einheiten verkauft haben und ",
@@ -4601,7 +4621,7 @@
   },
   {
     "id": "https://kotaku.com/pokemon-legends-za-shiny-alpha-hunting-exploit-zone-20-2000640814",
-    "title": "Pokémon Legends: Z-A Fans Have Discovered One Of The Most Elaborate Shiny-Hunting Exploits I&#8217;ve Ever Seen",
+    "title": "Pokémon Legends: Z-A Fans Have Discovered One Of The Most Elaborate Shiny-Hunting Exploits I’ve Ever Seen",
     "source": "Kotaku",
     "publicationDate": "2025-11-03T16:27:47.000Z",
     "summary": "\nPlayers found a way to shiny hunt six Alpha Pokémon at once\nThe post &lt;em&gt;Pokémon Legends: Z-A&lt;/em&gt; Fans Have Discovered One Of The Most E",
@@ -4611,7 +4631,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/microlandia/release-date",
-    "title": "Cities Skylines&#039; traffic headaches are nothing compared to this brutal new city builder, where your population&#039;s lives are literally on the line",
+    "title": "Cities Skylines' traffic headaches are nothing compared to this brutal new city builder, where your population's lives are literally on the line",
     "source": "PCGamesN",
     "publicationDate": "2025-11-03T16:26:58.000Z",
     "summary": "Microlandia bases its slice of life simulation on real-life statistics to create a brutally honest alternative to Cities Skylines.\n\t\t\t]]>",
@@ -4641,7 +4661,7 @@
   },
   {
     "id": "https://www.pcgameshardware.de/Polaris-Messe-Event-279274/Specials/2025-Gaming-Anime-Gaeste-1484134/",
-    "title": "Gaming oder Anime&#x3f; Auf der Polaris 2025 antworten 50.000 Besucher mit ja - PCGH war vor Ort",
+    "title": "Gaming oder Anime? Auf der Polaris 2025 antworten 50.000 Besucher mit ja - PCGH war vor Ort",
     "source": "PC Games Hardware",
     "publicationDate": "2025-11-03T16:15:00.000Z",
     "summary": "Zum vierten Mal &#xf6;ffnete die Polaris vom 10. bis 12. Oktober die Tore in Hamburg, sowohl f&#xfc;r Gaming-Fans als auch f&#xfc;r Anime-Anh&#xe4;nge",
@@ -4661,7 +4681,7 @@
   },
   {
     "id": "https://kotaku.com/a-surprise-departure-shows-the-problem-with-the-game-pass-backlog-2000640806",
-    "title": "A Surprise Departure Shows The Problem With The Game Pass &#8216;Backlog&#8217;",
+    "title": "A Surprise Departure Shows The Problem With The Game Pass ‘Backlog’",
     "source": "Kotaku",
     "publicationDate": "2025-11-03T16:12:28.000Z",
     "summary": "\nS.T.A.L.K.E.R. 2: Heart of Chornobyl is leaving just a year after launch\nThe post A Surprise Departure Shows The Problem With The Game Pass &#8216;Ba",
@@ -4741,7 +4761,7 @@
   },
   {
     "id": "https://www.pcgames.de/Saints-Row-2022-Spiel-73447/News/GTA-Konkurrent-Prequel-1485684/",
-    "title": "Saints Row&#x3a; Gute Nachrichten f&#xfc;r Fans des GTA-Konkurrenten&#x21; M&#xf6;glicherweise k&#xf6;nnen wir uns bald auf ein Prequel freuen",
+    "title": "Saints Row: Gute Nachrichten für Fans des GTA-Konkurrenten! Möglicherweise können wir uns bald auf ein Prequel freuen",
     "source": "PC Games",
     "publicationDate": "2025-11-03T16:01:00.000Z",
     "summary": "Das Reboot von Saints Row entpuppte sich als Sargnagel f&#xfc;r die Serie. Jetzt gibt es pl&#xf6;tzlich Ger&#xfc;chte rund um ein m&#xf6;gliches Prequ",
@@ -4751,7 +4771,7 @@
   },
   {
     "id": "https://www.gamezone.de/Saints-Row-2022-Spiel-73447/News/GTA-Konkurrent-Prequel-1485684/",
-    "title": "Saints Row&#x3a; Gute Nachrichten f&#xfc;r Fans des GTA-Konkurrenten&#x21; M&#xf6;glicherweise k&#xf6;nnen wir uns bald auf ein Prequel freuen",
+    "title": "Saints Row: Gute Nachrichten für Fans des GTA-Konkurrenten! Möglicherweise können wir uns bald auf ein Prequel freuen",
     "source": "GameZone",
     "publicationDate": "2025-11-03T16:01:00.000Z",
     "summary": "Das Reboot von Saints Row entpuppte sich als Sargnagel f&#xfc;r die Serie. Jetzt gibt es pl&#xf6;tzlich Ger&#xfc;chte rund um ein m&#xf6;gliches Prequ",
@@ -4761,7 +4781,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Saints-Row-2022-Spiel-73447/News/GTA-Konkurrent-Prequel-1485684/",
-    "title": "Saints Row&#x3a; Gute Nachrichten f&#xfc;r Fans des GTA-Konkurrenten&#x21; M&#xf6;glicherweise k&#xf6;nnen wir uns bald auf ein Prequel freuen",
+    "title": "Saints Row: Gute Nachrichten für Fans des GTA-Konkurrenten! Möglicherweise können wir uns bald auf ein Prequel freuen",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T16:01:00.000Z",
     "summary": "Das Reboot von Saints Row entpuppte sich als Sargnagel f&#xfc;r die Serie. Jetzt gibt es pl&#xf6;tzlich Ger&#xfc;chte rund um ein m&#xf6;gliches Prequ",
@@ -4771,7 +4791,7 @@
   },
   {
     "id": "https://www.buffed.de/Netflix-Firma-259629/News/stranger-things-aerger-am-set-1485634/",
-    "title": "&#xc4;rger am Set&#x3a; Stranger-Things-Star soll Co-Darsteller angezeigt haben",
+    "title": "Ärger am Set: Stranger-Things-Star soll Co-Darsteller angezeigt haben",
     "source": "Buffed",
     "publicationDate": "2025-11-03T16:00:00.000Z",
     "summary": "Hinter den Kulissen von Stranger Things brodelt es aktuell&#x3a; Eine der Hauptdarstellerinnen soll eine Beschwerde gegen ihren Serienvater eingereich",
@@ -4781,7 +4801,7 @@
   },
   {
     "id": "https://www.nintendolife.com/news/2025/11/bandai-namco-square-enix-and-other-japanese-publishers-arent-happy-about-openais-sora-2-generative-ai-tool",
-    "title": "Bandai Namco, Square Enix And Other Japanese Publishers Aren&#039;t Happy About OpenAI&#039;s Sora 2 Generative AI Tool",
+    "title": "Bandai Namco, Square Enix And Other Japanese Publishers Aren't Happy About OpenAI's Sora 2 Generative AI Tool",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-03T16:00:00.000Z",
     "summary": "\"The result of using Japanese content as machine learning data\".Japanese video game giants Bandai Namco and Square Enix have joined other companies su",
@@ -4791,7 +4811,7 @@
   },
   {
     "id": "https://www.destructoid.com/all-quests-in-arc-raiders-full-quest-list/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=all-quests-in-arc-raiders-full-quest-list",
-    "title": "All quests in ARC Raiders &#8211; Full quest list in progress",
+    "title": "All quests in ARC Raiders – Full quest list in progress",
     "source": "Destructoid",
     "publicationDate": "2025-11-03T15:57:41.000Z",
     "summary": "\n\nARC Raiders is all about heading out into an unknown world for loot, riches, and maybe even some friends (or foes).\n\n\nAs part of ARC Raiders' storyl",
@@ -4801,7 +4821,7 @@
   },
   {
     "id": "https://www.destructoid.com/how-to-complete-a-reveal-in-ruins-quest-in-arc-raiders-esr-analyzer-location/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=how-to-complete-a-reveal-in-ruins-quest-in-arc-raiders-esr-analyzer-location",
-    "title": "How to complete A Reveal in Ruins quest in ARC Raiders &#8211; ESR Analyzer location",
+    "title": "How to complete A Reveal in Ruins quest in ARC Raiders – ESR Analyzer location",
     "source": "Destructoid",
     "publicationDate": "2025-11-03T15:56:54.000Z",
     "summary": "\n\nA Reveal in Ruins is one of the easier quests in ARC Raiders, but it takes a fair amount of time to unlock.\n\n\nThis quest requires you to find an ESR",
@@ -4850,16 +4870,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.pcgameshardware.de/Doom-Classic-Spiel-55785/News/Retro-Shooter-erstmals-Weltraum-ESA-Satellit-1485660/",
-    "title": "Doom&#x3a; Retro-Ego-Shooter lief erstmals im Weltraum - auf einem ESA-Satelliten",
-    "source": "PC Games Hardware",
-    "publicationDate": "2025-11-03T15:45:00.000Z",
-    "summary": "Der Software-Entwickler &#xd3;lafur Waage erkl&#xe4;rt in einem Video, wie er Doom erstmals auf einem Satelliten der ESA ausf&#xfc;hren konnte. Der Eg",
-    "link": "https://www.pcgameshardware.de/Doom-Classic-Spiel-55785/News/Retro-Shooter-erstmals-Weltraum-ESA-Satellit-1485660/",
-    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/11/Doom-on-ESA-Satellite-Gameplay-pcgh.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.gamesradar.com/games/third-person-shooter/arc-raiders-supply-drops/",
     "title": "How to request Supply Drops in Arc Raiders",
     "source": "GamesRadar+",
@@ -4891,7 +4901,7 @@
   },
   {
     "id": "https://jpgames.de/2025/11/der-erste-richtige-trailer-zum-zweiten-super-mario-film-koennte-uns-sehr-bald-erwarten/",
-    "title": "Der erste richtige Trailer zum zweiten &#8222;Super Mario&#8220;-Film könnte uns sehr bald erwarten",
+    "title": "Der erste richtige Trailer zum zweiten „Super Mario“-Film könnte uns sehr bald erwarten",
     "source": "JPGames",
     "publicationDate": "2025-11-03T15:40:43.000Z",
     "summary": "Mit Wicked: For Good.\nDer Beitrag Der erste richtige Trailer zum zweiten &#8222;Super Mario&#8220;-Film könnte uns sehr bald erwarten erschien zuerst ",
@@ -4941,7 +4951,7 @@
   },
   {
     "id": "https://www.play3.de/2025/11/03/ps5-ps5-pro-sony-startet-zum-5-jubilaeum-weltweite-kampagne-und-das-erste-ergebnis-seht-ihr-schon-heute/",
-    "title": "PS5 &#038; PS5 Pro: Sony startet zum 5. Jubiläum weltweite Kampagne und das erste Ergebnis seht ihr schon heute",
+    "title": "PS5 & PS5 Pro: Sony startet zum 5. Jubiläum weltweite Kampagne und das erste Ergebnis seht ihr schon heute",
     "source": "Play3",
     "publicationDate": "2025-11-03T15:39:49.000Z",
     "summary": "Zum bevorstehenden fünften Jubiläum der PS5, die je nach Region am 12. oder 19. November 2020 in den Handel kam, [&#8230;]\nDer Beitrag PS5 &amp; PS5 P",
@@ -4961,7 +4971,7 @@
   },
   {
     "id": "https://www.nintendolife.com/news/2025/11/a-trailer-for-the-super-mario-galaxy-movie-will-debut-this-month-its-claimed",
-    "title": "A Trailer For The Super Mario Galaxy Movie Will Debut This Month, It&#039;s Claimed",
+    "title": "A Trailer For The Super Mario Galaxy Movie Will Debut This Month, It's Claimed",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-03T15:30:00.000Z",
     "summary": "Ahead of 'Wicked: For Good'.If you're itching to see what The Super Mario Galaxy Movie will actually look like, then you might not have much longer to",
@@ -4981,7 +4991,7 @@
   },
   {
     "id": "https://www.pcgames.de/Timberborn-Spiel-73473/News/Version-1-0-neue-Feautures-Update-Steam-1485681/",
-    "title": "Timberborn&#x3a; Gefeiertes Aufbauspiel verl&#xe4;sst den Early Access mit vielen neuen Features",
+    "title": "Timberborn: Gefeiertes Aufbauspiel verlässt den Early Access mit vielen neuen Features",
     "source": "PC Games",
     "publicationDate": "2025-11-03T15:28:00.000Z",
     "summary": "Nach vier Jahren Early Access bereitet Entwickler Mechanistry den Sprung zur Version 1.0 von Timberborn vor - mit neuen Features, &#xfc;berarbeiteter ",
@@ -4991,7 +5001,7 @@
   },
   {
     "id": "https://www.gamezone.de/Timberborn-Spiel-73473/News/Version-1-0-neue-Feautures-Update-Steam-1485681/",
-    "title": "Timberborn&#x3a; Gefeiertes Aufbauspiel verl&#xe4;sst den Early Access mit vielen neuen Features",
+    "title": "Timberborn: Gefeiertes Aufbauspiel verlässt den Early Access mit vielen neuen Features",
     "source": "GameZone",
     "publicationDate": "2025-11-03T15:28:00.000Z",
     "summary": "Nach vier Jahren Early Access bereitet Entwickler Mechanistry den Sprung zur Version 1.0 von Timberborn vor - mit neuen Features, &#xfc;berarbeiteter ",
@@ -5001,7 +5011,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Timberborn-Spiel-73473/News/Version-1-0-neue-Feautures-Update-Steam-1485681/",
-    "title": "Timberborn&#x3a; Gefeiertes Aufbauspiel verl&#xe4;sst den Early Access mit vielen neuen Features",
+    "title": "Timberborn: Gefeiertes Aufbauspiel verlässt den Early Access mit vielen neuen Features",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T15:28:00.000Z",
     "summary": "Nach vier Jahren Early Access bereitet Entwickler Mechanistry den Sprung zur Version 1.0 von Timberborn vor - mit neuen Features, &#xfc;berarbeiteter ",
@@ -5031,7 +5041,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/squad/trust-shaken",
-    "title": "Tactical shooter Squad admits &quot;trust has been shaken&quot; as recent Steam reviews drop to &#039;mixed&#039;",
+    "title": "Tactical shooter Squad admits \"trust has been shaken\" as recent Steam reviews drop to 'mixed'",
     "source": "PCGamesN",
     "publicationDate": "2025-11-03T15:22:14.000Z",
     "summary": "Players are turning on Squad, as feedback is ignored and updates are rushed, but developer Offworld promises to repair that relationship.\n\t\t\t]]>",
@@ -5081,7 +5091,7 @@
   },
   {
     "id": "https://www.gematsu.com/2025/11/nicktoons-the-dice-of-destiny-coming-to-switch-2-on-december-5",
-    "title": "Nicktoons &#038; the Dice of Destiny coming to Switch 2 on December 5",
+    "title": "Nicktoons & the Dice of Destiny coming to Switch 2 on December 5",
     "source": "Gematsu",
     "publicationDate": "2025-11-03T15:11:58.000Z",
     "summary": "Publisher GameMill Entertainment and developers Fair Play Labs and Petit Fabrik will release four-player cooperative &#8230;\nSource",
@@ -5131,7 +5141,7 @@
   },
   {
     "id": "https://www.gematsu.com/2025/11/montezumas-revenge-the-40th-anniversary-edition-for-ps5-xbox-series-ps4-xbox-one-and-switch-launches-december-10",
-    "title": "Montezuma&#8217;s Revenge: The 40th Anniversary Edition for PS5, Xbox Series, PS4, Xbox One, and Switch launches December 10",
+    "title": "Montezuma’s Revenge: The 40th Anniversary Edition for PS5, Xbox Series, PS4, Xbox One, and Switch launches December 10",
     "source": "Gematsu",
     "publicationDate": "2025-11-03T15:05:40.000Z",
     "summary": "Side-scrolling platformer Montezuma&#8217;s Revenge: The 40th Anniversary Edition will launch for PlayStation 5, Xbox Series, &#8230;\nSource",
@@ -5141,7 +5151,7 @@
   },
   {
     "id": "https://www.pcgames.de/YouTube-Thema-163920/News/Ueberarbeitung-Jugendschutz-Richtlinien-ab-18-GTA-6-Call-of-Duty-1485678/",
-    "title": "Ab 18&#x3a; YouTube will brutale Szenen aus Videospielen nur noch vollj&#xe4;hrigen, eingeloggten Usern zeigen",
+    "title": "Ab 18: YouTube will brutale Szenen aus Videospielen nur noch volljährigen, eingeloggten Usern zeigen",
     "source": "PC Games",
     "publicationDate": "2025-11-03T15:02:00.000Z",
     "summary": "YouTube hat eine &#xdc;berarbeitung der Jugendschutz-Richtlinien angek&#xfc;ndigt. Bestimmte Gaming-Inhalte sollen nur noch f&#xfc;r erwachsene Nutzer",
@@ -5151,7 +5161,7 @@
   },
   {
     "id": "https://www.gamezone.de/YouTube-Thema-163920/News/Ueberarbeitung-Jugendschutz-Richtlinien-ab-18-GTA-6-Call-of-Duty-1485678/",
-    "title": "Ab 18&#x3a; YouTube will brutale Szenen aus Videospielen nur noch vollj&#xe4;hrigen, eingeloggten Usern zeigen",
+    "title": "Ab 18: YouTube will brutale Szenen aus Videospielen nur noch volljährigen, eingeloggten Usern zeigen",
     "source": "GameZone",
     "publicationDate": "2025-11-03T15:02:00.000Z",
     "summary": "YouTube hat eine &#xdc;berarbeitung der Jugendschutz-Richtlinien angek&#xfc;ndigt. Bestimmte Gaming-Inhalte sollen nur noch f&#xfc;r erwachsene Nutzer",
@@ -5161,23 +5171,13 @@
   },
   {
     "id": "https://www.videogameszone.de/YouTube-Thema-163920/News/Ueberarbeitung-Jugendschutz-Richtlinien-ab-18-GTA-6-Call-of-Duty-1485678/",
-    "title": "Ab 18&#x3a; YouTube will brutale Szenen aus Videospielen nur noch vollj&#xe4;hrigen, eingeloggten Usern zeigen",
+    "title": "Ab 18: YouTube will brutale Szenen aus Videospielen nur noch volljährigen, eingeloggten Usern zeigen",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T15:02:00.000Z",
     "summary": "YouTube hat eine &#xdc;berarbeitung der Jugendschutz-Richtlinien angek&#xfc;ndigt. Bestimmte Gaming-Inhalte sollen nur noch f&#xfc;r erwachsene Nutzer",
     "link": "https://www.videogameszone.de/YouTube-Thema-163920/News/Ueberarbeitung-Jugendschutz-Richtlinien-ab-18-GTA-6-Call-of-Duty-1485678/",
     "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/10/Cal_Hampton_landscape-pc-games.jpg",
     "language": "de"
-  },
-  {
-    "id": "https://www.polygon.com/godzilla-minus-zero-announced-sequel/",
-    "title": "The sequel to Godzilla Minus One could release next year",
-    "source": "Polygon",
-    "publicationDate": "2025-11-03T15:01:09.000Z",
-    "summary": "Takashi Yamazaki will write, direct, and supervise VFX for Godzilla Minus Zero, the sequel to 2023's hit movie Godzilla Minus One.",
-    "link": "https://www.polygon.com/godzilla-minus-zero-announced-sequel/",
-    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/chorus/uploads/chorus_asset/file/25346957/GMinusOne.jpg",
-    "language": "en"
   },
   {
     "id": "https://www.destructoid.com/how-to-complete-the-medical-merchandise-quest-in-arc-raiders/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=how-to-complete-the-medical-merchandise-quest-in-arc-raiders",
@@ -5191,7 +5191,7 @@
   },
   {
     "id": "https://blog.playstation.com/2025/11/03/players-choice-vote-for-october-2025s-best-new-game/",
-    "title": "Players&#8217; Choice: Vote for October 2025’s best new game",
+    "title": "Players’ Choice: Vote for October 2025’s best new game",
     "source": "PlayStation.Blog",
     "publicationDate": "2025-11-03T15:00:09.000Z",
     "summary": "Last month, we sought revenge, conquered the shadows, and stormed the battlefield. Some big new releases included Ghost of Yōtei, Battlefield 6, Ninja",
@@ -5201,7 +5201,7 @@
   },
   {
     "id": "https://www.buffed.de/GTA-6-Spiel-55239/News/gta6-rockstar-entlassungen-gewerkschaft-1485654/",
-    "title": "Interner Aufstand bei Rockstar Games&#x3f; Gewerkschaft erhebt schwere Vorw&#xfc;rfe",
+    "title": "Interner Aufstand bei Rockstar Games? Gewerkschaft erhebt schwere Vorwürfe",
     "source": "Buffed",
     "publicationDate": "2025-11-03T15:00:00.000Z",
     "summary": "Rockstar sorgt wieder f&#xfc;r Schlagzeilen - dieses Mal nicht wegen GTA 6, sondern wegen massiver Vorw&#xfc;rfe rund um gewerkschaftsfeindliche Entla",
@@ -5341,7 +5341,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/nvidia/rtx-4060-steam-hardware-survey-october-2025",
-    "title": "Shockingly, Nvidia&#039;s GeForce RTX 4060 just lost its top gaming GPU spot on Steam",
+    "title": "Shockingly, Nvidia's GeForce RTX 4060 just lost its top gaming GPU spot on Steam",
     "source": "PCGamesN",
     "publicationDate": "2025-11-03T14:40:28.000Z",
     "summary": "In a surprise shift, the October 2025 Steam Hardware Survey results show Nvidia's long-time most popular GPU has missed out on the top spot.\n\t\t\t]]>",
@@ -5351,7 +5351,7 @@
   },
   {
     "id": "https://de.ign.com/stranger-things/149550/news/stranger-things-kurz-vor-staffel-5-berichte-uber-mobbing-belastigung-am-set",
-    "title": "Stranger Things | Kurz vor Staffel 5: Berichte über Mobbing &amp; Belästigung am Set",
+    "title": "Stranger Things | Kurz vor Staffel 5: Berichte über Mobbing & Belästigung am Set",
     "source": "IGN",
     "publicationDate": "2025-11-03T14:40:20.000Z",
     "summary": "&lt;img src=\"https://sm.ign.com/t/ign_de/screenshot/default/stranger-things-mobbing-am-set_87j9.640.jpg\" width=\"120\" hspace=\"5\" alt=\"\" vspace=\"5\" alig",
@@ -5411,7 +5411,7 @@
   },
   {
     "id": "https://pixelcritics.com/the-witcher-4-autor-sapkowski-hat-exzellenten-vertrag-wird-aber-kaum-gefragt/",
-    "title": "The Witcher 4: Autor Sapkowski hat &#8222;exzellenten&#8220; Vertrag, wird aber kaum gefragt",
+    "title": "The Witcher 4: Autor Sapkowski hat „exzellenten“ Vertrag, wird aber kaum gefragt",
     "source": "PixelCritics",
     "publicationDate": "2025-11-03T14:31:00.000Z",
     "summary": "Obwohl Witcher-Autor Andrzej Sapkowski seinen aktuellen Vertrag mit CD Projekt RED als „exzellent“ bezeichnet, enthüllt er, dass das Studio ihn für da",
@@ -5441,7 +5441,7 @@
   },
   {
     "id": "https://www.pcgames.de/Frostpunk-2-Spiel-73439/News/Fractured-Utopias-DLC-Winter-Release-Termin-1485668/",
-    "title": "Frostpunk 2&#x3a; Erster DLC Fractured Utopias erscheint im Dezember",
+    "title": "Frostpunk 2: Erster DLC Fractured Utopias erscheint im Dezember",
     "source": "PC Games",
     "publicationDate": "2025-11-03T14:28:00.000Z",
     "summary": "Der erste DLC zu Frostpunk 2 namens Fractured Utopias erscheint am 8. Dezember - passend zur eisigen Jahreszeit. Es wartet ein neuer Utopia-Modus mit ",
@@ -5451,7 +5451,7 @@
   },
   {
     "id": "https://www.gamezone.de/Frostpunk-2-Spiel-73439/News/Fractured-Utopias-DLC-Winter-Release-Termin-1485668/",
-    "title": "Frostpunk 2&#x3a; Erster DLC Fractured Utopias erscheint im Dezember",
+    "title": "Frostpunk 2: Erster DLC Fractured Utopias erscheint im Dezember",
     "source": "GameZone",
     "publicationDate": "2025-11-03T14:28:00.000Z",
     "summary": "Der erste DLC zu Frostpunk 2 namens Fractured Utopias erscheint am 8. Dezember - passend zur eisigen Jahreszeit. Es wartet ein neuer Utopia-Modus mit ",
@@ -5461,7 +5461,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Frostpunk-2-Spiel-73439/News/Fractured-Utopias-DLC-Winter-Release-Termin-1485668/",
-    "title": "Frostpunk 2&#x3a; Erster DLC Fractured Utopias erscheint im Dezember",
+    "title": "Frostpunk 2: Erster DLC Fractured Utopias erscheint im Dezember",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T14:28:00.000Z",
     "summary": "Der erste DLC zu Frostpunk 2 namens Fractured Utopias erscheint am 8. Dezember - passend zur eisigen Jahreszeit. Es wartet ein neuer Utopia-Modus mit ",
@@ -5471,23 +5471,13 @@
   },
   {
     "id": "https://jpgames.de/2025/11/hoyoverse-legt-nach-petit-planet-stellt-sein-home-decor-feature-und-einige-nachbarn-vor/",
-    "title": "Hoyoverse legt nach: Petit Planet stellt sein &#8222;Home Decor&#8220;-Feature und einige Nachbarn vor",
+    "title": "Hoyoverse legt nach: Petit Planet stellt sein „Home Decor“-Feature und einige Nachbarn vor",
     "source": "JPGames",
     "publicationDate": "2025-11-03T14:27:03.000Z",
     "summary": "Zu Hause gibt es viel zu tun.\nDer Beitrag Hoyoverse legt nach: Petit Planet stellt sein &#8222;Home Decor&#8220;-Feature und einige Nachbarn vor ersch",
     "link": "https://jpgames.de/2025/11/hoyoverse-legt-nach-petit-planet-stellt-sein-home-decor-feature-und-einige-nachbarn-vor/",
     "imageUrl": "https://jpgames.de/wp-content/uploads/2025/11/petit-planet-decor-01-300x169.jpg",
     "language": "de"
-  },
-  {
-    "id": "https://www.polygon.com/battlefield-6-casual-breakthrough-playlist-players-split/",
-    "title": "Battlefield 6's new casual playlist ignites debates over bots, XP, and queue times",
-    "source": "Polygon",
-    "publicationDate": "2025-11-03T14:26:42.000Z",
-    "summary": "Battlefield 6 players can't agree on whether the new playlist is a good thing or not, and here's why.",
-    "link": "https://www.polygon.com/battlefield-6-casual-breakthrough-playlist-players-split/",
-    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/2025/11/battlefield-6-players-split-casual-breakthrough.jpg",
-    "language": "en"
   },
   {
     "id": "https://www.giga.de/games/battlefield-6-muss-sich-geschlagen-geben-das-ist-steams-neuer-shooter-koenig--01K8TTV9XPGYVTDP0KQZGFX1J7",
@@ -5501,7 +5491,7 @@
   },
   {
     "id": "https://www.destructoid.com/this-player-chose-the-hardest-path-for-pokemon-z-as-1000-battle-quest-and-its-perfectly-canon/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=this-player-chose-the-hardest-path-for-pokemon-z-as-1000-battle-quest-and-its-perfectly-canon",
-    "title": "This player chose the hardest path for Pokémon Z-A&#8217;s 1000-battle quest and it&#8217;s perfectly canon",
+    "title": "This player chose the hardest path for Pokémon Z-A’s 1000-battle quest and it’s perfectly canon",
     "source": "Destructoid",
     "publicationDate": "2025-11-03T14:21:46.000Z",
     "summary": "\n\nThe quest to defeat 1,000 trainers in Pokémon Legends: Z-A can be annoying. One player, however, managed to reach over 1,000 battles in what's proba",
@@ -5530,16 +5520,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.polygon.com/toei-animation-expansion-global-one-piece-dragon-ball-anime/",
-    "title": "One Piece and Dragon Ball anime studio plans big global expansion",
-    "source": "Polygon",
-    "publicationDate": "2025-11-03T14:16:09.000Z",
-    "summary": "Toei Animation outlines a five-year plan of global expansion that will focus on new IPs and technological innovation",
-    "link": "https://www.polygon.com/toei-animation-expansion-global-one-piece-dragon-ball-anime/",
-    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/2025/11/goku-vegeta-and-luffy.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.heise.de/blog/Die-Produktwerker-Wie-viel-Zeit-darf-das-Erstellen-von-User-Stories-kosten-10984544.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Die Produktwerker: Wie viel Zeit darf das Erstellen von User Stories kosten?",
     "source": "Heise Online",
@@ -5551,7 +5531,7 @@
   },
   {
     "id": "https://jpgames.de/2025/11/was-es-fuer-tales-of-bedeutet-dass-inzwischen-70-prozent-der-fans-aus-dem-westen-kommen/",
-    "title": "Was es für &#8222;Tales of&#8220; bedeutet, dass inzwischen 70 Prozent der Fans aus dem Westen kommen",
+    "title": "Was es für „Tales of“ bedeutet, dass inzwischen 70 Prozent der Fans aus dem Westen kommen",
     "source": "JPGames",
     "publicationDate": "2025-11-03T14:13:50.000Z",
     "summary": "Spoiler: nicht viel.\nDer Beitrag Was es für &#8222;Tales of&#8220; bedeutet, dass inzwischen 70 Prozent der Fans aus dem Westen kommen erschien zuerst",
@@ -5581,7 +5561,7 @@
   },
   {
     "id": "https://jpgames.de/2025/11/neues-action-adventure-mit-heftigen-links-awakening-vibes-bringt-auch-eigene-ideen-mit/",
-    "title": "Neues Action-Adventure mit heftigen &#8222;Link&#8217;s Awakening&#8220;-Vibes bringt auch eigene Ideen mit",
+    "title": "Neues Action-Adventure mit heftigen „Link’s Awakening“-Vibes bringt auch eigene Ideen mit",
     "source": "JPGames",
     "publicationDate": "2025-11-03T14:09:48.000Z",
     "summary": "The Tale of Mara and Moa.\nDer Beitrag Neues Action-Adventure mit heftigen &#8222;Link&#8217;s Awakening&#8220;-Vibes bringt auch eigene Ideen mit ersc",
@@ -5601,7 +5581,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/schedule-1/halloween-update-sewer",
-    "title": "New Schedule 1 update lets you become a sewer gremlin to evade police, but you&#039;re not alone down there",
+    "title": "New Schedule 1 update lets you become a sewer gremlin to evade police, but you're not alone down there",
     "source": "PCGamesN",
     "publicationDate": "2025-11-03T14:07:55.000Z",
     "summary": "Developer TVGS apologizes to fans, but makes up for it with a major Schedule 1 update that adds an extensive sewer network to the game.\n\t\t\t]]>",
@@ -5631,7 +5611,7 @@
   },
   {
     "id": "https://www.pcgames.de/Star-Wars-Outlaws-Spiel-74306/News/Switch-2-Version-im-eShop-Sale-1485674/",
-    "title": "Star Wars Outlaws f&#xfc;r Switch 2&#x3a; Gold Edition jetzt erstmals im Angebot",
+    "title": "Star Wars Outlaws für Switch 2: Gold Edition jetzt erstmals im Angebot",
     "source": "PC Games",
     "publicationDate": "2025-11-03T14:01:00.000Z",
     "summary": "Erst vor wenigen Wochen brachte Ubisoft die gro&#xdf;artige Portierung von Star Wars Outlaws f&#xfc;r die Switch 2 auf den Markt. Diese steht jetzt zu",
@@ -5641,7 +5621,7 @@
   },
   {
     "id": "https://www.gamezone.de/Star-Wars-Outlaws-Spiel-74306/News/Switch-2-Version-im-eShop-Sale-1485674/",
-    "title": "Star Wars Outlaws f&#xfc;r Switch 2&#x3a; Gold Edition jetzt erstmals im Angebot",
+    "title": "Star Wars Outlaws für Switch 2: Gold Edition jetzt erstmals im Angebot",
     "source": "GameZone",
     "publicationDate": "2025-11-03T14:01:00.000Z",
     "summary": "Erst vor wenigen Wochen brachte Ubisoft die gro&#xdf;artige Portierung von Star Wars Outlaws f&#xfc;r die Switch 2 auf den Markt. Diese steht jetzt zu",
@@ -5651,7 +5631,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Star-Wars-Outlaws-Spiel-74306/News/Switch-2-Version-im-eShop-Sale-1485674/",
-    "title": "Star Wars Outlaws f&#xfc;r Switch 2&#x3a; Gold Edition jetzt erstmals im Angebot",
+    "title": "Star Wars Outlaws für Switch 2: Gold Edition jetzt erstmals im Angebot",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T14:01:00.000Z",
     "summary": "Erst vor wenigen Wochen brachte Ubisoft die gro&#xdf;artige Portierung von Star Wars Outlaws f&#xfc;r die Switch 2 auf den Markt. Diese steht jetzt zu",
@@ -5661,7 +5641,7 @@
   },
   {
     "id": "https://jpgames.de/2025/11/capcom-ist-unzufrieden-mit-den-longseller-qualitaten-monster-hunter/",
-    "title": "Capcom ist unzufrieden mit den Longseller-Qualitäten des aktuellen &#8222;Monster Hunter&#8220;",
+    "title": "Capcom ist unzufrieden mit den Longseller-Qualitäten des aktuellen „Monster Hunter“",
     "source": "JPGames",
     "publicationDate": "2025-11-03T14:00:28.000Z",
     "summary": "Rekorde nur zum Launch.\nDer Beitrag Capcom ist unzufrieden mit den Longseller-Qualitäten des aktuellen &#8222;Monster Hunter&#8220; erschien zuerst au",
@@ -5681,7 +5661,7 @@
   },
   {
     "id": "https://www.buffed.de/HBO-US-Firma-206419/News/hbo-max-start-deutschland-januar-2026-1485635/",
-    "title": "Abschied von &#x22;Sky&#x22; - Das &#xe4;ndert sich mit dem HBO-Max-Start 2026",
+    "title": "Abschied von \"Sky\" - Das ändert sich mit dem HBO-Max-Start 2026",
     "source": "Buffed",
     "publicationDate": "2025-11-03T14:00:00.000Z",
     "summary": "Der Start von HBO Max in Deutschland steht endlich fest. Doch was bedeutet das f&#xfc;r aktuelle Sky-Kunden - und wann genau geht&#x27;s los&#x3f;",
@@ -5721,7 +5701,7 @@
   },
   {
     "id": "https://www.play3.de/2025/11/03/halo-xbox-fuehrung-soll-mmo-projekt-titan-fuer-manager-bonus-geopfert-haben-ex-entwickler-rechnet-ab/",
-    "title": "Halo: Xbox-Führung soll MMO-Projekt Titan für Manager-Bonus geopfert haben &#8211; Ex-Entwickler rechnet ab",
+    "title": "Halo: Xbox-Führung soll MMO-Projekt Titan für Manager-Bonus geopfert haben – Ex-Entwickler rechnet ab",
     "source": "Play3",
     "publicationDate": "2025-11-03T13:50:59.000Z",
     "summary": "Im Jahr 2008 begannen die für die „Age of Empires“-Reihe bekannten Ensemble Studios mit der Planung für ein Online-Rollenspiel, angesiedelt [&#8230;]\n",
@@ -5781,7 +5761,7 @@
   },
   {
     "id": "https://www.pcgames.de/Anno-117-Pax-Romana-Spiel-74719/News/Entwickler-mit-Anno-2205-nicht-zufrieden-1485664/",
-    "title": "Ubisoft Mainz&#x3a; Mit diesem Anno war das Team nie gl&#xfc;cklich",
+    "title": "Ubisoft Mainz: Mit diesem Anno war das Team nie glücklich",
     "source": "PC Games",
     "publicationDate": "2025-11-03T13:33:00.000Z",
     "summary": "Alle Spiele der legend&#xe4;ren Anno-Reihe erf&#xfc;llen die Entwickler bis heute mit Stolz. Allerdings gibt es eine Ausnahme, mit der sie nicht wirkl",
@@ -5791,7 +5771,7 @@
   },
   {
     "id": "https://www.gamezone.de/Anno-117-Pax-Romana-Spiel-74719/News/Entwickler-mit-Anno-2205-nicht-zufrieden-1485664/",
-    "title": "Ubisoft Mainz&#x3a; Mit diesem Anno war das Team nie gl&#xfc;cklich",
+    "title": "Ubisoft Mainz: Mit diesem Anno war das Team nie glücklich",
     "source": "GameZone",
     "publicationDate": "2025-11-03T13:33:00.000Z",
     "summary": "Alle Spiele der legend&#xe4;ren Anno-Reihe erf&#xfc;llen die Entwickler bis heute mit Stolz. Allerdings gibt es eine Ausnahme, mit der sie nicht wirkl",
@@ -5801,7 +5781,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Anno-117-Pax-Romana-Spiel-74719/News/Entwickler-mit-Anno-2205-nicht-zufrieden-1485664/",
-    "title": "Ubisoft Mainz&#x3a; Mit diesem Anno war das Team nie gl&#xfc;cklich",
+    "title": "Ubisoft Mainz: Mit diesem Anno war das Team nie glücklich",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T13:33:00.000Z",
     "summary": "Alle Spiele der legend&#xe4;ren Anno-Reihe erf&#xfc;llen die Entwickler bis heute mit Stolz. Allerdings gibt es eine Ausnahme, mit der sie nicht wirkl",
@@ -5831,7 +5811,7 @@
   },
   {
     "id": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/wow-midight-housing-handwerk-holz-gold-reich-1485662/",
-    "title": "WoW Midnight&#x3a; Housing und das Handwerk - ohne Farmen geht gar nichts",
+    "title": "WoW Midnight: Housing und das Handwerk - ohne Farmen geht gar nichts",
     "source": "Buffed",
     "publicationDate": "2025-11-03T13:30:00.000Z",
     "summary": "Das Holz wird die wichtigste Ressource in Sachen Housing und Handwerk - doch leider gibt es einen gro&#xdf;en Haken an der Sache.",
@@ -5891,7 +5871,7 @@
   },
   {
     "id": "https://www.play3.de/2025/11/03/silent-hill-2-oblivion-co-neuauflagen-ein-milliardengeschaeft-was-aktuelle-zahlen-verraten/",
-    "title": "Silent Hill 2, Oblivion &#038; Co.: Neuauflagen ein Milliardengeschäft &#8211; Was aktuelle Zahlen verraten",
+    "title": "Silent Hill 2, Oblivion & Co.: Neuauflagen ein Milliardengeschäft – Was aktuelle Zahlen verraten",
     "source": "Play3",
     "publicationDate": "2025-11-03T13:15:43.000Z",
     "summary": "Im Rahmen einer aktuellen Studie (via VGC) beschäftigten sich die Marktforscher von Ampere Analysis mit dem Einfluss von Remastern und [&#8230;]\nDer B",
@@ -5901,7 +5881,7 @@
   },
   {
     "id": "https://www.pcgames.de/Playstation-5-Konsolen-265878/Specials/Release-Termine-Playstation-PS5-Terminplaner-1482990/",
-    "title": "Release-Liste f&#xfc;r PS5-Spiele 2025 und 2026&#x3a; Der PC-Games-Terminplaner - Update mit Halo, Cthulhu und mehr",
+    "title": "Release-Liste für PS5-Spiele 2025 und 2026: Der PC-Games-Terminplaner - Update mit Halo, Cthulhu und mehr",
     "source": "PC Games",
     "publicationDate": "2025-11-03T13:15:00.000Z",
     "summary": "Wissen, was auf PS5 gespielt wird&#x21; Wir bieten euch mit unserer Releaseliste einen &#xdc;berblick zu den kommenden Spielen auf Playstation 5 und P",
@@ -5951,7 +5931,7 @@
   },
   {
     "id": "https://www.pcgames.de/GTA-6-Spiel-55239/News/Release-Termin-erneute-Verschiebung-1485657/",
-    "title": "Neues Ger&#xfc;cht um GTA-6-Release&#x3a; Droht eine neue Verz&#xf6;gerung&#x3f;",
+    "title": "Neues Gerücht um GTA-6-Release: Droht eine neue Verzögerung?",
     "source": "PC Games",
     "publicationDate": "2025-11-03T13:01:00.000Z",
     "summary": "Ein bekannter Spiele-Interviewer berichtet, dass sich GTA 6 erneut verz&#xf6;gern k&#xf6;nnte. Interne Quellen bei Rockstar sollen sich uneins &#xfc;b",
@@ -5961,7 +5941,7 @@
   },
   {
     "id": "https://www.gamezone.de/GTA-6-Spiel-55239/News/Release-Termin-erneute-Verschiebung-1485657/",
-    "title": "Neues Ger&#xfc;cht um GTA-6-Release&#x3a; Droht eine neue Verz&#xf6;gerung&#x3f;",
+    "title": "Neues Gerücht um GTA-6-Release: Droht eine neue Verzögerung?",
     "source": "GameZone",
     "publicationDate": "2025-11-03T13:01:00.000Z",
     "summary": "Ein bekannter Spiele-Interviewer berichtet, dass sich GTA 6 erneut verz&#xf6;gern k&#xf6;nnte. Interne Quellen bei Rockstar sollen sich uneins &#xfc;b",
@@ -5971,7 +5951,7 @@
   },
   {
     "id": "https://www.videogameszone.de/GTA-6-Spiel-55239/News/Release-Termin-erneute-Verschiebung-1485657/",
-    "title": "Neues Ger&#xfc;cht um GTA-6-Release&#x3a; Droht eine neue Verz&#xf6;gerung&#x3f;",
+    "title": "Neues Gerücht um GTA-6-Release: Droht eine neue Verzögerung?",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T13:01:00.000Z",
     "summary": "Ein bekannter Spiele-Interviewer berichtet, dass sich GTA 6 erneut verz&#xf6;gern k&#xf6;nnte. Interne Quellen bei Rockstar sollen sich uneins &#xfc;b",
@@ -6011,7 +5991,7 @@
   },
   {
     "id": "https://www.buffed.de/One-Piece-Serie-204699/News/Weniger-Folgen-und-mehr-Pausen-fuer-Anime-von-One-Piece-Toei-Animation-Egghead-Elbaf-1485643/",
-    "title": "One Piece&#x3a; Der Anime geht auf Sparflamme - aus gutem Grund",
+    "title": "One Piece: Der Anime geht auf Sparflamme - aus gutem Grund",
     "source": "Buffed",
     "publicationDate": "2025-11-03T13:00:00.000Z",
     "summary": "Mit &#xfc;ber 1125 Episoden blickt One Piece auf eine umwerfende Anime-Geschichte zur&#xfc;ck - doch die wird in Zukunft kleiner ausfallen als je zuvo",
@@ -6021,7 +6001,7 @@
   },
   {
     "id": "https://www.nintendolife.com/news/2025/11/dragon-quest-creator-yuji-horii-has-been-awarded-one-of-japans-highest-honours",
-    "title": "Dragon Quest Creator Yuji Horii Has Been Awarded One Of Japan&#039;s Highest Honours",
+    "title": "Dragon Quest Creator Yuji Horii Has Been Awarded One Of Japan's Highest Honours",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-03T13:00:00.000Z",
     "summary": "Good on you!Dragon Quest is a remarkable, enduring game series, and now its creator, Yuji Horii, has received the recognition he well and truly deserv",
@@ -6101,7 +6081,7 @@
   },
   {
     "id": "https://www.gamezone.de/Fortnite-Spiel-16272/News/Sidekicks-Haustiere-Pets-Haken-Monetarisierung-1485640/",
-    "title": "Fortnite&#x3a; Bald stehen euch niedliche Sidekicks zur Verf&#xfc;gung - mit einem gewaltigen Haken",
+    "title": "Fortnite: Bald stehen euch niedliche Sidekicks zur Verfügung - mit einem gewaltigen Haken",
     "source": "GameZone",
     "publicationDate": "2025-11-03T12:31:00.000Z",
     "summary": "Fortnite bekommt Haustiere - die sogenannten Sidekicks. Die kleinen Begleiter wie Bananenhund Peels sind s&#xfc;&#xdf;, bieten aber keinen Spielvortei",
@@ -6111,7 +6091,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Fortnite-Spiel-16272/News/Sidekicks-Haustiere-Pets-Haken-Monetarisierung-1485640/",
-    "title": "Fortnite&#x3a; Bald stehen euch niedliche Sidekicks zur Verf&#xfc;gung - mit einem gewaltigen Haken",
+    "title": "Fortnite: Bald stehen euch niedliche Sidekicks zur Verfügung - mit einem gewaltigen Haken",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T12:31:00.000Z",
     "summary": "Fortnite bekommt Haustiere - die sogenannten Sidekicks. Die kleinen Begleiter wie Bananenhund Peels sind s&#xfc;&#xdf;, bieten aber keinen Spielvortei",
@@ -6121,7 +6101,7 @@
   },
   {
     "id": "https://www.destructoid.com/tank-game-tier-list/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=tank-game-tier-list",
-    "title": "Roblox Tank Game Tier List &#8211; Best Tanks [NOV3 UPD]",
+    "title": "Roblox Tank Game Tier List – Best Tanks [NOV3 UPD]",
     "source": "Destructoid",
     "publicationDate": "2025-11-03T12:28:03.000Z",
     "summary": "\n\nNow that the developers mostly removed the P2W features, I can more comfortably give you the best Tanks in Tank Game. You can't go wrong by building",
@@ -6161,7 +6141,7 @@
   },
   {
     "id": "https://www.gameswirtschaft.de/events/deutscher-entwicklerpreis-2025-nominierungen-031125/",
-    "title": "Deutscher Entwicklerpreis 2025: Die Nominierungen für das &#8218;Beste deutsche Spiel&#8216; (Update)",
+    "title": "Deutscher Entwicklerpreis 2025: Die Nominierungen für das ‚Beste deutsche Spiel‘ (Update)",
     "source": "GamesWirtschaft",
     "publicationDate": "2025-11-03T12:22:17.000Z",
     "summary": "Aus 244 Einreichungen haben die Fachjurys ihre Favoriten ausgewählt: Die Nominierungen für den Deutschen Entwicklerpreis 2025 sind da. Update vom 3. N",
@@ -6201,7 +6181,7 @@
   },
   {
     "id": "https://www.nintendolife.com/news/2025/11/warframes-switch-2-version-is-officially-launching-in-2026",
-    "title": "Warframe&#039;s Switch 2 Version Is Officially Launching In 2026",
+    "title": "Warframe's Switch 2 Version Is Officially Launching In 2026",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-03T12:15:00.000Z",
     "summary": "\"It looks so good, it runs so well\".Digital Extremes has been teasing Warframe's Switch 2 version for a few weeks now, and in a recent devstream, the ",
@@ -6291,7 +6271,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Rocket-League-Spiel-54968/News/Die-Simpsons-Springfield-Event-Inhalt-1485646/",
-    "title": "Die Simpsons machen jetzt auch Rocket League unsicher&#x3a; Das steckt im Springfield-Event",
+    "title": "Die Simpsons machen jetzt auch Rocket League unsicher: Das steckt im Springfield-Event",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T12:02:00.000Z",
     "summary": "Aktuell l&#xe4;uft ein gro&#xdf;es Simpsons-Event im Battle-Royale-Shooter Fortnite. Auch in Rocket League k&#xf6;nnen dabei Items verdient werden.",
@@ -6301,7 +6281,7 @@
   },
   {
     "id": "https://www.buffed.de/Doctor-Who-Serie-214183/News/doctor-who-disney-deal-geplatzt-1485624/",
-    "title": "Zu teuer, zu politisch&#x3a; Die Warhheit hinter dem Aus von &#x22;Doctor Who&#x22;",
+    "title": "Zu teuer, zu politisch: Die Warhheit hinter dem Aus von \"Doctor Who\"",
     "source": "Buffed",
     "publicationDate": "2025-11-03T12:00:00.000Z",
     "summary": "Ein legend&#xe4;res Sci-Fi-Franchise scheitert an hohen Erwartungen, leeren Kassen und einem Publikum, das nicht mehr mitzieht. Disney&#x2b; zieht die",
@@ -6341,7 +6321,7 @@
   },
   {
     "id": "https://www.play3.de/2025/11/03/ps6-xbox-next-switch-2-eine-rein-digitale-zukunft-analyst-ueber-das-ende-physischer-spiele/",
-    "title": "PS6, Xbox Next &#038; Switch 2: Eine rein digitale Zukunft? Analyst über das Ende physischer Spiele",
+    "title": "PS6, Xbox Next & Switch 2: Eine rein digitale Zukunft? Analyst über das Ende physischer Spiele",
     "source": "Play3",
     "publicationDate": "2025-11-03T11:51:53.000Z",
     "summary": "Die Entwicklung der vergangenen Jahre machte deutlich, dass der Anteil der physisch verkauften Spiele kontinuierlich sank. Im Rahmen der Geschäftszahl",
@@ -6461,7 +6441,7 @@
   },
   {
     "id": "https://www.buffed.de/MMO-Thema-267704/News/Wollte-niemand-haben-Halo-MMO-wurde-eingestampft-und-Spieler-findens-okay-1485648/",
-    "title": "&#x22;Wollte niemand haben&#x22; - Halo-MMO wurde eingestampft und Spieler findens okay",
+    "title": "\"Wollte niemand haben\" - Halo-MMO wurde eingestampft und Spieler findens okay",
     "source": "Buffed",
     "publicationDate": "2025-11-03T11:30:00.000Z",
     "summary": "In einem Twitter-Thread erkl&#xe4;rte Entwickler Sandy Petersen, wieso das Halo-MMO schlussendlich eingestellt wurde.",
@@ -6491,7 +6471,7 @@
   },
   {
     "id": "https://www.videogameszone.de/The-Witcher-Serie-267922/News/wieso-spielt-henry-cavill-nicht-mehr-mit-sieht-anders-aus-neuer-schauspieler-1485636/",
-    "title": "The Witcher mit neuem Schauspieler&#x3a; Die Netflix-Serie erkl&#xe4;rt, wieso Geralt jetzt anders aussieht",
+    "title": "The Witcher mit neuem Schauspieler: Die Netflix-Serie erklärt, wieso Geralt jetzt anders aussieht",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T11:26:00.000Z",
     "summary": "Mit dieser Erkl&#xe4;rung, wieso der Hexer jetzt ganz anders aussieht, speist die 4. Staffel von The Witcher das Publikum ab.",
@@ -6521,7 +6501,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/arc-raiders/skins-cosmetics-interview",
-    "title": "Arc Raiders won&#039;t have CoD-style &quot;T-Rex costumes&quot; and &quot;Santa Claus outfits&quot; because Embark wants to &quot;protect&quot; its visual identity",
+    "title": "Arc Raiders won't have CoD-style \"T-Rex costumes\" and \"Santa Claus outfits\" because Embark wants to \"protect\" its visual identity",
     "source": "PCGamesN",
     "publicationDate": "2025-11-03T11:24:55.000Z",
     "summary": "Arc Raiders' design director tells us Embark wants to give players freedom to express themselves, but not at the cost of breaking immersion.\n\t\t\t]]>",
@@ -6531,7 +6511,7 @@
   },
   {
     "id": "https://www.eurogamer.de/ab-in-den-game-pass-egging-on-whiskerwood-voidtrain-incoming",
-    "title": "Ab in den Game Pass: Egging On, Whiskerwood &amp; Voidtrain incoming!",
+    "title": "Ab in den Game Pass: Egging On, Whiskerwood & Voidtrain incoming!",
     "source": "Eurogamer",
     "publicationDate": "2025-11-03T11:24:33.000Z",
     "summary": " Microsofts Game Pass f&auml;hrt weiter auf Erfolgskurs &ndash; und zwar mit einer Mischung aus Experimentierfreude, Indie-Charme und einer Portion Wa",
@@ -6581,7 +6561,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/apex-legends/season-27-ranked",
-    "title": "Apex Legends Season 27 finally adds a new feature that&#039;ll change my ranked experience forever",
+    "title": "Apex Legends Season 27 finally adds a new feature that'll change my ranked experience forever",
     "source": "PCGamesN",
     "publicationDate": "2025-11-03T11:15:44.000Z",
     "summary": "Apex Legends Season 27 ranked mode is seeing some major shakeups, including addressing loot discrepancies and making kills more worthwhile.\n\t\t\t]]>",
@@ -6631,7 +6611,7 @@
   },
   {
     "id": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/wow-the-war-within-legion-remix-1485642/",
-    "title": "WoW&#x3a; Legion Remix verliert, The War Within gewinnt - der j&#xfc;ngste Trend in WoW",
+    "title": "WoW: Legion Remix verliert, The War Within gewinnt - der jüngste Trend in WoW",
     "source": "Buffed",
     "publicationDate": "2025-11-03T11:00:00.000Z",
     "summary": "Ein Blick auf die Zahlen in WoW l&#xe4;sst einen gr&#xfc;beln. Warum sind die Mythisch-Plus-Dungeons in The War Within auf einmal so beliebt&#x3f;",
@@ -6690,18 +6670,8 @@
     "language": "de"
   },
   {
-    "id": "https://www.giga.de/entertainment/stumble-guys-codes-einloesen--01J5QXYCVWJ28MF8Y4PFGMR3JW",
-    "title": "Stumble Guys: Codes einlösen (November 2025)",
-    "source": "GIGA Games",
-    "publicationDate": "2025-11-03T10:50:32.000Z",
-    "summary": "In Stumble Guys könnt ihr Codes einlösen, um eure Lieblings-Content-Creator zu unterstützen. Im Folgenden listen wir euch alle aktuellen Codes auf und",
-    "link": "https://www.giga.de/entertainment/stumble-guys-codes-einloesen--01J5QXYCVWJ28MF8Y4PFGMR3JW",
-    "imageUrl": "https://static.giga.de/38/42/9c/5418b4a6e570d11fcb3ee9eb4d_ZmMgNzkxMTRkZmNmZmZmIDE5MjAgMAMzMjU4YTVkZjM5NA==.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.nintendolife.com/news/2025/11/jill-chris-would-be-more-befitting-resident-evils-obsession-with-lady-d-is-getting-fans-riled-up",
-    "title": "&quot;Jill / Chris Would Be More Befitting&quot; - Resident Evil&#039;s Obsession With Lady D. Is Getting Fans Riled Up",
+    "title": "\"Jill / Chris Would Be More Befitting\" - Resident Evil's Obsession With Lady D. Is Getting Fans Riled Up",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-03T10:45:00.000Z",
     "summary": "Series' 30th anniversary looms.Capcom has announced a new collaboration between Resident Evil and Japanese metal group BABYMETAL, but its debut has fa",
@@ -6711,7 +6681,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/stalker-2/leaving-game-pass",
-    "title": "Stalker 2 is leaving Game Pass after less than a year, and that&#039;s a damn shame",
+    "title": "Stalker 2 is leaving Game Pass after less than a year, and that's a damn shame",
     "source": "PCGamesN",
     "publicationDate": "2025-11-03T10:44:03.000Z",
     "summary": "Several more games are being booted from Game Pass soon, including Stalker 2, one of the most immersive and dark survival shooters around.\n\t\t\t]]>",
@@ -6741,7 +6711,7 @@
   },
   {
     "id": "https://www.videogameszone.de/Cyberpunk-2077-Spiel-20697/News/Comeback-von-Keanu-Reeves-in-Cyberpunk-2-1485641/",
-    "title": "Cyberpunk 2&#x3a; Die T&#xfc;r f&#xfc;r Johnny Silverhand w&#xe4;re offen",
+    "title": "Cyberpunk 2: Die Tür für Johnny Silverhand wäre offen",
     "source": "Video Games Zone",
     "publicationDate": "2025-11-03T10:34:00.000Z",
     "summary": "Schauspieler Keanu Reeves hatte bereits sein Interesse an einer R&#xfc;ckkehr als Johnny Silverhand in Cyberpunk 2 bekundet. Doch wie realistisch ist ",
@@ -6771,7 +6741,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/cyberpunk-2077/keanu-reeves-want-to-return-for-cyberpunk-2077s-sequel-and-creator-mike-pondsmith-has-ways-to-do-that",
-    "title": "Keanu Reeves wants to return for Cyberpunk 2077&#039;s sequel, and creator Mike Pondsmith &quot;has ways to do that&quot;",
+    "title": "Keanu Reeves wants to return for Cyberpunk 2077's sequel, and creator Mike Pondsmith \"has ways to do that\"",
     "source": "PCGamesN",
     "publicationDate": "2025-11-03T10:18:13.000Z",
     "summary": "While Mike Pondsmith couldn't see Keanu Reeves as \"incredible jerk\" Johnny Silverhands, he'd love him to return for Cyberpunk 2077's sequel.\n\t\t\t]]>",
@@ -7011,7 +6981,7 @@
   },
   {
     "id": "https://www.4p.de/news/red-dead-redemption-2-grafik-upgrade-gratis-hoehepunkt-nexus-mods-kostenlos/3354645",
-    "title": "Red Dead Redemption 2: Jetzt tierisches Grafik-Upgrade kostenlos laden – &#8222;Absoluter Höhepunkt&#8220;",
+    "title": "Red Dead Redemption 2: Jetzt tierisches Grafik-Upgrade kostenlos laden – „Absoluter Höhepunkt“",
     "source": "4P",
     "publicationDate": "2025-11-03T08:24:00.000Z",
     "summary": "Da werfen Grafik-Fetischisten vor Freude die Hände in die Luft: Red Dead Redemption 2 so schön (und schuppig) wie noch nie!",
@@ -7061,7 +7031,7 @@
   },
   {
     "id": "https://www.destructoid.com/where-is-bilguuns-hideout-located-in-arc-raiders/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=where-is-bilguuns-hideout-located-in-arc-raiders",
-    "title": "Where is Bilguun&#8217;s Hideout located in ARC Raiders",
+    "title": "Where is Bilguun’s Hideout located in ARC Raiders",
     "source": "Destructoid",
     "publicationDate": "2025-11-03T07:35:28.000Z",
     "summary": "\n\nThe Bilguun's Hideout location in ARC Raiders is a vital quest area, but finding the place can be really challenging if you don't know where to look",
@@ -7191,7 +7161,7 @@
   },
   {
     "id": "https://www.gematsu.com/2025/11/this-weeks-japanese-game-releases-hyrule-warriors-age-of-imprisonment-magical-craft-neko-to-mahou-no-dress-more",
-    "title": "This Week&#8217;s Japanese Game Releases: Hyrule Warriors: Age of Imprisonment, Magical Craft: Neko to Mahou no Dress, more",
+    "title": "This Week’s Japanese Game Releases: Hyrule Warriors: Age of Imprisonment, Magical Craft: Neko to Mahou no Dress, more",
     "source": "Gematsu",
     "publicationDate": "2025-11-03T02:38:17.000Z",
     "summary": "Hyrule Warriors: Age of Imprisonment for Switch 2 and Magical Craft: Neko to Mahou no &#8230;\nSource",
@@ -7221,7 +7191,7 @@
   },
   {
     "id": "https://www.destructoid.com/why-is-there-a-queue-in-arc-raiders-in-queue-message-explained/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=why-is-there-a-queue-in-arc-raiders-in-queue-message-explained",
-    "title": "Why is there a queue in ARC Raiders? &#8216;In Queue&#8217; message, explained",
+    "title": "Why is there a queue in ARC Raiders? ‘In Queue’ message, explained",
     "source": "Destructoid",
     "publicationDate": "2025-11-03T00:08:38.000Z",
     "summary": "\n\nWhenever we get a super-popular multiplayer game, server issues tend to arise. One way to mitigate them is to put players in a queue, allowing them ",
@@ -7491,7 +7461,7 @@
   },
   {
     "id": "https://www.giantbomb.com/thebomb12?slug=giant-bombs-the-bomb-12&amp;typeId=1100&amp;id=6556",
-    "title": "Giant Bomb&#039;s The Bomb 12",
+    "title": "Giant Bomb's The Bomb 12",
     "source": "Giant Bomb",
     "publicationDate": "2025-11-02T17:05:00.000Z",
     "summary": "Each week Jeff Grubb debuts The Bomb 12, Giant Bomb's comprehensive power rankings list of the games that people are actually playing.October 24, 2025",
@@ -7551,7 +7521,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/diablo-ii/project-diablo-2-season-12-reveal",
-    "title": "The next Project Diablo 2 update dramatically expands the ARPG&#039;s ranged combat with an idea Blizzard never tried",
+    "title": "The next Project Diablo 2 update dramatically expands the ARPG's ranged combat with an idea Blizzard never tried",
     "source": "PCGamesN",
     "publicationDate": "2025-11-02T16:37:16.000Z",
     "summary": "Project Diablo 2 Season 12 expands the classic ARPG’s ranged combat, with a range of arrow and bolt types to enhance bows and crossbows.\n\t\t\t]]>",
@@ -7568,16 +7538,6 @@
     "link": "https://www.computerbase.de/news/gehaeuse/msi-pro-shield-m100p-guenstiges-kompaktgehaeuse-fuer-den-office-schreibtisch.94884/",
     "imageUrl": "https://pics.computerbase.de/1/1/9/9/5/4-407bb45b1c2de1ef/article-640x360.fd8b2a69.jpg",
     "language": "de"
-  },
-  {
-    "id": "https://www.pcgamer.com/gaming-industry/events-conferences/mcm-comic-con-cosplayers-never-fail-to-amaze-me-with-their-outfits-and-hopefully-next-year-my-inspiration-manifests-into-my-own-weekend-pass/",
-    "title": "MCM Comic Con cosplayers never fail to amaze me with their outfits, and hopefully next year my inspiration manifests into my own weekend pass",
-    "source": "PC Gamer",
-    "publicationDate": "2025-11-02T16:00:00.000Z",
-    "summary": "",
-    "link": "https://www.pcgamer.com/gaming-industry/events-conferences/mcm-comic-con-cosplayers-never-fail-to-amaze-me-with-their-outfits-and-hopefully-next-year-my-inspiration-manifests-into-my-own-weekend-pass/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/vRuJjDwecV34qZsqpqtEgi-1280-80.jpg",
-    "language": "en"
   },
   {
     "id": "https://www.eurogamer.de/doom-designer-sandy-petersen-sagt-der-fruhere-xbox-chef-don-mattrick-habe-ensemble-und-dessen-halo-mmo-zerstort-um-seinen-personlichen-aktienbonus-zu-schutzen",
@@ -7611,7 +7571,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/final-fantasy-14/ff14-mr-ozma-new-content",
-    "title": "FF14&#039;s battle designer is cooking up &quot;something new and fresh&quot; for the MMORPG, but he&#039;s focused more on fun than difficulty",
+    "title": "FF14's battle designer is cooking up \"something new and fresh\" for the MMORPG, but he's focused more on fun than difficulty",
     "source": "PCGamesN",
     "publicationDate": "2025-11-02T15:28:42.000Z",
     "summary": "Lead FF14 battle designer Masaki Nakagawa, best known as ‘Mr Ozma,’ has been developing “a major piece of content” for the 7.5 patches.\n\t\t\t]]>",
@@ -7651,7 +7611,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/resonance-solstice/reviews-mixed",
-    "title": "Combining train sims and strategic card battlers, this free anime game sounds like a dream, but it hasn&#039;t landed how I hoped",
+    "title": "Combining train sims and strategic card battlers, this free anime game sounds like a dream, but it hasn't landed how I hoped",
     "source": "PCGamesN",
     "publicationDate": "2025-11-02T14:27:19.000Z",
     "summary": "As it struggles to gather steam at launch, is its bold mix of genres keeping this card-battling train sim from making it off the platform?\n\t\t\t]]>",
@@ -7681,7 +7641,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/grand-theft-auto-vi/dan-houser-rdr3-gta6",
-    "title": "Grand Theft Auto&#039;s Dan Houser would be &quot;sadder&quot; to see Red Dead Redemption 3 happen without him than GTA 6",
+    "title": "Grand Theft Auto's Dan Houser would be \"sadder\" to see Red Dead Redemption 3 happen without him than GTA 6",
     "source": "PCGamesN",
     "publicationDate": "2025-11-02T13:16:27.000Z",
     "summary": "Grand Theft Auto writer Dan Houser talks about watching Rockstar Games from afar, wanting to kill a protagonist, and the lost GTA 5 DLC.\n\t\t\t]]>",
@@ -7721,7 +7681,7 @@
   },
   {
     "id": "https://de.ign.com/hbo-max/149525/video/das-sind-die-streaming-highlights-auf-netflix-co-der-woche",
-    "title": "Das sind die Streaming-Highlights auf Netflix &amp; Co. der Woche",
+    "title": "Das sind die Streaming-Highlights auf Netflix & Co. der Woche",
     "source": "IGN",
     "publicationDate": "2025-11-02T12:31:09.000Z",
     "summary": "&lt;img src=\"https://sm.ign.com/t/ign_de/screenshot/default/streaming-update_pk2t.640.png\" width=\"120\" hspace=\"5\" alt=\"\" vspace=\"5\" align=\"left\" /&gt;",
@@ -7881,7 +7841,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/battlefield-6/casual-breakthrough-mode",
-    "title": "A new Battlefield 6 &quot;casual&quot; mode aims to find middle ground as dev continues fightback against XP farming",
+    "title": "A new Battlefield 6 \"casual\" mode aims to find middle ground as dev continues fightback against XP farming",
     "source": "PCGamesN",
     "publicationDate": "2025-11-02T10:20:35.000Z",
     "summary": "As it cracks down on XP farm servers, Battlefield Studios launches a new BF6 Casual Breakthrough mode featuring teams that are mostly bots.\n\t\t\t]]>",
@@ -8111,7 +8071,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/cubic-odyssey/steam-sale",
-    "title": "Cubic Odyssey is what you&#039;d get if you launched Minecraft into space, and it&#039;s cheaper than ever right now",
+    "title": "Cubic Odyssey is what you'd get if you launched Minecraft into space, and it's cheaper than ever right now",
     "source": "PCGamesN",
     "publicationDate": "2025-11-01T17:02:26.000Z",
     "summary": "Combining the open-world survival crafting of Minecraft and the space travel of No Man’s Sky, Cubic Odyssey has a deep discount on Steam.\n\t\t\t]]>",
@@ -8141,7 +8101,7 @@
   },
   {
     "id": "https://www.computerbase.de/news/kuehlung/royal-knight-120-und-royal-pretor-130-thermalrights-grosskuehler-wollen-high-end-sein.94879/",
-    "title": "Royal Knight 120 &amp; Royal Pretor 130: Thermalrights Großkühler wollen High-End sein",
+    "title": "Royal Knight 120 & Royal Pretor 130: Thermalrights Großkühler wollen High-End sein",
     "source": "ComputerBase",
     "publicationDate": "2025-11-01T16:13:00.000Z",
     "summary": "Zwei große Doppelturmkühler mit ungewöhnlicher Lüfterbestückung, der Royal Knight 120 Digital und der Royal Pretor 130 Ultra, sollen Thermalright wied",
@@ -8151,7 +8111,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/frostpunk-2/fractured-utopias-release-date",
-    "title": "The first Frostpunk 2 DLC makes factions matter way more, and you can sign up to try it early if you&#039;re fast",
+    "title": "The first Frostpunk 2 DLC makes factions matter way more, and you can sign up to try it early if you're fast",
     "source": "PCGamesN",
     "publicationDate": "2025-11-01T16:00:37.000Z",
     "summary": "Defrost your digits in time and you might just get the chance to try Fractured Utopias, the first Frostpunk 2 DLC, a month ahead of launch.\n\t\t\t]]>",
@@ -8161,32 +8121,12 @@
   },
   {
     "id": "https://www.pcgamesn.com/master-of-command/out-now",
-    "title": "If you&#039;re tired of Total War, 18th-Century strategy game Master of Command feels like a breath of fresh air",
+    "title": "If you're tired of Total War, 18th-Century strategy game Master of Command feels like a breath of fresh air",
     "source": "PCGamesN",
     "publicationDate": "2025-11-01T15:33:52.000Z",
     "summary": "Beating Europa Universalis 5 to the punch, Master of Command is out now and bringing a more snappy alternative to Total War Empire.\n\t\t\t]]>",
     "link": "https://www.pcgamesn.com/master-of-command/out-now",
     "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/11/master-of-command-out-now-seven-years-war-strategy-game-total-war-meets-europa-universalis-5-armchair-history-interactive.jpg",
-    "language": "en"
-  },
-  {
-    "id": "https://www.polygon.com/the-simpsons-rocket-league-car-fortnite/",
-    "title": "Fortnite's The Simpsons collab is also bringing new items to Rocket League",
-    "source": "Polygon",
-    "publicationDate": "2025-11-01T15:22:08.000Z",
-    "summary": "If you want all of the Simpsons cosmetics, you'd better sign into Rocket League.",
-    "link": "https://www.polygon.com/the-simpsons-rocket-league-car-fortnite/",
-    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/2025/10/the-homer.png",
-    "language": "en"
-  },
-  {
-    "id": "https://www.polygon.com/fortnite-simpsons-shorts-episodes-disney-plus/",
-    "title": "New The Simpsons shorts releasing for Fortnite collab",
-    "source": "Polygon",
-    "publicationDate": "2025-11-01T15:16:32.000Z",
-    "summary": "As if a battle pass and tons of cosmetics weren't enough, Fortnite's The Simpsons season also includes new animated shorts",
-    "link": "https://www.polygon.com/fortnite-simpsons-shorts-episodes-disney-plus/",
-    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/chorus/uploads/chorus_asset/file/15964439/E_My_Sports_promo_1.png",
     "language": "en"
   },
   {
@@ -8211,7 +8151,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/mount-blade-ii-bannerlord/war-sails-release-date",
-    "title": "Masterful medieval RPG Mount and Blade 2 is about to take to the sea, and I can&#039;t wait to smash up some ships",
+    "title": "Masterful medieval RPG Mount and Blade 2 is about to take to the sea, and I can't wait to smash up some ships",
     "source": "PCGamesN",
     "publicationDate": "2025-11-01T14:50:20.000Z",
     "summary": "Originally slated to release in the summer, the big Mount and Blade 2 Bannerlord War Sails expansions takes your vikings onto the seas later this mont",
@@ -8281,7 +8221,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/saints-row/prequel-pitch-original-director",
-    "title": "A Saints Row prequel going &quot;back to its roots&quot; might actually happen, as its original director works on a pitch &quot;to get the band back together&quot;",
+    "title": "A Saints Row prequel going \"back to its roots\" might actually happen, as its original director works on a pitch \"to get the band back together\"",
     "source": "PCGamesN",
     "publicationDate": "2025-11-01T12:28:15.000Z",
     "summary": "Original Saints Row director Chris Stockman tells us he wants to take the GTA rival back to the start, as he works on a prequel pitch.\n\t\t\t]]>",
@@ -8321,7 +8261,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/warframe/devstream-the-old-peace-devils-triad-romance",
-    "title": "Warframe The Old Peace is pulling me back in as Digital Extremes shows The Devil&#039;s Triad in action (yes, there&#039;s kissing)",
+    "title": "Warframe The Old Peace is pulling me back in as Digital Extremes shows The Devil's Triad in action (yes, there's kissing)",
     "source": "PCGamesN",
     "publicationDate": "2025-11-01T11:33:13.000Z",
     "summary": "Digital Extremes lifts the lid on The Old Peace, The Devil’s Triad, three Protoframes, and the Uriel Warframe, which arrive in December.\n\t\t\t]]>",
@@ -8381,7 +8321,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/battlefield-6/update-challenge-rerolls-redsec",
-    "title": "New Battlefield 6 update will stop pushing you into battle royale spinoff Redsec if you don&#039;t play it",
+    "title": "New Battlefield 6 update will stop pushing you into battle royale spinoff Redsec if you don't play it",
     "source": "PCGamesN",
     "publicationDate": "2025-11-01T10:02:49.000Z",
     "summary": "A Battlefield 6 update adjusts challenge rerolls so that you aren’t given tasks in its battle royale spinoff Redsec if you don’t play it.\n\t\t\t]]>",
@@ -8631,7 +8571,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/brotato/giveaway-steam-keys",
-    "title": "Grab a free Steam key for Brotato and the beloved roguelike&#039;s must-play DLC",
+    "title": "Grab a free Steam key for Brotato and the beloved roguelike's must-play DLC",
     "source": "PCGamesN",
     "publicationDate": "2025-10-31T19:00:59.000Z",
     "summary": "Brotato is one of the all-time great bullet heavens, and we've got some free Steam keys for both the base game and its Abyssal Terrors DLC.\n\t\t\t]]>",
@@ -8781,7 +8721,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/apex-legends/season-27-legend-changes-interview",
-    "title": "Apex Legends Season 27 massively buffs three characters, but devs promise &quot;Octane has not been forgotten&quot;",
+    "title": "Apex Legends Season 27 massively buffs three characters, but devs promise \"Octane has not been forgotten\"",
     "source": "PCGamesN",
     "publicationDate": "2025-10-31T16:33:32.000Z",
     "summary": "Respawn devs explain why Apex Legends' trio of Horizon, Rampart, and Valkyrie are getting big buffs and kit reworks in its upcoming Season 27. \n\t\t\t]]>",
@@ -8981,7 +8921,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/civilization-vii/update-1-3-0-naval-combat-overhaul",
-    "title": "The next Civilization 7 update aims to deliver &quot;more strategy, less ambiguity&quot; with a total overhaul to naval combat",
+    "title": "The next Civilization 7 update aims to deliver \"more strategy, less ambiguity\" with a total overhaul to naval combat",
     "source": "PCGamesN",
     "publicationDate": "2025-10-31T15:08:51.000Z",
     "summary": "Civilization 7 update 1.3.0 will bring a complete rework to seaborne strategy with ‘naval combat 2.0,’ including the new Privateer ship.\n\t\t\t]]>",
@@ -9031,7 +8971,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/warframe/starfinder-collab-out-now",
-    "title": "Warframe&#039;s latest collaboration is with D&#038;D&#039;s sci-fi rival, and I&#039;ve already added those dice to my cart",
+    "title": "Warframe's latest collaboration is with D&D's sci-fi rival, and I've already added those dice to my cart",
     "source": "PCGamesN",
     "publicationDate": "2025-10-31T14:54:00.000Z",
     "summary": "Warframe has teamed up with TTRPG publisher Paizo to launch a new Starfinder module set in the 1999 universe, and you can buy it right now.\n\t\t\t]]>",
@@ -9051,7 +8991,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/deus-ex/remastered-reaction-art-director",
-    "title": "Deus Ex&#039;s art director says ugly new remaster &quot;did not need to happen&quot;",
+    "title": "Deus Ex's art director says ugly new remaster \"did not need to happen\"",
     "source": "PCGamesN",
     "publicationDate": "2025-10-31T14:45:05.000Z",
     "summary": "Aspyr's Deus Ex Remastered got slated following its reveal a few weeks ago, and now the original game's art director has given his verdict.\n\t\t\t]]>",
@@ -9061,7 +9001,7 @@
   },
   {
     "id": "https://www.computerbase.de/news/tastaturen/cherry-stream-desktop-ultimate-hoechste-produktivitaet-bei-maus-und-tastatur-fuer-200-euro.94873/",
-    "title": "Cherry Stream Desktop Ultimate: „Höchste Produktivität“ bei Maus &amp; Tastatur für 200 Euro",
+    "title": "Cherry Stream Desktop Ultimate: „Höchste Produktivität“ bei Maus & Tastatur für 200 Euro",
     "source": "ComputerBase",
     "publicationDate": "2025-10-31T14:45:00.000Z",
     "summary": "Das Stream Desktop Ultimate ist ein Bundle aus Maus und Tastatur, das als „Präzisionsset“ „höchste Produktivität“ im Büro verspricht – für 200 Euro. D",
@@ -9151,7 +9091,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/final-fantasy-14/ff14-6-4-release-date-live-letter-89-summary",
-    "title": "Here&#039;s the FF14 7.4 release date and everything shown during Live Letter 89, and the MMO is answering my wildest hopes",
+    "title": "Here's the FF14 7.4 release date and everything shown during Live Letter 89, and the MMO is answering my wildest hopes",
     "source": "PCGamesN",
     "publicationDate": "2025-10-31T13:23:40.000Z",
     "summary": "The FF14 7.4 release date and details have been revealed by Yoshi-P in PLL 89, including the new Variant Dungeon and a fresh glamour system.\n\t\t\t]]>",
@@ -9171,7 +9111,7 @@
   },
   {
     "id": "https://www.gematsu.com/2025/10/frostpunk-2-dlc-fractured-utopias-launches-december-8",
-    "title": "Frostpunk 2 DLC &#8216;Fractured Utopias&#8217; launches December 8",
+    "title": "Frostpunk 2 DLC ‘Fractured Utopias’ launches December 8",
     "source": "Gematsu",
     "publicationDate": "2025-10-31T13:11:40.000Z",
     "summary": "11 bit studios will release Frostpunk 2 downloadable content &#8220;Fractured Utopias&#8221; for all available platforms &#8230;\nSource",
@@ -9181,7 +9121,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/nzxt/h7-flow-deal",
-    "title": "My favorite mid-size PC case is perfect for keeping graphics cards cool, and it&#039;s currently 20% off",
+    "title": "My favorite mid-size PC case is perfect for keeping graphics cards cool, and it's currently 20% off",
     "source": "PCGamesN",
     "publicationDate": "2025-10-31T13:08:46.000Z",
     "summary": "A saving of $30 might not sound like much, but this NZXT H7 Flow RGB discount gets you a top PC case for an incredible price.\n\t\t\t]]>",
@@ -9231,7 +9171,7 @@
   },
   {
     "id": "https://www.gematsu.com/2025/10/arknights-endfield-beta-test-ii-and-ps5-technical-test-announced",
-    "title": "Arknights: Endfield &#8216;Beta Test II&#8217; and &#8216;PS5 Technical Test&#8217; announced",
+    "title": "Arknights: Endfield ‘Beta Test II’ and ‘PS5 Technical Test’ announced",
     "source": "Gematsu",
     "publicationDate": "2025-10-31T12:41:05.000Z",
     "summary": "Publisher GRYPHLINE and developer Mountain Contour have opened registration for the Arknights: Endfield &#8220;Beta Test &#8230;\nSource",
@@ -9301,7 +9241,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/arc-raiders/discount-free-game-pass",
-    "title": "Arc Raiders isn&#039;t free or on Game Pass, but here&#039;s how to get it for cheap",
+    "title": "Arc Raiders isn't free or on Game Pass, but here's how to get it for cheap",
     "source": "PCGamesN",
     "publicationDate": "2025-10-31T11:40:37.000Z",
     "summary": "Arc Raiders is finally here, and Embark Studios’ extraction shooter already has a tasty 14% discount to celebrate its long-awaited launch.\n\t\t\t]]>",
@@ -9401,7 +9341,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/escape-from-tarkov/goes-gold-1-0-launch-steam",
-    "title": "After nine years, Escape From Tarkov finally achieves &quot;the result we&#039;ve all been waiting for&quot;",
+    "title": "After nine years, Escape From Tarkov finally achieves \"the result we've all been waiting for\"",
     "source": "PCGamesN",
     "publicationDate": "2025-10-31T11:05:11.000Z",
     "summary": "Ahead of Escape From Tarkov's Steam debut and 1.0 launch, Battlestate Games' COO Nikita Buyanov confirms \"the final version is complete.\" \n\t\t\t]]>",
@@ -9430,16 +9370,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "\"Thief VR\" erscheint im Dezember: Kaum Unterschiede zwischen Quest 3 und PS VR2",
-    "source": "Heise Online",
-    "publicationDate": "2025-10-31T10:42:00.000Z",
-    "summary": "\"Thief VR\" hat nun einen konkreten Veröffentlichungstermin. Zwei neue Trailer zeigen kaum Unterschiede zwischen den Versionen für Quest 3 und PS VR2.",
-    "link": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/7/7/2/5/ThiefVR_GameplayTrailer_Screenshot_01-7704846210940744.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/iPhone-17-Ersatzteile-fuer-neue-Apple-Handys-fuer-Bastler-verfuegbar-10965281.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "iPhone 17: Ersatzteile für neue Apple-Handys für Bastler verfügbar",
     "source": "Heise Online",
@@ -9447,6 +9377,16 @@
     "summary": "Nach den Reparaturhandbüchern hat Apple nun auch das notwendige Material für alle neuen iPhones freigegeben. Wie üblich ein teurer Spaß.",
     "link": "https://www.heise.de/news/iPhone-17-Ersatzteile-fuer-neue-Apple-Handys-fuer-Bastler-verfuegbar-10965281.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/7/6/4/5/airrepair-f5917f04d15d1a96.png",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "\"Thief VR\" erscheint im Dezember: Kaum Unterschiede zwischen Quest 3 und PS VR2",
+    "source": "Heise Online",
+    "publicationDate": "2025-10-31T10:42:00.000Z",
+    "summary": "\"Thief VR\" hat nun einen konkreten Veröffentlichungstermin. Zwei neue Trailer zeigen kaum Unterschiede zwischen den Versionen für Quest 3 und PS VR2.",
+    "link": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/7/7/2/5/ThiefVR_GameplayTrailer_Screenshot_01-7704846210940744.jpeg",
     "language": "de"
   },
   {
@@ -9501,7 +9441,7 @@
   },
   {
     "id": "https://www.gameswelt.ch/dragon-quest-i-ii-hd-2d-remake/test/test-neue-optik-und-alte-probleme-fuer-die-jrpg-klassiker-332158?utm_campaign=tbuk",
-    "title": "Dragon Quest I &amp; II HD-2D Remake - Test: Neue Optik und alte Probleme für die JRPG-Klassiker",
+    "title": "Dragon Quest I & II HD-2D Remake - Test: Neue Optik und alte Probleme für die JRPG-Klassiker",
     "source": "GamesWelt",
     "publicationDate": "2025-10-31T10:00:00.000Z",
     "summary": "Lange blieben uns in Deutschland die Anfänge von Square Enix’ ikonischer Reihe verwehrt, jetzt können wir sie im neuen Gewand nachholen – lohnt sich d",
@@ -9821,7 +9761,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/clair-obscur-expedition-33/loaded-sale",
-    "title": "Expedition 33 has hit its lowest price yet, so now there&#039;s no excuse not to play it",
+    "title": "Expedition 33 has hit its lowest price yet, so now there's no excuse not to play it",
     "source": "PCGamesN",
     "publicationDate": "2025-10-30T19:00:19.000Z",
     "summary": "Clair Obscur Expedition 33 is expected to be one of 2025’s main GOTY contenders, and Sandfall's RPG has hit its lowest price to celebrate.\n\t\t\t]]>",
@@ -9851,7 +9791,7 @@
   },
   {
     "id": "https://www.eurogamer.de/bridges-ports-fur-cities-skylines-2-ist-da-launch-trailer-zeigt-neue-fahrlinien-und-maritime-industrien",
-    "title": "Bridges &amp; Ports für Cities: Skylines 2 ist da: Launch-Trailer zeigt neue Fährlinien und maritime Industrien",
+    "title": "Bridges & Ports für Cities: Skylines 2 ist da: Launch-Trailer zeigt neue Fährlinien und maritime Industrien",
     "source": "Eurogamer",
     "publicationDate": "2025-10-30T18:30:00.000Z",
     "summary": " Paradox Interactive hat die umfangreiche Erweiterung Bridges & Ports f&uuml;r das St&auml;dtebau-Managementspiel Cities: Skylines 2 von Colossal Orde",
@@ -9920,18 +9860,8 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Neue-Filme-und-Serien-bei-Netflix-Disney-und-Amazon-Prime-im-November-2025-10965088.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Neue Filme und Serien bei Netflix, Disney+ und Amazon Prime im November 2025",
-    "source": "Heise Online",
-    "publicationDate": "2025-10-30T17:14:00.000Z",
-    "summary": "Im November zeigt Netflix \"Frankenstein\". Bei Disney+ läuft \"The Fantastic Four: First Steps\", während bei Amazon \"Robin Hood\" startet.",
-    "link": "https://www.heise.de/news/Neue-Filme-und-Serien-bei-Netflix-Disney-und-Amazon-Prime-im-November-2025-10965088.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/7/5/4/8/_aufmacher-7605c15728ca56d0.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.computerbase.de/news/grafikkarten/fsr-4-auf-rdna-2-vom-tisch-amd-versetzt-radeon-rx-5000-und-6000-in-den-vorruhestand.94862/",
-    "title": "FSR 4 auf RDNA 2 vom Tisch: AMD versetzt Radeon RX 5000 &amp; 6000 in den Vorruhestand (Update)",
+    "title": "FSR 4 auf RDNA 2 vom Tisch: AMD versetzt Radeon RX 5000 & 6000 in den Vorruhestand (Update)",
     "source": "ComputerBase",
     "publicationDate": "2025-10-30T17:07:00.000Z",
     "summary": "AMD hat mit Adrenalin 25.10.2 den Support von RDNA 1 und 2 auf der einen und RDNA 3 und 4 auf der anderen Seite getrennt. Das sorgt nicht nur für Inst",
@@ -9970,16 +9900,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Grosses-Update-fuer-Canva-Affinity-wird-kostenlos-10964463.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Großes Update für Canva, Affinity wird kostenlos",
-    "source": "Heise Online",
-    "publicationDate": "2025-10-30T17:00:00.000Z",
-    "summary": "Das Grafik-Tool Canva bekommt mehr KI, besseren Video-Schnitt, Marketing-Werkzeuge, Mail-Designer und Formulare – zudem trägt die Affinity-Übernahme F",
-    "link": "https://www.heise.de/news/Grosses-Update-fuer-Canva-Affinity-wird-kostenlos-10964463.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/7/2/2/9/301025_Bildmaterial_Canva_stellt_sein_Creative_OS_vor_01-58d7785e7e42fa0e.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.golem.de/news/battle-pass-fuer-25-euro-es-hagelt-schlechte-kritiken-fuer-battlefield-6-auf-steam-2510-201705.html",
     "title": "Battle Pass für 25 Euro: Es hagelt schlechte Kritiken für Battlefield 6 auf Steam",
     "source": "Golem",
@@ -9987,16 +9907,6 @@
     "summary": "Für ein 70 Euro teures Spiel noch einmal 25 Euro bezahlen: Viele Spieler sind von Battlefield 6 enttäuscht. Zuvor wurde es hoch gelobt. (&lt;a href=&q",
     "link": "https://www.golem.de/news/battle-pass-fuer-25-euro-es-hagelt-schlechte-kritiken-fuer-battlefield-6-auf-steam-2510-201705.html",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
-    "language": "de"
-  },
-  {
-    "id": "https://www.heise.de/news/Internetpionier-Bending-Spoons-aus-Italien-uebernimmt-jetzt-auch-AOL-10965148.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Internetpionier: Bending Spoons aus Italien übernimmt jetzt auch AOL",
-    "source": "Heise Online",
-    "publicationDate": "2025-10-30T16:56:00.000Z",
-    "summary": "Die Einkaufstour von Bending Spoons geht weiter, das italienische Unternehmen kauft jetzt auch AOL. Übernommen werden die Website und der Mail-Provide",
-    "link": "https://www.heise.de/news/Internetpionier-Bending-Spoons-aus-Italien-uebernimmt-jetzt-auch-AOL-10965148.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/7/5/7/8/shutterstock_1450445567-95a3ea30efc39972.jpeg",
     "language": "de"
   },
   {
@@ -10031,7 +9941,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/the-outer-worlds-2/flaws",
-    "title": "All The Outer Worlds 2 flaws we&#039;ve seen so far",
+    "title": "All The Outer Worlds 2 flaws we've seen so far",
     "source": "PCGamesN",
     "publicationDate": "2025-10-30T16:32:05.000Z",
     "summary": "A list of each of the flaws in The Outer Worlds 2, how the flaw system works, and how to equip flaws by unlocking additional perk points.\n\t\t\t]]>",
@@ -10081,7 +9991,7 @@
   },
   {
     "id": "https://news.xbox.com/en-us/2025/10/30/free-play-days-10-30-2025/",
-    "title": "Free Play Days – Call of Duty Black Ops 6 (MP &#038; Zombies), Dragon Ball Xenoverse 2, Dead by Daylight, CATAN, and More",
+    "title": "Free Play Days – Call of Duty Black Ops 6 (MP & Zombies), Dragon Ball Xenoverse 2, Dead by Daylight, CATAN, and More",
     "source": "Xbox Wire",
     "publicationDate": "2025-10-30T16:00:00.000Z",
     "summary": "The post Free Play Days – Call of Duty Black Ops 6 (MP &amp; Zombies), Dragon Ball Xenoverse 2, Dead by Daylight, CATAN, and More appeared first on Xb",
@@ -10091,7 +10001,7 @@
   },
   {
     "id": "https://www.eurogamer.de/apex-legends-aufgeladen-kurbelt-das-tempo-an-neue-map-zonen-auf-olympus-und-buffs-fur-valkyrie-rampart-horizon",
-    "title": "Apex Legends: Aufgeladen kurbelt das Tempo an – neue Map-Zonen auf Olympus und Buffs für Valkyrie, Rampart &amp; Horizon",
+    "title": "Apex Legends: Aufgeladen kurbelt das Tempo an – neue Map-Zonen auf Olympus und Buffs für Valkyrie, Rampart & Horizon",
     "source": "Eurogamer",
     "publicationDate": "2025-10-30T15:59:47.000Z",
     "summary": " EA und Respawn haben heute einen neuen Gameplay-Trailer zu Apex Legends: Aufgeladen ver&ouml;ffentlicht. Darin bekommt ihr einen ersten Eindruck davo",
@@ -10101,7 +10011,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/dying-light-the-beast/update-1-3-enemy-surrender",
-    "title": "New Dying Light The Beast update makes your enemies value their lives more, but you don&#039;t have to accept their surrender",
+    "title": "New Dying Light The Beast update makes your enemies value their lives more, but you don't have to accept their surrender",
     "source": "PCGamesN",
     "publicationDate": "2025-10-30T15:52:38.000Z",
     "summary": "Dying Light The Beast update 1.3 introduces new enemy behavior for humans, including a chance to surrender and more execution animations.\n\t\t\t]]>",
@@ -10161,7 +10071,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/amd/free-radeon-rx-9070-xt-graphics-card-monster-hunter-wilds",
-    "title": "Capture a free Monster Hunter Wilds AMD Radeon RX 9070 XT graphics card, if you&#039;re quick",
+    "title": "Capture a free Monster Hunter Wilds AMD Radeon RX 9070 XT graphics card, if you're quick",
     "source": "PCGamesN",
     "publicationDate": "2025-10-30T15:16:50.000Z",
     "summary": "You've just six days left to enter this competition to win one of five special edition Monster Hunter Wilds editions of AMD's current flagship gaming ",
@@ -10201,7 +10111,7 @@
   },
   {
     "id": "https://www.rockpapershotgun.com/mount-blade-ii-bannerlords-war-sails-naval-warfare-expansion-takes-to-the-high-seas-in-late-november",
-    "title": "Mount &amp; Blade II: Bannerlord's War Sails naval warfare expansion takes to the high seas in late November",
+    "title": "Mount & Blade II: Bannerlord's War Sails naval warfare expansion takes to the high seas in late November",
     "source": "Rock Paper Shotgun",
     "publicationDate": "2025-10-30T15:00:00.000Z",
     "summary": " To the boats, sword stabby and arrow shooty folk! Well, to the boats as of November 26th, which is when Mount & Blade II: Bannerlord's War Sails expa",
@@ -10221,7 +10131,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/broken-arrow/update-zombie-mode-anti-cheat",
-    "title": "Military RTS Broken Arrow parks its obsession with realism to bring you one of the coolest zombie modes I&#039;ve seen in ages",
+    "title": "Military RTS Broken Arrow parks its obsession with realism to bring you one of the coolest zombie modes I've seen in ages",
     "source": "PCGamesN",
     "publicationDate": "2025-10-30T14:57:14.000Z",
     "summary": "A new update for Broken Arrow takes a huge stride towards solving its cheating problem, rebalances factions, and adds zombie hordes.\n\t\t\t]]>",
@@ -10271,7 +10181,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/earth-vs-mars/out-now-steam-demo",
-    "title": "Earth vs Mars is Warhammer 40k Dawn of War developer Relic&#039;s spin on turn-based tactics, and you can try it for free",
+    "title": "Earth vs Mars is Warhammer 40k Dawn of War developer Relic's spin on turn-based tactics, and you can try it for free",
     "source": "PCGamesN",
     "publicationDate": "2025-10-30T14:38:24.000Z",
     "summary": "Built by a subset of Company of Heroes and Warhammer 40k Dawn of War developer Relic Entertainment, Earth vs Mars is out now on Steam.\n\t\t\t]]>",
@@ -10291,7 +10201,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/echoes-of-the-end/enhanced-edition-update",
-    "title": "KCD2 publisher&#039;s stunning, troubled Norse RPG gets a whole new version just two months after launch, and it changes everything",
+    "title": "KCD2 publisher's stunning, troubled Norse RPG gets a whole new version just two months after launch, and it changes everything",
     "source": "PCGamesN",
     "publicationDate": "2025-10-30T14:26:40.000Z",
     "summary": "In a bizarre turn of events, Echoes of the End, Deep Silver's action-adventure game that released two months ago, has an enhanced edition.\n\t\t\t]]>",
@@ -10311,7 +10221,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/apex-legends/season-27-alternator-double-tap-car-smg-care-package",
-    "title": "Apex Legends Season 27 is unleashing one of the wildest care package weapons ever, and I&#039;m so here for it",
+    "title": "Apex Legends Season 27 is unleashing one of the wildest care package weapons ever, and I'm so here for it",
     "source": "PCGamesN",
     "publicationDate": "2025-10-30T14:00:40.000Z",
     "summary": "Respawn devs tell us that the CAR SMG will be the new care package weapon for Apex Legends Season 27, and it comes with a powerful twist.\n\t\t\t]]>",
@@ -10431,7 +10341,7 @@
   },
   {
     "id": "https://www.eurogamer.de/dragon-quest-i-ii-hd-2d-remake-alte-heldentaten-in-neuem-licht",
-    "title": "Dragon Quest I &amp; II HD-2D Remake: Alte Heldentaten in neuem Licht",
+    "title": "Dragon Quest I & II HD-2D Remake: Alte Heldentaten in neuem Licht",
     "source": "Eurogamer",
     "publicationDate": "2025-10-30T12:50:17.000Z",
     "summary": " Mit dem Dragon Quest I & II HD-2D Remake kehren die V&auml;ter des japanischen Rollenspiels in neuem Glanz zur&uuml;ck. Und das ist noch untertrieben",
@@ -10471,7 +10381,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/astroneer/megatech-release-date",
-    "title": "Astroneer&#039;s Megatech DLC escalates the space sandbox game to colossal size, and connects your entire galaxy together",
+    "title": "Astroneer's Megatech DLC escalates the space sandbox game to colossal size, and connects your entire galaxy together",
     "source": "PCGamesN",
     "publicationDate": "2025-10-30T12:05:43.000Z",
     "summary": "The Astroneer Megatech DLC lands in November, with megastructures including a plant-farming biodome and resource transfer between planets.\n\t\t\t]]>",
@@ -10561,7 +10471,7 @@
   },
   {
     "id": "https://www.pcgamesn.com/league-of-legends/riftbound-launch-interview",
-    "title": "League of Legends TCG Riftbound lowers Legends of Runeterra&#039;s &quot;really high mental ceiling&quot; so that everyone can play, Riot says",
+    "title": "League of Legends TCG Riftbound lowers Legends of Runeterra's \"really high mental ceiling\" so that everyone can play, Riot says",
     "source": "PCGamesN",
     "publicationDate": "2025-10-30T10:50:13.000Z",
     "summary": "While Legends of Runeterra’s demise will never be an easy pill to swallow, Riot's League of Legends TCG Riftbound has a lot of its DNA.\n\t\t\t]]>",
@@ -10578,16 +10488,6 @@
     "link": "https://www.computerbase.de/news/betriebssysteme/optionales-oktober-update-windows-11-erhaelt-neues-startmenue-und-simplere-update-titel.94854/",
     "imageUrl": "https://pics.computerbase.de/1/1/9/9/2/2-32cf6300408d9747/article-640x360.42923504.jpg",
     "language": "de"
-  },
-  {
-    "id": "https://www.pcgamesn.com/fellowship/halloween-event-2025",
-    "title": "Fellowship&#039;s Halloween event ditches microtransactions for actual rewards; rival devs, take note",
-    "source": "PCGamesN",
-    "publicationDate": "2025-10-30T10:45:05.000Z",
-    "summary": "The new Fellowship patch notes take aim at some of the UI's main issues while adding a Halloween event that I'm genuinely hyped about.\n\t\t\t]]>",
-    "link": "https://www.pcgamesn.com/fellowship/halloween-event-2025",
-    "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/10/Fellowship-halloween-event-new-patch-ui-fixes-mmo-moba-moda-steam.jpg",
-    "language": "en"
   },
   {
     "id": "https://www.rockpapershotgun.com/morrowind-in-elden-ring-mod-shows-off-questing-and-criminal-scumming-and-theres-only-one-thing-its-creator-is-worried-about",
@@ -10821,7 +10721,7 @@
   },
   {
     "id": "https://www.gamersglobal.de/test/dragon-quest-1-2-hd-2d-remake",
-    "title": "Test: Dragon Quest 1 &amp; 2 HD-2D Remake",
+    "title": "Test: Dragon Quest 1 & 2 HD-2D Remake",
     "source": "GamersGlobal",
     "publicationDate": "2025-10-29T18:02:30.000Z",
     "summary": "&lt;div class=&quot;field field-type-filefield field-field-teaser-bild&quot;&gt;\n    &lt;div class=&quot;field-items&quot;&gt;\n            &lt;div cla",
@@ -10961,7 +10861,7 @@
   },
   {
     "id": "https://gameinformer.com/review/dragon-quest-i-ii-hd-2d-remake/level-up-and-up",
-    "title": "Dragon Quest I &amp;amp; II HD-2D Remake Review - Level Up And Up",
+    "title": "Dragon Quest I &amp; II HD-2D Remake Review - Level Up And Up",
     "source": "Game Informer",
     "publicationDate": "2025-10-29T15:00:00.000Z",
     "summary": "\n\n  \n              Reviewed on:\n      Switch 2\n      \n                                                                                                ",
@@ -10971,7 +10871,7 @@
   },
   {
     "id": "https://www.eurogamer.de/dragon-quest-i-ii-hd-2d-remake-im-test-alles-fangt-mal-irgendwo-an-aber-zum-gluck-bleibt-es-da-nicht-stehen",
-    "title": "Dragon Quest I &amp; II HD-2D Remake im Test - Alles fängt mal irgendwo an, aber zum Glück bleibt es da nicht stehen",
+    "title": "Dragon Quest I & II HD-2D Remake im Test - Alles fängt mal irgendwo an, aber zum Glück bleibt es da nicht stehen",
     "source": "Eurogamer",
     "publicationDate": "2025-10-29T15:00:00.000Z",
     "summary": " Dragon Quest, das Erste, erschien 1986. Das ist wirklich lange her. Falco lebte nicht nur, er toppte die Charts am 27.5.1986 mit &bdquo;Jeanny, Part ",
@@ -11891,7 +11791,7 @@
   },
   {
     "id": "https://www.giantbomb.com/articles/theres-a-new-king-of-the-bomb-12/1100-6559/",
-    "title": "There&#039;s a new king of The Bomb 12",
+    "title": "There's a new king of The Bomb 12",
     "source": "Giant Bomb",
     "publicationDate": "2025-10-24T23:30:00.000Z",
     "summary": "It's Fri-Day-NIGHT -- and that means it's time to freak out because I'm going to be on a plane in 12 hours. The team is heading out to the East Coast ",
@@ -12041,7 +11941,7 @@
   },
   {
     "id": "https://www.gamersglobal.de/news/333694/soma-crowdfunding-fuer-10th-anniversary-collectors-edition-gestartet",
-    "title": "Soma: Crowdfunding für 10th Anniversary Collector&#039;s Edition gestartet",
+    "title": "Soma: Crowdfunding für 10th Anniversary Collector's Edition gestartet",
     "source": "GamersGlobal",
     "publicationDate": "2025-10-24T12:00:11.000Z",
     "summary": "&lt;div class=&quot;field field-type-filefield field-field-teaser-bild&quot;&gt;\n    &lt;div class=&quot;field-items&quot;&gt;\n            &lt;div cla",
@@ -12171,7 +12071,7 @@
   },
   {
     "id": "https://www.gamersglobal.de/news/333654/assassins-creed-shadows-erscheint-am-2-dezember-fuer-die-switch-2",
-    "title": "Assassin&#039;s Creed - Shadows erscheint am 2. Dezember für die Switch 2",
+    "title": "Assassin's Creed - Shadows erscheint am 2. Dezember für die Switch 2",
     "source": "GamersGlobal",
     "publicationDate": "2025-10-23T20:59:04.000Z",
     "summary": "&lt;div class=&quot;field field-type-filefield field-field-teaser-bild&quot;&gt;\n    &lt;div class=&quot;field-items&quot;&gt;\n            &lt;div cla",
@@ -12491,7 +12391,7 @@
   },
   {
     "id": "https://www.computerbild.de/artikel/News-Spiele-UNO-Show-em-No-Mercy-DLC-kommt-gnadenlos-40454543.html",
-    "title": "UNO Show &apos;em No Mercy – gnadenloser DLC ist da",
+    "title": "UNO Show 'em No Mercy – gnadenloser DLC ist da",
     "source": "Computer Bild",
     "publicationDate": "2025-10-23T08:44:00.000Z",
     "summary": "Der DLC &quot;UNO Show &apos;em No Mercy&quot; bringt neue Regeln, wilde Aktionskarten und ein komplett überarbeitetes Interface. Der Spin-off ist ab ",
@@ -12651,7 +12551,7 @@
   },
   {
     "id": "https://www.golem.de/news/shuhei-yoshida-die-playstation-6-braucht-etwas-neues-2510-201390.html",
-    "title": "Shuhei Yoshida: &quot;Die Playstation 6 braucht etwas Neues&quot;",
+    "title": "Shuhei Yoshida: \"Die Playstation 6 braucht etwas Neues\"",
     "source": "Golem",
     "publicationDate": "2025-10-21T14:14:01.000Z",
     "summary": "Einfach nur schönere Grafik reicht nicht: Der langjährige Playstation-Manager Shuhei Yoshida sieht sehr spezielle Probleme bei neuen Konsolen. (&lt;a ",
@@ -12741,7 +12641,7 @@
   },
   {
     "id": "https://www.computerbild.de/artikel/News-Spiele-What-If-Trailer-Star-Trek-Voyager-Across-the-Unknown-40445947.html",
-    "title": "&quot;What If&quot;-Trailer zu Star Trek: Voyager – Entscheidungen mit Folgen",
+    "title": "\"What If\"-Trailer zu Star Trek: Voyager – Entscheidungen mit Folgen",
     "source": "Computer Bild",
     "publicationDate": "2025-10-20T10:20:00.000Z",
     "summary": "Im neuen &quot;What If&quot;-Trailer zu &quot;Star Trek: Voyager – Across the Unknown&quot; zeigt Daedalic, wie stark spielerische Entscheidungen das ",
@@ -13241,7 +13141,7 @@
   },
   {
     "id": "https://www.computerbild.de/artikel/cbs-News-Spiele-Ebay-Wiederverkaufswerte-fuer-Spielekonsolen-36908287.html",
-    "title": "Weg mit der Konsole: So viel Geld gibt es für PlayStation, Xbox &amp; Co.",
+    "title": "Weg mit der Konsole: So viel Geld gibt es für PlayStation, Xbox & Co.",
     "source": "Computer Bild",
     "publicationDate": "2025-10-09T09:02:00.000Z",
     "summary": "Ob Upgrade, Systemwechsel oder einfach weniger Zocken – der Verkauf Ihrer gebrauchten Spielekonsole bringt Geld ein. Doch wie viel genau können Sie ak",
@@ -13351,7 +13251,7 @@
   },
   {
     "id": "https://www.giantbomb.com/articles/you-know-that-meme-where-the-guy-cant-hold-all-the-good-things/1100-6553/",
-    "title": "You know that meme where the guy can&#039;t hold all the good things?",
+    "title": "You know that meme where the guy can't hold all the good things?",
     "source": "Giant Bomb",
     "publicationDate": "2025-10-01T23:48:00.000Z",
     "summary": "Can I interest you in some The Bomb 12? It's chock full of good video games. Some would argue that it's too many video games. Others might wonder what",
