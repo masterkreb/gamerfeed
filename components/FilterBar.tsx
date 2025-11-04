@@ -244,7 +244,7 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
           )}
           
           {isDropdownOpen && savedSearches.length > 0 && (
-            <div className="absolute top-full mt-2 w-full bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-slate-200 dark:border-zinc-700 z-10 p-2 space-y-1 animate-fade-in">
+            <div className="absolute top-full mt-2 w-full bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-slate-200 dark:border-zinc-700 z-30 p-2 space-y-1 animate-fade-in">
                 <p className="text-xs font-semibold text-slate-400 dark:text-zinc-500 px-2 pb-1 uppercase">Saved Searches</p>
                 {savedSearches.map(search => (
                     <div key={search} className="group flex items-center justify-between text-left w-full rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 active:bg-slate-200 dark:active:bg-zinc-600 transition-colors">
