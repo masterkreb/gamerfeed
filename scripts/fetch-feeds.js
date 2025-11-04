@@ -8,8 +8,6 @@ import path from 'path';
 import { parseHTML } from 'linkedom';
 
 // === HTML ENTITY DECODING ===
-// === HTML ENTITY DECODING ===
-// === HTML ENTITY DECODING ===
 function decodeHtmlEntities(text) {
     if (!text) return text;
 
