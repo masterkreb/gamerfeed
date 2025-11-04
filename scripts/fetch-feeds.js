@@ -8,6 +8,7 @@ import path from 'path';
 import { parseHTML } from 'linkedom';
 
 // === HTML ENTITY DECODING ===
+// === HTML ENTITY DECODING ===
 function decodeHtmlEntities(text) {
     if (!text) return text;
 
@@ -18,7 +19,13 @@ function decodeHtmlEntities(text) {
         '&quot;': '"',
         '&#39;': "'",
         '&apos;': "'",
-        '&nbsp;': ' '
+        '&nbsp;': ' ',
+        '&rsquo;': "'",   // <-- NEU (right single quote)
+        '&lsquo;': "'",   // <-- NEU (left single quote)
+        '&rdquo;': '"',   // <-- NEU (right double quote)
+        '&ldquo;': '"',   // <-- NEU (left double quote)
+        '&ndash;': '–',   // <-- NEU (en dash)
+        '&mdash;': '—',   // <-- NEU (em dash)
     };
 
     let decoded = text;
@@ -33,6 +40,9 @@ function decodeHtmlEntities(text) {
     decoded = decoded.replace(/&#x([0-9a-f]+);/gi, (match, hex) =>
         String.fromCharCode(parseInt(hex, 16))
     );
+
+    // CDATA-Marker entfernen
+    decoded = decoded.replace(/\]\]>/g, '');  // <-- NEU
 
     return decoded;
 }
