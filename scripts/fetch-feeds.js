@@ -7,6 +7,36 @@ import fs from 'fs';
 import path from 'path';
 import { parseHTML } from 'linkedom';
 
+// === HTML ENTITY DECODING ===
+function decodeHtmlEntities(text) {
+    if (!text) return text;
+
+    const entities = {
+        '&amp;': '&',
+        '&lt;': '<',
+        '&gt;': '>',
+        '&quot;': '"',
+        '&#39;': "'",
+        '&apos;': "'",
+        '&nbsp;': ' '
+    };
+
+    let decoded = text;
+    for (const [entity, char] of Object.entries(entities)) {
+        decoded = decoded.replaceAll(entity, char);
+    }
+
+    decoded = decoded.replace(/&#(\d+);/g, (match, dec) =>
+        String.fromCharCode(parseInt(dec, 10))
+    );
+
+    decoded = decoded.replace(/&#x([0-9a-f]+);/gi, (match, hex) =>
+        String.fromCharCode(parseInt(hex, 16))
+    );
+
+    return decoded;
+}
+
 // === IMAGE SCRAPING ===
 async function getOgImageFromUrl(url) {
     const proxies = [
@@ -201,7 +231,10 @@ function parseRssXml(xmlString, feed) {
     for (const match of matches) {
         const itemXml = match[1];
 
-        const title = itemXml.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/is)?.[1]?.trim();
+        // Extrahiere und dekodiere den Titel
+        const titleRaw = itemXml.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/is)?.[1]?.trim();
+        const title = decodeHtmlEntities(titleRaw);  // <-- NEU
+
         const link = isAtom
             ? itemXml.match(/<link[^>]*href=["']([^"']+)["']/i)?.[1]
             : itemXml.match(/<link[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/is)?.[1]?.trim();
