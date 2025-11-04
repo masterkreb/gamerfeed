@@ -1,5 +1,25 @@
 [
   {
+    "id": "https://www.computerbase.de/news/gaming/retro-konsole-vectrex-mini-erreicht-crowdfunding-ziel-in-12-minuten.94897/",
+    "title": "Retro-Konsole: Vectrex Mini erreicht Crowdfunding-Ziel in 12 Minuten",
+    "source": "ComputerBase",
+    "publicationDate": "2025-11-04T06:47:00.000Z",
+    "summary": "Die im vergangenen August auf der Gamescom erstmals vorgestellte, verkleinerte Neuauflage der Anfang der 1980er-Jahre bekannten Vectrex-Konsole hat ih",
+    "link": "https://www.computerbase.de/news/gaming/retro-konsole-vectrex-mini-erreicht-crowdfunding-ziel-in-12-minuten.94897/",
+    "imageUrl": "https://pics.computerbase.de/1/1/9/9/7/3-1167911a8cb44dab/article-640x360.da46f2dc.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gematsu.com/2025/11/switch-2-worldwide-sales-top-10-36-million-switch-tops-154-01-million",
+    "title": "Switch 2 worldwide sales top 10.36 million, Switch tops 154.01 million",
+    "source": "Gematsu",
+    "publicationDate": "2025-11-04T06:38:09.000Z",
+    "summary": "Nintendo Switch 2 has sold 10.36 million units and Switch has sold 154.01 million units &#8230;\nSource",
+    "link": "https://www.gematsu.com/2025/11/switch-2-worldwide-sales-top-10-36-million-switch-tops-154-01-million",
+    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/Switch-Sales_11-04-25.jpg",
+    "language": "en"
+  },
+  {
     "id": "https://www.4p.de/news/steam-verschenkt-vier-neue-spiele-eines-davon-ist-ein-echter-knaller/3355123",
     "title": "Steam verschenkt vier neue Spiele – eines davon ist ein &#8222;echter Knaller&#8220;",
     "source": "4P",
@@ -37,6 +57,16 @@
     "summary": "Bei diesen Systemanforderungen wird einem nicht Angst und Bange: Resident Evil Requiem verlangt offenbar noch keinem High-End-Rechner.",
     "link": "https://www.4p.de/news/resident-evil-requiem-systemanforderungen-fuer-den-pc-windows-11/3355409",
     "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/10/residentevil-requiem-systemanforderungen.jpg?w=1200&#038;h=900&#038;crop=1",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Einsam-vor-dem-Bildschirm-Studie-warnt-vor-Lage-im-Land-11036695.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Einsam vor dem Bildschirm – Studie warnt vor Lage im Land",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-04T06:29:00.000Z",
+    "summary": "Wer länger am Bildschirm sitzt, fühlt sich laut einer Studie häufiger einsam. Warum die Experten mehr Aufklärung über den Umgang mit digitalen Medien ",
+    "link": "https://www.heise.de/news/Einsam-vor-dem-Bildschirm-Studie-warnt-vor-Lage-im-Land-11036695.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/9/7/9/2/shutterstock_2538194743-f4df6ad6972b8fab.jpeg",
     "language": "de"
   },
   {
@@ -146,7 +176,7 @@
     "publicationDate": "2025-11-04T05:55:00.000Z",
     "summary": "Elektroroller könnten die urbane Mobilität verbessern, aber die deutschen Zulassungszahlen bleiben dürftig, trotz einer ansehnlichen Vielfalt von Mode",
     "link": "https://www.heise.de/ratgeber/Elektroroller-In-Konkurrenz-zum-E-Bike-Marktuebersicht-mit-16-E-Rollern-10915116.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/4/5/8/0/BMW_CE_04-bfc79457e59b5ab4.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/4/5/8/0/BMW_CE_04-a0d829cd8215e7c4.jpeg",
     "language": "de"
   },
   {
@@ -2081,7 +2111,7 @@
   },
   {
     "id": "https://de.ign.com/godzilla-minus-one-sequel/149554/video/godzilla-minus-zero-offizieller-title-enthullt",
-    "title": "Godzilla Minus Zero - Offizieller Title Enthüllt",
+    "title": "Godzilla Minus Zero - Offizieller Name steht fest und lässt uns fragend zurück",
     "source": "IGN",
     "publicationDate": "2025-11-03T17:02:55.000Z",
     "summary": "&lt;img src=\"https://sm.ign.com/t/ign_de/video/g/godzilla-m/godzilla-minus-zero-official-title-reveal-video_n4kk.640.jpg\" width=\"120\" hspace=\"5\" alt=\"",
@@ -7850,16 +7880,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
-    "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
-    "source": "Eurogamer",
-    "publicationDate": "2025-11-01T09:00:00.000Z",
-    "summary": " ARC Raiders ist seit dieser Woche erh&auml;ltlich, und w&auml;hrend eine gro&szlig;e Zahl an Spielern zum Launch ins Spiel str&ouml;mt, ist es kein G",
-    "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
-    "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
-  },
-  {
     "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
     "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
     "source": "Eurogamer",
@@ -7867,6 +7887,16 @@
     "summary": " Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod f&uuml;r Doom 2,",
     "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
     "imageUrl": "https://assetsio.gnwcdn.com/Catharsis---Akira-Yamaoka-(1)-gigapixel-low_res-scale-4_00x-cropped.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
+    "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-01T09:00:00.000Z",
+    "summary": " ARC Raiders ist seit dieser Woche erh&auml;ltlich, und w&auml;hrend eine gro&szlig;e Zahl an Spielern zum Launch ins Spiel str&ouml;mt, ist es kein G",
+    "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
+    "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "de"
   },
   {
@@ -8910,16 +8940,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "\"Thief VR\" erscheint im Dezember: Kaum Unterschiede zwischen Quest 3 und PS VR2",
-    "source": "Heise Online",
-    "publicationDate": "2025-10-31T10:42:00.000Z",
-    "summary": "\"Thief VR\" hat nun einen konkreten Veröffentlichungstermin. Zwei neue Trailer zeigen kaum Unterschiede zwischen den Versionen für Quest 3 und PS VR2.",
-    "link": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/7/7/2/5/ThiefVR_GameplayTrailer_Screenshot_01-7704846210940744.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/iPhone-17-Ersatzteile-fuer-neue-Apple-Handys-fuer-Bastler-verfuegbar-10965281.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "iPhone 17: Ersatzteile für neue Apple-Handys für Bastler verfügbar",
     "source": "Heise Online",
@@ -8927,6 +8947,16 @@
     "summary": "Nach den Reparaturhandbüchern hat Apple nun auch das notwendige Material für alle neuen iPhones freigegeben. Wie üblich ein teurer Spaß.",
     "link": "https://www.heise.de/news/iPhone-17-Ersatzteile-fuer-neue-Apple-Handys-fuer-Bastler-verfuegbar-10965281.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/7/6/4/5/airrepair-f5917f04d15d1a96.png",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "\"Thief VR\" erscheint im Dezember: Kaum Unterschiede zwischen Quest 3 und PS VR2",
+    "source": "Heise Online",
+    "publicationDate": "2025-10-31T10:42:00.000Z",
+    "summary": "\"Thief VR\" hat nun einen konkreten Veröffentlichungstermin. Zwei neue Trailer zeigen kaum Unterschiede zwischen den Versionen für Quest 3 und PS VR2.",
+    "link": "https://www.heise.de/news/Thief-VR-erscheint-im-Dezember-Kaum-Unterschiede-zwischen-Quest-3-und-PS-VR2-10965440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/7/7/2/5/ThiefVR_GameplayTrailer_Screenshot_01-7704846210940744.jpeg",
     "language": "de"
   },
   {
@@ -8978,16 +9008,6 @@
     "link": "https://www.computerbase.de/news/wirtschaft/amazon-quartalsbericht-aws-zeigt-wer-der-cloud-koenig-ist-und-bleiben-will.94865/",
     "imageUrl": "https://pics.computerbase.de/1/1/9/9/3/5-726aaeb2a42b9a40/article-640x360.9a47f877.jpg",
     "language": "de"
-  },
-  {
-    "id": "https://www.gematsu.com/2025/10/esrb-rates-silent-hill-2-remake-for-xbox-series",
-    "title": "ESRB rates Silent Hill 2 remake for Xbox Series",
-    "source": "Gematsu",
-    "publicationDate": "2025-10-31T10:00:09.000Z",
-    "summary": "The Entertainment Software Rating Board has rated an Xbox Series version of the Silent Hill &#8230;\nSource",
-    "link": "https://www.gematsu.com/2025/10/esrb-rates-silent-hill-2-remake-for-xbox-series",
-    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/10/SH2-Rating-Xbox_10-31-25.jpg",
-    "language": "en"
   },
   {
     "id": "https://www.gameswelt.ch/dragon-quest-i-ii-hd-2d-remake/test/test-neue-optik-und-alte-probleme-fuer-die-jrpg-klassiker-332158?utm_campaign=tbuk",
@@ -10420,16 +10440,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.heise.de/news/Deutsche-LNG-Importe-steigen-deutlich-10964318.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "LNG-Terminals: Deutschland importiert mehr Gas als je zuvor",
-    "source": "Heise Online",
-    "publicationDate": "2025-10-30T09:34:00.000Z",
-    "summary": "Die deutschen LNG-Terminals importieren immer mehr Gas. Europaweit gebe es aber erstmal genug Infrastruktur für Flüssigerdgas, sagen Experten.",
-    "link": "https://www.heise.de/news/Deutsche-LNG-Importe-steigen-deutlich-10964318.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/7/1/5/6/csm_20221215-fsru-hoegh-esperanza-ankunft-whv_dfab4d3092-ca7e02dd82b99876-352f3a1a98a95d07.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.computerbase.de/news/wirtschaft/quartalszahlen-alphabet-setzt-erstmals-100-milliarden-usd-im-quartal-um.94853/",
     "title": "Quartalszahlen: Alphabet setzt erstmals 100 Milliarden USD im Quartal um",
     "source": "ComputerBase",
@@ -10517,16 +10527,6 @@
     "summary": "Amazon stellt die Weiterentwicklung von New World nach vier Jahren ein und zieht damit einen Schlussstrich unter die Spiele-Offensive. Sie ist trotz b",
     "link": "https://www.computerbase.de/news/gaming/rueckschlag-fuer-gaming-sparte-amazon-stellt-entwicklung-des-mmos-new-world-ein.94849/",
     "imageUrl": "https://pics.computerbase.de/1/1/9/9/1/7-de7bfc844d3dbb17/article-640x360.f77d93fc.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.computerbase.de/news/gaming/indiana-jones-und-der-grosse-kreis-indy-findet-den-weg-auf-gog-com.94848/",
-    "title": "Indiana Jones und der Große Kreis: Indy findet den Weg auf GOG.com",
-    "source": "ComputerBase",
-    "publicationDate": "2025-10-30T06:15:00.000Z",
-    "summary": "Fast elf Monate nach Release von Indiana Jones und der Große Kreis erscheint das Action-Adventure ohne DRM auf GOG.com. PC-Spieler konnten bereits sei",
-    "link": "https://www.computerbase.de/news/gaming/indiana-jones-und-der-grosse-kreis-indy-findet-den-weg-auf-gog-com.94848/",
-    "imageUrl": "https://pics.computerbase.de/1/1/9/9/1/6-8ba552048a39606c/article-640x360.c1a8b8d6.jpg",
     "language": "de"
   },
   {
