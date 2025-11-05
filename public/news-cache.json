@@ -1,5 +1,75 @@
 [
   {
+    "id": "https://www.eurogamer.de/kein-cavill-kein-erfolg-the-witcher-staffel-4-halbiert-seine-zuschauerzahl",
+    "title": "Kein Cavill, kein Erfolg? The Witcher Staffel 4 halbiert seine Zuschauerzahl",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-05T13:55:26.000Z",
+    "summary": "The Witcher Staffel 4 hat einen schwierigen Start. Das ist nicht ungewöhnlich, wenn man den Hauptdarsteller austauscht, nachdem sich alle ziemlich ein",
+    "link": "https://www.eurogamer.de/kein-cavill-kein-erfolg-the-witcher-staffel-4-halbiert-seine-zuschauerzahl",
+    "imageUrl": "https://assetsio.gnwcdn.com/The-Witcher_-Season-4-_-Official-Trailer-_-Netflix-1-33-screenshot.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.nintendolife.com/news/2025/11/biped-2-is-a-delightfully-quirky-co-op-sequel-and-its-out-now-on-switch",
+    "title": "Biped 2 Is A Delightfully Quirky Co-op Sequel, And It's Out Now On Switch",
+    "source": "Nintendo Life",
+    "publicationDate": "2025-11-05T13:45:00.000Z",
+    "summary": "Partner up.The original Biped was a charming little co-op adventure that we rather enjoyed here at Nintendo Life, and now its sequel, Biped 2, is out ",
+    "link": "https://www.nintendolife.com/news/2025/11/biped-2-is-a-delightfully-quirky-co-op-sequel-and-its-out-now-on-switch",
+    "imageUrl": "https://images.nintendolife.com/38bfbcae1461d/small.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.pcgameshardware.de/AMD-Zen-Architektur-261795/News/Ryzen-7-9700X3D-AMD-Neuling-Passmark-Auffaelligkeiten-1485829/",
+    "title": "Ryzen 7 9700X3D: AMD-Neuling zeigt sich im Passmark - mit Fragezeichen",
+    "source": "PC Games Hardware",
+    "publicationDate": "2025-11-05T13:45:00.000Z",
+    "summary": "In der Passmark-Datenbank ist ein neuer AMD-Prozessor namens Ryzen 7 9700X3D aufgetaucht, der sich knapp unter dem Ryzen 7 9800X3D ansiedeln dürfte. D",
+    "link": "https://www.pcgameshardware.de/AMD-Zen-Architektur-261795/News/Ryzen-7-9700X3D-AMD-Neuling-Passmark-Auffaelligkeiten-1485829/",
+    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/01/AMR-Ryzen-9000X3D-Delidded-Chip-Shot-1-pcgh.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://jpgames.de/2025/11/endlich-playstation-portal-erlaubt-ab-morgen-natives-cloud-streaming-auch-ohne-ps5/",
+    "title": "Endlich: PlayStation Portal erlaubt ab morgen natives Cloud-Streaming auch ohne PS5",
+    "source": "JPGames",
+    "publicationDate": "2025-11-05T13:44:00.000Z",
+    "summary": "Jetzt etwas für euch? Der Beitrag Endlich: PlayStation Portal erlaubt ab morgen natives Cloud-Streaming auch ohne PS5 erschien zuerst auf JPGAMES.DE.",
+    "link": "https://jpgames.de/2025/11/endlich-playstation-portal-erlaubt-ab-morgen-natives-cloud-streaming-auch-ohne-ps5/",
+    "imageUrl": "https://jpgames.de/wp-content/uploads/2025/11/playstation-portal-cloud-02-300x169.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/heise-meets-Richard-Seidl-gewinnt-den-Deutschen-Preis-fuer-Software-Qualitaet-11066592.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "heise meets ... Richard Seidl gewinnt den Deutschen Preis für Software-Qualität",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T13:39:00.000Z",
+    "summary": "Softwareentwickler müssen mehr tun, um Vertrauen zu schaffen. Nur so könne Technologie ein brauchbares Werkzeug bleiben, um die Zukunft zu gestalten.",
+    "link": "https://www.heise.de/news/heise-meets-Richard-Seidl-gewinnt-den-Deutschen-Preis-fuer-Software-Qualitaet-11066592.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/5/9/2/heise_meets_Keyvisual_1024x576_mitLogo-e379749fa616ddf0.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://de.ign.com/nintendo-switch-2/149578/news/nintendo-verlagert-entwicklungsschwerpunkt-auf-switch-2",
+    "title": "Nintendo verlagert Entwicklungsschwerpunkt auf Switch 2",
+    "source": "IGN",
+    "publicationDate": "2025-11-05T13:34:04.000Z",
+    "summary": "Die alte Switch wird überholt Einen Tag nach der Veröffentlichung der neuesten hervorragenden Verkaufszahlen hat Nintendo bestätigt, dass es den Entwi",
+    "link": "https://de.ign.com/nintendo-switch-2/149578/news/nintendo-verlagert-entwicklungsschwerpunkt-auf-switch-2",
+    "imageUrl": "https://sm.ign.com/ign_de/blogroll/n/nintendo-s/nintendo-signals-primary-development-focus-shift-to-switch-2_mv43.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Erste-Beta-von-iOS-26-2-Neue-Features-in-vielen-Bereichen-11066307.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Erste Beta von iOS 26.2: Neue Features in vielen Bereichen",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T13:34:00.000Z",
+    "summary": "Nach der Finalversion von iOS 26.1 ist nun die erste Entwicklervorschau von iOS 26.2 verfügbar. Apple reicht noch einige Neuerungen nach.",
+    "link": "https://www.heise.de/news/Erste-Beta-von-iOS-26-2-Neue-Features-in-vielen-Bereichen-11066307.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/4/4/6/Apple-WWDC25-iOS-26-hero-250609_big-8bdafd170838a392.png",
+    "language": "de"
+  },
+  {
     "id": "https://www.xboxdynasty.de/news/ghost-of-yotei/xbox-fragt-insider-nach-exklusivem-ps5-spiel/",
     "title": "Ghost of Yotei: Xbox fragt Insider nach exklusivem PS5-Spiel",
     "source": "XboxDynasty",
@@ -87,6 +157,16 @@
     "summary": "Kalypso Media schickt seine Elite-Soldaten zurück in den Zweiten Weltkrieg: Shadows over Crete heißt der erste DLC für Commandos: Origins und führt da",
     "link": "https://www.videogameszone.de/Commandos-Origins-Spiel-74937/News/Shadows-over-Crete-DLC-Release-1485833/",
     "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/11/Erster-Commandos-Origins-DLC-Shadows-over-Crete-rueckt-zur-Schlacht-um-Kreta-aus-9--pcgh.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://jpgames.de/2025/11/die-neuesten-wertungen-der-japanischen-famitsu-mit-pokemon-legenden-z-a-und-hyrule-warriors/",
+    "title": "Die neuesten Wertungen der japanischen Famitsu mit Pokémon-Legenden: Z-A und Hyrule Warriors",
+    "source": "JPGames",
+    "publicationDate": "2025-11-05T13:24:40.000Z",
+    "summary": "Wer macht das Rennen? Der Beitrag Die neuesten Wertungen der japanischen Famitsu mit Pokémon-Legenden: Z-A und Hyrule Warriors erschien zuerst auf JPG",
+    "link": "https://jpgames.de/2025/11/die-neuesten-wertungen-der-japanischen-famitsu-mit-pokemon-legenden-z-a-und-hyrule-warriors/",
+    "imageUrl": "https://jpgames.de/wp-content/uploads/2025/11/pokemon-legenden-za-6.jpg",
     "language": "de"
   },
   {
@@ -1300,16 +1380,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/software-architektur-tv-Teamwork-Muessen-wir-darueber-sprechen-10986000.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "software-architektur.tv: Teamwork – Müssen wir darüber sprechen?",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-05T11:00:00.000Z",
-    "summary": "In dieser Episode gehen Aino Vonge Corry und Lisa Maria Schäfer der Frage nach, ob man heute überhaupt noch über Teamwork diskutieren muss.",
-    "link": "https://www.heise.de/news/software-architektur-tv-Teamwork-Muessen-wir-darueber-sprechen-10986000.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/9/3/4/teamworrk-d4f94d607c05266c.png",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/heise-jobs-IT-Tag-am-11-November-in-Berlin-10980994.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "heise-Angebot: heise jobs IT Tag am 11. November in Berlin",
     "source": "Heise Online",
@@ -1317,6 +1387,16 @@
     "summary": "Finden Sie ihren IT-Traumjob und kommen Sie mit potenziellen Arbeitgebern in Kontakt!",
     "link": "https://www.heise.de/news/heise-jobs-IT-Tag-am-11-November-in-Berlin-10980994.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/7/5/1/heise_jobs_Tickermeldung_1920x1080-98e0aa27a33aa8ca.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/software-architektur-tv-Teamwork-Muessen-wir-darueber-sprechen-10986000.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "software-architektur.tv: Teamwork – Müssen wir darüber sprechen?",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T11:00:00.000Z",
+    "summary": "In dieser Episode gehen Aino Vonge Corry und Lisa Maria Schäfer der Frage nach, ob man heute überhaupt noch über Teamwork diskutieren muss.",
+    "link": "https://www.heise.de/news/software-architektur-tv-Teamwork-Muessen-wir-darueber-sprechen-10986000.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/9/3/4/teamworrk-d4f94d607c05266c.png",
     "language": "de"
   },
   {
@@ -4630,16 +4710,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.pcgameshardware.de/Cyberpunk-2077-Spiel-20697/News/Cyberpunk-2-Pondsmith-hat-es-gesehen-1485725/",
-    "title": "Cyberpunk 2: Schöpfer Pondsmith hat das Spiel schon gesehen",
-    "source": "PC Games Hardware",
-    "publicationDate": "2025-11-04T17:45:00.000Z",
-    "summary": "CD Projekt Red arbeitet derzeit an dem Nachfolger von Cyberpunk 2077. Mike Pondsmith, der Schöpfer der Vorlage, weiß schon, worum sich das Spiel dreht",
-    "link": "https://www.pcgameshardware.de/Cyberpunk-2077-Spiel-20697/News/Cyberpunk-2-Pondsmith-hat-es-gesehen-1485725/",
-    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2023/11/Cyberpunk_2077_Phantom_Liberty_Aurore_NPC-buffed.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.pcgamer.com/games/sim/the-return-of-baby-driver-the-dwarf-fortress-siege-update-briefly-reintroduced-an-old-bug-where-dwarf-babies-pilot-their-moms-like-mech-suits-until-they-die-of-dehydration-because-babies-dont-know-what-drinking-is/",
     "title": "'The return of baby driver': The Dwarf Fortress Siege Update briefly reintroduced an old bug where dwarf babies pilot their moms like mech suits until they die of dehydration because babies don't know what drinking is",
     "source": "PC Gamer",
@@ -5810,16 +5880,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Das dreifache Lottchen: Apples große TV-Ambitionen | Mac & i-Podcast",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-04T15:22:00.000Z",
-    "summary": "Einen Apple-Fernseher gab es nie, ins Wohnzimmer will der Konzern trotzdem. In Episode 108 widmen wir uns Apple TV – Streaming-Dienst, App und Settop-",
-    "link": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/4/2/heise_Podcast_maci_16_9-5e3b2af672f36dae.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "TrueNAS 25.10 mit NVMe-oF-Unterstützung, schneller API und neuem OpenZFS",
     "source": "Heise Online",
@@ -5827,6 +5887,16 @@
     "summary": "iXsystems hat TrueNAS 25.10 \"Goldeye\" vorgestellt, das mit NVMe-oF an superschnelle Storage-Systeme angebunden werden kann. Dazu kommen weitere neue F",
     "link": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/2/8/NAS-e7e42cd3a07f171a.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Das dreifache Lottchen: Apples große TV-Ambitionen | Mac & i-Podcast",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-04T15:22:00.000Z",
+    "summary": "Einen Apple-Fernseher gab es nie, ins Wohnzimmer will der Konzern trotzdem. In Episode 108 widmen wir uns Apple TV – Streaming-Dienst, App und Settop-",
+    "link": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/4/2/heise_Podcast_maci_16_9-5e3b2af672f36dae.jpeg",
     "language": "de"
   },
   {
@@ -7840,16 +7910,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.nintendolife.com/news/2025/11/switch-2-sells-over-10-million-units-nintendo-increases-forecast-even-further",
-    "title": "Switch 2 Sells Over 10 Million Units, Nintendo Increases Forecast Even Further",
-    "source": "Nintendo Life",
-    "publicationDate": "2025-11-04T08:00:00.000Z",
-    "summary": "There's just no stopping it.Nintendo has released its latest financial data for the six months ending 30th September 2025, and has provided updated sa",
-    "link": "https://www.nintendolife.com/news/2025/11/switch-2-sells-over-10-million-units-nintendo-increases-forecast-even-further",
-    "imageUrl": "https://images.nintendolife.com/9cd0e499927a1/small.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.eurogamer.de/das-atemberaubende-science-fiction-adventure-1000xresist-ist-ab-heute-im-game-pass-verfugbar",
     "title": "Das atemberaubende Science-Fiction-Adventure 1000XRESIST ist ab heute im Game Pass verfügbar!",
     "source": "Eurogamer",
@@ -8520,16 +8580,6 @@
     "language": "en"
   },
   {
-    "id": "https://jpgames.de/2025/11/das-neue-tomb-raider-von-crystal-dynamics-ist-trotz-amazon-turbulenzen-wohlauf/",
-    "title": "Das neue Tomb Raider von Crystal Dynamics ist trotz Amazon-Turbulenzen wohlauf",
-    "source": "JPGames",
-    "publicationDate": "2025-11-03T15:07:59.000Z",
-    "summary": "Amazon-Manager bestätigt. Der Beitrag Das neue Tomb Raider von Crystal Dynamics ist trotz Amazon-Turbulenzen wohlauf erschien zuerst auf JPGAMES.DE.",
-    "link": "https://jpgames.de/2025/11/das-neue-tomb-raider-von-crystal-dynamics-ist-trotz-amazon-turbulenzen-wohlauf/",
-    "imageUrl": "https://jpgames.de/wp-content/uploads/2024/10/tomb-raider-iv-v-vi-remastered-announcement.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.eurogamer.de/league-of-legends-ja-das-mmo-existiert-noch-release-so-weit-entfernt-sogar-das-team-macht-witze-daruber",
     "title": "League of Legends: Ja, das MMO existiert noch - Release so weit entfernt, sogar das Team macht Witze darüber",
     "source": "Eurogamer",
@@ -8567,16 +8617,6 @@
     "summary": "Neben Samsung und Apple bietet jetzt auch Motorola mit dem Edge 70 ein Smartphone an, das mit einer besonders dünnen Bauweise überzeugen soll. Das Edg",
     "link": "https://www.computerbase.de/news/smartphones/motorola-das-edge-70-soll-5-99-mm-ohne-kompromisse-schaffen.94891/",
     "imageUrl": "https://pics.computerbase.de/1/1/9/9/6/4-5d1f44a344b90e5a/article-640x360.2268dd36.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://jpgames.de/2025/11/die-erfolgreichsten-gacha-games-im-oktober-kreativitaet-zahlt-sich-aus-resident-evil-zuendet-nicht/",
-    "title": "Die erfolgreichsten Gacha-Games im Oktober: Kreativität zahlt sich aus; Resident Evil zündet nicht",
-    "source": "JPGames",
-    "publicationDate": "2025-11-03T14:56:05.000Z",
-    "summary": "Genshin Impact belohnt sich. Der Beitrag Die erfolgreichsten Gacha-Games im Oktober: Kreativität zahlt sich aus; Resident Evil zündet nicht erschien z",
-    "link": "https://jpgames.de/2025/11/die-erfolgreichsten-gacha-games-im-oktober-kreativitaet-zahlt-sich-aus-resident-evil-zuendet-nicht/",
-    "imageUrl": "https://jpgames.de/wp-content/uploads/2025/10/genshin-impact-nefer-scaled.jpg",
     "language": "de"
   },
   {
@@ -9207,26 +9247,6 @@
     "summary": "Donuts fallen vom Himmel, Bart baut Barrikaden: In der neuen Season von Fortnite gibt es eine Springfield-Insel. (Fortnite, Disney)",
     "link": "https://www.golem.de/news/homer-und-bart-die-simpsons-ziehen-auf-eigene-insel-in-fortnite-ein-2511-201769.html",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
-    "language": "de"
-  },
-  {
-    "id": "https://www.heise.de/news/Zeiss-Kameras-und-Android-16-Vivo-bringt-X300-Serie-nach-Deutschland-10970695.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Zeiss-Kameras und Android 16: Vivo bringt X300-Serie nach Deutschland",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-03T09:30:00.000Z",
-    "summary": "Der Hersteller Vivo meldet sich mit dem X300 und X300 Pro zurück auf dem deutschen Markt. Die Akkus fallen jedoch kleiner aus als bei den Modellen für",
-    "link": "https://www.heise.de/news/Zeiss-Kameras-und-Android-16-Vivo-bringt-X300-Serie-nach-Deutschland-10970695.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/3/9/1/vivo-x300-serie-1dfd517743224bd6.jpeg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.heise.de/news/iPad-Pro-M5-Minimale-Verbesserungen-bei-der-Reparierbarkeit-10966235.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "iPad Pro M5: Minimale Verbesserungen bei der Reparierbarkeit",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-03T09:28:00.000Z",
-    "summary": "Mit dem Spec-Bump auf den neuen M5-Chip hatten sich Reparateure Verbesserungen beim iPad Pro gewünscht. Sie werden leider nicht erfüllt.",
-    "link": "https://www.heise.de/news/iPad-Pro-M5-Minimale-Verbesserungen-bei-der-Reparierbarkeit-10966235.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/1/3/5/Screenshot_2025-11-03_at_09-57749bc4f84184f4.png",
     "language": "de"
   },
   {
@@ -10190,16 +10210,6 @@
     "language": "de"
   },
   {
-    "id": "https://de.ign.com/indiana-jones-and-the-great-circle/149526/news/der-grosse-kreis-expandiert-indiana-jones-erschliesst-eine-neue-plattform",
-    "title": "Der Große Kreis ohne DRM: Indiana Jones nun auch auf GOG verfügbar",
-    "source": "IGN",
-    "publicationDate": "2025-11-01T07:22:33.000Z",
-    "summary": "Auch nach dem erstmaligen Release Ende 2024 geht das Abenteuer für Indy in Indiana Jones und der Große Kreis immer weiter – jetzt auf einer weiteren g",
-    "link": "https://de.ign.com/indiana-jones-and-the-great-circle/149526/news/der-grosse-kreis-expandiert-indiana-jones-erschliesst-eine-neue-plattform",
-    "imageUrl": "https://sm.ign.com/ign_de/photo/default/indiana-jones-1739526055236_q8x9.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.eurogamer.de/dangbei-mp1-max-test",
     "title": "Dangbei MP1 Max im Test: Bildgewaltiger 4K-Beamer fürs Heimkino und den mobilen Einsatz",
     "source": "Eurogamer",
@@ -10897,16 +10907,6 @@
     "summary": "Der Chef von Take-Two Interactive, Strauss Zelnick, hat das Thema KI erneut aufgegriffen und diesmal angedeutet, dass die umstrittene Technologie niem",
     "link": "https://www.eurogamer.de/take-two-chef-zelnick-ki-kann-niemals-ein-gta-erschaffen-genie-ist-das-gebiet-der-menschen",
     "imageUrl": "https://assetsio.gnwcdn.com/GTA-6-KI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
-  },
-  {
-    "id": "https://www.eurogamer.de/volle-kontrolle-pioneers-of-pagonia-veroffentlicht-modding-werkzeuge-vor-dem-10-release",
-    "title": "Volle Kontrolle: Pioneers of Pagonia veröffentlicht Modding-Werkzeuge vor dem 1.0-Release",
-    "source": "Eurogamer",
-    "publicationDate": "2025-10-30T17:00:00.000Z",
-    "summary": "Vor dem für den 11. Dezember 2025 geplanten Release von Version 1.0 mit vollständiger Story-Kampagne hat die Wirtschaftssimulation Pioneers of Pagonia",
-    "link": "https://www.eurogamer.de/volle-kontrolle-pioneers-of-pagonia-veroffentlicht-modding-werkzeuge-vor-dem-10-release",
-    "imageUrl": "https://assetsio.gnwcdn.com/Pioneers-of-Pagonia_tKprDik.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "de"
   },
   {
