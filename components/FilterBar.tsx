@@ -284,7 +284,7 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
       </div>
 
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <div>
           <label htmlFor="time-filter" className="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1">Time</label>
           <select id="time-filter" value={timeFilter} onChange={(e) => setTimeFilter(e.target.value as TimeFilter)} className={`${baseSelectClasses} ${timeFilter !== 'all' ? activeFilterClasses : ''}`}>
