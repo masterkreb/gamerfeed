@@ -1,5 +1,45 @@
 [
   {
+    "id": "https://playfront.de/marvel-setzt-weiter-auf-insomniac-games-und-das-ist-kein-grund-zur-freude/",
+    "title": "Marvel setzt weiter auf Insomniac Games, und das ist kein Grund zur Freude",
+    "source": "PlayFront",
+    "publicationDate": "2025-11-05T07:48:49.000Z",
+    "summary": "Marvel Games will weiter mit Insomniac zusammenarbeiten. Für PlayStation-Fans klingt das weniger nach Zukunftsvision, sondern eher nach kreativem Stil",
+    "link": "https://playfront.de/marvel-setzt-weiter-auf-insomniac-games-und-das-ist-kein-grund-zur-freude/",
+    "imageUrl": "https://cdn.playfront.de/uploads/2025/09/marvels-wolverine-cover.webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.computerbase.de/news/wirtschaft/amd-quartalsbericht-rekordumsatz-und-guter-ausblick-sind-der-boerse-nicht-genug.94917/",
+    "title": "AMD-Quartalsbericht: Rekordumsatz und guter Ausblick sind der Börse nicht genug",
+    "source": "ComputerBase",
+    "publicationDate": "2025-11-05T07:45:00.000Z",
+    "summary": "AMD hat ein Rekordquartal mit 9,2 Milliarden US-Dollar Umsatz abgeliefert, das aktuelle Quartal soll mit bis zu 9,9 Milliarden US-Dollar noch darüber ",
+    "link": "https://www.computerbase.de/news/wirtschaft/amd-quartalsbericht-rekordumsatz-und-guter-ausblick-sind-der-boerse-nicht-genug.94917/",
+    "imageUrl": "https://pics.computerbase.de/1/1/9/9/9/3-0a935c6e86356782/article-640x360.20cc9226.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.pcgameshardware.de/Gaming-PC-Hardware-217554/News/Windows-Neptune-Gaming-PC-Projekt-1485743/",
+    "title": "Windows \"Neptune\": Unveröffentlichtes Betriebssystem als Basis für Retro-Gaming-PC",
+    "source": "PC Games Hardware",
+    "publicationDate": "2025-11-05T07:45:00.000Z",
+    "summary": "Windows \"Neptune\" war ein geplanter Nachfolger von Windows 2000, der es nie offiziell auf den Markt schaffte. Ein Retro-PC-Projekt nutzt nun eine gele",
+    "link": "https://www.pcgameshardware.de/Gaming-PC-Hardware-217554/News/Windows-Neptune-Gaming-PC-Projekt-1485743/",
+    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/11/Windows-Neptune-Gaming-PC-Projekt-pcgh.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Kreditkartenbetrug-Durchsuchungen-auf-drei-Kontinenten-11057117.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Kreditkartenbetrug: Durchsuchungen auf drei Kontinenten",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T07:43:00.000Z",
+    "summary": "Durchsucht wurden unter anderem Objekte in Kanada, Singapur – und Deutschland. Die Betrüger sollen einen dreistelligen Millionenschaden verursacht hab",
+    "link": "https://www.heise.de/news/Kreditkartenbetrug-Durchsuchungen-auf-drei-Kontinenten-11057117.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/0/9/1/shutterstock_289585190-b2c3d76b1fef60a0.jpeg",
+    "language": "de"
+  },
+  {
     "id": "https://www.eurogamer.de/xbox-game-pass-das-sind-die-neuen-spiele-im-november",
     "title": "Xbox Game Pass: Das sind die neuen Spiele im November",
     "source": "Eurogamer",
@@ -7,6 +47,16 @@
     "summary": "Microsoft hat gerade die neueste Liste der Spiele bekannt gegeben, die im November im Xbox Game Pass erscheinen werden. Nehmt schon mal die Halloween-",
     "link": "https://www.eurogamer.de/xbox-game-pass-das-sind-die-neuen-spiele-im-november",
     "imageUrl": "https://assetsio.gnwcdn.com/Call-of-duty-black-ops-7-game-pass-november.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Hohe-Winde-Ueber-40-Prozent-der-Offshore-Windparks-in-Europa-und-Asien-gefaehrdet-11057097.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Hohe Winde: Über 40 Prozent der Offshore-Windparks in Europa und Asien gefährdet",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T07:39:00.000Z",
+    "summary": "Mehr als 40 Prozent der Windturbinen europäischer und asiatischer Offshore-Windkraftanlagen sind Winden ausgesetzt, für die sie nicht ausgelegt sind.",
+    "link": "https://www.heise.de/news/Hohe-Winde-Ueber-40-Prozent-der-Offshore-Windparks-in-Europa-und-Asien-gefaehrdet-11057097.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/0/8/1/shutterstock_1091442722-b60a1736839f90a9.jpeg",
     "language": "de"
   },
   {
@@ -61,7 +111,7 @@
   },
   {
     "id": "https://www.heise.de/news/Google-und-Epic-einigen-sich-auf-weltweite-Android-Aenderungen-11057051.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Google und Epic einigen sich auf weltweite Android-Änderungen",
+    "title": "Paukenschlag: Google und Epic einigen sich auf weltweite Android-Änderungen",
     "source": "Heise Online",
     "publicationDate": "2025-11-05T07:25:00.000Z",
     "summary": "Überraschend haben sich Google und Epic im Android-Gerichtsstreit auf einen gemeinsamen Vorschlag geeinigt. Die geplanten Änderungen sollen weltweit g",
@@ -3640,16 +3690,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Das dreifache Lottchen: Apples große TV-Ambitionen | Mac & i-Podcast",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-04T15:22:00.000Z",
-    "summary": "Einen Apple-Fernseher gab es nie, ins Wohnzimmer will der Konzern trotzdem. In Episode 108 widmen wir uns Apple TV – Streaming-Dienst, App und Settop-",
-    "link": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/4/2/heise_Podcast_maci_16_9-5e3b2af672f36dae.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "TrueNAS 25.10 mit NVMe-oF-Unterstützung, schneller API und neuem OpenZFS",
     "source": "Heise Online",
@@ -3657,6 +3697,16 @@
     "summary": "iXsystems hat TrueNAS 25.10 \"Goldeye\" vorgestellt, das mit NVMe-oF an superschnelle Storage-Systeme angebunden werden kann. Dazu kommen weitere neue F",
     "link": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/2/8/NAS-e7e42cd3a07f171a.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Das dreifache Lottchen: Apples große TV-Ambitionen | Mac & i-Podcast",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-04T15:22:00.000Z",
+    "summary": "Einen Apple-Fernseher gab es nie, ins Wohnzimmer will der Konzern trotzdem. In Episode 108 widmen wir uns Apple TV – Streaming-Dienst, App und Settop-",
+    "link": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/4/2/heise_Podcast_maci_16_9-5e3b2af672f36dae.jpeg",
     "language": "de"
   },
   {
@@ -3950,16 +4000,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.heise.de/bestenlisten/testbericht/test-atoto-carwave-cb6b-youtube-ohne-handy-android-auto-und-carplay-wireless/bw744fr?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Test: Atoto Carwave CB6B – Youtube ohne Handy, Android Auto & Carplay Wireless",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-04T15:00:00.000Z",
-    "summary": "Vom Dongle zum Entertainment-Center: Der Carwave-Adapter von Atoto kombiniert Carplay, Android Auto und ein vollwertiges Android-System im Auto.",
-    "link": "https://www.heise.de/bestenlisten/testbericht/test-atoto-carwave-cb6b-youtube-ohne-handy-android-auto-und-carplay-wireless/bw744fr?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/Magie-im-Alltag-Die-Bilder-der-Woche-44-10961863.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Magie im Alltag – Die Bilder der Woche 44",
     "source": "Heise Online",
@@ -3967,6 +4007,16 @@
     "summary": "Von dynamischem Tanz bis zu majestätischen Hafenkränen erzählt jede Aufnahme dieser Woche ihre eigene Geschichte aus Licht und Gefühl.",
     "link": "https://www.heise.de/news/Magie-im-Alltag-Die-Bilder-der-Woche-44-10961863.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/5/9/1/1/May-the-force-be-with-you-3e23693aca335719.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/bestenlisten/testbericht/test-atoto-carwave-cb6b-youtube-ohne-handy-android-auto-und-carplay-wireless/bw744fr?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Test: Atoto Carwave CB6B – Youtube ohne Handy, Android Auto & Carplay Wireless",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-04T15:00:00.000Z",
+    "summary": "Vom Dongle zum Entertainment-Center: Der Carwave-Adapter von Atoto kombiniert Carplay, Android Auto und ein vollwertiges Android-System im Auto.",
+    "link": "https://www.heise.de/bestenlisten/testbericht/test-atoto-carwave-cb6b-youtube-ohne-handy-android-auto-und-carplay-wireless/bw744fr?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
     "language": "de"
   },
   {
@@ -5770,16 +5820,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.pcgameshardware.de/RAM-Hardware-154108/News/DDR5-Preise-explodieren-1485720/",
-    "title": "DDR5: Preise für Arbeitsspeicher explodieren immer weiter",
-    "source": "PC Games Hardware",
-    "publicationDate": "2025-11-04T11:15:00.000Z",
-    "summary": "Die Preise für DDR5-Arbeitsspeicher der aktuellen Generation steigen aufgrund der enormen Nachfrage aus dem KI-Segment immer weiter und haben mittlerw",
-    "link": "https://www.pcgameshardware.de/RAM-Hardware-154108/News/DDR5-Preise-explodieren-1485720/",
-    "imageUrl": "https://www.pcgameshardware.de/screenshots/original/2025/11/DDR5-Preise-pcgh.png",
-    "language": "de"
-  },
-  {
     "id": "https://www.gamesradar.com/entertainment/anime-shows/solo-leveling-season-3-has-yet-to-be-announced-but-anime-fans-are-hopeful-following-a-cryptic-tweet-from-one-of-its-producers-i-know-what-the-world-is-waiting-for/",
     "title": "Solo Leveling season 3 has yet to be announced, but anime fans are hopeful following a cryptic tweet from one of its producers: \"I know what the world is waiting for\"",
     "source": "GamesRadar+",
@@ -5998,16 +6038,6 @@
     "link": "https://www.pcgamesn.com/arc-raiders/supply-drops",
     "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/11/arc-raiders-supply-drop.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://playfront.de/cyberpunk-2-cd-projekt-gewaehrt-erste-einblicke-in-die-fortsetzung/",
-    "title": "Cyberpunk 2: CD Projekt gewährt erste Einblicke in die Fortsetzung",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-04T10:47:00.000Z",
-    "summary": "Mike Pondsmith verrät erste Details zu Cyberpunk 2. Projekt Orion verspricht neue Städte, düstere Ästhetik und vertraute Elemente für Fans der Serie.",
-    "link": "https://playfront.de/cyberpunk-2-cd-projekt-gewaehrt-erste-einblicke-in-die-fortsetzung/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2025/05/cyberpunk-2-teaser.webp",
-    "language": "de"
   },
   {
     "id": "https://www.4p.de/tipps/deals/nur-2999-statt-4999-euro-beliebtes-ps5-spiel-aus-2025-jetzt-schon-zum-schnaeppchenpreis-bei-amazon/3355628",
@@ -6531,7 +6561,7 @@
   },
   {
     "id": "https://www.giga.de/games/wordle-loesung-von-heute--01J52RXENDE8S6KSVDA7T2PD19",
-    "title": "Wordle: Lösung von heute 04.11.2025",
+    "title": "Wordle: Lösung von heute 05.11.2025",
     "source": "GIGA Games",
     "publicationDate": "2025-11-04T09:00:06.000Z",
     "summary": "Da die knifflige Suche nach der richtigen Antwort bei Wordle nicht jeden Tag gelingt, haben wir alle korrekten Lösungen für euch zusammengetragen. Daz",
@@ -9380,16 +9410,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.heise.de/bestenlisten/testsieger/top-10-balkonkraftwerk-mit-speicher-im-test-top-modelle-zum-bestpreis/9g7b03h?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Top 10: Balkonkraftwerk mit Speicher im Test – Top-Modelle zum Bestpreis",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-01T19:00:00.000Z",
-    "summary": "Akkus fürs Balkonkraftwerk speichern Überschussstrom für die Nacht und schlechtes Wetter. Wir zeigen die besten Speicher, um Stromkosten zu senken.",
-    "link": "https://www.heise.de/bestenlisten/testsieger/top-10-balkonkraftwerk-mit-speicher-im-test-top-modelle-zum-bestpreis/9g7b03h?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
-    "language": "de"
-  },
-  {
     "id": "https://de.ign.com/untitled-battlefield-game/149541/video/battlefield-6-offizieller-season-1-intro-cinematic-trailer",
     "title": "Battlefield 6 - Offizieller Season 1 Intro Cinematic Trailer",
     "source": "IGN",
@@ -9478,16 +9498,6 @@
     "link": "https://www.pcgamesn.com/master-of-command/out-now",
     "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/11/master-of-command-out-now-seven-years-war-strategy-game-total-war-meets-europa-universalis-5-armchair-history-interactive.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://www.heise.de/bestenlisten/testbericht/soundbar-kef-xio-im-test-grandioser-klang-auch-ohne-subwoofer/jfwrvft?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Soundbar KEF Xio im Test: grandioser Klang – auch ohne Subwoofer",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-01T15:00:00.000Z",
-    "summary": "Mit 12 Lautsprechern und einer Musikleistung von 820 Watt will die KEF Xio bei Soundbars neue Maßstäbe setzen. Ob und wie gut ihr das gelingt, zeigt u",
-    "link": "https://www.heise.de/bestenlisten/testbericht/soundbar-kef-xio-im-test-grandioser-klang-auch-ohne-subwoofer/jfwrvft?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
-    "language": "de"
   },
   {
     "id": "https://www.pcgamesn.com/mount-blade-ii-bannerlord/war-sails-release-date",
@@ -10477,16 +10487,6 @@
     "summary": "Mit Richard Löwenstein hatten wir neulich ein Urgestein und Multitalent der deutschen Spieleindustrie zu Besuch. Seine Karriere als Spieleentwickler b",
     "link": "https://www.gamersglobal.de/video/videospielkultur-ev-reshoot-proxima-3-mit-richard-loewenstein",
     "imageUrl": "https://www.gamersglobal.de/sites/gamersglobal.de/files/imagecache/news_600/video/teaser/332/vlcsnap-2025-10-26-07h14m18s488.png",
-    "language": "de"
-  },
-  {
-    "id": "https://www.computerbase.de/news/wirtschaft/quartalszahlen-apple-schliesst-rekordquartal-ab-und-erwartet-hohen-zuwachs.94864/",
-    "title": "Quartalszahlen: Apple schließt Rekordquartal ab und erwartet hohen Zuwachs",
-    "source": "ComputerBase",
-    "publicationDate": "2025-10-31T09:00:00.000Z",
-    "summary": "Apple hat das Fiskaljahr 2025 zum 27. September mit einem Rekordquartal abgeschlossen, in dem das Unternehmen 102,5 Milliarden US-Dollar Umsatz und 27",
-    "link": "https://www.computerbase.de/news/wirtschaft/quartalszahlen-apple-schliesst-rekordquartal-ab-und-erwartet-hohen-zuwachs.94864/",
-    "imageUrl": "https://pics.computerbase.de/1/1/9/9/3/4-0d3257ac3bf5f5d9/article-640x360.364e62fe.jpg",
     "language": "de"
   },
   {
