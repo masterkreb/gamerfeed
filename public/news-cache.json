@@ -1,5 +1,375 @@
 [
   {
+    "id": "https://www.play3.de/2025/11/05/ps5-dynamische-preise-im-ps-store-spieler-berichten-von-unterschiedlichen-betraegen/",
+    "title": "PS5: Dynamische Preise im PS-Store? Spieler berichten von unterschiedlichen Beträgen",
+    "source": "Play3",
+    "publicationDate": "2025-11-05T16:35:03.000Z",
+    "summary": "Seit einiger Zeit beobachten PlayStation-Spieler Preisunterschiede bei digitalen PSN-Games. Wiederholt berichten sie davon, dass Spiele bei abweichend",
+    "link": "https://www.play3.de/2025/11/05/ps5-dynamische-preise-im-ps-store-spieler-berichten-von-unterschiedlichen-betraegen/",
+    "imageUrl": "https://www.play3.de/wp-content/uploads/2025/06/PS-Store.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.computerbase.de/news/prozessoren/panther-lake-das-sind-die-taktraten-fuer-intels-neue-notebook-cpu.94935/",
+    "title": "Panther Lake: Das sind die Taktraten für Intels neue Notebook-CPU",
+    "source": "ComputerBase",
+    "publicationDate": "2025-11-05T16:35:00.000Z",
+    "summary": "Viele Details zu Intel Panther Lake sind bereits bekannt, was fehlte, waren die Taktraten. Bis heute, Leaks zeichnen ein schlüssiges Bild. Demnach wir",
+    "link": "https://www.computerbase.de/news/prozessoren/panther-lake-das-sind-die-taktraten-fuer-intels-neue-notebook-cpu.94935/",
+    "imageUrl": "https://pics.computerbase.de/1/2/0/0/1/4-112ffd029c3fccdf/article-640x360.2b99ed1c.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.pcgamer.com/hardware/youtuber-salvages-500-disposable-vapes-to-not-only-power-his-gaming-pc-but-take-his-entire-house-and-workshop-off-grid/",
+    "title": "YouTuber salvages 500 disposable vapes to not only power his gaming PC, but take his entire house and workshop off-grid",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-05T16:31:12.000Z",
+    "summary": "Impractical, but no less impressive.",
+    "link": "https://www.pcgamer.com/hardware/youtuber-salvages-500-disposable-vapes-to-not-only-power-his-gaming-pc-but-take-his-entire-house-and-workshop-off-grid/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/sPepU6jjaBkncTDXUEx9im-1280-80.png",
+    "language": "en"
+  },
+  {
+    "id": "https://www.pcgames.de/Halo-Online-Spiel-55450/News/Halo-MMO-gecancelt-Xbox-Bonus-Don-Mattrick-Ensemble-1485858/",
+    "title": "Das Halo-MMO wurde gecancelt, damit der Xbox-Chef einen Bonus einstreichen kann, behauptet Ex-Entwickler",
+    "source": "PC Games",
+    "publicationDate": "2025-11-05T16:31:00.000Z",
+    "summary": "Ein Ex-Ensemble-Entwickler erhebt schwere Vorwürfe: Das geplante Halo-MMO Titan sei gestrichen worden, nur damit Xbox-Chef Don Mattrick seinen Aktienb",
+    "link": "https://www.pcgames.de/Halo-Online-Spiel-55450/News/Halo-MMO-gecancelt-Xbox-Bonus-Don-Mattrick-Ensemble-1485858/",
+    "imageUrl": "https://www.pcgames.de/screenshots/970x546/2016/08/halo_online-gamezone.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamezone.de/Halo-Online-Spiel-55450/News/Halo-MMO-gecancelt-Xbox-Bonus-Don-Mattrick-Ensemble-1485858/",
+    "title": "Das Halo-MMO wurde gecancelt, damit der Xbox-Chef einen Bonus einstreichen kann, behauptet Ex-Entwickler",
+    "source": "GameZone",
+    "publicationDate": "2025-11-05T16:31:00.000Z",
+    "summary": "Ein Ex-Ensemble-Entwickler erhebt schwere Vorwürfe: Das geplante Halo-MMO Titan sei gestrichen worden, nur damit Xbox-Chef Don Mattrick seinen Aktienb",
+    "link": "https://www.gamezone.de/Halo-Online-Spiel-55450/News/Halo-MMO-gecancelt-Xbox-Bonus-Don-Mattrick-Ensemble-1485858/",
+    "imageUrl": "https://www.gamezone.de/screenshots/970x546/2016/08/halo_online-gamezone.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.videogameszone.de/Halo-Online-Spiel-55450/News/Halo-MMO-gecancelt-Xbox-Bonus-Don-Mattrick-Ensemble-1485858/",
+    "title": "Das Halo-MMO wurde gecancelt, damit der Xbox-Chef einen Bonus einstreichen kann, behauptet Ex-Entwickler",
+    "source": "Video Games Zone",
+    "publicationDate": "2025-11-05T16:31:00.000Z",
+    "summary": "Ein Ex-Ensemble-Entwickler erhebt schwere Vorwürfe: Das geplante Halo-MMO Titan sei gestrichen worden, nur damit Xbox-Chef Don Mattrick seinen Aktienb",
+    "link": "https://www.videogameszone.de/Halo-Online-Spiel-55450/News/Halo-MMO-gecancelt-Xbox-Bonus-Don-Mattrick-Ensemble-1485858/",
+    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2016/08/halo_online-gamezone.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.pcgameshardware.de/PC-Games-Hardware-Brands-18366/Specials/PCGH-12-2025-Magazin-302-DVD-Download-PDF-1485459/",
+    "title": "Aufrüstpflicht dank Anno 117 und Battlefield 6? PCGH 12/2025 schlüsselt auf",
+    "source": "PC Games Hardware",
+    "publicationDate": "2025-11-05T16:31:00.000Z",
+    "summary": "Die PCGH-Ausgabe 12/2025 bietet das ganze Paket! Mit Marktübersichten zu externen SSDs, Voodoo-GPU-Rückblick, Komponenten-Empfehlungen für aktuelle Sp",
+    "link": "https://www.pcgameshardware.de/PC-Games-Hardware-Brands-18366/Specials/PCGH-12-2025-Magazin-302-DVD-Download-PDF-1485459/",
+    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/10/Hauptbanner_PCGH_neutral_zentriert_NEU-pcgh.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.xboxdynasty.de/news/silent-hill-f/entwickler-spricht-ueber-designprozesse/",
+    "title": "Silent Hill f: Entwickler spricht über Designprozesse",
+    "source": "XboxDynasty",
+    "publicationDate": "2025-11-05T16:30:47.000Z",
+    "summary": "Im dritten Entwickler-Video enthüllt NeoBards Entertainment, wie charaktergetriebener Horror und brutale Kämpfe zu einem einzigartigen Spielerlebnis v",
+    "link": "https://www.xboxdynasty.de/news/silent-hill-f/entwickler-spricht-ueber-designprozesse/",
+    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2022/10/silent-hill-f-14.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.nintendolife.com/features/poll-is-the-latest-metroid-prime-4-trailer-teasing-another-legacy-character",
+    "title": "Poll: Is The Latest Metroid Prime 4 Trailer Teasing Another Legacy Character?",
+    "source": "Nintendo Life",
+    "publicationDate": "2025-11-05T16:30:00.000Z",
+    "summary": "Kan it be..?Nintendo has released a fresh new look at Metroid Prime 4: Beyond - Nintendo Switch 2 Edition, and while much of the footage is recycled f",
+    "link": "https://www.nintendolife.com/features/poll-is-the-latest-metroid-prime-4-trailer-teasing-another-legacy-character",
+    "imageUrl": "https://images.nintendolife.com/bcc28667e8bb3/small.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.heise.de/tests/Gezielt-trainieren-Suunto-Race-2-im-Test-10781721.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
+    "title": "heise+ | Gezielt trainieren: Suunto Race 2 im Test",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T16:30:00.000Z",
+    "summary": "Suunto ergänzt bei seiner Sportuhr Race 2 ein Sprachfeedback und Trainingspläne. Wie gut ist die Fitness-Smartwatch?",
+    "link": "https://www.heise.de/tests/Gezielt-trainieren-Suunto-Race-2-im-Test-10781721.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/5/9/2/7/5/suunto_race-2_16_07_2025_c_brecheis-4391_01-79a3396ae6d97ea2.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://playfront.de/battlefield-6-grosse-anpassungen-kommen-weniger-grind-mehr-spielspass/",
+    "title": "Battlefield 6: Große Anpassungen kommen – weniger Grind, mehr Spielspaß",
+    "source": "PlayFront",
+    "publicationDate": "2025-11-05T16:29:18.000Z",
+    "summary": "Battlefield 6 vereinfacht Challenges und Assignments. Weniger Zeitaufwand, klarere Ziele und gezieltes Fortschreiten sorgen für spielbare Belohnungen.",
+    "link": "https://playfront.de/battlefield-6-grosse-anpassungen-kommen-weniger-grind-mehr-spielspass/",
+    "imageUrl": "https://cdn.playfront.de/uploads/2025/10/battlefield-6-phantom-edition.webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamesradar.com/games/destiny/remembering-its-mmo-has-an-expansion-out-soon-bungie-addresses-destiny-2s-missing-roadmap-as-player-counts-hit-a-new-low-on-steam/",
+    "title": "Remembering its MMO has an expansion out soon, Bungie addresses Destiny 2's missing roadmap as player counts hit a new low on Steam",
+    "source": "GamesRadar+",
+    "publicationDate": "2025-11-05T16:27:48.000Z",
+    "summary": "Third-party tools suggest Destiny 2 is down across the board as well",
+    "link": "https://www.gamesradar.com/games/destiny/remembering-its-mmo-has-an-expansion-out-soon-bungie-addresses-destiny-2s-missing-roadmap-as-player-counts-hit-a-new-low-on-steam/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/Pi3TcpRKj64WDgseFdTnbd-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.eurogamer.de/nach-wolverine-ist-nicht-schluss-marvel-setzt-weiter-auf-insomniac",
+    "title": "Nach Wolverine ist nicht Schluss: Marvel setzt weiter auf Insomniac",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-05T16:26:24.000Z",
+    "summary": "Marvel Games will seine erfolgreiche Zusammenarbeit mit Insomniac Games auch nach dem Release von Marvel's Wolverine fortsetzen. Das bestätigte Haluk ",
+    "link": "https://www.eurogamer.de/nach-wolverine-ist-nicht-schluss-marvel-setzt-weiter-auf-insomniac",
+    "imageUrl": "https://assetsio.gnwcdn.com/wolverine-cover.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/KI-Browser-fuer-macOS-Dia-bekommt-Funktionen-aus-Arc-zurueck-11050838.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "KI-Browser für macOS: Dia bekommt Funktionen aus Arc (zurück)",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T16:25:00.000Z",
+    "summary": "Die Browser Company, mittlerweile Teil von Atlassian, hat Funktionen aus Arc in Dia zurückportiert – allerdings noch etwas anders als erwünscht.",
+    "link": "https://www.heise.de/news/KI-Browser-fuer-macOS-Dia-bekommt-Funktionen-aus-Arc-zurueck-11050838.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/4/8/5/Screenshot_2025-11-05_at_16-e3affbc9ea6c3bd3.png",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/EU-plant-Hochgeschwindigkeitsnetz-In-vier-Stunden-von-Berlin-nach-Kopenhagen-11066826.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "EU plant Hochgeschwindigkeitsnetz: In vier Stunden von Berlin nach Kopenhagen",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T16:23:00.000Z",
+    "summary": "Die EU-Kommission will Europa durch schnellere Bahnverbindungen näher zusammenbringen. Bis 2040 sollen Reisezeiten drastisch sinken.",
+    "link": "https://www.heise.de/news/EU-plant-Hochgeschwindigkeitsnetz-In-vier-Stunden-von-Berlin-nach-Kopenhagen-11066826.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/6/6/4/shutterstock_2164381323-dc399f3b3d62ef6c.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamesradar.com/games/action-rpg/the-outer-worlds-2-pursuit-of-purloined-propaganda-science-adventures-quarterly/",
+    "title": "All The Outer Worlds 2 In Pursuit of Purloined Propaganda locations",
+    "source": "GamesRadar+",
+    "publicationDate": "2025-11-05T16:22:18.000Z",
+    "summary": "There are 10 Science Adventures Quarterly Volumes to find for the Purloined Propaganda Outer Worlds 2 quest",
+    "link": "https://www.gamesradar.com/games/action-rpg/the-outer-worlds-2-pursuit-of-purloined-propaganda-science-adventures-quarterly/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/iz7Kf5pqxhKdpwdfBR96Fm-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.gamesradar.com/platforms/playstation/playstation-portal-now-lets-you-stream-your-own-digital-games-to-the-handheld-without-a-ps5-but-you-still-need-to-have-the-most-expensive-version-of-ps-plus-to-do-so/",
+    "title": "PlayStation Portal now lets you stream your own digital games to the handheld without a PS5, but you still need to have the most expensive version of PS Plus to do so",
+    "source": "GamesRadar+",
+    "publicationDate": "2025-11-05T16:18:30.000Z",
+    "summary": "Not exactly a plus",
+    "link": "https://www.gamesradar.com/platforms/playstation/playstation-portal-now-lets-you-stream-your-own-digital-games-to-the-handheld-without-a-ps5-but-you-still-need-to-have-the-most-expensive-version-of-ps-plus-to-do-so/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/w8CQHsh4KkNsPEKV7ft9r6-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.play3.de/2025/11/05/one-piece-staffel-3-feuerfaust-ace-cobra-kai-star-wird-bei-netflix-zu-ruffys-grossem-bruder/",
+    "title": "One Piece Staffel 3: Feuerfaust Ace – Cobra-Kai-Star wird bei Netflix zu Ruffys großem Bruder",
+    "source": "Play3",
+    "publicationDate": "2025-11-05T16:17:00.000Z",
+    "summary": "Während zahlreiche „One Piece“-Fans derzeit gespannt Staffel 2 des Netflix-Hits entgegenfiebern, arbeiten die Verantwortlichen des Piratenepos bereits",
+    "link": "https://www.play3.de/2025/11/05/one-piece-staffel-3-feuerfaust-ace-cobra-kai-star-wird-bei-netflix-zu-ruffys-grossem-bruder/",
+    "imageUrl": "https://www.play3.de/wp-content/uploads/2025/11/One-Piece-Staffel-3-Season-3-Ace-Cobra-Kai-Netflix-Casting-Beitragsbild.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.giga.de/video/soulslike-fans-kaufen-seit-jahren-das-selbe-spiel-und-merken-es-nicht-mal--01K99H82YPWN893Z5VZFP929C2",
+    "title": "Soulslike-Fans kaufen seit Jahren das selbe Spiel und merken es nicht mal",
+    "source": "GIGA Games",
+    "publicationDate": "2025-11-05T16:15:00.000Z",
+    "summary": "Elden Ring ist voller Gegner, die wir schon seit Demon's Souls kennen. Das ist allerdings oft gut versteckt. Wie From Software seine Faulheit kaschier",
+    "link": "https://www.giga.de/video/soulslike-fans-kaufen-seit-jahren-das-selbe-spiel-und-merken-es-nicht-mal--01K99H82YPWN893Z5VZFP929C2",
+    "imageUrl": "https://static.giga.de/cc/22/5b/1d62e8a81abadd1bdda1284c3d_cmUgMTkyMCADYzIxMmFhZGJhODM=.png",
+    "language": "de"
+  },
+  {
+    "id": "https://www.pcgameshardware.de/Geforce-RTX-5090-Grafikkarte-281029/News/FE-Nvidia-ueberraschend-RMA-Austausch-Kuehlerumbau-1485812/",
+    "title": "RTX 5090 FE: Nvidia mit überraschendem RMA-Vorgehen - Austausch nach Kühlerumbau",
+    "source": "PC Games Hardware",
+    "publicationDate": "2025-11-05T16:15:00.000Z",
+    "summary": "Wer den Kühler seiner Grafikkarte abmontiert, verliert damit normalerweise auch seine Garantie. In einem Fall reagierte Nvidia nun trotzdem gnädig. Wo",
+    "link": "https://www.pcgameshardware.de/Geforce-RTX-5090-Grafikkarte-281029/News/FE-Nvidia-ueberraschend-RMA-Austausch-Kuehlerumbau-1485812/",
+    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/01/High-Density-PCB-pcgh.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.pcgamer.com/games/third-person-shooter/arc-raiders-respec-mobility-skills/",
+    "title": "Most of Arc Raiders' Mobility skills don't work how you think they do, so I guess it's time to start building your Expedition caravan to respec",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-05T16:10:18.000Z",
+    "summary": "Looks like you'll be on the next caravan out of here.",
+    "link": "https://www.pcgamer.com/games/third-person-shooter/arc-raiders-respec-mobility-skills/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/j37SLL32QZ32qEmxQrXgJX-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.gamespot.com/articles/epic-games-and-google-reach-legal-settlement-after-years-of-court-battles/1100-6535950/?ftag=CAD-01-10abi2f",
+    "title": "Epic Games And Google Reach Legal Settlement After Years Of Court Battles",
+    "source": "GameSpot",
+    "publicationDate": "2025-11-05T16:09:00.000Z",
+    "summary": "The legal battle between Google and Epic Games goes back to 2020, when the former pulled Fortnite from the Play Store over billing disputes. Since the",
+    "link": "https://www.gamespot.com/articles/epic-games-and-google-reach-legal-settlement-after-years-of-court-battles/1100-6535950/?ftag=CAD-01-10abi2f",
+    "imageUrl": "https://www.gamespot.com/a/uploads/original/1837/18375603/4596884-epicgamesstore.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.rockpapershotgun.com/arc-raiders-could-get-map-conditions-that-alter-the-friction-for-truly-tribes-esque-sliding",
+    "title": "Arc Raiders could get map conditions that alter the friction, for truly Tribes-esque sliding",
+    "source": "Rock Paper Shotgun",
+    "publicationDate": "2025-11-05T16:08:35.000Z",
+    "summary": "I called out sliding as one of my favourite aspects of Arc Raiders in a launch-day write-up. It lends the looter shooter a gambolling giddiness you mi",
+    "link": "https://www.rockpapershotgun.com/arc-raiders-could-get-map-conditions-that-alter-the-friction-for-truly-tribes-esque-sliding",
+    "imageUrl": "https://assetsio.gnwcdn.com/Arc-Raiders-review-downed.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "en"
+  },
+  {
+    "id": "https://de.ign.com/entertainment/149585/news/oscar-preistragerin-chloe-zhao-konzentriert-sich-kunftig-auf-manga-adaptionen",
+    "title": "Oscar-Preisträgerin Chloé Zhao konzentriert sich künftig auf Manga-Adaptionen",
+    "source": "IGN",
+    "publicationDate": "2025-11-05T16:07:18.000Z",
+    "summary": "Oscar, Marvel, Manga: Chloé Zhao gründet eine eigene Firma, um künftig Manga zu verfilmen. Manga und Anime entwickeln sich immer rasanter zu einem äuß",
+    "link": "https://de.ign.com/entertainment/149585/news/oscar-preistragerin-chloe-zhao-konzentriert-sich-kunftig-auf-manga-adaptionen",
+    "imageUrl": "https://sm.ign.com/ign_de/screenshot/default/chloe-zhao-manga-verfilmungen_fpns.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.polygon.com/five-nights-at-freddys-2-trailer-springtrap/",
+    "title": "New Five Nights at Freddy's 2 trailer shows off Springtrap, Balloon Boy, and more",
+    "source": "Polygon",
+    "publicationDate": "2025-11-05T16:04:24.000Z",
+    "summary": "The new Five Nights at Freddy's 2 trailer makes it clear that although William Afton is dead, Springtrap is very much alive",
+    "link": "https://www.polygon.com/five-nights-at-freddys-2-trailer-springtrap/",
+    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/2025/11/bonnie-fnaf.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.eurogamer.de/minecraft-dragon-ball-z-dlc-bringt-goku-vegeta-und-co-ins-spiel",
+    "title": "Minecraft: Dragon Ball Z-DLC bringt Goku, Vegeta und Co. ins Spiel",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-05T16:04:12.000Z",
+    "summary": "Mojang hat überraschend ein Dragon Ball Z-DLC-Paket für Minecraft veröffentlicht. Ohne vorherige Ankündigung steht der neue Zusatzinhalt ab sofort im ",
+    "link": "https://www.eurogamer.de/minecraft-dragon-ball-z-dlc-bringt-goku-vegeta-und-co-ins-spiel",
+    "imageUrl": "https://assetsio.gnwcdn.com/minecraftxdragonballz_dlc_art_1920x1080.png?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://de.ign.com/routine/149571/preview/routine-wir-stellen-das-cat-ultraview-modul-vor-ign-first",
+    "title": "ROUTINE: Wir stellen das C.A.T. Ultraview-Modul vor – IGN First",
+    "source": "IGN",
+    "publicationDate": "2025-11-05T16:04:03.000Z",
+    "summary": "Back to the 80s Was wäre, wenn die 1980er Jahre zum Ausgangspunkt für die Zukunft würden? So wie der diesjährige Film Fantastic Four“ eine 50er-Jahre-",
+    "link": "https://de.ign.com/routine/149571/preview/routine-wir-stellen-das-cat-ultraview-modul-vor-ign-first",
+    "imageUrl": "https://sm.ign.com/ign_de/preview/r/routine-in/routine-introducing-the-cat-ultraview-module-ign-first_ge26.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://de.ign.com/routine/149572/gallery/routine-2025-screenshots",
+    "title": "Routine - 2025 Screenshots",
+    "source": "IGN",
+    "publicationDate": "2025-11-05T16:04:03.000Z",
+    "summary": "",
+    "link": "https://de.ign.com/routine/149572/gallery/routine-2025-screenshots",
+    "imageUrl": "https://sm.ign.com/ign_de/gallery/r/routine-20/routine-2025-screenshots_xusz.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Arbeitslos-wegen-KI-Laut-einer-Studie-holen-Unternehmen-ihre-Mitarbeiter-zurueck-11066882.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Arbeitslos wegen KI: Laut einer Studie holen Unternehmen ihre Mitarbeiter zurück",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T16:02:00.000Z",
+    "summary": "Studien zeigen: Bisher können KI-Modelle menschliche Mitarbeiter nicht ersetzen. Wer entlassen wird, könnte deshalb bald wieder am selben Schreibtisch",
+    "link": "https://www.heise.de/news/Arbeitslos-wegen-KI-Laut-einer-Studie-holen-Unternehmen-ihre-Mitarbeiter-zurueck-11066882.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/6/8/9/shutterstock_2103114116-2304ad48acc7c693.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamesradar.com/games/action-rpg/outer-worlds-2-diabolical-drones-of-doom/",
+    "title": "How to complete Diabolical Drones of Doom in The Outer Worlds 2",
+    "source": "GamesRadar+",
+    "publicationDate": "2025-11-05T16:01:47.000Z",
+    "summary": "Whether it's bugged or stuck as mentioned, the Drones of Doom might need a kickstart in Outer Worlds 2",
+    "link": "https://www.gamesradar.com/games/action-rpg/outer-worlds-2-diabolical-drones-of-doom/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/NVoRRYn23Vq8QPhFbFWxpQ-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.polygon.com/fortnite-disneyland-game-rush-map-star-wars-marvel/",
+    "title": "Disneyland joins Fortnite with special new island and games",
+    "source": "Polygon",
+    "publicationDate": "2025-11-05T16:01:15.000Z",
+    "summary": "Star Wars and Marvel games, exclusive cosmetics, and more in Disneyland's new Fortnite island",
+    "link": "https://www.polygon.com/fortnite-disneyland-game-rush-map-star-wars-marvel/",
+    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/2025/11/12-disneyland-game-rush-hub-celebration-1.jpeg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.xboxdynasty.de/news/nintendo-switch-2/entwicklungsfokus-auf-neue-konsole-verlagert/",
+    "title": "Nintendo Switch 2: Entwicklungsfokus auf neue Konsole verlagert",
+    "source": "XboxDynasty",
+    "publicationDate": "2025-11-05T16:00:02.000Z",
+    "summary": "Künftig wird Nintendo den Entwicklungsschwerpunkt auf die Nintendo Switch 2 Konsole setzen.",
+    "link": "https://www.xboxdynasty.de/news/nintendo-switch-2/entwicklungsfokus-auf-neue-konsole-verlagert/",
+    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2023/09/nintendo-switch-2-4.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamepro.de/artikel/pokemon-tcg-pocket-tier-list-decks,3423310.html",
+    "title": "Guide: Pokémon TCG Pocket Tier-List: Das sind die besten Meta Decks - jetzt mit Mega-Aufstieg-Karten/B1 (November 2025)",
+    "source": "GamePro",
+    "publicationDate": "2025-11-05T16:00:00.000Z",
+    "summary": "In Pokémon TCG Pocket könnt ihr aus mehr als 1200 Karten ein Deck erstellen. Das ist die Tier List mit den aktuell besten Decks.",
+    "link": "https://www.gamepro.de/artikel/pokemon-tcg-pocket-tier-list-decks,3423310.html",
+    "imageUrl": "https://images.cgames.de/images/gsgp/800/gp-pok%C3%A9mon-tcg-pocket-tierlist-november-2025_6384453.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamesradar.com/entertainment/action-movies/the-running-man-director-reveals-the-big-way-the-action-packed-thriller-differs-from-the-likes-of-kill-bill-and-john-wick-this-was-an-opportunity-to-bring-it-down-to-a-more-relatable-level/",
+    "title": "The Running Man director reveals the big way the action-packed thriller differs from the likes of Kill Bill and John Wick: \"This was an opportunity to bring it down to a more relatable level\"",
+    "source": "GamesRadar+",
+    "publicationDate": "2025-11-05T16:00:00.000Z",
+    "summary": "Edgar Wright wanted to create a \"relatively grounded\" action movie with The Running Man",
+    "link": "https://www.gamesradar.com/entertainment/action-movies/the-running-man-director-reveals-the-big-way-the-action-packed-thriller-differs-from-the-likes-of-kill-bill-and-john-wick-this-was-an-opportunity-to-bring-it-down-to-a-more-relatable-level/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/9ex4xaoHBLiwZsAxb8AtA3-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.buffed.de/World-of-Warcraft-The-War-Within-Spiel-74416/News/wow-legion-remix-mythisch-kiljaeden-knockback-guide-1485817/",
+    "title": "WoW Legion Remix: So überlebt ihr den mythischen Kil'jaeden",
+    "source": "Buffed",
+    "publicationDate": "2025-11-05T16:00:00.000Z",
+    "summary": "Im Legion Remix fällt fast alles schnell um, doch Mythisch-Kil'jaeden bleibt ein Problemfall. Besonders die Intermission wirft viele Spieler von der P",
+    "link": "https://www.buffed.de/World-of-Warcraft-The-War-Within-Spiel-74416/News/wow-legion-remix-mythisch-kiljaeden-knockback-guide-1485817/",
+    "imageUrl": "https://www.buffed.de/screenshots/970x546/2017/07/28873-patch-72-tomb-of-sargeras-boss-models-buffed.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamesradar.com/games/battlefield/battlefield-6-players-rig-their-own-anti-crossplay-on-pc-to-avoid-controller-players-with-the-massive-advantage-of-aim-assist/",
+    "title": "Battlefield 6 players rig their own anti-crossplay on PC to avoid controller players with the \"massive advantage\" of aim assist",
+    "source": "GamesRadar+",
+    "publicationDate": "2025-11-05T15:58:16.000Z",
+    "summary": "Battlefield 6's aim assist has become a bone of contention",
+    "link": "https://www.gamesradar.com/games/battlefield/battlefield-6-players-rig-their-own-anti-crossplay-on-pc-to-avoid-controller-players-with-the-massive-advantage-of-aim-assist/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/evDDy3VrmUhHdimGptw5CV-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://kotaku.com/fallout-4-anniversary-bethesda-update-mods-creation-2000641340",
+    "title": "Fallout 4‘s Surprise Update Will Make It So VATS No Longer Lies",
+    "source": "Kotaku",
+    "publicationDate": "2025-11-05T15:58:11.000Z",
+    "summary": "VATS is also getting some love in this update The post Fallout 4‘s Surprise Update Will Make It So VATS No Longer Lies appeared first on Kotaku.",
+    "link": "https://kotaku.com/fallout-4-anniversary-bethesda-update-mods-creation-2000641340",
+    "imageUrl": "https://kotaku.com/app/uploads/2025/11/f4-1280x720.jpg",
+    "language": "en"
+  },
+  {
     "id": "https://playfront.de/one-piece-pirate-warriors-4-ps5-upgrade-bringt-groessere-schlachten-und-neue-helden/",
     "title": "One Piece Pirate Warriors 4 – PS5-Upgrade bringt größere Schlachten und neue Helden",
     "source": "PlayFront",
@@ -38,6 +408,16 @@
     "link": "https://www.videogameszone.de/The-Witcher-Serie-267922/News/zuschauerzahlen-staffel-4-netflix-1485844/",
     "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2019/07/The-Witcher-Netflix-Yennefer-01-buffed.jpg",
     "language": "de"
+  },
+  {
+    "id": "https://www.gamespot.com/articles/james-islington-the-strength-of-the-few-hierarchy-series-preorder-deal/1100-6535936/?ftag=CAD-01-10abi2f",
+    "title": "James Islington's Hierarchy Series: Save 30% On The Strength Of The Few Preorder",
+    "source": "GameSpot",
+    "publicationDate": "2025-11-05T15:54:00.000Z",
+    "summary": "James Islington - The Strength of the Few (Hierarchy, Book 2) $23.80 (was $35) See at Amazon It's almost time to return to the world of Caten in The S",
+    "link": "https://www.gamespot.com/articles/james-islington-the-strength-of-the-few-hierarchy-series-preorder-deal/1100-6535936/?ftag=CAD-01-10abi2f",
+    "imageUrl": "https://www.gamespot.com/a/uploads/original/1595/15950357/4596887-islington-books.jpg",
+    "language": "en"
   },
   {
     "id": "https://www.giga.de/tipp/coin-master-free-spins-link-liste-fuer-gratis-spins-versuche-muenzen/",
@@ -181,7 +561,7 @@
   },
   {
     "id": "https://www.heise.de/news/Ueber-Monopole-Medienmacht-und-die-Rueckeroberung-der-digitalen-Souveraenitaet-11066578.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Über Monopole, Medienmacht und die Rückeroberung der digitalen Souveränität",
+    "title": "Diskussion um \"Digitalokratie\": \"Aktuell gibt es keine digitale Souveränität\"",
     "source": "Heise Online",
     "publicationDate": "2025-11-05T15:37:00.000Z",
     "summary": "Was Europas digitaler Zukunft helfen könnte und wie die Befreiung aus den Fängen der Tech-Monopolisten gelingen kann, war Thema auf der KI-Woche in St",
@@ -340,6 +720,16 @@
     "language": "en"
   },
   {
+    "id": "https://www.gamepro.de/artikel/coin-master-kostenlose-spin-links-aktuell,3439854.html",
+    "title": "Guide: Coin Master-Free Spins - Alle aktuellen und kostenlosen Spin-Links (November 2025)",
+    "source": "GamePro",
+    "publicationDate": "2025-11-05T15:26:00.000Z",
+    "summary": "Ihr braucht wieder kostenlose Spins für Coin Master? Wir zeigen euch hier die tagesaktuellen Gratis-Spin-Links.",
+    "link": "https://www.gamepro.de/artikel/coin-master-kostenlose-spin-links-aktuell,3439854.html",
+    "imageUrl": "https://images.cgames.de/images/gsgp/800/gp-cm-spin_6376555.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://www.heise.de/news/Vertrag-soll-bis-Jahresende-stehen-Bayern-will-in-die-Microsoft-Cloud-11066618.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Vertrag soll bis Jahresende stehen: Bayern will in die Microsoft-Cloud",
     "source": "Heise Online",
@@ -410,6 +800,16 @@
     "language": "de"
   },
   {
+    "id": "https://www.pcgamesn.com/marvel-rivals/ranks-competitive",
+    "title": "Marvel Rivals ranks, distribution, and competitive explained",
+    "source": "PCGamesN",
+    "publicationDate": "2025-11-05T15:20:40.000Z",
+    "summary": "Here's everything you need to know about the Marvel Rivals ranks, including how competitive mode works and the Season 4.5 ranked rewards.",
+    "link": "https://www.pcgamesn.com/marvel-rivals/ranks-competitive",
+    "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/01/marvel-rivals-ranks-1.jpg",
+    "language": "en"
+  },
+  {
     "id": "https://www.play3.de/2025/11/05/xbox-microsoft-befragt-spieler-zum-ps5-hit-ghost-of-yotei-was-steckt-hinter-der-ungewoehnlichen-umfrage/",
     "title": "Xbox: Microsoft befragt Spieler zum PS5-Hit Ghost of Yotei – Was steckt hinter der ungewöhnlichen Umfrage?",
     "source": "Play3",
@@ -426,7 +826,7 @@
     "publicationDate": "2025-11-05T15:15:00.000Z",
     "summary": "Waka Waka!Atari has announced that the Namco Legendary Pack expansion for Atari 50: The Anniversary Celebration will launch on Switch next week on 13t",
     "link": "https://www.nintendolife.com/news/2025/11/the-atari-50-pac-man-expansion-launches-on-switch-next-week",
-    "imageUrl": "https://images.nintendolife.com/02d8f1f4c5256/small.jpg",
+    "imageUrl": "https://images.nintendolife.com/91b7f76d9efae/small.jpg",
     "language": "en"
   },
   {
@@ -518,6 +918,16 @@
     "link": "https://www.gamestar.de/artikel/epomaker-he-68-tastatur-magnetisch-klein-leicht-schoen-angebot,3442458.html",
     "imageUrl": "https://images.cgames.de/images/gamestar/800/epomaker-he68_6384441.jpg",
     "language": "de"
+  },
+  {
+    "id": "https://www.pcgamesn.com/fortnite/server-status",
+    "title": "Fortnite server status right now and extended downtime",
+    "source": "PCGamesN",
+    "publicationDate": "2025-11-05T15:08:20.000Z",
+    "summary": "We've got you covered on the current Fortnite server status and any communications from Epic Games about when normal service resumes.",
+    "link": "https://www.pcgamesn.com/fortnite/server-status",
+    "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2024/12/fortnite-server-status.jpg",
+    "language": "en"
   },
   {
     "id": "https://jpgames.de/2025/11/nach-sechs-jahren-erhaelt-ein-one-piece-ableger-einen-neuen-dlc-und-eine-next-gen-version/",
@@ -900,6 +1310,16 @@
     "language": "en"
   },
   {
+    "id": "https://de.ign.com/frankenstein-2025/149584/video/frankenstein-offizieller-finaler-trailer",
+    "title": "Frankenstein – Offizieller finaler Trailer",
+    "source": "IGN",
+    "publicationDate": "2025-11-05T14:36:44.000Z",
+    "summary": "",
+    "link": "https://de.ign.com/frankenstein-2025/149584/video/frankenstein-offizieller-finaler-trailer",
+    "imageUrl": "https://sm.ign.com/ign_de/video/f/frankenste/frankenstein-official-final-trailer_8bxx.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://www.giga.de/games/1-milliarde-downloads-dank-kuechenmesser-werbung-die-story-hinter-fruit-ninja--01K94MJ2EA8MJRRK0H3NA8TA6R",
     "title": "1 Milliarde Downloads dank Küchenmesser-Werbung: Die Story hinter Fruit Ninja",
     "source": "GIGA Games",
@@ -1017,6 +1437,16 @@
     "summary": "Sony’s handheld streaming device is getting a huge update tonight The post The PlayStation Portal Just Became The Streaming Handheld It Was Meant To B",
     "link": "https://kotaku.com/playstation-portal-cloud-streaming-update-ps5-patch-2000641330",
     "imageUrl": "https://kotaku.com/app/uploads/2023/11/adb9326d6539729648ca981d4ce52a58-1280x720.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.gamespot.com/articles/a-vast-majority-of-nintendo-switch-2-owners-transitioned-from-switch-1/1100-6535947/?ftag=CAD-01-10abi2f",
+    "title": "A Vast Majority Of Nintendo Switch 2 Owners Transitioned From Switch 1",
+    "source": "GameSpot",
+    "publicationDate": "2025-11-05T14:27:00.000Z",
+    "summary": "The Switch 2 is already the fastest-selling Nintendo hardware to date, and data coming directly from the company indicates that most Switch 2 owners a",
+    "link": "https://www.gamespot.com/articles/a-vast-majority-of-nintendo-switch-2-owners-transitioned-from-switch-1/1100-6535947/?ftag=CAD-01-10abi2f",
+    "imageUrl": "https://www.gamespot.com/a/uploads/original/1850/18504982/4596877-2_nintendoswitch2_launch.jpg",
     "language": "en"
   },
   {
@@ -2590,16 +3020,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.xboxdynasty.de/news/xbox-360/abwaertskompatibilitaet-entfernte-spiele-im-store-aufgetaucht/",
-    "title": "Xbox 360: Abwärtskompatibilität: Entfernte Spiele im Store aufgetaucht",
-    "source": "XboxDynasty",
-    "publicationDate": "2025-11-05T11:30:48.000Z",
-    "summary": "Entfernte Spiele für Xbox 360 sind im Store aufgetaucht und könnten ein Hinweis auf neue, abwärtskompatible Titel sein.",
-    "link": "https://www.xboxdynasty.de/news/xbox-360/abwaertskompatibilitaet-entfernte-spiele-im-store-aufgetaucht/",
-    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2017/11/xbox360.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.gamesradar.com/entertainment/fantasy-shows/the-witcher-season-4-viewership-is-down-over-50-percent-on-season-3-so-far-with-only-7-3-million-views-on-netflix/",
     "title": "The Witcher season 4 viewership is down over 50% on season 3 so far, with only 7.3 million views on Netflix",
     "source": "GamesRadar+",
@@ -3007,16 +3427,6 @@
     "summary": "Der November bringt eine Reihe von Neuheiten für Abonnenten des PC / Xbox Game Pass, darunter Call of Duty: Black Ops 7. Nach abermaligen massiven Pre",
     "link": "https://www.gameswirtschaft.de/news/xbox-game-pass-die-neuen-spiele-november-2025-051125/",
     "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/10/Xbox-Game-Pass-Logo-2025-081025.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.xboxdynasty.de/news/psyvariar-3/shmup-klassiker-fuer-das-jahr-2026-angekuendigt/",
-    "title": "Psyvariar 3: Shmup-Klassiker für das Jahr 2026 angekündigt",
-    "source": "XboxDynasty",
-    "publicationDate": "2025-11-05T11:00:31.000Z",
-    "summary": "Psyvariar 3 stellt Anfang nächsten Jahres die Fähigkeiten von Shmup-Fans auf Konsolen und PCs auf die Probe.",
-    "link": "https://www.xboxdynasty.de/news/psyvariar-3/shmup-klassiker-fuer-das-jahr-2026-angekuendigt/",
-    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2025/11/psyvariar-3.jpg",
     "language": "de"
   },
   {
@@ -3940,16 +4350,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamepro.de/artikel/coin-master-kostenlose-spin-links-aktuell,3439854.html",
-    "title": "Guide: Coin Master-Free Spins - Alle aktuellen und kostenlosen Spin-Links (November 2025)",
-    "source": "GamePro",
-    "publicationDate": "2025-11-05T08:35:00.000Z",
-    "summary": "Ihr braucht wieder kostenlose Spins für Coin Master? Wir zeigen euch hier die tagesaktuellen Gratis-Spin-Links.",
-    "link": "https://www.gamepro.de/artikel/coin-master-kostenlose-spin-links-aktuell,3439854.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/gp-cm-spin_6376555.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.4p.de/tipps/deals/knapp-30-prozent-rabatt-reduzierter-playstation-5-hit-entfuehrt-euch-in-ungezaehmte-offene-welt-amazon-snowrunner/3355933",
     "title": "Knapp 30 Prozent Rabatt: Reduzierter PlayStation 5-Hit entführt euch in „ungezähmte offene Welt“",
     "source": "4P",
@@ -4227,16 +4627,6 @@
     "summary": "Im November ist der Xbox Game Pass erneut stark besetzt – nicht nur wegen des neuen Call of Duty: Black Ops 7. Wir zeigen euch alle Gratis-Spiele.",
     "link": "https://www.4p.de/news/xbox-game-pass-november-elf-gratis-spiele-mit-gta-alternative/3356134",
     "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/11/xboxgamepass-november2025.jpg?w=1200&#038;h=900&#038;crop=1",
-    "language": "de"
-  },
-  {
-    "id": "https://playfront.de/marvel-setzt-weiter-auf-insomniac-games-und-das-ist-kein-grund-zur-freude/",
-    "title": "Marvel setzt weiter auf Insomniac Games – Erfolgsrezept mit Ablaufdatum?",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-05T07:48:49.000Z",
-    "summary": "Marvel Games will weiter mit Insomniac zusammenarbeiten. Für PlayStation-Fans klingt das weniger nach Zukunftsvision, sondern eher nach kreativem Stil",
-    "link": "https://playfront.de/marvel-setzt-weiter-auf-insomniac-games-und-das-ist-kein-grund-zur-freude/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2025/09/marvels-wolverine-cover.webp",
     "language": "de"
   },
   {
@@ -4950,16 +5340,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.gamespot.com/articles/call-of-duty-black-ops-7-pc-system-requirements-heres-what-youll-need-for-november-14/1100-6535929/?ftag=CAD-01-10abi2f",
-    "title": "Call Of Duty Black Ops 7 PC System Requirements: Here's What You'll Need For November 14",
-    "source": "GameSpot",
-    "publicationDate": "2025-11-05T00:13:00.000Z",
-    "summary": "In just 10 days, the next installment of Call of Duty will arrive. Activision has already shared the details about when fans can preload Call of Duty:",
-    "link": "https://www.gamespot.com/articles/call-of-duty-black-ops-7-pc-system-requirements-heres-what-youll-need-for-november-14/1100-6535929/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1837/18375603/4596484-callofdutyblackops7pcspecs.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.giantbomb.com/articles/pikachus-still-got-it/1100-6562/",
     "title": "Pikachu's still got it",
     "source": "Giant Bomb",
@@ -5050,16 +5430,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.gamespot.com/articles/odds-chronicle-rolls-luck-and-strategy-into-a-tabletop-inspired-roguelite/1100-6535923/?ftag=CAD-01-10abi2f",
-    "title": "Odds Chronicle Rolls Luck And Strategy Into A Tabletop-Inspired Roguelite",
-    "source": "GameSpot",
-    "publicationDate": "2025-11-04T23:15:00.000Z",
-    "summary": "Roguelite is one of the hottest subgenres in gaming right now. From Balatro to Drop Duchy, developers have integrated cyclical mechanics into all sort",
-    "link": "https://www.gamespot.com/articles/odds-chronicle-rolls-luck-and-strategy-into-a-tabletop-inspired-roguelite/1100-6535923/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1595/15957481/4596347-oddschronicles_village01_close.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.gematsu.com/2025/11/alchemy-x-roguelike-rpg-alchemia-rogue-mia-and-the-mystery-labyrinth-announced-for-pc",
     "title": "‘Alchemy x roguelike RPG’ Alchemia Rogue: Mia and the Mystery Labyrinth announced for PC",
     "source": "Gematsu",
@@ -5068,16 +5438,6 @@
     "link": "https://www.gematsu.com/2025/11/alchemy-x-roguelike-rpg-alchemia-rogue-mia-and-the-mystery-labyrinth-announced-for-pc",
     "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/Alchemia-Rogue-Mia-and-the-Mystery-Labyrinth_2025_11-04-25_019.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://www.pcgameshardware.de/Retrospektive-Thema-214694/News/Startschuss-fuer-das-deutsche-Internet-und-Atis-X1800-PCGH-Retro-05-November-665801/",
-    "title": "Startschuss für das \"deutsche\" Internet, Atis Radeon X1800 und AMDs R9 290 ohne-X (PCGH-Retro, 05. November)",
-    "source": "PC Games Hardware",
-    "publicationDate": "2025-11-04T23:01:00.000Z",
-    "summary": "Startschuss für das \"deutsche\" Internet, Atis Radeon X1800 und AMDs R9 290 non-X - das geschah am 5. November. Jeden Tag wirft PC Games Hardware einen",
-    "link": "https://www.pcgameshardware.de/Retrospektive-Thema-214694/News/Startschuss-fuer-das-deutsche-Internet-und-Atis-X1800-PCGH-Retro-05-November-665801/",
-    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2013/10/Radeon_R9-Series_Hawaii-GPU_Overview_06-pcgh.jpg",
-    "language": "de"
   },
   {
     "id": "https://www.pcgamer.com/hardware/finally-the-steam-deck-can-now-download-games-in-a-new-display-off-low-power-mode-before-automatically-going-to-sleep/",
@@ -5120,26 +5480,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.pcgameshardware.de/Windows-Software-277633/News/Microsoft-warnt-vor-Supportende-1485783/",
-    "title": "Windows 10: Microsoft warnt fälschlicherweise vor Supportende",
-    "source": "PC Games Hardware",
-    "publicationDate": "2025-11-04T22:45:00.000Z",
-    "summary": "Microsoft warnt unter Windows 10 auch auf solchen Systemen, welche noch Sicherheitsupdates erhalten, fälschlicherweise vor dem Supportende. Auch Syste",
-    "link": "https://www.pcgameshardware.de/Windows-Software-277633/News/Microsoft-warnt-vor-Supportende-1485783/",
-    "imageUrl": "https://www.pcgameshardware.de/screenshots/original/2025/11/Windows-10-end-of-life-alert-pcgh.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamespot.com/articles/lego-fortnite-building-set-deals-black-friday-2025/1100-6531091/?ftag=CAD-01-10abi2f",
-    "title": "Lego Fortnite 691-Piece Supply Llama Is Only $26 At Amazon",
-    "source": "GameSpot",
-    "publicationDate": "2025-11-04T22:44:00.000Z",
-    "summary": "Lego Fortnite Deals Save big on Supply Llama, Durr Burger Restaurant, and more. See at Amazon See at Walmart See at Lego Store See at Target See at Be",
-    "link": "https://www.gamespot.com/articles/lego-fortnite-building-set-deals-black-friday-2025/1100-6531091/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1595/15950357/4585117-fortnitelegosetsthumbnail%28october2025%29.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.pcgamer.com/games/adventure/telltale-style-adventures-are-back-dispatch-has-sold-more-than-a-million-copies-in-10-days/",
     "title": "Telltale-style adventures are back: Dispatch has sold more than a million copies in 10 days",
     "source": "PC Gamer",
@@ -5170,16 +5510,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.play3.de/2025/11/04/the-crew-motorfest-year-3-startet-mit-season-8-street-racing-bmw-m-playlist-und-mehr/",
-    "title": "The Crew Motorfest: Year 3 startet mit Season 8 – Street Racing, BMW M-Playlist und mehr",
-    "source": "Play3",
-    "publicationDate": "2025-11-04T22:28:48.000Z",
-    "summary": "Im September 2023 wurde „The Crew: Motorfest“ veröffentlicht und so startet das Open-World-Rennspiel von Ubisoft am morgigen Mittwoch, dem 5. […] Der ",
-    "link": "https://www.play3.de/2025/11/04/the-crew-motorfest-year-3-startet-mit-season-8-street-racing-bmw-m-playlist-und-mehr/",
-    "imageUrl": "https://www.play3.de/wp-content/uploads/2025/11/The-Crew-Motorfest-Season-8.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.destructoid.com/pesky-steam-deck-downloads-got-better-new-firmware-update/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=pesky-steam-deck-downloads-got-better-new-firmware-update",
     "title": "Those pesky Steam Deck downloads just got way better in new firmware update",
     "source": "Destructoid",
@@ -5198,16 +5528,6 @@
     "link": "https://www.destructoid.com/how-to-complete-celestes-journal-in-arc-raiders/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=how-to-complete-celestes-journal-in-arc-raiders",
     "imageUrl": "https://www.destructoid.com/wp-content/uploads/2025/11/1808500_806.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://www.play3.de/2025/11/04/die-mumie-ueberraschung-kultfilmreihe-kehrt-zurueck-und-zwei-stars-sind-wieder-mit-dabei/",
-    "title": "Die Mumie: Überraschung! Kultfilmreihe kehrt zurück und zwei Stars sind wohl wieder mit dabei",
-    "source": "Play3",
-    "publicationDate": "2025-11-04T22:05:00.000Z",
-    "summary": "Vor beinahe 100 Jahren flimmerte erstmals „Die Mumie“ über die große Leinwand, doch den meisten Fans des legendären Monsters dürfte […] Der Beitrag Di",
-    "link": "https://www.play3.de/2025/11/04/die-mumie-ueberraschung-kultfilmreihe-kehrt-zurueck-und-zwei-stars-sind-wieder-mit-dabei/",
-    "imageUrl": "https://www.play3.de/wp-content/uploads/2025/11/Die-Mumie-The-Mummy-Fortsetzung-Sequel-Kinofilm-Brendan-Fraser-Rachel-Weisz-Beitragsbild.jpg",
-    "language": "de"
   },
   {
     "id": "https://www.gamesradar.com/games/pokemon/pokemon-legends-z-a-speedrunners-are-all-using-the-same-one-pokemon-a-free-heroic-heracross-named-bois/",
@@ -5680,16 +6000,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.polygon.com/game-pass-additions-removals-november-2025/",
-    "title": "Xbox Game Pass November 2025: Black Ops 7 and 10 more new additions",
-    "source": "Polygon",
-    "publicationDate": "2025-11-04T18:42:03.000Z",
-    "summary": "The first wave of November Game Pass additions and removals have been announced — Black Ops 7 is in, S.T.A.L.K.E.R. 2 is out",
-    "link": "https://www.polygon.com/game-pass-additions-removals-november-2025/",
-    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/2025/11/black-ops-7-1.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.heise.de/news/China-installiert-Wind-und-Solaranlagen-in-halsbrecherischem-Tempo-11056816.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "China installiert Wind- und Solaranlagen in halsbrecherischem Tempo",
     "source": "Heise Online",
@@ -5900,16 +6210,6 @@
     "language": "de"
   },
   {
-    "id": "https://kotaku.com/jonathan-bailey-sexiest-man-alive-people-final-fantasy-2000641145",
-    "title": "A Final Fantasy Actor Is 2025’s ‘Sexiest Man Alive’",
-    "source": "Kotaku",
-    "publicationDate": "2025-11-04T17:48:57.000Z",
-    "summary": "And no, it’s not Ben Starr The post A Final Fantasy Actor Is 2025’s ‘Sexiest Man Alive’ appeared first on Kotaku.",
-    "link": "https://kotaku.com/jonathan-bailey-sexiest-man-alive-people-final-fantasy-2000641145",
-    "imageUrl": "https://kotaku.com/app/uploads/2025/11/latest-15-1280x720.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.destructoid.com/reviews/arc-raiders-review/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=arc-raiders-review",
     "title": "ARC Raiders review – The risk finally rewards a stellar experience",
     "source": "Destructoid",
@@ -5940,16 +6240,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.gamesradar.com/games/battlefield/a-battlefield-6-bug-is-killing-some-players-for-committing-the-heinous-crime-of-jumping-dev-says-we-dont-break-knees-on-purpose/",
-    "title": "A Battlefield 6 bug is killing some players for committing the heinous crime of jumping, dev says \"We don't break knees on purpose\"",
-    "source": "GamesRadar+",
-    "publicationDate": "2025-11-04T17:38:34.000Z",
-    "summary": "This is one Battlefield 6 problem that isn't just a matter of skill",
-    "link": "https://www.gamesradar.com/games/battlefield/a-battlefield-6-bug-is-killing-some-players-for-committing-the-heinous-crime-of-jumping-dev-says-we-dont-break-knees-on-purpose/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/nUvYc9aXxst8XT6BiwpSsE-1280-80.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.gamepro.de/artikel/stardew-valley-fan-entdeckt-hopsen-mit-giesskanne,3442277.html",
     "title": "News: \"Ich bin sprachlos\": Stardew Valley-Fan entdeckt nach 200 Stunden im Spiel ein neues Feature, das beim Gießen richtig praktisch ist",
     "source": "GamePro",
@@ -5958,26 +6248,6 @@
     "link": "https://www.gamepro.de/artikel/stardew-valley-fan-entdeckt-hopsen-mit-giesskanne,3442277.html",
     "imageUrl": "https://images.cgames.de/images/gsgp/800/stardew-valley-gp_6383937.jpg",
     "language": "de"
-  },
-  {
-    "id": "https://www.gamesradar.com/hardware/accessories/the-official-switch-2-sd-card-is-out-of-stock-but-this-record-low-sandisk-deal-has-come-to-the-rescue/",
-    "title": "The official Switch 2 SD card is out of stock, but this record-low SanDisk deal has come to the rescue",
-    "source": "GamesRadar+",
-    "publicationDate": "2025-11-04T17:35:22.000Z",
-    "summary": "Stock of the official SanDisk Switch 2 SD card is getting hard to find, but Amazon has come to the rescue with this record-low saving.",
-    "link": "https://www.gamesradar.com/hardware/accessories/the-official-switch-2-sd-card-is-out-of-stock-but-this-record-low-sandisk-deal-has-come-to-the-rescue/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/XJKB3MFmuwJeEjWZKzFEsH-1280-80.jpg",
-    "language": "en"
-  },
-  {
-    "id": "https://www.gamesradar.com/games/fallout/obsidian-knows-that-everyone-on-the-internet-keeps-asking-for-fallout-new-vegas-2-but-its-devs-are-currently-happy-working-on-their-own-ip-and-xbox-has-been-pretty-supportive-too/",
-    "title": "Obsidian knows that \"everyone on the internet\" keeps asking for Fallout: New Vegas 2, but its devs are currently happy working on their own IP, and \"Xbox has been pretty supportive\" too",
-    "source": "GamesRadar+",
-    "publicationDate": "2025-11-04T17:35:18.000Z",
-    "summary": "How about Fallout: anything that isn't 76 at this point...",
-    "link": "https://www.gamesradar.com/games/fallout/obsidian-knows-that-everyone-on-the-internet-keeps-asking-for-fallout-new-vegas-2-but-its-devs-are-currently-happy-working-on-their-own-ip-and-xbox-has-been-pretty-supportive-too/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/ssPXLtGsPYemnyBgTk2kUe-1280-80.jpg",
-    "language": "en"
   },
   {
     "id": "https://www.pcgamer.com/hardware/arc-raiders-and-battlefield-6-prove-that-great-performance-and-low-system-requirements-are-king-for-multiplayer-pc-games-in-2025/",
@@ -6007,36 +6277,6 @@
     "summary": "Google erweitert Google Maps bei Fahrzeugen mit „Google built-in“ um eine Live-Spurführung, die Fahrern dabei helfen soll, auf komplexen Autobahnen un",
     "link": "https://www.computerbase.de/news/apps/polestar-4-google-maps-erhaelt-live-spurfuehrung-mittels-kamerazugriff.94909/",
     "imageUrl": "https://pics.computerbase.de/1/1/9/9/8/5-e4a07975116a5fe9/article-640x360.22f70b9f.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.polygon.com/fortnite-simpsons-marge-skin-sweaty-season-map-size/",
-    "title": "The Simpsons has become Fortnite's sweatiest season ever",
-    "source": "Polygon",
-    "publicationDate": "2025-11-04T17:30:15.000Z",
-    "summary": "Fans wearing Marge Simpsons skins are terrorizing poor players who just want to explore Springfield so they can sit on the show's iconic couch",
-    "link": "https://www.polygon.com/fortnite-simpsons-marge-skin-sweaty-season-map-size/",
-    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/2025/11/jonesy.JPG",
-    "language": "en"
-  },
-  {
-    "id": "https://www.pcgames.de/Landwirtschafts-Simulator-25-Spiel-74736/News/Highlands-Fishing-DLC-Inhalte-1485765/",
-    "title": "Landwirtschafts-Simulator 25: DLC bringt Fischzucht, Boote und Highland-Rinder",
-    "source": "PC Games",
-    "publicationDate": "2025-11-04T17:27:00.000Z",
-    "summary": "Mit Highlands Fishing erweitert Giants Software den Landwirtschafts-Simulator 25 um eine neue Dimension: Fischzucht, Boote, Highland-Rinder und ein An",
-    "link": "https://www.pcgames.de/Landwirtschafts-Simulator-25-Spiel-74736/News/Highlands-Fishing-DLC-Inhalte-1485765/",
-    "imageUrl": "https://www.pcgames.de/screenshots/970x546/2025/11/Landwirtschaft-Simulator-25-DLC-bringt-Fischzucht-Boote-und-Highland-Rinder-5--pcgh.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamezone.de/Landwirtschafts-Simulator-25-Spiel-74736/News/Highlands-Fishing-DLC-Inhalte-1485765/",
-    "title": "Landwirtschafts-Simulator 25: DLC bringt Fischzucht, Boote und Highland-Rinder",
-    "source": "GameZone",
-    "publicationDate": "2025-11-04T17:27:00.000Z",
-    "summary": "Mit Highlands Fishing erweitert Giants Software den Landwirtschafts-Simulator 25 um eine neue Dimension: Fischzucht, Boote, Highland-Rinder und ein An",
-    "link": "https://www.gamezone.de/Landwirtschafts-Simulator-25-Spiel-74736/News/Highlands-Fishing-DLC-Inhalte-1485765/",
-    "imageUrl": "https://www.gamezone.de/screenshots/970x546/2025/11/Landwirtschaft-Simulator-25-DLC-bringt-Fischzucht-Boote-und-Highland-Rinder-5--pcgh.jpg",
     "language": "de"
   },
   {
@@ -6160,16 +6400,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamesradar.com/games/less-than-3-months-after-netease-shut-it-down-new-studio-from-dragon-age-and-halo-devs-gets-resurrected/",
-    "title": "Less than 3 months after NetEase shut it down, new studio from Dragon Age and Halo devs gets resurrected",
-    "source": "GamesRadar+",
-    "publicationDate": "2025-11-04T17:08:46.000Z",
-    "summary": "T-Minus Zero Entertainment is back in action",
-    "link": "https://www.gamesradar.com/games/less-than-3-months-after-netease-shut-it-down-new-studio-from-dragon-age-and-halo-devs-gets-resurrected/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/vbQiTX95nxQgMcTnLjgB3H-1280-80.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.eurogamer.de/fortnite-die-neuen-niedlichen-sidekicks-sorgen-bei-fans-fur-frustration",
     "title": "Fortnite: Die neuen niedlichen Sidekicks sorgen bei Fans für Frustration",
     "source": "Eurogamer",
@@ -6178,16 +6408,6 @@
     "link": "https://www.eurogamer.de/fortnite-die-neuen-niedlichen-sidekicks-sorgen-bei-fans-fur-frustration",
     "imageUrl": "https://assetsio.gnwcdn.com/fortnite-sidekicks_CL5LlrQ.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "de"
-  },
-  {
-    "id": "https://www.gamesradar.com/platforms/nintendo/best-nintendo-gifts-2025/",
-    "title": "Best Nintendo gifts 2025, with recommendations from a fan of 30+ years",
-    "source": "GamesRadar+",
-    "publicationDate": "2025-11-04T17:01:43.000Z",
-    "summary": "Let's-a-go shopping",
-    "link": "https://www.gamesradar.com/platforms/nintendo/best-nintendo-gifts-2025/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/EJmKEDcXaoHDAKwak4TXVE-1280-80.jpg",
-    "language": "en"
   },
   {
     "id": "https://www.giga.de/games/nancy-drew-fans-sollten-unbedingt-dieses-neue-mystery-spiel-auf-steam-ausprobieren--01K8WK1Z8ANFE55G0V228VPWJ4",
@@ -6207,16 +6427,6 @@
     "summary": "Der neue Battle-Royale-Shooter RedSec hat offenbar mit einem ziemlich fiesen Bug zu kämpfen.",
     "link": "https://www.gamepro.de/artikel/battlefield-6-redsec-glitch,3442305.html",
     "imageUrl": "https://images.cgames.de/images/gsgp/800/battlefield-6-season-1_6382353.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.videogameszone.de/Dispatch-Spiel-75245/News/Millionenseller-Episoden-Spiel-Adhoc-Studio-1485550/",
-    "title": "Millionen-Erfolg: Dispatch knackt nach nur 10 Tagen beeindruckenden Meilenstein",
-    "source": "Video Games Zone",
-    "publicationDate": "2025-11-04T17:01:00.000Z",
-    "summary": "Das Superhelden-Genre lebt: Nur zehn Tage nach dem Launch knackt die Superhelden-Satire Dispatch die Millionengrenze.",
-    "link": "https://www.videogameszone.de/Dispatch-Spiel-75245/News/Millionenseller-Episoden-Spiel-Adhoc-Studio-1485550/",
-    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/10/Dispatch_Ep01_02_Test-Review-PC-PCGAMES-007-pc-games.jpg",
     "language": "de"
   },
   {
@@ -6250,14 +6460,14 @@
     "language": "en"
   },
   {
-    "id": "https://www.gamesradar.com/entertainment/sci-fi-movies/predator-badlands-review/",
-    "title": "Predator: Badlands review: \"Die-hard fans may be disappointed, but as a blockbuster action-adventure, Badlands kills it\"",
-    "source": "GamesRadar+",
+    "id": "https://de.ign.com/routine/149573/video/routine-gameplay-zum-cat-ultraview-modul-ign-first",
+    "title": "ROUTINE Gameplay zum C.A.T. Ultraview-Modul – IGN First",
+    "source": "IGN",
     "publicationDate": "2025-11-04T17:00:00.000Z",
-    "summary": "Predator: Badlands review: \"Die-hard fans may be disappointed, but as a blockbuster action-adventure, Badlands kills it\"",
-    "link": "https://www.gamesradar.com/entertainment/sci-fi-movies/predator-badlands-review/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/fvgP7vz82mf3jGBgB4WUrR-1280-80.jpg",
-    "language": "en"
+    "summary": "",
+    "link": "https://de.ign.com/routine/149573/video/routine-gameplay-zum-cat-ultraview-modul-ign-first",
+    "imageUrl": "https://sm.ign.com/ign_de/video/r/routine-in/routine-introducing-the-cat-ultraview-module-ign-first_4pvd.jpg",
+    "language": "de"
   },
   {
     "id": "https://www.buffed.de/Palworld-Spiel-74505/News/palworld-mobile-krafton-gstar-2025-1485718/",
@@ -6397,16 +6607,6 @@
     "summary": "Die ersten neuen Gebiete sind wunderschön, die Story bisher erstklassig, vieles kommt aber erst noch. Die ersten neuen Gebiete sind wunderschön, die S",
     "link": "https://de.ign.com/guild-wars-2/149511/feature/guild-wars-2-visions-of-eternity-geht-fantastisch-los-erfordert-aber-viel-geduld",
     "imageUrl": "https://sm.ign.com/ign_de/screenshot/default/thumbnail-1sadads_fc4a.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamepro.de/artikel/pokemon-legenden-za-geburtstag,3442311.html",
-    "title": "News: Pokémon Legenden: Z-A reagiert auf euren Geburtstag – das passiert, wenn ihr an eurem Ehrentag das Pokémon-Center betretet",
-    "source": "GamePro",
-    "publicationDate": "2025-11-04T16:30:00.000Z",
-    "summary": "Wenn ihr in Pokémon Legenden: Z-A Geburtstag habt, passiert tatsächlich etwas. Wenn auch nicht viel.",
-    "link": "https://www.gamepro.de/artikel/pokemon-legenden-za-geburtstag,3442311.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/pok%C3%A9mon-legenden-z-a_6383998.jpg",
     "language": "de"
   },
   {
@@ -6700,16 +6900,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.pcgamer.com/games/sim/as-if-being-a-gas-station-attendant-in-roadside-research-wasnt-stressful-enough-im-also-an-alien-who-has-to-research-humans-while-trying-not-to-poop-goop-everywhere/",
-    "title": "As if being a gas station attendant in Roadside Research wasn't stressful enough, I'm also an alien who has to research humans while trying not to poop goop everywhere",
-    "source": "PC Gamer",
-    "publicationDate": "2025-11-04T15:36:35.000Z",
-    "summary": "Sorry for the squelching.",
-    "link": "https://www.pcgamer.com/games/sim/as-if-being-a-gas-station-attendant-in-roadside-research-wasnt-stressful-enough-im-also-an-alien-who-has-to-research-humans-while-trying-not-to-poop-goop-everywhere/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/YgpsVNCygbJhAYNgPiYy2j-1280-80.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.destructoid.com/vampire-survivors-devs-next-project-warhammer/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=vampire-survivors-devs-next-project-warhammer",
     "title": "Vampire Survivors’ dev’s next side project is a Warhammer collab that looks too good to be true for franchise fans",
     "source": "Destructoid",
@@ -6780,16 +6970,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "TrueNAS 25.10 mit NVMe-oF-Unterstützung, schneller API und neuem OpenZFS",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-04T15:22:00.000Z",
-    "summary": "iXsystems hat TrueNAS 25.10 \"Goldeye\" vorgestellt, das mit NVMe-oF an superschnelle Storage-Systeme angebunden werden kann. Dazu kommen weitere neue F",
-    "link": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/2/8/NAS-e7e42cd3a07f171a.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Das dreifache Lottchen: Apples große TV-Ambitionen | Mac & i-Podcast",
     "source": "Heise Online",
@@ -6797,6 +6977,16 @@
     "summary": "Einen Apple-Fernseher gab es nie, ins Wohnzimmer will der Konzern trotzdem. In Episode 108 widmen wir uns Apple TV – Streaming-Dienst, App und Settop-",
     "link": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/4/2/heise_Podcast_maci_16_9-5e3b2af672f36dae.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "TrueNAS 25.10 mit NVMe-oF-Unterstützung, schneller API und neuem OpenZFS",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-04T15:22:00.000Z",
+    "summary": "iXsystems hat TrueNAS 25.10 \"Goldeye\" vorgestellt, das mit NVMe-oF an superschnelle Storage-Systeme angebunden werden kann. Dazu kommen weitere neue F",
+    "link": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/2/8/NAS-e7e42cd3a07f171a.jpeg",
     "language": "de"
   },
   {
@@ -6907,16 +7097,6 @@
     "summary": "80s-themed story-driven action RPG Kingdom of Night will launch for PC via Steam on December … Source",
     "link": "https://www.gematsu.com/2025/11/kingdom-of-night-for-pc-launches-december-2",
     "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/Kingdom-Night_11-04-25.jpg",
-    "language": "en"
-  },
-  {
-    "id": "https://www.pcgamer.com/hardware/handheld-gaming-pcs/ive-been-playing-with-the-worlds-first-glasses-free-3d-handheld-pc-and-my-early-impressions-are-that-the-usd1-500-abxylute-3d-one-is-absolutely-huge-annoyingly-clunky-and-a-little-bit-silly/",
-    "title": "I've been playing with the 'world's first' glasses-free 3D handheld PC and my early impressions are that the $1,500 Abxylute 3D One is absolutely huge, annoyingly clunky and a little bit silly",
-    "source": "PC Gamer",
-    "publicationDate": "2025-11-04T15:03:03.000Z",
-    "summary": "This 11-inch 'handheld' PC is bigger than my laptop...",
-    "link": "https://www.pcgamer.com/hardware/handheld-gaming-pcs/ive-been-playing-with-the-worlds-first-glasses-free-3d-handheld-pc-and-my-early-impressions-are-that-the-usd1-500-abxylute-3d-one-is-absolutely-huge-annoyingly-clunky-and-a-little-bit-silly/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/4w4pmGNa8zGiiEPjLhdG5L-1280-80.jpg",
     "language": "en"
   },
   {
@@ -7187,16 +7367,6 @@
     "summary": "Epischer geht es kaum - die ultimative Allmachts-Fantasie im Zelda-Gewand",
     "link": "https://www.gameswelt.ch/hyrule-warriors-chronik-der-versiegelung/test/dieses-spiel-schliesst-eine-luecke-in-der-zelda-saga-auf-die-fans-33-jahre-gewartet-haben-332174?utm_campaign=tbuk",
     "imageUrl": "https://img.gameswelt.ch/public/images/202511/fa3bf9982bed7a9d0752197048d8943c.png",
-    "language": "de"
-  },
-  {
-    "id": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/WoW-Echt-fies-Beliebtes-Transmog-Item-wird-vielen-Spielern-einfach-weggenommen-1485729/",
-    "title": "WoW: Echt fies! Beliebtes Transmog-Item wird vielen Spielern einfach geklaut",
-    "source": "Buffed",
-    "publicationDate": "2025-11-04T14:00:00.000Z",
-    "summary": "Ihr seid kein Jäger, freut euch aber trotzdem über eure schicken Windläuferköcher-Transmogs aus dem Legion-Remix? Dann haben wir leider schlechte Nach",
-    "link": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/WoW-Echt-fies-Beliebtes-Transmog-Item-wird-vielen-Spielern-einfach-weggenommen-1485729/",
-    "imageUrl": "https://www.buffed.de/screenshots/970x546/2022/04/wow_sylvanas_bfa_teldrassil-buffed.jpg",
     "language": "de"
   },
   {
@@ -7730,6 +7900,16 @@
     "language": "de"
   },
   {
+    "id": "https://de.ign.com/untitled-battlefield-game/149557/gallery/battlefield-redsec-fort-lyndon-screenshots",
+    "title": "Battlefield REDSEC Fort Lyndon Screenshots",
+    "source": "IGN",
+    "publicationDate": "2025-11-04T10:51:32.000Z",
+    "summary": "",
+    "link": "https://de.ign.com/untitled-battlefield-game/149557/gallery/battlefield-redsec-fort-lyndon-screenshots",
+    "imageUrl": "https://sm.ign.com/ign_de/gallery/b/battlefiel/battlefield-redsec-fort-lyndon-screenshots_e2c8.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://de.ign.com/untitled-battlefield-game/149555/news/battlefield-redsec-battle-royale-gauntlet-und-portal-modes-alle-inhalte-erklart",
     "title": "Battlefield REDSEC: Battle Royale, Gauntlet, und Portal Modes — Alle Inhalte erklärt",
     "source": "IGN",
@@ -7747,16 +7927,6 @@
     "summary": "",
     "link": "https://de.ign.com/untitled-battlefield-game/149556/gallery/battlefield-redsec-launch-screenshots",
     "imageUrl": "https://sm.ign.com/ign_de/gallery/b/battlefiel/battlefield-redsec-launch-screenshots_ucgf.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://de.ign.com/untitled-battlefield-game/149557/gallery/battlefield-redsec-fort-lyndon-screenshots",
-    "title": "Battlefield REDSEC Fort Lyndon Screenshots",
-    "source": "IGN",
-    "publicationDate": "2025-11-04T10:51:32.000Z",
-    "summary": "",
-    "link": "https://de.ign.com/untitled-battlefield-game/149557/gallery/battlefield-redsec-fort-lyndon-screenshots",
-    "imageUrl": "https://sm.ign.com/ign_de/gallery/b/battlefiel/battlefield-redsec-fort-lyndon-screenshots_e2c8.jpg",
     "language": "de"
   },
   {
@@ -7810,16 +7980,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.nintendolife.com/news/2025/11/sega-provides-updated-sales-figures-for-sonic-frontiers-and-sonic-superstars",
-    "title": "Sega Provides Updated Sales Figures For Sonic Frontiers And Sonic Superstars",
-    "source": "Nintendo Life",
-    "publicationDate": "2025-11-04T10:30:00.000Z",
-    "summary": "How is the blue blur doing?Sega has released updated sales figures for both Sonic Frontiers and Sonic Superstars as part of its integrated report for ",
-    "link": "https://www.nintendolife.com/news/2025/11/sega-provides-updated-sales-figures-for-sonic-frontiers-and-sonic-superstars",
-    "imageUrl": "https://images.nintendolife.com/0c2e0ba680b7e/small.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.heise.de/news/Hackerparagraf-BSI-Chefin-fordert-Sicherheitsforscher-Entkriminalisierung-11044176.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Für Entkriminalisierung: BSI-Chefin fordert Überarbeitung des Hackerparagrafen",
     "source": "Heise Online",
@@ -7847,16 +8007,6 @@
     "summary": "In Disney Dreamlight Valley könnt ihr Codes einlösen und dadurch besondere Belohnungen und Items freischalten. Damit ihr keine kostenlosen Gegenstände",
     "link": "https://www.giga.de/tipp/disney-dreamlight-valley-promo-codes-einloesen-liste-aller-codes/",
     "imageUrl": "https://static.giga.de/cc/9d/31/f300457c24138c55d87c021092_cmUgMTkyMCADY2RmMDc0ODU3Mjk=.jpeg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.giga.de/tipp/afk-arena-alle-gutscheincodes-und-wir-ihr-sie-eingeben-koennt/",
-    "title": "AFK Arena: Alle Gutscheincodes und wie ihr sie eingeben könnt (November 2025)",
-    "source": "GIGA Games",
-    "publicationDate": "2025-11-04T10:15:13.000Z",
-    "summary": "In AFK Arena könnt ihr durch die Eingabe von Gutscheincodes jede Menge Belohnungen verdienen, ohne etwas dafür tun zu müssen. Wir zeigen euch eine akt",
-    "link": "https://www.giga.de/tipp/afk-arena-alle-gutscheincodes-und-wir-ihr-sie-eingeben-koennt/",
-    "imageUrl": "https://static.giga.de/97/3f/47/7ccba849f296ba0e4e585c25f1_cmUgMTkyMCADOWY3YjQyYmU1Y2Y=.jpeg",
     "language": "de"
   },
   {
@@ -9160,36 +9310,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.heise.de/news/Online-Versicherungsschutz-greift-nicht-bei-Phishing-per-SMS-10977336.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Phishing-Opfer geht leer aus: Versicherung lehnt SMS-Betrug ab",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-03T12:03:00.000Z",
-    "summary": "Nicht jeder Schaden, der durch digitale Täuschung entsteht, ist laut Landgericht Bielefeld direkt durch eine Hausratversicherung mit Internetschutz ab",
-    "link": "https://www.heise.de/news/Online-Versicherungsschutz-greift-nicht-bei-Phishing-per-SMS-10977336.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/6/2/8/shutterstock_2358150961-286d05fe506f1036.jpeg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.heise.de/news/Fliegende-autonome-Drohnen-transportieren-gemeinsam-Lasten-10974248.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Fliegende autonome Drohnen transportieren gemeinsam Lasten",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-03T11:59:00.000Z",
-    "summary": "Gemeinsam können Drohnen schwere Lasten transportieren. Ein Algorithmus hilft bei der Koordination in der Luft.",
-    "link": "https://www.heise.de/news/Fliegende-autonome-Drohnen-transportieren-gemeinsam-Lasten-10974248.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/5/4/3/Drohnenlast_tragen-e2417b2edbb69162.jpeg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.heise.de/news/Neue-Siri-Wie-viel-Google-steckt-in-Apples-neuer-Assistentin-10966245.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Siri by Gemini: Apple hat sich angeblich auf Google-KI festgelegt",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-03T11:52:00.000Z",
-    "summary": "Apples KI-Abteilung kämpft weiter mit Abgängen und technischen Problemen. Bei Siri scheint sich der iPhone-Hersteller auf Google-Hilfe zu einigen.",
-    "link": "https://www.heise.de/news/Neue-Siri-Wie-viel-Google-steckt-in-Apples-neuer-Assistentin-10966245.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/1/4/0/google-gemini-shutterstock-181029cb21d6a458.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.gamersglobal.de/news/334315/momoca-vom-31125-brettspiel-bonanza",
     "title": "*TOP* MoMoCa vom 3.11.25: Brettspiel-Bonanza",
     "source": "GamersGlobal",
@@ -9570,16 +9690,6 @@
     "language": "de"
   },
   {
-    "id": "https://de.ign.com/bonaparte-a-mechanized-revolution/149540/video/bonaparte-a-mechanized-revolution-offizieller-release-date-trailer",
-    "title": "Bonaparte: A Mechanized Revolution - Offizieller  Release Date Trailer",
-    "source": "IGN",
-    "publicationDate": "2025-11-02T15:35:54.000Z",
-    "summary": "",
-    "link": "https://de.ign.com/bonaparte-a-mechanized-revolution/149540/video/bonaparte-a-mechanized-revolution-offizieller-release-date-trailer",
-    "imageUrl": "https://sm.ign.com/ign_de/video/b/bonaparte-/bonaparte-a-mechanized-revolution-official-release-date-trai_ryv8.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.pcgamesn.com/final-fantasy-14/ff14-mr-ozma-new-content",
     "title": "FF14's battle designer is cooking up \"something new and fresh\" for the MMORPG, but he's focused more on fun than difficulty",
     "source": "PCGamesN",
@@ -9667,16 +9777,6 @@
     "summary": "Auch wenn die Zeit die lästige Angewohnheit hat, unaufhaltsam voranzuschreiten, vergessen wir die Spielethemen der Vergangenheit nicht. Wir blättern u",
     "link": "https://www.gamersglobal.de/news/334270/spieleveteranen-podcast-424-zeitreise-122015-2005-1995",
     "imageUrl": "https://www.gamersglobal.de/sites/gamersglobal.de/files/imagecache/news_600/news/teaser/4770/SPV424.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://de.ign.com/hbo-max/149525/video/das-sind-die-streaming-highlights-auf-netflix-co-der-woche",
-    "title": "Das sind die Streaming-Highlights auf Netflix & Co. der Woche",
-    "source": "IGN",
-    "publicationDate": "2025-11-02T12:31:09.000Z",
-    "summary": "Alle Highlights der kommenden Woche auf den Streaming-Diensten",
-    "link": "https://de.ign.com/hbo-max/149525/video/das-sind-die-streaming-highlights-auf-netflix-co-der-woche",
-    "imageUrl": "https://sm.ign.com/ign_de/screenshot/default/streaming-update_pk2t.png",
     "language": "de"
   },
   {
@@ -9800,16 +9900,6 @@
     "language": "en"
   },
   {
-    "id": "https://de.ign.com/clair-obscur-expedition-33/149268/feature/aa-vs-aaa-oase-oder-fata-morgana",
-    "title": "AA vs. AAA: Oase oder Fata Morgana?",
-    "source": "IGN",
-    "publicationDate": "2025-11-02T10:33:32.000Z",
-    "summary": "Während auch Produktionen mit den Budgets kleiner Volkswirtschaften an den Kassen scheitern können, liefern mittelgroße Studios oft unterhaltsame, ker",
-    "link": "https://de.ign.com/clair-obscur-expedition-33/149268/feature/aa-vs-aaa-oase-oder-fata-morgana",
-    "imageUrl": "https://sm.ign.com/ign_de/screenshot/default/ign-aa-v-aaa-burtchen_fptx.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.pcgamesn.com/battlefield-6/casual-breakthrough-mode",
     "title": "A new Battlefield 6 \"casual\" mode aims to find middle ground as dev continues fightback against XP farming",
     "source": "PCGamesN",
@@ -9840,16 +9930,6 @@
     "language": "en"
   },
   {
-    "id": "https://de.ign.com/satisfactory/149524/video/release-reminder-die-games-veroffentlichungen-der-woche",
-    "title": "Release-Reminder: Die Games-Veröffentlichungen der Woche",
-    "source": "IGN",
-    "publicationDate": "2025-11-02T09:33:34.000Z",
-    "summary": "Alle Highlights: Unser Überblick verrät euch, welche Games ihr diese Woche auf dem Schirm haben solltet.",
-    "link": "https://de.ign.com/satisfactory/149524/video/release-reminder-die-games-veroffentlichungen-der-woche",
-    "imageUrl": "https://sm.ign.com/ign_de/screenshot/default/release-reminder_aqnf.png",
-    "language": "de"
-  },
-  {
     "id": "https://www.computerbase.de/news/netzpolitik/chatkontrollen-pflicht-vor-dem-aus-daenische-ratspraesidentschaft-will-freiwillige-loesung.94878/",
     "title": "Chatkontrollen-Pflicht vor dem Aus: Dänische Ratspräsi­dentschaft will freiwillige Lösung",
     "source": "ComputerBase",
@@ -9877,16 +9957,6 @@
     "summary": "Wenn Nutzer das optionale Oktober-Update für Windows 11 24H2 und 25H2 (KB5067036) installieren, kann es zu Problemen mit dem Taskmanager kommen. Diese",
     "link": "https://www.computerbase.de/news/betriebssysteme/bug-im-optionalen-oktober-update-taskmanager-laesst-sich-unter-windows-11-nicht-beenden.94882/",
     "imageUrl": "https://pics.computerbase.de/1/1/9/9/5/2-3754609185425599/article-640x360.3e327e09.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://de.ign.com/amazon-luna/149527/news/amazon-luna-20-prime-mitglieder-durfen-sich-uber-ein-gratis-upgrade-freuen",
-    "title": "Amazon Luna 2.0: Prime-Mitglieder dürfen sich über ein Gratis-Upgrade freuen",
-    "source": "IGN",
-    "publicationDate": "2025-11-02T08:18:27.000Z",
-    "summary": "Seit wenigen Tagen steht Prime-Mitglieder Amazon Luna 2.0 zur Verfügung inklusive kostenlosem Zugang zu über 50 Spielen wie der neuen GameNight-Collec",
-    "link": "https://de.ign.com/amazon-luna/149527/news/amazon-luna-20-prime-mitglieder-durfen-sich-uber-ein-gratis-upgrade-freuen",
-    "imageUrl": "https://sm.ign.com/ign_de/photo/a/amazon-lun/amazon-luna-gives-casual-party-games-a-shot_64jn.png",
     "language": "de"
   },
   {
@@ -10017,16 +10087,6 @@
     "summary": "Mit einem kurzen, gerade mal 32 Sekunden dauernden Trailer haben Raw Fury und Entwickler Lunar Software das genaue Releasedatum zu Routine enthüllt. D",
     "link": "https://www.gamersglobal.de/video/routine-release-date-trailer",
     "imageUrl": "https://www.gamersglobal.de/sites/gamersglobal.de/files/imagecache/news_600/video/teaser/5555/Routine_date_pic.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.computerbase.de/news/kuehlung/royal-knight-120-und-royal-pretor-130-thermalrights-grosskuehler-wollen-high-end-sein.94879/",
-    "title": "Royal Knight 120 & Royal Pretor 130: Thermalrights Großkühler wollen High-End sein",
-    "source": "ComputerBase",
-    "publicationDate": "2025-11-01T16:13:00.000Z",
-    "summary": "Zwei große Doppelturmkühler mit ungewöhnlicher Lüfterbestückung, der Royal Knight 120 Digital und der Royal Pretor 130 Ultra, sollen Thermalright wied",
-    "link": "https://www.computerbase.de/news/kuehlung/royal-knight-120-und-royal-pretor-130-thermalrights-grosskuehler-wollen-high-end-sein.94879/",
-    "imageUrl": "https://pics.computerbase.de/1/1/9/9/4/9-93f2be252e67a9fe/article-640x360.071134e6.jpg",
     "language": "de"
   },
   {
@@ -10210,16 +10270,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
-    "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
-    "source": "Eurogamer",
-    "publicationDate": "2025-11-01T09:00:00.000Z",
-    "summary": "ARC Raiders ist seit dieser Woche erhältlich, und während eine große Zahl an Spielern zum Launch ins Spiel strömt, ist es kein Geheimnis, dass der Ext",
-    "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
-    "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
-  },
-  {
     "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
     "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
     "source": "Eurogamer",
@@ -10227,6 +10277,16 @@
     "summary": "Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod für Doom 2, begin",
     "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
     "imageUrl": "https://assetsio.gnwcdn.com/Catharsis---Akira-Yamaoka-(1)-gigapixel-low_res-scale-4_00x-cropped.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
+    "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-01T09:00:00.000Z",
+    "summary": "ARC Raiders ist seit dieser Woche erhältlich, und während eine große Zahl an Spielern zum Launch ins Spiel strömt, ist es kein Geheimnis, dass der Ext",
+    "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
+    "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "de"
   },
   {
@@ -10560,16 +10620,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.pcgamesn.com/deus-ex/remastered-reaction-art-director",
-    "title": "Deus Ex's art director says ugly new remaster \"did not need to happen\"",
-    "source": "PCGamesN",
-    "publicationDate": "2025-10-31T14:45:05.000Z",
-    "summary": "Aspyr's Deus Ex Remastered got slated following its reveal a few weeks ago, and now the original game's art director has given his verdict.",
-    "link": "https://www.pcgamesn.com/deus-ex/remastered-reaction-art-director",
-    "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/10/deus-ex-remastered-criticism.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.eurogamer.de/xbox-version-bestatigt-silent-hill-2-remake-taucht-in-esrb-datenbank-fur-xbox-series-xs-auf",
     "title": "Xbox-Version bestätigt? Silent Hill 2 Remake taucht in ESRB-Datenbank für Xbox Series X/S auf",
     "source": "Eurogamer",
@@ -10607,16 +10657,6 @@
     "summary": "The post Next Week on Xbox: New Games for November 3 to 7 appeared first on Xbox Wire.",
     "link": "https://news.xbox.com/en-us/2025/10/31/next-week-on-xbox-new-games-for-november-3-to-7/",
     "imageUrl": "https://xboxwire.thesourcemediaassets.com/sites/2/2025/07/tow2-hero-50c9663f0ffa8322a22c.jpg",
-    "language": "en"
-  },
-  {
-    "id": "https://www.pcgamesn.com/nzxt/h7-flow-deal",
-    "title": "My favorite mid-size PC case is perfect for keeping graphics cards cool, and it's currently 20% off",
-    "source": "PCGamesN",
-    "publicationDate": "2025-10-31T13:08:46.000Z",
-    "summary": "A saving of $30 might not sound like much, but this NZXT H7 Flow RGB discount gets you a top PC case for an incredible price.",
-    "link": "https://www.pcgamesn.com/nzxt/h7-flow-deal",
-    "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/10/nzxt-h7-flow-rgb-deal.jpg",
     "language": "en"
   },
   {
@@ -10888,26 +10928,6 @@
     "link": "https://gameinformer.com/2025/10/30/call-of-duty-movie-to-be-directed-by-lone-survivor-deepwater-horizon-director-peter-berg",
     "imageUrl": "https://www.gameinformer.com/sites/default/files/styles/body_default/public/2025/08/21/32fe8306/call_of_duty_blops7_characters.jpg.webp",
     "language": "en"
-  },
-  {
-    "id": "https://www.eurogamer.de/steel-dragons-dlc-fur-railway-empire-2-erschienen-neue-karte-zuge-und-szenarien-in-china",
-    "title": "Steel Dragons DLC für Railway Empire 2 erschienen: neue Karte, Züge und Szenarien in China",
-    "source": "Eurogamer",
-    "publicationDate": "2025-10-30T19:00:00.000Z",
-    "summary": "Kalypso Media und Gaming Minds Studios haben den neuen DLC Steel Dragons für Railway Empire 2 veröffentlicht, der euch in das China an der Schwelle zu",
-    "link": "https://www.eurogamer.de/steel-dragons-dlc-fur-railway-empire-2-erschienen-neue-karte-zuge-und-szenarien-in-china",
-    "imageUrl": "https://assetsio.gnwcdn.com/Railway-Empire-2-Steel-Dragons.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
-  },
-  {
-    "id": "https://www.eurogamer.de/bridges-ports-fur-cities-skylines-2-ist-da-launch-trailer-zeigt-neue-fahrlinien-und-maritime-industrien",
-    "title": "Bridges & Ports für Cities: Skylines 2 ist da: Launch-Trailer zeigt neue Fährlinien und maritime Industrien",
-    "source": "Eurogamer",
-    "publicationDate": "2025-10-30T18:30:00.000Z",
-    "summary": "Paradox Interactive hat die umfangreiche Erweiterung Bridges & Ports für das Städtebau-Managementspiel Cities: Skylines 2 von Colossal Order veröffent",
-    "link": "https://www.eurogamer.de/bridges-ports-fur-cities-skylines-2-ist-da-launch-trailer-zeigt-neue-fahrlinien-und-maritime-industrien",
-    "imageUrl": "https://assetsio.gnwcdn.com/Cities-Skylines-2-Bridges-and-Ports.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
   },
   {
     "id": "https://www.golem.de/news/battle-pass-fuer-25-euro-es-hagelt-schlechte-kritiken-fuer-battlefield-6-auf-steam-2510-201705.html",
@@ -12457,16 +12477,6 @@
     "summary": "Watch out. There's a musician mystery afoot. They've gone missing, mysteriously. So says Silver Pines, a Twin Peaks-inspired survival horror puzzler t",
     "link": "https://www.rockpapershotgun.com/twin-peaks-inspired-spooky-private-eye-puzzler-silver-pines-is-set-to-deliver-missing-musician-mystery-next-year",
     "imageUrl": "https://assetsio.gnwcdn.com/silver-pines-lynchian-detective-horror-puzzler-announced-01.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "en"
-  },
-  {
-    "id": "https://www.rockpapershotgun.com/bojack-style-band-management-sim-rockbeasts-gets-a-fresh-trailer-which-asks-existential-questions-i-was-afraid-to",
-    "title": "Bojack-style band management sim Rockbeasts gets a fresh trailer which asks existential questions I was afraid to",
-    "source": "Rock Paper Shotgun",
-    "publicationDate": "2025-10-23T20:00:00.000Z",
-    "summary": "Looking back on it, when I played a preview build of zoological band management game Rockbeasts earlier this year, I think I went along with it a bit ",
-    "link": "https://www.rockpapershotgun.com/bojack-style-band-management-sim-rockbeasts-gets-a-fresh-trailer-which-asks-existential-questions-i-was-afraid-to",
-    "imageUrl": "https://assetsio.gnwcdn.com/rockbeasts-preview-01.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "en"
   },
   {
