@@ -1,395 +1,203 @@
-// scripts/fetch-feeds.js
-// Fetches RSS feeds and saves to public/news-cache.json
-// WITH image optimization and scraping support
-
-import { sql } from '@vercel/postgres';
+import axios from 'axios';
+import * as cheerio from 'cheerio';
+import Parser from 'rss-parser';
+import { neon } from '@neondatabase/serverless';
 import fs from 'fs';
-import path from 'path';
-import { parseHTML } from 'linkedom';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-// === HTML ENTITY DECODING ===
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const sql = neon(process.env.DATABASE_URL || process.env.POSTGRES_URL);
+const parser = new Parser({
+    timeout: 15000,
+    headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/rss+xml, application/xml, text/xml, */*'
+    }
+});
+
 function decodeHtmlEntities(text) {
     if (!text) return text;
-
     const entities = {
-        '&amp;': '&',
-        '&lt;': '<',
-        '&gt;': '>',
-        '&quot;': '"',
-        '&#39;': "'",
-        '&apos;': "'",
-        '&nbsp;': ' ',
-        '&rsquo;': "'",
-        '&lsquo;': "'",
-        '&rdquo;': '"',
-        '&ldquo;': '"',
-        '&ndash;': '–',
-        '&mdash;': '—',
-        // Deutsche Umlaute
-        '&auml;': 'ä',
-        '&ouml;': 'ö',
-        '&uuml;': 'ü',
-        '&Auml;': 'Ä',
-        '&Ouml;': 'Ö',
-        '&Uuml;': 'Ü',
-        '&szlig;': 'ß',
+        '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&apos;': "'",
+        '&nbsp;': ' ', '&copy;': '©', '&reg;': '®', '&euro;': '€'
     };
-
-    let decoded = text;
-
-    // CDATA-Marker entfernen (beide)
-    decoded = decoded.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '');
-
-    for (const [entity, char] of Object.entries(entities)) {
-        decoded = decoded.replaceAll(entity, char);
-    }
-
-    decoded = decoded.replace(/&#(\d+);/g, (match, dec) =>
-        String.fromCharCode(parseInt(dec, 10))
-    );
-
-    decoded = decoded.replace(/&#x([0-9a-f]+);/gi, (match, hex) =>
-        String.fromCharCode(parseInt(hex, 16))
-    );
-
-    return decoded;
+    return text
+        .replace(/&([a-z]+);/gi, (match, entity) => entities[match] || match)
+        .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
+        .replace(/&#x([0-9a-f]+);/gi, (match, hex) => String.fromCharCode(parseInt(hex, 16)));
 }
 
-// === IMAGE SCRAPING ===
-async function getOgImageFromUrl(url) {
-    const proxies = [
-        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-        `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    ];
+function extractImageFromContent(content) {
+    if (!content) return null;
+    const $ = cheerio.load(content);
+    const images = [];
 
-    for (const proxyUrl of proxies) {
-        try {
-            const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(5000) });
-            if (!response.ok) continue;
+    $('img').each((i, elem) => {
+        const src = $(elem).attr('src');
+        const width = parseInt($(elem).attr('width') || '0');
+        const height = parseInt($(elem).attr('height') || '0');
 
-            const html = await response.text();
-            const { document: doc } = parseHTML(html);
-
-            const ogImageMeta =
-                doc.querySelector('meta[property="og:image"]') ||
-                doc.querySelector('meta[property="og:image:url"]') ||
-                doc.querySelector('meta[name="twitter:image"]');
-
-            if (ogImageMeta) {
-                const imageUrl = ogImageMeta.getAttribute('content');
-                if (imageUrl) {
-                    try {
-                        return new URL(imageUrl, url).href;
-                    } catch {
-                        return imageUrl;
-                    }
-                }
-            }
-        } catch (e) {
-            // Try next proxy
+        if (src && !src.includes('1x1') && !src.includes('tracking') && !src.includes('pixel')) {
+            images.push({ src, size: width * height || 0 });
         }
+    });
+
+    if (images.length > 0) {
+        images.sort((a, b) => b.size - a.size);
+        return images[0].src;
     }
     return null;
 }
 
-// === EXTRACT IMAGE FROM FEED ITEM ===
-function extractImageUrl(itemXml, feed, articleLink) {
+function extractImageUrl(item, feedUrl) {
     let imageUrl = null;
 
-    // 1. enclosure (Prioritized for feeds like pcgames.de)
-    if (!imageUrl) {
-        const enclosureMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
-        if (enclosureMatch) {
-            const url = enclosureMatch[1];
-            if (url.match(/\.(jpg|jpeg|png|gif|webp)($|\?)/i)) {
-                imageUrl = url;
-            }
-        }
+    if (item.enclosure?.url && item.enclosure.type?.startsWith('image/')) {
+        imageUrl = item.enclosure.url;
+    } else if (item['media:content']?.$ || item['media:thumbnail']?.$) {
+        const media = item['media:content']?.$ || item['media:thumbnail']?.$;
+        if (media.url) imageUrl = media.url;
     }
 
-    // 2. media:thumbnail (Moved up for better accuracy with feeds like PlayStation.Blog)
     if (!imageUrl) {
-        const mediaThumbnailMatch = itemXml.match(/<(?:media:)?thumbnail[^>]+url=["']([^"']+)["']/i);
-        if (mediaThumbnailMatch) {
-            imageUrl = mediaThumbnailMatch[1];
-        }
-    }
-
-    // 3. media:content (Original position was #2)
-    if (!imageUrl) {
-        const mediaContentPatterns = [
-            /<(?:media:)?content[^>]+url=["']([^"']+)["'][^>]*medium=["']image["']/i,
-            /<(?:media:)?content[^>]+medium=["']image["'][^>]*url=["']([^"']+)["']/i,
-            /<(?:media:)?content[^>]+url=["']([^"']+\.(?:jpg|jpeg|png|gif|webp)[^"']*)["']/i
+        const contentFields = [
+            item['content:encoded'],
+            item.content,
+            item.description,
+            item.summary
         ];
 
-        for (const pattern of mediaContentPatterns) {
-            const match = itemXml.match(pattern);
-            if (match) {
-                imageUrl = match[1];
-                break;
+        for (const field of contentFields) {
+            if (field) {
+                imageUrl = extractImageFromContent(field);
+                if (imageUrl) break;
             }
         }
     }
 
-    // 4. HTML-Inhalt parsen
-    if (!imageUrl) {
-        const contentMatches = [
-            itemXml.match(/<content(?::encoded)?[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/content(?::encoded)?>/is),
-            itemXml.match(/<(?:description|summary)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary)>/is)
-        ];
-
-        for (const match of contentMatches) {
-            if (!match) continue;
-            let content = match[1];
-
-            content = content
-                .replace(/&quot;/g, '"')
-                .replace(/&amp;/g, '&')
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/&#39;/g, "'")
-                .replace(/&apos;/g, "'");
-
-            const imgMatches = [...content.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi)];
-
-            let bestImage = null;
-            let maxSize = 0;
-
-            for (const imgMatch of imgMatches) {
-                const src = imgMatch[1];
-
-                // Tracking-Filter
-                if (
-                    src.includes('cpx.golem.de') ||
-                    src.includes('feedburner.com') ||
-                    src.includes('feedsportal.com') ||
-                    src.includes('tracking') ||
-                    src.includes('count.php') ||
-                    src.includes('vgc.php') ||
-                    src.includes('pixel') ||
-                    src.match(/[?&]width=1[&$]/) ||
-                    src.match(/[?&]height=1[&$]/) ||
-                    src.endsWith('1x1.gif') ||
-                    src.endsWith('1x1.png')
-                ) {
-                    continue;
-                }
-
-                const widthMatch = imgMatch[0].match(/width=["']?(\d+)/i);
-                const heightMatch = imgMatch[0].match(/height=["']?(\d+)/i);
-                const width = widthMatch ? parseInt(widthMatch[1]) : 200;
-                const height = heightMatch ? parseInt(heightMatch[1]) : 200;
-
-                if (width <= 1 || height <= 1) continue;
-
-                const size = width * height;
-
-                if (size > maxSize) {
-                    maxSize = size;
-                    bestImage = src;
-                }
-            }
-
-            if (bestImage) {
-                imageUrl = bestImage;
-                break;
-            }
+    if (imageUrl && !imageUrl.startsWith('http')) {
+        try {
+            const feedDomain = new URL(feedUrl);
+            imageUrl = new URL(imageUrl, feedDomain.origin).href;
+        } catch (e) {
+            console.error('Error converting relative URL:', e);
         }
     }
 
-    if (!imageUrl) return null;
-
-    // URL-Optimierung
-    try {
-        let processedUrl = new URL(imageUrl, articleLink).href;
-        const urlObject = new URL(processedUrl);
-
-        if (urlObject.hostname.includes('giantbomb.com')) {
-            processedUrl = processedUrl.replace(/\/[^\/]+_(\d+)\.(jpg|jpeg|png)/, '/original.$2');
+    if (imageUrl) {
+        if (imageUrl.includes('gamespot.com') && imageUrl.includes('480x')) {
+            imageUrl = imageUrl.replace('480x270', '1280x720');
         }
-        else if (urlObject.hostname.includes('gamespot.com')) {
-            processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
+        if (imageUrl.includes('giantbomb.com') && imageUrl.includes('thumb')) {
+            imageUrl = imageUrl.replace(/thumb_\d+/, 'original');
         }
-        else if (feed.name.includes('GamesWirtschaft') || urlObject.hostname.includes('gameswirtschaft.de')) {
-            processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)($|\?))/i, '');
+        if (imageUrl.includes('heise.de') && imageUrl.includes('w=450')) {
+            imageUrl = imageUrl.replace('w=450', 'w=800');
         }
-        else if (urlObject.hostname.includes('heise.de')) {
-            processedUrl = processedUrl.replace(/\/geometry\/\d+\//, '/geometry/800/');
+        if (imageUrl.includes('golem.de') && (imageUrl.includes('1x1') || imageUrl.includes('cpx'))) {
+            imageUrl = null;
         }
-        else if (urlObject.hostname.includes('pcgames.de')) {
-            // This rule is placed before the 'cgames.de' rule to prevent conflicts.
-            // The URL from pcgames.de is often correct, but was being broken by the
-            // .includes('cgames.de') check. This empty block ensures the original URL is preserved.
-        }
-        else if (urlObject.hostname.includes('cgames.de')) {
-            // GameStar/GamePro: This rule can incorrectly modify pcgames.de URLs by replacing the year.
-            // The pcgames.de rule above now prevents this from running on the wrong URLs.
-            processedUrl = processedUrl.replace(/\/\d{2,4}\//, '/800/');
-        }
-        else if (urlObject.hostname.includes('4players.de')) {
-            processedUrl = processedUrl.replace(/\/\d+\//, '/800/');
-        }
-
-        return processedUrl;
-    } catch (e) {
-        return imageUrl;
     }
+
+    return imageUrl;
 }
 
-
-// === PARSE RSS/ATOM FEED ===
-function parseRssXml(xmlString, feed) {
-    const articles = [];
-    const isAtom = xmlString.includes('<feed');
-    const itemPattern = isAtom ? /<entry[^>]*>([\s\S]*?)<\/entry>/gi : /<item[^>]*>([\s\S]*?)<\/item>/gi;
-    const matches = xmlString.matchAll(itemPattern);
-
-    for (const match of matches) {
-        const itemXml = match[1];
-
-        // Extrahiere und dekodiere den Titel
-        const titleRaw = itemXml.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/is)?.[1]?.trim();
-        const title = decodeHtmlEntities(titleRaw);  // <-- NEU
-
-        const link = isAtom
-            ? itemXml.match(/<link[^>]*href=["']([^"']+)["']/i)?.[1]
-            : itemXml.match(/<link[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/is)?.[1]?.trim();
-        const pubDate = isAtom
-            ? itemXml.match(/<(?:published|updated)[^>]*>([^<]+)<\/(?:published|updated)>/i)?.[1]
-            : itemXml.match(/<pubDate[^>]*>([^<]+)<\/pubDate>/i)?.[1];
-
-        if (!title || !link || !pubDate) continue;
-
-        const desc = itemXml.match(/<(?:description|summary)[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/(?:description|summary)>/is)?.[1]?.trim() || '';
-        const decodedDesc = decodeHtmlEntities(desc);  // Erst dekodieren
-        const summary = decodedDesc
-            .replace(/<[^>]+>/g, '')  // Dann HTML-Tags entfernen
-            .replace(/\s+/g, ' ')      // Mehrfache Leerzeichen zu einem
-            .trim()                    // Trimmen
-            .substring(0, 150);        // Dann kürzen
-
-        // Extract image
-        const imageUrl = extractImageUrl(itemXml, feed, link);
-
-        articles.push({
-            id: link,
-            title,
-            source: feed.name,
-            publicationDate: new Date(pubDate).toISOString(),
-            summary,
-            link,
-            imageUrl: imageUrl || null,
-            needsScraping: !imageUrl && feed.needs_scraping,
-            language: feed.language
+async function scrapeImage(articleUrl) {
+    try {
+        const { data } = await axios.get(articleUrl, {
+            timeout: 10000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
         });
-    }
 
-    return articles;
-}
+        const $ = cheerio.load(data);
 
-// === MAIN FETCH FUNCTION ===
-async function fetchArticles() {
-    try {
-        // Get feeds from database
-        const { rows: feeds } = await sql`SELECT * FROM feeds;`;
-        console.log(`\n🔍 Found ${feeds.length} feeds in database\n`);
+        let ogImage = $('meta[property="og:image"]').attr('content');
+        if (ogImage) return ogImage;
 
-        let articles = [];
+        let twitterImage = $('meta[name="twitter:image"]').attr('content');
+        if (twitterImage) return twitterImage;
 
-        // STEP 1: Fetch all feeds
-        for (const feed of feeds) {
-            try {
-                console.log(`📡 Fetching: ${feed.name}...`);
+        const images = [];
+        $('article img, .article img, main img').each((i, elem) => {
+            const src = $(elem).attr('src');
+            const width = parseInt($(elem).attr('width') || '0');
+            const height = parseInt($(elem).attr('height') || '0');
 
-                const response = await fetch(feed.url, {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                        'Accept': 'application/rss+xml, application/xml'
-                    },
-                    signal: AbortSignal.timeout(10000)
-                });
-
-                if (!response.ok) {
-                    console.warn(`   ❌ Failed: ${feed.name} (${response.status})`);
-                    continue;
-                }
-
-                const xmlString = await response.text();
-                const feedArticles = parseRssXml(xmlString, feed);
-                articles.push(...feedArticles);
-                console.log(`   ✅ ${feed.name}: ${feedArticles.length} articles`);
-
-                await new Promise(r => setTimeout(r, 200));
-
-            } catch (error) {
-                console.error(`   ❌ Error: ${feed.name} - ${error.message}`);
+            if (src && !src.includes('1x1') && !src.includes('tracking')) {
+                images.push({ src, size: width * height });
             }
+        });
+
+        if (images.length > 0) {
+            images.sort((a, b) => b.size - a.size);
+            return images[0].src;
         }
 
-        console.log(`\n📰 Total articles fetched: ${articles.length}`);
+        return null;
+    } catch (error) {
+        console.error(`   ❌ Scraping failed for ${articleUrl}:`, error.message);
+        return null;
+    }
+}
 
-        // STEP 2: Scrape missing images
-        const articlesNeedingScraping = articles.filter(a => a.needsScraping);
-        if (articlesNeedingScraping.length > 0) {
-            console.log(`\n🔎 Scraping images for ${articlesNeedingScraping.length} articles...\n`);
+async function fetchFeeds() {
+    console.log('🚀 Starting feed fetch process...\n');
 
-            for (const article of articlesNeedingScraping) {
-                try {
-                    console.log(`   🖼️  Scraping: ${article.source} - ${article.title.substring(0, 40)}...`);
-                    const scrapedImage = await getOgImageFromUrl(article.link);
+    try {
+        const feeds = await sql`SELECT * FROM feeds WHERE enabled = true ORDER BY name`;
+        console.log(`📊 Found ${feeds.length} enabled feeds\n`);
 
-                    if (scrapedImage) {
-                        article.imageUrl = scrapedImage;
-                        article.needsScraping = false;
-                        console.log(`      ✅ Found image`);
-                    } else {
-                        console.log(`      ⚠️  No image found, using placeholder`);
+        const allArticles = [];
+
+        for (const feed of feeds) {
+            console.log(`Fetching: ${feed.name}...`);
+
+            try {
+                const feedData = await parser.parseURL(feed.url);
+                const articles = feedData.items.slice(0, 5);
+
+                for (const item of articles) {
+                    let imageUrl = extractImageUrl(item, feed.url);
+
+                    if (!imageUrl && feed.needs_scraping && item.link) {
+                        console.log(`   🔍 Scraping image for: ${feed.name}`);
+                        imageUrl = await scrapeImage(item.link);
                     }
 
-                    await new Promise(r => setTimeout(r, 500));
-                } catch (error) {
-                    console.error(`      ❌ Scraping failed: ${error.message}`);
+                    allArticles.push({
+                        source: feed.name,
+                        title: decodeHtmlEntities(item.title || 'Untitled'),
+                        link: item.link,
+                        pubDate: item.pubDate || new Date().toISOString(),
+                        imageUrl: imageUrl || undefined
+                    });
                 }
+
+                console.log(`   ✅ Success: ${feed.name} (${articles.length} articles)`);
+
+            } catch (error) {
+                const statusCode = error.response?.status || error.code;
+                console.log(`   ❌ Failed: ${feed.name} (${statusCode})`);
             }
         }
 
-        // STEP 3: Add placeholders for articles still without images
-        articles = articles.map(article => {
-            if (!article.imageUrl) {
-                article.imageUrl = `https://placehold.co/600x400/374151/d1d5db?text=${encodeURIComponent(article.source.substring(0, 30))}`;
-            }
-            delete article.needsScraping;
-            return article;
-        });
+        allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-        // STEP 4: Deduplicate and sort
-        const uniqueArticles = new Map();
-        articles.forEach(a => {
-            if (!uniqueArticles.has(a.id)) {
-                uniqueArticles.set(a.id, a);
-            }
-        });
+        const cachePath = join(__dirname, '../public/news-cache.json');
+        fs.writeFileSync(cachePath, JSON.stringify(allArticles, null, 2));
 
-        const sortedArticles = Array.from(uniqueArticles.values())
-            .sort((a, b) => new Date(b.publicationDate) - new Date(a.publicationDate));
-
-        // STEP 5: Save to cache
-        const cacheDir = path.join(process.cwd(), 'public');
-        if (!fs.existsSync(cacheDir)) {
-            fs.mkdirSync(cacheDir, { recursive: true });
-        }
-
-        const cachePath = path.join(cacheDir, 'news-cache.json');
-        fs.writeFileSync(cachePath, JSON.stringify(sortedArticles, null, 2));
-
-        console.log(`\n✅ Saved ${sortedArticles.length} articles to ${cachePath}\n`);
+        console.log(`\n✅ Completed! Total articles: ${allArticles.length}`);
+        console.log(`📦 Cache saved to: ${cachePath}`);
 
     } catch (error) {
-        console.error('\n❌ Fatal error:', error);
+        console.error('❌ Fatal error:', error);
         process.exit(1);
     }
 }
 
-fetchArticles();
+fetchFeeds();
