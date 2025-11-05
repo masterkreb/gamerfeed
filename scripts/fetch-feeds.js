@@ -1,10 +1,14 @@
-require('dotenv').config();
-const axios = require('axios');
-const cheerio = require('cheerio');
-const Parser = require('rss-parser');
-const { neon } = require('@neondatabase/serverless');
-const fs = require('fs');
-const path = require('path');
+import 'dotenv/config';
+import axios from 'axios';
+import * as cheerio from 'cheerio';
+import Parser from 'rss-parser';
+import { neon } from '@neondatabase/serverless';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const sql = neon(process.env.DATABASE_URL);
 const parser = new Parser({
@@ -15,7 +19,6 @@ const parser = new Parser({
     }
 });
 
-// HTML Entity Decoder
 function decodeHtmlEntities(text) {
     if (!text) return text;
     const entities = {
@@ -28,10 +31,8 @@ function decodeHtmlEntities(text) {
         .replace(/&#x([0-9a-f]+);/gi, (match, hex) => String.fromCharCode(parseInt(hex, 16)));
 }
 
-// Verbesserte Image Extraction (gleiche Logik wie im fetch-feeds)
 function extractImageFromContent(content) {
     if (!content) return null;
-
     const $ = cheerio.load(content);
     const images = [];
 
@@ -41,24 +42,20 @@ function extractImageFromContent(content) {
         const height = parseInt($(elem).attr('height') || '0');
 
         if (src && !src.includes('1x1') && !src.includes('tracking') && !src.includes('pixel')) {
-            const size = width * height || 0;
-            images.push({ src, size });
+            images.push({ src, size: width * height || 0 });
         }
     });
 
-    // Sortiere nach Größe und nimm das größte
     if (images.length > 0) {
         images.sort((a, b) => b.size - a.size);
         return images[0].src;
     }
-
     return null;
 }
 
 function extractImageUrl(item, feedUrl) {
     let imageUrl = null;
 
-    // 1. media:content oder media:thumbnail
     if (item.enclosure?.url && item.enclosure.type?.startsWith('image/')) {
         imageUrl = item.enclosure.url;
     } else if (item['media:content']?.$ || item['media:thumbnail']?.$) {
@@ -66,7 +63,6 @@ function extractImageUrl(item, feedUrl) {
         if (media.url) imageUrl = media.url;
     }
 
-    // 2. Suche in content:encoded, content, description, summary
     if (!imageUrl) {
         const contentFields = [
             item['content:encoded'],
@@ -83,7 +79,6 @@ function extractImageUrl(item, feedUrl) {
         }
     }
 
-    // 3. Relative URLs zu absoluten machen
     if (imageUrl && !imageUrl.startsWith('http')) {
         try {
             const feedDomain = new URL(feedUrl);
@@ -93,24 +88,16 @@ function extractImageUrl(item, feedUrl) {
         }
     }
 
-    // 4. Optimierungen für bessere Qualität
     if (imageUrl) {
-        // GameSpot: Thumbnail zu full size
         if (imageUrl.includes('gamespot.com') && imageUrl.includes('480x')) {
             imageUrl = imageUrl.replace('480x270', '1280x720');
         }
-
-        // Giant Bomb: Thumbnail zu HD
         if (imageUrl.includes('giantbomb.com') && imageUrl.includes('thumb')) {
             imageUrl = imageUrl.replace(/thumb_\d+/, 'original');
         }
-
-        // Heise: 450px zu 800px
         if (imageUrl.includes('heise.de') && imageUrl.includes('w=450')) {
             imageUrl = imageUrl.replace('w=450', 'w=800');
         }
-
-        // Golem: Tracking Pixel entfernen
         if (imageUrl.includes('golem.de') && (imageUrl.includes('1x1') || imageUrl.includes('cpx'))) {
             imageUrl = null;
         }
@@ -130,15 +117,12 @@ async function scrapeImage(articleUrl) {
 
         const $ = cheerio.load(data);
 
-        // Suche nach og:image
         let ogImage = $('meta[property="og:image"]').attr('content');
         if (ogImage) return ogImage;
 
-        // Suche nach twitter:image
         let twitterImage = $('meta[name="twitter:image"]').attr('content');
         if (twitterImage) return twitterImage;
 
-        // Suche nach größtem Bild im article
         const images = [];
         $('article img, .article img, main img').each((i, elem) => {
             const src = $(elem).attr('src');
@@ -181,7 +165,6 @@ async function fetchFeeds() {
                 for (const item of articles) {
                     let imageUrl = extractImageUrl(item, feed.url);
 
-                    // Falls kein Bild gefunden und Scraping aktiviert
                     if (!imageUrl && feed.needs_scraping && item.link) {
                         console.log(`   🔍 Scraping image for: ${feed.name}`);
                         imageUrl = await scrapeImage(item.link);
@@ -204,11 +187,9 @@ async function fetchFeeds() {
             }
         }
 
-        // Sortiere nach Datum
         allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-        // Speichere in news-cache.json
-        const cachePath = path.join(__dirname, '../public/news-cache.json');
+        const cachePath = join(__dirname, '../public/news-cache.json');
         fs.writeFileSync(cachePath, JSON.stringify(allArticles, null, 2));
 
         console.log(`\n✅ Completed! Total articles: ${allArticles.length}`);
