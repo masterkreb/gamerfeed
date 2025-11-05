@@ -1,5 +1,75 @@
 [
   {
+    "id": "https://www.nintendolife.com/news/2025/11/nintendo-is-preparing-for-even-more-movies-in-the-future-unsurprisingly",
+    "title": "Nintendo Is Preparing For Even More Movies In The Future, Unsurprisingly",
+    "source": "Nintendo Life",
+    "publicationDate": "2025-11-05T05:30:00.000Z",
+    "summary": "The Mario and Zelda movies are just the start.Nintendo's movie business is already booming following the release of the Mario Movie in 2023, which was",
+    "link": "https://www.nintendolife.com/news/2025/11/nintendo-is-preparing-for-even-more-movies-in-the-future-unsurprisingly",
+    "imageUrl": "https://images.nintendolife.com/5bc86a535252d/small.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.heise.de/news/Mittwoch-Verhaftungen-nach-Krypto-Betrug-AMDs-Rekordumsatz-auch-dank-Radeon-11056993.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Mittwoch: Verhaftungen nach Krypto-Betrug, AMDs Rekordumsatz auch dank Radeon",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T05:15:00.000Z",
+    "summary": "EU-Erfolg bei Finanzbetrug + AMD weiter mit Oberwasser + MacBook-Gerücht um A-Chip + Plugin gegen Cookie-Banner + Telefónica mit Umsatzrückgang + Bit-",
+    "link": "https://www.heise.de/news/Mittwoch-Verhaftungen-nach-Krypto-Betrug-AMDs-Rekordumsatz-auch-dank-Radeon-11056993.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/0/2/8/mittwoch-3c5ff2b2c55816d9.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/meinung/Bit-Rauschen-der-Prozessor-Podcast-Leidige-Benchmark-Tricksereien-10963736.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Bit-Rauschen, der Prozessor-Podcast: Leidige Benchmark-Tricksereien",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T05:10:00.000Z",
+    "summary": "Benchmarks sollen faire Vergleiche von Geräten und Komponenten ermöglichen, werden aber gerne umgebogen: Folge 2025/23 des Podcasts Bit-Rauschen.",
+    "link": "https://www.heise.de/meinung/Bit-Rauschen-der-Prozessor-Podcast-Leidige-Benchmark-Tricksereien-10963736.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/6/8/6/1/Podcast_Bitrauschen_16_9-ce8188fccf789414.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.xboxdynasty.de/news/xbox-game-pass/diese-zwei-spiele-sind-heute-neu-im-abo-verfuegbar-4/",
+    "title": "Xbox Game Pass: Diese zwei Spiele sind heute neu im Abo verfügbar",
+    "source": "XboxDynasty",
+    "publicationDate": "2025-11-05T05:00:31.000Z",
+    "summary": "Heute gibt es zwei neue Spiele im Xbox Game Pass-Abonnement. Damit ihr jetzt schon wisst, was ihr euch im Abo herunterladen könnt, gibt es hier wie ge",
+    "link": "https://www.xboxdynasty.de/news/xbox-game-pass/diese-zwei-spiele-sind-heute-neu-im-abo-verfuegbar-4/",
+    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2017/02/xbox-game-pass-207.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamepro.de/artikel/dragon-ball-super-auf-deutsch-bei-diesem-streamingdienst,3442068.html",
+    "title": "News: Dragon Ball Super: Ab sofort könnt ihr bei diesem Streamingdienst den Anime komplett auf Deutsch schauen",
+    "source": "GamePro",
+    "publicationDate": "2025-11-05T04:44:00.000Z",
+    "summary": "Neben One Piece und Sailor Moon gibt es auch Dragon Ball Super auf Deutsch – und das alles bei nur einem Streaminganbieter!",
+    "link": "https://www.gamepro.de/artikel/dragon-ball-super-auf-deutsch-bei-diesem-streamingdienst,3442068.html",
+    "imageUrl": "https://images.cgames.de/images/gsgp/800/dragonballsuper-deutsch_6383140.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/arc-raiders-umfrage,3442396.html",
+    "title": "News: Arc Raiders - Wie gefällt euch der neue Looter Shooter der Finals-Macher? Stimmt jetzt ab!",
+    "source": "GameStar",
+    "publicationDate": "2025-11-05T04:42:00.000Z",
+    "summary": "Arc Raiders ist der neue PvPvE-Shooter aus dem Hause Embark. Auf Steam steht das Multiplayer-Spiel bei sehr positiven 88 Prozent – aber wir wollen nat",
+    "link": "https://www.gamestar.de/artikel/arc-raiders-umfrage,3442396.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/arc-raiders-umfrage_6384317.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/deadpool-ryan-reynolds-buch-lizenz,3442379.html",
+    "title": "News: Deadpool - Ryan Reynolds hat 5.000 Dollar aus eigener Tasche gezahlt, damit ein ganz bestimmtes Buch in den Deadpool-Filmen rumliegen darf",
+    "source": "GameStar",
+    "publicationDate": "2025-11-05T04:34:00.000Z",
+    "summary": "In allen drei Deadpool-Filmen liegt ein ganz bestimmtes Buch im Hintergrund. Damit es gezeigt werden darf, musste Ryan Reynolds jedes Mal tausende Eur",
+    "link": "https://www.gamestar.de/artikel/deadpool-ryan-reynolds-buch-lizenz,3442379.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/deadpool-candian-mounted-teaser-gs_6384283.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://www.gematsu.com/2025/11/famitsu-review-scores-issue-1922",
     "title": "Famitsu Review Scores: Issue 1922",
     "source": "Gematsu",
@@ -18,6 +88,16 @@
     "link": "https://www.nintendolife.com/news/2025/11/supply-of-switch-hardware-will-continue-if-enough-demand-persists",
     "imageUrl": "https://images.nintendolife.com/1e79a35a07e67/small.jpg",
     "language": "en"
+  },
+  {
+    "id": "https://www.gamepro.de/artikel/one-piece-vivi-als-aeltere-frau,3442374.html",
+    "title": "News: One Piece: Eiichiro Oda zeigt mit neuer Zeichnung, wie Vivi als 40- und 60-Jährige aussehen würde – und sogar als Himmelsdrache",
+    "source": "GamePro",
+    "publicationDate": "2025-11-05T04:24:00.000Z",
+    "summary": "Jetzt ist auch Vivi mal an der Reihe von One Piece-Schöpfer Eiichiro Oda als ältere Frau gezeichnet zu werden – und das sogar gleich in zwei unterschi",
+    "link": "https://www.gamepro.de/artikel/one-piece-vivi-als-aeltere-frau,3442374.html",
+    "imageUrl": "https://images.cgames.de/images/gsgp/800/onepiece-vivi_6384234.jpg",
+    "language": "de"
   },
   {
     "id": "https://www.heise.de/news/AMDs-Rekordumsatz-und-Gewinnanstieg-uebertreffen-Erwartungen-doch-Aktie-sinkt-11056979.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
@@ -3230,16 +3310,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamestar.de/artikel/borderlands-4-shift-codes-goldene-schluessel,3439325.html",
-    "title": "News: Borderlands 4 - Alle Shift-Codes für Goldene Schlüssel & Skins im Überblick (November 2025)",
-    "source": "GameStar",
-    "publicationDate": "2025-11-04T15:11:00.000Z",
-    "summary": "Auf der Suche nach aktiven Borderlands 4 Shift Codes? Unsere ständig aktualisierte Liste zeigt euch alle gültigen Codes für Goldene Schlüssel und exkl",
-    "link": "https://www.gamestar.de/artikel/borderlands-4-shift-codes-goldene-schluessel,3439325.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/borderlands-schl%C3%BCssel_6374352.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.pcgamesn.com/best-turn-based-strategy-games",
     "title": "Best turn-based strategy games on PC 2025",
     "source": "PCGamesN",
@@ -3248,16 +3318,6 @@
     "link": "https://www.pcgamesn.com/best-turn-based-strategy-games",
     "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2021/10/best-turn-based-strategy-games-2022.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://www.gamestar.de/artikel/gaming-tastatur-steelseries-mechanisch-optisch-black-friday-angebot-amazon,3442292.html",
-    "title": "Deals: 46% Rabatt - Diese Profi-Tastatur könnte glatt als früher Black-Friday-Deal durchgehen! [Anzeige]",
-    "source": "GameStar",
-    "publicationDate": "2025-11-04T15:10:00.000Z",
-    "summary": "Bei Amazon gibt's gerade einen echten Keyboard-Geheimtipp zum halben Preis: Andere Tastaturen können da wahrlich nicht mithalten – vor allem nicht bei",
-    "link": "https://www.gamestar.de/artikel/gaming-tastatur-steelseries-mechanisch-optisch-black-friday-angebot-amazon,3442292.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/steelseries-apex-9-mini-amazon-03112025-teaser_6383943.jpg",
-    "language": "de"
   },
   {
     "id": "https://www.giga.de/tipp/monopoly-go-wuerfel-links-fuer-taegliche-gratis-wuerfel/",
@@ -3870,16 +3930,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.xboxdynasty.de/news/xbox-game-pass/diese-spiele-erscheinen-im-november-im-abo-3/",
-    "title": "Xbox Game Pass: Diese Spiele erscheinen im November im Abo",
-    "source": "XboxDynasty",
-    "publicationDate": "2025-11-04T14:06:54.000Z",
-    "summary": "Was hat der Xbox Game Pass für seine Mitglieder im November an Spielen geplant? Wir verraten es euch!",
-    "link": "https://www.xboxdynasty.de/news/xbox-game-pass/diese-spiele-erscheinen-im-november-im-abo-3/",
-    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2017/02/xbox-game-pass-243.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.rockpapershotgun.com/arc-raiders-review",
     "title": "Arc Raiders review",
     "source": "Rock Paper Shotgun",
@@ -4236,7 +4286,7 @@
     "publicationDate": "2025-11-04T13:30:00.000Z",
     "summary": "Rockstar-Mitgründer Dan Houser begründet, dass die Grand Theft Auto-Reihe untrennbar mit der amerikanischen Kultur und ihren Mythen verwoben ist und e",
     "link": "https://pixelcritics.com/gta-in-london-rockstar-gruender-erklaert-warum-das-nicht-funktioniert-haette/",
-    "imageUrl": "https://pixelcritics.com/wp-content/uploads/2024/08/GTA_San_Andreas_Wallpaper.webp",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=PixelCritics",
     "language": "de"
   },
   {
@@ -5880,16 +5930,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.gamepro.de/artikel/keanu-reeves-im-cyberpunk-2077-sequel,3442353.html",
-    "title": "News: \"Melde dich\": Die Chancen, dass Keanu Reeves im Cyberpunk 2077-Sequel mitspielt, sind soeben massiv gestiegen",
-    "source": "GamePro",
-    "publicationDate": "2025-11-04T10:03:00.000Z",
-    "summary": "Keanu Reeves hat bereits öffentlich Interesse bekundet, nach Cyberpunk 2077 auch in der Fortsetzung Projekt Orion mitzuwirken. Dem Schöpfer der Rollen",
-    "link": "https://www.gamepro.de/artikel/keanu-reeves-im-cyberpunk-2077-sequel,3442353.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/highlightbild-cyberpunk-2077-mit-neuem-trailer-release-termin-und-keanu-reeves_6068975.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.playstationinfo.de/2025/11/04/neue-analyse-sorgt-fuer-diskussion-sind-die-karten-in-battlefield-6-wirklich-zu-klein/",
     "title": "Neue Analyse sorgt für Diskussion: Sind die Karten in Battlefield 6 wirklich zu klein?",
     "source": "PlayStationInfo",
@@ -5917,16 +5957,6 @@
     "summary": "Just Cause-Mitbegründer Christofer Sundberg erteilt einem potenziellen fünften Teil eine klare Absage, da das ursprüngliche Kreativteam Avalanche Stud",
     "link": "https://pixelcritics.com/die-grabrede-fuer-das-chaos-just-cause-schoepfer-erklaert-die-serie-fuer-klinisch-tot/",
     "imageUrl": "https://pixelcritics.com/wp-content/uploads/2025/11/Just_Cause_Art.webp",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamepro.de/artikel/gta-5-dlc-gegen-red-dead-2,3442354.html",
-    "title": "News: GTA 5: Story-DLC mit Trevor war schon halb fertig – wurde aber für Red Dead 2 gestrichen",
-    "source": "GamePro",
-    "publicationDate": "2025-11-04T09:59:00.000Z",
-    "summary": "Fans wünschen sich bis heute Singleplayer-Nachschub für GTA 5. Jetzt erklärt Mitgründer Dan Houser, warum das nie passiert ist – und wie weit das Proj",
-    "link": "https://www.gamepro.de/artikel/gta-5-dlc-gegen-red-dead-2,3442354.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/gta-5-trevor_6384169.jpg",
     "language": "de"
   },
   {
@@ -6857,16 +6887,6 @@
     "summary": "It's impolite to shoot at others in Arc Raiders, which is surprising for an extraction shooter but also beautiful.",
     "link": "https://www.pcgamer.com/games/third-person-shooter/one-of-the-chillest-communities-ive-ever-encountered-arc-raiders-is-becoming-the-anti-tarkov-as-solo-players-choose-love-over-war/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/j37SLL32QZ32qEmxQrXgJX-1280-80.jpg",
-    "language": "en"
-  },
-  {
-    "id": "https://www.nintendolife.com/news/2025/11/mario-kart-world-and-donkey-kong-bananza-shortlisted-for-console-game-of-the-year",
-    "title": "Mario Kart World And Donkey Kong Bananza Shortlisted For 'Console Game Of The Year'",
-    "source": "Nintendo Life",
-    "publicationDate": "2025-11-04T00:30:00.000Z",
-    "summary": "Update: DK is in the running for 'Ultimate GOTY'.The Switch 2 game library has already scooped up some awards this year, and now that we're at the tai",
-    "link": "https://www.nintendolife.com/news/2025/11/mario-kart-world-and-donkey-kong-bananza-shortlisted-for-console-game-of-the-year",
-    "imageUrl": "https://images.nintendolife.com/afd903548b0fa/small.jpg",
     "language": "en"
   },
   {
@@ -9540,16 +9560,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
-    "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
-    "source": "Eurogamer",
-    "publicationDate": "2025-11-01T09:00:00.000Z",
-    "summary": "ARC Raiders ist seit dieser Woche erhältlich, und während eine große Zahl an Spielern zum Launch ins Spiel strömt, ist es kein Geheimnis, dass der Ext",
-    "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
-    "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
-  },
-  {
     "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
     "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
     "source": "Eurogamer",
@@ -9557,6 +9567,16 @@
     "summary": "Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod für Doom 2, begin",
     "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
     "imageUrl": "https://assetsio.gnwcdn.com/Catharsis---Akira-Yamaoka-(1)-gigapixel-low_res-scale-4_00x-cropped.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
+    "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-01T09:00:00.000Z",
+    "summary": "ARC Raiders ist seit dieser Woche erhältlich, und während eine große Zahl an Spielern zum Launch ins Spiel strömt, ist es kein Geheimnis, dass der Ext",
+    "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
+    "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "de"
   },
   {
@@ -9720,16 +9740,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Chipkrise-Nexperia-stoppt-Ausfuhr-von-Wafern-nach-China-10965827.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Chipkrise: Nexperia stoppt Ausfuhr von Wafern nach China",
-    "source": "Heise Online",
-    "publicationDate": "2025-10-31T19:13:00.000Z",
-    "summary": "Trotz der Lieferprobleme bei Nexperia blieben bisher Produktionsstopps bei deutschen Autobauern aus. Doch nun droht eine Verschärfung des Konflikts.",
-    "link": "https://www.heise.de/news/Chipkrise-Nexperia-stoppt-Ausfuhr-von-Wafern-nach-China-10965827.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/7/9/2/1/shutterstock_2136020447-794c6ab3ecb926b1.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://gameinformer.com/review-in-progress/2025/10/31/arc-raiders-review-in-progress",
     "title": "ARC Raiders – Review In Progress",
     "source": "Game Informer",
@@ -9748,16 +9758,6 @@
     "link": "https://www.pcgamesn.com/brotato/giveaway-steam-keys",
     "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/10/brotato-giveaway-free-steam-keys.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://www.heise.de/bestenlisten/testsieger/top-10-das-beste-outdoor-handy-im-test-robust-mit-beamer-nachtsicht-und-co/l7bnxjv?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Top 10: Das beste Outdoor-Handy im Test – robust, mit Beamer, Nachtsicht & Co.",
-    "source": "Heise Online",
-    "publicationDate": "2025-10-31T19:00:00.000Z",
-    "summary": "Nachtsicht, Wärmebildkamera oder Monster-Akku: Outdoor-Smartphones sind nicht nur stabil und wasserdicht. Wir zeigen die besten Outdoor-Handys aus den",
-    "link": "https://www.heise.de/bestenlisten/testsieger/top-10-das-beste-outdoor-handy-im-test-robust-mit-beamer-nachtsicht-und-co/l7bnxjv?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
-    "language": "de"
   },
   {
     "id": "https://www.gamersglobal.de/test/europa-universalis-5",
