@@ -1,5 +1,35 @@
 [
   {
+    "id": "https://www.eurogamer.de/dispatch-episode-5-und-6-treffen-mitten-ins-herz-kein-wunder-dass-dieses-spiel-ein-millionen-seller-ist",
+    "title": "Dispatch Episode 5 und 6 treffen mitten ins Herz – kein Wunder, dass dieses Spiel ein Millionen-Seller ist!",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-06T11:50:57.000Z",
+    "summary": "Spoiler zu Episoden 5 und 6 von The Dispatch. Mehr",
+    "link": "https://www.eurogamer.de/dispatch-episode-5-und-6-treffen-mitten-ins-herz-kein-wunder-dass-dieses-spiel-ein-millionen-seller-ist",
+    "imageUrl": "https://assetsio.gnwcdn.com/Dispatch-5-Cover.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamesradar.com/entertainment/marvel-movies/avengers-doomsday-star-channing-tatum-says-the-marvel-movie-could-be-the-biggest-movie-of-the-next-decade-everyone-in-the-world-is-going-to-see-this-movie/",
+    "title": "Avengers: Doomsday star Channing Tatum says the Marvel movie could be the biggest movie of the next decade: \"Everyone in the world is going to see this movie\"",
+    "source": "GamesRadar+",
+    "publicationDate": "2025-11-06T11:45:03.000Z",
+    "summary": "The Gambit actor is still in awe of what was achieved in Avengers: Doomsday",
+    "link": "https://www.gamesradar.com/entertainment/marvel-movies/avengers-doomsday-star-channing-tatum-says-the-marvel-movie-could-be-the-biggest-movie-of-the-next-decade-everyone-in-the-world-is-going-to-see-this-movie/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/bRTGrWithNY66GtDQpLTwH-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.pcgameshardware.de/Arc-Raiders-Spiel-73530/News/Bester-Mulitplayer-Shooter-der-Dekade-fast-1485900/",
+    "title": "Arc Raiders ist (fast) der beste Multiplayer-Shooter der Dekade, dem nur ein Titel den Rang abläuft",
+    "source": "PC Games Hardware",
+    "publicationDate": "2025-11-06T11:45:00.000Z",
+    "summary": "Arc Raiders mausert sich zum echten Multiplayer-Hit und heimst so viele Traumwertungen ein, dass er sich nur einem anderen Titel der vergangenen zehn ",
+    "link": "https://www.pcgameshardware.de/Arc-Raiders-Spiel-73530/News/Bester-Mulitplayer-Shooter-der-Dekade-fast-1485900/",
+    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/10/Arc-Raiders-Test-Aufmacher-pc-games.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://www.gamesradar.com/games/simulation/fix-it-up-codes/",
     "title": "Fix It Up codes (November 2025) for Cash",
     "source": "GamesRadar+",
@@ -130,6 +160,16 @@
     "language": "de"
   },
   {
+    "id": "https://www.gamestar.de/artikel/die-gilde-europa-1410-vorgaenger-features,3442472.html",
+    "title": "Plus - Special: Die Gilde: Europa 1410 - Eine der größten Wirtschaftssimulationen Deutschlands kehrt zurück, aber neben neuen Features sie auch sehr viele alte Qualitäten im Gepäck",
+    "source": "GameStar",
+    "publicationDate": "2025-11-06T11:24:00.000Z",
+    "summary": "Die Gilde 4 besinnt sich auf das Original von 2002. Dabei wird für den neuen Ableger Europa 1410 viel versprochen. Ist das endlich ein Schritt zurück ",
+    "link": "https://www.gamestar.de/artikel/die-gilde-europa-1410-vorgaenger-features,3442472.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/gs-plus-die-gilde-europa-1410_6384619.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://www.gameswirtschaft.de/events/german-esports-summit-2025-esbd-061125/",
     "title": "ESBD organisiert German Esports Summit 2025",
     "source": "GamesWirtschaft",
@@ -147,6 +187,26 @@
     "summary": "Der Automobilzulieferer Schaeffler stellt Teile für humanoide Roboter von Neura Robotics her. Zudem werden sie in der Produktion eingesetzt und liefer",
     "link": "https://www.heise.de/news/Schaeffler-setzt-humanoide-Roboter-von-Neura-Robotics-ein-und-liefert-Teile-11067909.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/2/2/0/8/schaeffler_x_neura-7b74bc07fd4e259e.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/wow-haendlerbrutosaurus-kaufen-2025,3442516.html",
+    "title": "News: World of Warcraft - Das teuerste und auch praktischste Mount in der Geschichte des MMOs könnte bald in den Echtgeld-Shop zurückkehren",
+    "source": "GameStar",
+    "publicationDate": "2025-11-06T11:19:00.000Z",
+    "summary": "Dataminer fanden Hinweise auf die Rückkehr eines großen Dinos, der eigentlich ein Goldesel ist.",
+    "link": "https://www.gamestar.de/artikel/wow-haendlerbrutosaurus-kaufen-2025,3442516.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/wow-brutosaurus_6384597.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/publisher-aendert-spieleverpackung-weil-pferd-ablenkt,3442521.html",
+    "title": "News: Atelier Lulua - Ein Publisher musste eine Spieleverpackung ändern, weil das Pferd darauf die Leute zu sehr ablenkt",
+    "source": "GameStar",
+    "publicationDate": "2025-11-06T11:16:00.000Z",
+    "summary": "Pferde haben eine ganz besondere Aura – dieser Prachtbursche hat jedoch offenbar zu viel des Guten gehabt.",
+    "link": "https://www.gamestar.de/artikel/publisher-aendert-spieleverpackung-weil-pferd-ablenkt,3442521.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/atelier-lulua-pferd-cover-teaserbild_6384604.jpg",
     "language": "de"
   },
   {
@@ -220,6 +280,16 @@
     "language": "de"
   },
   {
+    "id": "https://www.gamestar.de/artikel/rockstar-games-kuendigungen-gewerkschaft,3442503.html",
+    "title": "News: Rockstar - Aufregung um Kündigungen: Gefeuerte Angestellte hatten angeblich Dreck am Stecken",
+    "source": "GameStar",
+    "publicationDate": "2025-11-06T11:12:00.000Z",
+    "summary": "Die Entlassung mehrerer Angestellter brachte Rockstar Games kürzlich den Vorwurf ein, die Gründung einer Gewerkschaft verhindern zu wollen. Das Untern",
+    "link": "https://www.gamestar.de/artikel/rockstar-games-kuendigungen-gewerkschaft,3442503.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/rockstar-entlassungen_6384596.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://www.playstationinfo.de/2025/11/06/neuer-hinweis-auf-crash-team-racing-mysteroeses-beenox-bild-sorgt-fuer-spekulationen/",
     "title": "Neuer Hinweis auf Crash Team Racing? Mysteröses Beenox-Bild sorgt für Spekulationen",
     "source": "PlayStationInfo",
@@ -227,6 +297,16 @@
     "summary": "Neuer Hinweis auf Crash Team Racing? Mysteröses Beenox-Bild sorgt für Spekulationen PlayStation Info Ein einzelnes Bild reicht manchmal aus, um eine g",
     "link": "https://www.playstationinfo.de/2025/11/06/neuer-hinweis-auf-crash-team-racing-mysteroeses-beenox-bild-sorgt-fuer-spekulationen/",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=PlayStationInfo",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/49-zoll-oled-monitor-ultrawide-empfehlung-samsung,3442332.html",
+    "title": "Deals: 49 Zoll & OLED! - Dieser Monitor klingt unbezahlbar, ist gerade aber stark reduziert! [Anzeige]",
+    "source": "GameStar",
+    "publicationDate": "2025-11-06T11:10:00.000Z",
+    "summary": "Ultrawide, 240Hz und ein Bild für Götter: Der Monitor, den ich aktuell am ehesten kaufen würde, ist nicht nur ein OLED, sondern auch richtig groß - un",
+    "link": "https://www.gamestar.de/artikel/49-zoll-oled-monitor-ultrawide-empfehlung-samsung,3442332.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/samsung-odyssey-oled-g93sc-curved-gaming-monitor-49-zoll-oled-panel-5120-x-1440-pixel-freesync-premium-pro-bildwiederholrate-240-hz_6384119.jpg",
     "language": "de"
   },
   {
@@ -247,6 +327,16 @@
     "summary": "Direkte Antwort auf Spielerfeedback EA und Battlefield Studios haben Pläne, die Einstellungen für die Zielhilfe für Nutzer von Controllern in Battlefi",
     "link": "https://de.ign.com/untitled-battlefield-game/149591/news/battlefield-6-fahrt-den-aim-assist-runter-sogar-controller-spieler-sind-glucklich",
     "imageUrl": "https://sm.ign.com/ign_de/news/b/battlefiel/battlefield-6-devs-to-revert-aim-assist-settings-as-pc-playe_e3q2.png",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/13-statt-256-euro-strategie-fans-humble-abo,3442505.html",
+    "title": "News: Humble Bundle - Für 13 statt 256 Euro: Vor allem für Strategie-Fans ist diesen Monat ein Abo besonders attraktiv",
+    "source": "GameStar",
+    "publicationDate": "2025-11-06T11:06:00.000Z",
+    "summary": "Bei Humble könnt ihr immer viel Geld sparen und dafür jede Menge Spiele einsacken. Gerade diesen Monat lohnt sich wieder ein Blick.",
+    "link": "https://www.gamestar.de/artikel/13-statt-256-euro-strategie-fans-humble-abo,3442505.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/warhammer-3-meets-pharaoh_6384591.jpg",
     "language": "de"
   },
   {
@@ -297,6 +387,16 @@
     "summary": "In dieser Galerie zeigen wir euch die kreativsten Design-IDs der Community – von Pokémon über Zelda und Mario bis hin zu Disney und Anime. Mit diesen ",
     "link": "https://www.giga.de/galerie/animal-crossing-new-horizons-die-besten-design-ids-pokemon-zelda-mario-und-mehr/",
     "imageUrl": "https://static.giga.de/3d/cb/af/4a31aa6aa5127e31822aa574b0_cmUgMTkyMCADM2I0MTY1NzEyNWI=.png",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/borderlands-4-shift-codes-goldene-schluessel,3439325.html",
+    "title": "News: Borderlands 4 - Alle Shift-Codes für Goldene Schlüssel & Skins im Überblick (November 2025)",
+    "source": "GameStar",
+    "publicationDate": "2025-11-06T11:01:00.000Z",
+    "summary": "Auf der Suche nach aktiven Borderlands 4 Shift Codes? Unsere ständig aktualisierte Liste zeigt euch alle gültigen Codes für Goldene Schlüssel und exkl",
+    "link": "https://www.gamestar.de/artikel/borderlands-4-shift-codes-goldene-schluessel,3439325.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/borderlands-schl%C3%BCssel_6374352.jpg",
     "language": "de"
   },
   {
@@ -390,6 +490,16 @@
     "language": "en"
   },
   {
+    "id": "https://www.gamestar.de/artikel/nyfter-black-friday-deals-schon-jetzt-tastatur-bundle,3442234.html",
+    "title": "Deals: Nyfter - Schon jetzt gibt es einen richtig starken exklusiven GameStar-Rabatt [Anzeige]",
+    "source": "GameStar",
+    "publicationDate": "2025-11-06T10:59:00.000Z",
+    "summary": "Ihr braucht nicht auf Black Week Angebote zu warten! Sichert euch jetzt 15 % Rabatt auf das Nyfter “Setup Transformation”-Bundle mit mechanischem Gen2",
+    "link": "https://www.gamestar.de/artikel/nyfter-black-friday-deals-schon-jetzt-tastatur-bundle,3442234.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/nyfter-november-25-titel01_6383759.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://www.play3.de/2025/11/06/resident-evil-zach-creggers-film-spielt-im-winterlichen-raccoon-city-erste-bilder-vom-set-aufgetaucht/",
     "title": "Resident Evil: Zach Creggers Film spielt im winterlichen Raccoon City – Erste Bilder vom Set aufgetaucht",
     "source": "Play3",
@@ -408,6 +518,16 @@
     "link": "https://www.gamesradar.com/entertainment/horror-movies/zach-creggers-resident-evil-movie-is-seemingly-set-in-a-wintry-raccoon-city-and-its-giving-us-code-veronica-vibes/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/235pFcDy75FUmV5ZV4HKFS-1280-80.jpg",
     "language": "en"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/das-kanu-des-manitu-blu-ray-stream-release,3442525.html",
+    "title": "News: Das Kanu des Manitu - Wann ihr den neuen Bully-Film auf Blu-ray und im Stream schauen könnt",
+    "source": "GameStar",
+    "publicationDate": "2025-11-06T10:56:00.000Z",
+    "summary": "Für die Fortsetzung von Der Schuh des Manitu stehen jetzt die Heimkino-Termine fest. Wir verraten euch, wann Abahachi und Ranger auf Blu-ray und im St",
+    "link": "https://www.gamestar.de/artikel/das-kanu-des-manitu-blu-ray-stream-release,3442525.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/das-kanu-des-manitu_6369322.jpg",
+    "language": "de"
   },
   {
     "id": "https://www.pcgames.de/Kino-Thema-130800/News/the-running-man-2025-schauspieler-kinostart-bewertungen-trailer-1485891/",
@@ -507,6 +627,16 @@
     "summary": "Casuals kommt zusammen Der Entwickler von Battlefield 6, BF Studios, hat eine „umfassende“ Überarbeitung der Challenges und Assignments angekündigt, m",
     "link": "https://de.ign.com/untitled-battlefield-game/149592/news/battlefield-6-update-macht-challenges-leichter-weniger-grind-mehr-fortschritt",
     "imageUrl": "https://sm.ign.com/ign_de/blogroll/b/battlefiel/battlefield-6-gets-major-overhaul-of-challenges-and-assignme_h2f1.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/ninja-woodfire-elektrogrill-vs-gasgrill-vs-kohle-wintergrillen,3442302.html",
+    "title": "Deals: Elektrogrill = langweilig? - Ninja versucht was Neues - und es ist richtig spannend! [Anzeige]",
+    "source": "GameStar",
+    "publicationDate": "2025-11-06T10:44:00.000Z",
+    "summary": "\"Elektrogrills sind keine echten Grills\" munkelt ja so manch Grillfan. Ich persönlich war auch nie ein großer Fan von Elektrogrills. Ninja jedoch hat ",
+    "link": "https://www.gamestar.de/artikel/ninja-woodfire-elektrogrill-vs-gasgrill-vs-kohle-wintergrillen,3442302.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/-ninja-woodfire-grill-elektrogrill-outdoor-r%C3%A4uchern-garen-braten-pizza-angebot-prime-day-amazon-gasgrill-grill-weber_6383980.jpg",
     "language": "de"
   },
   {
@@ -1220,16 +1350,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamestar.de/artikel/die-gilde-europa-1410-vorgaenger-features,3442472.html",
-    "title": "Plus - Special: Die Gilde: Europa 1410 - Wirtschaft, Intrigen und wachsende Städte: Teil 4 geht für höchsten Mittelalter-Spaß zurück in die Zeit",
-    "source": "GameStar",
-    "publicationDate": "2025-11-06T09:28:00.000Z",
-    "summary": "IDie Gilde: Europa 1410 besinnt sich auf das Original von 2002. Jetzt zeigen die Entwickler mehr von der einzigartigen Wirtschaftssimulation. Sind die",
-    "link": "https://www.gamestar.de/artikel/die-gilde-europa-1410-vorgaenger-features,3442472.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/gs-plus-die-gilde-europa-1410_6384484.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/Apple-reicht-iOS-18-7-2-und-iPadOS-18-7-2-nach-Sicherheitsfixes-11067259.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Apple reicht iOS 18.7.2 und iPadOS 18.7.2 nach – Sicherheitsfixes",
     "source": "Heise Online",
@@ -1900,16 +2020,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamestar.de/artikel/arc-raiders-systemanforderungen-4k-fluessig-wqhd-full-hd-gaming-pc,3442294.html",
-    "title": "Deals: Arc Raiders PCs - Mit diesen Gaming-PCs für Arc Raiders erreicht ihr dreistellige FPS problemlos [Anzeige]",
-    "source": "GameStar",
-    "publicationDate": "2025-11-06T07:54:00.000Z",
-    "summary": "Arc Raiders vereint spannende PvP-Action, zugängliche Systemanforderungen und beeindruckende Grafik, doch um in Gefechten die Oberhand zu behalten sin",
-    "link": "https://www.gamestar.de/artikel/arc-raiders-systemanforderungen-4k-fluessig-wqhd-full-hd-gaming-pc,3442294.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/gspc-2025-11-gspc-arc-raiders-teaser_6384285.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/hintergrund/Digitaler-OP-Wie-das-UKE-den-Operationssaal-der-Zukunft-realisiert-11066940.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Digitaler OP: Wie das UKE den Operationssaal der Zukunft realisiert",
     "source": "Heise Online",
@@ -1998,16 +2108,6 @@
     "link": "https://www.gamespot.com/articles/mass-effect-the-complete-comic-book-collection-amazon-deal/1100-6529102/?ftag=CAD-01-10abi2f",
     "imageUrl": "https://www.gamespot.com/a/uploads/original/1701/17013431/4435923-mecomics.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://www.gamestar.de/artikel/4k-tv-preis-leistung-sieger-144hz-tcl-mini-led-black-friday,3442276.html",
-    "title": "Deals: Mein Preis-Leistungs-Tipp - 4K-TV mit traumhaftem Bild und noch traumhafterem Preis! [Anzeige]",
-    "source": "GameStar",
-    "publicationDate": "2025-11-06T07:31:00.000Z",
-    "summary": "Der Black Friday ist fast schon da - und die ersten Angebote gibt's schon jetzt. Mein persönlicher Preis-Leistungs-Sieger unter den 4K-TVs ist gerade ",
-    "link": "https://www.gamestar.de/artikel/4k-tv-preis-leistung-sieger-144hz-tcl-mini-led-black-friday,3442276.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/tcl-55c7k-qd-mini-led-fernseher-55-zoll-4k-hdr-premium-dolby-vision-iq-atmos-bang-olufsen-sound-smart-tv-mit-google-tv-144hz-hdmi-21-amd-freesync-premium-pro-airplay-2-google-assistant_6383920.jpg",
-    "language": "de"
   },
   {
     "id": "https://www.xboxdynasty.de/news/xbox-store/diese-spiele-sind-heute-neu-eingetroffen-460-2/",
@@ -2100,16 +2200,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamestar.de/artikel/kostenlos-bei-epic-zu-halloween-bendy-fnaf,3442162.html",
-    "title": "News: Kostenlos bei Epic - Jetzt schnell noch zwei kostenlose Spiele abstauben: Bei Epic ist Halloween erst heute vorbei",
-    "source": "GameStar",
-    "publicationDate": "2025-11-06T07:10:00.000Z",
-    "summary": "Wer für die gruseligste Nacht des Jahres noch nichts zum Spielen hat, kann sich jetzt über Epics Spielgeschenke freuen.",
-    "link": "https://www.gamestar.de/artikel/kostenlos-bei-epic-zu-halloween-bendy-fnaf,3442162.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/epic-bendy-fnaf_6383510.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.computerbase.de/news/apps/google-chrome-browser-update-schliesst-drei-kritische-luecken.94939/",
     "title": "Google Chrome: Browser-Update schließt drei kritische Lücken",
     "source": "ComputerBase",
@@ -2120,16 +2210,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamestar.de/artikel/battlefield-6-season-1-das-muss-sich-aendern,3442449.html",
-    "title": "Special: Battlefield 6 - Season 1 sorgt bisher für schlechte Stimmung, 6 Dinge müssen sich jetzt dringend ändern",
-    "source": "GameStar",
-    "publicationDate": "2025-11-06T07:08:00.000Z",
-    "summary": "Nach einem erfolgreichen Release macht sich bei der Community von Battlefield 6 aktuell immer mehr Unmut breit. Wir haben die Shooter-Experten in unse",
-    "link": "https://www.gamestar.de/artikel/battlefield-6-season-1-das-muss-sich-aendern,3442449.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/battlefield-6-sammelartikel_6384478.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://playfront.de/rockstar-feuert-angebliche-gta-6-leaker-union-sieht-gezielte-einschuechterung/",
     "title": "Rockstar feuert angebliche GTA 6-Leaker – Union sieht gezielte Einschüchterung",
     "source": "PlayFront",
@@ -2137,16 +2217,6 @@
     "summary": "Rockstar Games hat laut Berichten bis zu 40 Mitarbeiter entlassen, offiziell wegen GTA 6-Leaks, laut Gewerkschaft jedoch aus Angst vor einer möglichen",
     "link": "https://playfront.de/rockstar-feuert-angebliche-gta-6-leaker-union-sieht-gezielte-einschuechterung/",
     "imageUrl": "https://cdn.playfront.de/uploads/2025/05/gta-6-story.webp",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamestar.de/artikel/black-friday-ecovacs-saugroboter-wischfunktion-station-guenstig-angebot,3442181.html",
-    "title": "Deals: Für unter 350€?! - Saugroboter mit All-In-One-Station und Kantenwischen im Sale! [Anzeige]",
-    "source": "GameStar",
-    "publicationDate": "2025-11-06T07:02:00.000Z",
-    "summary": "Normalerweise empfehle ich selten richtig günstige Saugroboter, denn die Kompromisse sind häufig zu groß. Schließlich soll so ein Roboter euch spürbar",
-    "link": "https://www.gamestar.de/artikel/black-friday-ecovacs-saugroboter-wischfunktion-station-guenstig-angebot,3442181.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/ecovacs-t30c-omni-saugroboter-mit-wischfunktion-all-in-one-station-kantenreinigung-wischen-angebot-_6383589.jpg",
     "language": "de"
   },
   {
@@ -2330,16 +2400,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamestar.de/artikel/fallout-new-vegas-2-fan-film,3442433.html",
-    "title": "News: Fallout: New Vegas - Der Nachfolger bleibt aktuell noch ein Wunschtraum, dafür setzt bald ein beeindruckender Fan-Film die Geschichte fort",
-    "source": "GameStar",
-    "publicationDate": "2025-11-06T06:24:00.000Z",
-    "summary": "Ein neues Fallout-Spiel wird es wohl so schnell nicht geben, aber noch im November erscheint ein kompletter Fan-Film, der die Geschichte von New Vegas",
-    "link": "https://www.gamestar.de/artikel/fallout-new-vegas-2-fan-film,3442433.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/fallout-new-vegas-fanfilm_6384373.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.destructoid.com/how-to-cook-and-eat-a-mandrake-in-peak-cryptogastronomy-badge/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=how-to-cook-and-eat-a-mandrake-in-peak-cryptogastronomy-badge",
     "title": "How to cook and eat a Mandrake in PEAK – Cryptogastronomy badge",
     "source": "Destructoid",
@@ -2377,16 +2437,6 @@
     "summary": "Ein einziger Satz macht alle Hoffnungen auf dieses Star Trek-Comeback zunichte.",
     "link": "https://www.videogameszone.de/Star-Trek-Brands-138540/News/star-trek-4-im-kino-gecancelt-1485810/",
     "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/11/star-trek_zoesaldana-pc-games.webp",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamestar.de/artikel/earth-vs-mars-test-steam-review,3442454.html",
-    "title": "Plus - Test: Earth vs Mars - Test: Statt Dawn of War 4 backt Relic jetzt ein kleines Taktik-Brötchen, das Into the Breach mit Advance Wars kombiniert",
-    "source": "GameStar",
-    "publicationDate": "2025-11-06T06:09:00.000Z",
-    "summary": "Im rundenbasierten Strategiespiel dreht sich alles um DNA-modifizierte Supersoldaten – doch seine Stärken liegen woanders.",
-    "link": "https://www.gamestar.de/artikel/earth-vs-mars-test-steam-review,3442454.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/gs-plus-earth-vs-mars_6384422.jpg",
     "language": "de"
   },
   {
@@ -2517,26 +2567,6 @@
     "summary": "In der #heiseshow: Kassenärzte warnen vor Rückkehr zum Papier-Rezept, Google und Epic einigen sich auf Android-Änderungen und die ISS feiert 25. Gebur",
     "link": "https://www.heise.de/news/heiseshow-E-Rezept-Chaos-Android-Oeffnung-ISS-Jubilaeum-11067053.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/7/7/5/hs_thumb_25kw45-df0065e16f197c94.png",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamestar.de/artikel/avengers-doomsday-sir-patrick-stewart-professor-x-letzter-auftritt,3442445.html",
-    "title": "News: Avengers 5 als Abschied - Mit einem letzten Auftritt als Professor X geht Sir Patrick Stewart angeblich in den Ruhestand",
-    "source": "GameStar",
-    "publicationDate": "2025-11-06T05:09:00.000Z",
-    "summary": "Als Professor Charles Xavier in Avengers: Doomsday verabschiedet sich Sir Patrick Stewart einem Bericht zufolge wohl von der Kinoleinwand.",
-    "link": "https://www.gamestar.de/artikel/avengers-doomsday-sir-patrick-stewart-professor-x-letzter-auftritt,3442445.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/x-men-professor-x_6384411.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamestar.de/artikel/battlefield-6-community-baut-conquest-karten-aus-battle-royale-map,3442479.html",
-    "title": "News: Battlefield 6 - »Das ist brillant!« - Es gibt euch zu wenig große Maps? Ihr könnt jetzt Conquest auf Teilen der Battle-Royale-Karte spielen",
-    "source": "GameStar",
-    "publicationDate": "2025-11-06T05:08:00.000Z",
-    "summary": "Die vergleichsweise kleinen Karten von Battlefield 6 sorgen für Frust in der Community, doch mit Portal gibt es ein Tool, um dem entgegenzuwirken.",
-    "link": "https://www.gamestar.de/artikel/battlefield-6-community-baut-conquest-karten-aus-battle-royale-map,3442479.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/bf6-br-map-conquest_6384502.jpg",
     "language": "de"
   },
   {
@@ -5260,16 +5290,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.pcgameshardware.de/Apple-Mac-Book-Hardware-255602/News/Apple-entwickelt-Budget-MacBook-1485820/",
-    "title": "Apple plant Budget-Macbook: Laptop für Studenten und Gelegenheitsnutzer zum iPad-Preis",
-    "source": "PC Games Hardware",
-    "publicationDate": "2025-11-05T15:15:00.000Z",
-    "summary": "Apple plant angeblich eine günstige Version seines Macbooks für 2026. Der Laptop soll mit einem iPhone-Chip ausgestattet sein und sich an Studenten un",
-    "link": "https://www.pcgameshardware.de/Apple-Mac-Book-Hardware-255602/News/Apple-entwickelt-Budget-MacBook-1485820/",
-    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2021/10/Apple_MacBook-Pro_14-16-inch_10182021-pcgh.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/bestenlisten/testbericht/thermostat-fuer-fussbodenheizung-aqara-w500-im-test-auch-fuer-home-assistant/g8vt4n4?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Thermostat für Fußbodenheizung: Aqara W500 im Test – auch für Home Assistant",
     "source": "Heise Online",
@@ -5728,16 +5748,6 @@
     "link": "https://www.play3.de/2025/11/05/five-nights-at-freddys-2-neuer-trailer-zum-animatronik-terror-schuert-vorfreude-auf-baldigen-kinostart/",
     "imageUrl": "https://www.play3.de/wp-content/uploads/2025/11/Five-Nights-at-Freddys-2-Official-Trailer-2-Horrorfilm-Videospiel-Verfilmung-Beitragsbild.jpg",
     "language": "de"
-  },
-  {
-    "id": "https://www.gamesradar.com/entertainment/sci-fi-movies/star-trek-4-is-reportedly-dead-at-paramount-though-a-new-movie-without-chris-pine-and-zachary-quinto-could-still-happen/",
-    "title": "Star Trek 4 is reportedly dead at Paramount, though a new movie without Chris Pine and Zachary Quinto could still happen",
-    "source": "GamesRadar+",
-    "publicationDate": "2025-11-05T14:24:54.000Z",
-    "summary": "Star Trek 4 looks to be dead in the water",
-    "link": "https://www.gamesradar.com/entertainment/sci-fi-movies/star-trek-4-is-reportedly-dead-at-paramount-though-a-new-movie-without-chris-pine-and-zachary-quinto-could-still-happen/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/JXKQgT2oHeXTfhUUFE62E5-1280-80.jpg",
-    "language": "en"
   },
   {
     "id": "https://de.ign.com/trading-card-games/149581/news/altered-tcg-ein-jahr-nach-deutschland-start-kurz-vor-dem-aus",
@@ -6800,16 +6810,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/software-architektur-tv-Teamwork-Muessen-wir-darueber-sprechen-10986000.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "software-architektur.tv: Teamwork – Müssen wir darüber sprechen?",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-05T11:00:00.000Z",
-    "summary": "In dieser Episode gehen Aino Vonge Corry und Lisa Maria Schäfer der Frage nach, ob man heute überhaupt noch über Teamwork diskutieren muss.",
-    "link": "https://www.heise.de/news/software-architektur-tv-Teamwork-Muessen-wir-darueber-sprechen-10986000.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/9/3/4/teamworrk-d4f94d607c05266c.png",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/heise-jobs-IT-Tag-am-11-November-in-Berlin-10980994.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "heise-Angebot: heise jobs IT Tag am 11. November in Berlin",
     "source": "Heise Online",
@@ -6817,6 +6817,16 @@
     "summary": "Finden Sie ihren IT-Traumjob und kommen Sie mit potenziellen Arbeitgebern in Kontakt!",
     "link": "https://www.heise.de/news/heise-jobs-IT-Tag-am-11-November-in-Berlin-10980994.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/7/5/1/heise_jobs_Tickermeldung_1920x1080-98e0aa27a33aa8ca.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/software-architektur-tv-Teamwork-Muessen-wir-darueber-sprechen-10986000.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "software-architektur.tv: Teamwork – Müssen wir darüber sprechen?",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T11:00:00.000Z",
+    "summary": "In dieser Episode gehen Aino Vonge Corry und Lisa Maria Schäfer der Frage nach, ob man heute überhaupt noch über Teamwork diskutieren muss.",
+    "link": "https://www.heise.de/news/software-architektur-tv-Teamwork-Muessen-wir-darueber-sprechen-10986000.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/9/3/4/teamworrk-d4f94d607c05266c.png",
     "language": "de"
   },
   {
@@ -8460,16 +8470,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "TrueNAS 25.10 mit NVMe-oF-Unterstützung, schneller API und neuem OpenZFS",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-04T15:22:00.000Z",
-    "summary": "iXsystems hat TrueNAS 25.10 \"Goldeye\" vorgestellt, das mit NVMe-oF an superschnelle Storage-Systeme angebunden werden kann. Dazu kommen weitere neue F",
-    "link": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/2/8/NAS-e7e42cd3a07f171a.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Das dreifache Lottchen: Apples große TV-Ambitionen | Mac & i-Podcast",
     "source": "Heise Online",
@@ -8477,6 +8477,16 @@
     "summary": "Einen Apple-Fernseher gab es nie, ins Wohnzimmer will der Konzern trotzdem. In Episode 108 widmen wir uns Apple TV – Streaming-Dienst, App und Settop-",
     "link": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/4/2/heise_Podcast_maci_16_9-5e3b2af672f36dae.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "TrueNAS 25.10 mit NVMe-oF-Unterstützung, schneller API und neuem OpenZFS",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-04T15:22:00.000Z",
+    "summary": "iXsystems hat TrueNAS 25.10 \"Goldeye\" vorgestellt, das mit NVMe-oF an superschnelle Storage-Systeme angebunden werden kann. Dazu kommen weitere neue F",
+    "link": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/2/8/NAS-e7e42cd3a07f171a.jpeg",
     "language": "de"
   },
   {
@@ -10720,16 +10730,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
-    "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
-    "source": "Eurogamer",
-    "publicationDate": "2025-11-01T09:00:00.000Z",
-    "summary": "Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod für Doom 2, begin",
-    "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
-    "imageUrl": "https://assetsio.gnwcdn.com/Catharsis---Akira-Yamaoka-(1)-gigapixel-low_res-scale-4_00x-cropped.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
-  },
-  {
     "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
     "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
     "source": "Eurogamer",
@@ -10737,6 +10737,16 @@
     "summary": "ARC Raiders ist seit dieser Woche erhältlich, und während eine große Zahl an Spielern zum Launch ins Spiel strömt, ist es kein Geheimnis, dass der Ext",
     "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
     "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
+    "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-01T09:00:00.000Z",
+    "summary": "Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod für Doom 2, begin",
+    "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
+    "imageUrl": "https://assetsio.gnwcdn.com/Catharsis---Akira-Yamaoka-(1)-gigapixel-low_res-scale-4_00x-cropped.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "de"
   },
   {
@@ -10947,16 +10957,6 @@
     "summary": "Mit Thief VR: Legacy of Shadow wird in einem Monat ein brandneues Thief-Spiel veröffentlicht. Mehr",
     "link": "https://www.eurogamer.de/mit-thief-vr-in-die-virtuelle-realitat-legacy-of-shadow-kommt-am-4-dezember-fur-ps-vr2-meta-quest-und-steam-vr",
     "imageUrl": "https://assetsio.gnwcdn.com/Thief-VR_PISsAaw.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
-  },
-  {
-    "id": "https://www.eurogamer.de/tales-of-xillia-remastered-veroffentlicht-ab-sofort-mit-neuer-grafik-und-komfortfunktionen",
-    "title": "Tales of Xillia Remastered veröffentlicht: ab sofort mit neuer Grafik und Komfortfunktionen",
-    "source": "Eurogamer",
-    "publicationDate": "2025-10-31T15:30:00.000Z",
-    "summary": "Bandai Namco Entertainment Europe hat heute Tales of Xillia Remastered veröffentlicht. Mehr",
-    "link": "https://www.eurogamer.de/tales-of-xillia-remastered-veroffentlicht-ab-sofort-mit-neuer-grafik-und-komfortfunktionen",
-    "imageUrl": "https://assetsio.gnwcdn.com/Tales-of-Xillia-Remastered.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "de"
   },
   {
