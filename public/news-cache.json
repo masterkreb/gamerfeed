@@ -1,5 +1,25 @@
 [
   {
+    "id": "https://www.heise.de/news/Office-Alternative-aus-Deutschland-von-Ionos-und-Nextcloud-ist-jetzt-verfuegbar-11067303.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Office-Alternative aus Deutschland von Ionos und Nextcloud ist jetzt verfügbar",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-06T04:04:00.000Z",
+    "summary": "Mit \"Ionos Nextcloud Workspace\" gibt es jetzt eine deutsche Konkurrenz zu Microsoft 365. Der Verzicht auf US-Clouds soll die digitale Souveränität stä",
+    "link": "https://www.heise.de/news/Office-Alternative-aus-Deutschland-von-Ionos-und-Nextcloud-ist-jetzt-verfuegbar-11067303.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/9/0/0/IONOS_Nextcloud_Workspace-0ae8c7249c2cafcd.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.computerbase.de/news/gaming/sony-cloud-streaming-auf-playstation-portal-startet-heute.94934/",
+    "title": "Sony: Cloud-Streaming auf PlayStation Portal startet heute",
+    "source": "ComputerBase",
+    "publicationDate": "2025-11-06T04:00:00.000Z",
+    "summary": "Sony ergänzt den PlayStation Portal Remote Player zwei Jahre nach Marktstart um ein Feature, das viele Nutzer von Anfang an erwartet hatten: das Cloud",
+    "link": "https://www.computerbase.de/news/gaming/sony-cloud-streaming-auf-playstation-portal-startet-heute.94934/",
+    "imageUrl": "https://pics.computerbase.de/1/2/0/0/1/3-64a0cac8f7af6c19/article-640x360.67f4ca10.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://www.gematsu.com/2025/11/robot-shoot-em-up-changeable-guardian-estique-coming-to-ps5-xbox-series-switch-and-pc-in-2026",
     "title": "Robot shoot ’em up Changeable Guardian ESTIQUE coming to PS5, Xbox Series, Switch, and PC in 2026",
     "source": "Gematsu",
@@ -5150,16 +5170,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/software-architektur-tv-Teamwork-Muessen-wir-darueber-sprechen-10986000.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "software-architektur.tv: Teamwork – Müssen wir darüber sprechen?",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-05T11:00:00.000Z",
-    "summary": "In dieser Episode gehen Aino Vonge Corry und Lisa Maria Schäfer der Frage nach, ob man heute überhaupt noch über Teamwork diskutieren muss.",
-    "link": "https://www.heise.de/news/software-architektur-tv-Teamwork-Muessen-wir-darueber-sprechen-10986000.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/9/3/4/teamworrk-d4f94d607c05266c.png",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/heise-jobs-IT-Tag-am-11-November-in-Berlin-10980994.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "heise-Angebot: heise jobs IT Tag am 11. November in Berlin",
     "source": "Heise Online",
@@ -5167,6 +5177,16 @@
     "summary": "Finden Sie ihren IT-Traumjob und kommen Sie mit potenziellen Arbeitgebern in Kontakt!",
     "link": "https://www.heise.de/news/heise-jobs-IT-Tag-am-11-November-in-Berlin-10980994.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/7/5/1/heise_jobs_Tickermeldung_1920x1080-98e0aa27a33aa8ca.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/software-architektur-tv-Teamwork-Muessen-wir-darueber-sprechen-10986000.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "software-architektur.tv: Teamwork – Müssen wir darüber sprechen?",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-05T11:00:00.000Z",
+    "summary": "In dieser Episode gehen Aino Vonge Corry und Lisa Maria Schäfer der Frage nach, ob man heute überhaupt noch über Teamwork diskutieren muss.",
+    "link": "https://www.heise.de/news/software-architektur-tv-Teamwork-Muessen-wir-darueber-sprechen-10986000.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/9/3/4/teamworrk-d4f94d607c05266c.png",
     "language": "de"
   },
   {
@@ -7630,16 +7650,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "TrueNAS 25.10 mit NVMe-oF-Unterstützung, schneller API und neuem OpenZFS",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-04T15:22:00.000Z",
-    "summary": "iXsystems hat TrueNAS 25.10 \"Goldeye\" vorgestellt, das mit NVMe-oF an superschnelle Storage-Systeme angebunden werden kann. Dazu kommen weitere neue F",
-    "link": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/2/8/NAS-e7e42cd3a07f171a.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Das dreifache Lottchen: Apples große TV-Ambitionen | Mac & i-Podcast",
     "source": "Heise Online",
@@ -7647,6 +7657,16 @@
     "summary": "Einen Apple-Fernseher gab es nie, ins Wohnzimmer will der Konzern trotzdem. In Episode 108 widmen wir uns Apple TV – Streaming-Dienst, App und Settop-",
     "link": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/4/2/heise_Podcast_maci_16_9-5e3b2af672f36dae.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "TrueNAS 25.10 mit NVMe-oF-Unterstützung, schneller API und neuem OpenZFS",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-04T15:22:00.000Z",
+    "summary": "iXsystems hat TrueNAS 25.10 \"Goldeye\" vorgestellt, das mit NVMe-oF an superschnelle Storage-Systeme angebunden werden kann. Dazu kommen weitere neue F",
+    "link": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/2/8/NAS-e7e42cd3a07f171a.jpeg",
     "language": "de"
   },
   {
@@ -9520,16 +9540,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Windows-Zero-Day-Luecke-bei-LNK-Anzeige-gegen-Diplomaten-missbraucht-10983101.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Zero-Day-Lücke bei LNK-Anzeige in Windows gegen Diplomaten missbraucht",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-03T13:39:00.000Z",
-    "summary": "Microsoft hält eine Lücke in der LNK-Anzeige für nicht behebenswert. Sie wurde inzwischen gegen europäische Diplomaten missbraucht.",
-    "link": "https://www.heise.de/news/Windows-Zero-Day-Luecke-bei-LNK-Anzeige-gegen-Diplomaten-missbraucht-10983101.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/8/1/8/shutterstock_1124819546_jpg-d3889c815ce30778.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.rockpapershotgun.com/saints-rows-original-design-director-is-pitching-a-grounded-70s-open-world-prequel-with-absolutely-no-dildobats",
     "title": "Saints Row's original design director is pitching a \"grounded\" 70s open world prequel with absolutely no dildobats",
     "source": "Rock Paper Shotgun",
@@ -10187,16 +10197,6 @@
     "summary": "Könntet ihr aus all den vielen, vielen Indie-Spielen, die in den vergangenen Jahrzehnten erschienen sind, 50 Stück herauspicken, die die Welt veränder",
     "link": "https://www.eurogamer.de/50-indie-games-that-changed-the-world-verandert-nicht-die-welt-ist-aber-dennoch-ein-schones-buch",
     "imageUrl": "https://assetsio.gnwcdn.com/50-Indie-Games-that-changed-the-world.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
-  },
-  {
-    "id": "https://www.computerbase.de/news/smartphones/smartphones-was-ist-euch-wichtig-und-kann-das-noch-begeistern.94881/",
-    "title": "Smartphones: Was ist euch wichtig und kann das noch begeistern?",
-    "source": "ComputerBase",
-    "publicationDate": "2025-11-02T11:00:00.000Z",
-    "summary": "Diese Woche geht es in der Sonntagsfrage um eure Smartphones. Wie lange nutzt ihr euer aktuelles Modell schon, wie groß ist es und wie viel hat es gek",
-    "link": "https://www.computerbase.de/news/smartphones/smartphones-was-ist-euch-wichtig-und-kann-das-noch-begeistern.94881/",
-    "imageUrl": "https://pics.computerbase.de/1/1/9/9/5/1-069c52e371b67798/article-640x360.ea43b0b0.jpg",
     "language": "de"
   },
   {
