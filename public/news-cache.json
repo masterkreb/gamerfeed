@@ -1,5 +1,45 @@
 [
   {
+    "id": "https://www.4p.de/news/red-dead-redemption-2-thanksgiving-event-kostenloses-outfit/3356250",
+    "title": "Red Dead Redemption 2: Rockstar verschenkt schickes Outfit – aber ihr dürft nicht zu lange warten",
+    "source": "4P",
+    "publicationDate": "2025-11-06T05:52:21.000Z",
+    "summary": "In den USA ist Thanksgiving ein beliebtes Fest, dementsprechend wird es auch in Red Dead Redemption 2 gefeiert – und ihr profitiert davon.",
+    "link": "https://www.4p.de/news/red-dead-redemption-2-thanksgiving-event-kostenloses-outfit/3356250",
+    "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/11/reddeadredemption2-thanksgiving.jpg?w=1200&#038;h=900&#038;crop=1",
+    "language": "de"
+  },
+  {
+    "id": "https://www.4p.de/news/football-manager-26-massive-kritik-zum-release-auf-steam-absolute-schande/3356161",
+    "title": "Steam: „Absolute Schande“ – Der neue Release einer beliebten Spielereihe wird zum Desaster",
+    "source": "4P",
+    "publicationDate": "2025-11-06T05:49:58.000Z",
+    "summary": "Es sollte die größte Änderung der Reihe werden, doch der Football Manager 26 legt auf Steam stattdessen eine Bruchlandung hin.",
+    "link": "https://www.4p.de/news/football-manager-26-massive-kritik-zum-release-auf-steam-absolute-schande/3356161",
+    "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/11/fm26-steam-flop.jpg?w=1200&#038;h=900&#038;crop=1",
+    "language": "de"
+  },
+  {
+    "id": "https://www.4p.de/news/xbox-game-pass-november-2025-elf-gratis-spiele-mit-call-of-duty-und-gta-alternative/3356134",
+    "title": "Xbox Game Pass: 11 neue Gratis-Spiele erwarten euch – eine überraschende GTA-Alternative könnt ihr sofort laden",
+    "source": "4P",
+    "publicationDate": "2025-11-06T05:47:08.000Z",
+    "summary": "Der Xbox Game Pass füllt sich weiter mit Gratis-Spielen: Im November bekommt ihr unter anderem Zugang zu Call of Duty: Black Ops 7.",
+    "link": "https://www.4p.de/news/xbox-game-pass-november-2025-elf-gratis-spiele-mit-call-of-duty-und-gta-alternative/3356134",
+    "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/11/xboxgamepass-november2025.jpg?w=1200&#038;h=900&#038;crop=1",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Internetseite-von-Trier-nach-Cyberangriff-wieder-erreichbar-11067325.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Internetseite von Trier nach Cyberangriff wieder erreichbar",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-06T05:45:00.000Z",
+    "summary": "Doch die Attacken auf trier.de nehmen kein Ende. Was hinter der Angriffswelle steckt und wie die Stadt reagiert.",
+    "link": "https://www.heise.de/news/Internetseite-von-Trier-nach-Cyberangriff-wieder-erreichbar-11067325.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/9/1/1/shutterstock_680076340-9d48145a4c05a079.jpeg",
+    "language": "de"
+  },
+  {
     "id": "https://www.xboxdynasty.de/news/the-outer-worlds-2/harsche-kritik-vom-kingdom-come-2-director/",
     "title": "The Outer Worlds 2: Harsche Kritik vom Kingdom Come 2 Director",
     "source": "XboxDynasty",
@@ -57,6 +97,26 @@
     "summary": "In der #heiseshow: Kassenärzte warnen vor Rückkehr zum Papier-Rezept, Google und Epic einigen sich auf Android-Änderungen und die ISS feiert 25. Gebur",
     "link": "https://www.heise.de/news/heiseshow-E-Rezept-Chaos-Android-Oeffnung-ISS-Jubilaeum-11067053.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/7/7/5/heiseshow2023-49653e939be34fc1.png",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/avengers-doomsday-sir-patrick-stewart-professor-x-letzter-auftritt,3442445.html",
+    "title": "News: Avengers 5 als Abschied - Mit einem letzten Auftritt als Professor X geht Sir Patrick Stewart angeblich in den Ruhestand",
+    "source": "GameStar",
+    "publicationDate": "2025-11-06T05:09:00.000Z",
+    "summary": "Als Professor Charles Xavier in Avengers: Doomsday verabschiedet sich Sir Patrick Stewart einem Bericht zufolge wohl von der Kinoleinwand.",
+    "link": "https://www.gamestar.de/artikel/avengers-doomsday-sir-patrick-stewart-professor-x-letzter-auftritt,3442445.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/x-men-professor-x_6384411.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/battlefield-6-community-baut-conquest-karten-aus-battle-royale-map,3442479.html",
+    "title": "News: Battlefield 6 - »Das ist brillant!« - Es gibt euch zu wenig große Maps? Ihr könnt jetzt Conquest auf Teilen der Battle-Royale-Karte spielen",
+    "source": "GameStar",
+    "publicationDate": "2025-11-06T05:08:00.000Z",
+    "summary": "Die vergleichsweise kleinen Karten von Battlefield 6 sorgen für Frust in der Community, doch mit Portal gibt es ein Tool, um dem entgegenzuwirken.",
+    "link": "https://www.gamestar.de/artikel/battlefield-6-community-baut-conquest-karten-aus-battle-royale-map,3442479.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/bf6-br-map-conquest_6384502.jpg",
     "language": "de"
   },
   {
@@ -274,7 +334,7 @@
     "title": "Pokémon Legends Z-A Version 1.0.2 Is Now Live, Here Are The Full Patch Notes",
     "source": "Nintendo Life",
     "publicationDate": "2025-11-06T01:15:00.000Z",
-    "summary": "Update today, trainers.Following the launch of Pokémon Legends Z-A on the Switch and Switch 2 in October, Game Freak has now rolled out Version 1.0.2.",
+    "summary": "Update your copy today, trainers.Following the launch of Pokémon Legends Z-A on the Switch and Switch 2 in October, Game Freak has now rolled out Vers",
     "link": "https://www.nintendolife.com/news/2025/11/pokemon-legends-z-a-version-1-0-2-is-now-live-here-are-the-full-patch-notes",
     "imageUrl": "https://images.nintendolife.com/c9a42e802c7d9/small.jpg",
     "language": "en"
@@ -3820,26 +3880,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamestar.de/artikel/strom-sparen-stromverbrauch-standby,3442348.html",
-    "title": "Special: Energie - Überraschende Stromfresser: 3 Geräte, die viele gar nicht auf dem Schirm haben",
-    "source": "GameStar",
-    "publicationDate": "2025-11-05T14:15:00.000Z",
-    "summary": "Wer Strom sparen will, sollte nicht nur an die großen Geräte denken. Drei Geräte fressen Strom – wenn wir sie überhaupt nicht brauchen.",
-    "link": "https://www.gamestar.de/artikel/strom-sparen-stromverbrauch-standby,3442348.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/strom-sparen-bildquelle-maria-fuchs-adobe-stock_6384240.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamestar.de/artikel/walking-pad-home-office-sport-fitness-gesundheit-angebot-amazon,3442447.html",
-    "title": "Deals: Home Office - Diese Investition in eure Gesundheit ist mit 80% Rabatt ein Pflichtkauf! [Anzeige]",
-    "source": "GameStar",
-    "publicationDate": "2025-11-05T14:15:00.000Z",
-    "summary": "Wir sitzen zu viel, wir bewegen uns zu wenig – und unser Bewegungsapparat fängt irgendwann das Knarzen an. Bei Amazon könnt ihr die perfekte Abhilfe j",
-    "link": "https://www.gamestar.de/artikel/walking-pad-home-office-sport-fitness-gesundheit-angebot-amazon,3442447.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/walking-pad-amazon-05112025-teaser_6384375.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.giga.de/video/ist-apple-music-die-beste-spotify-alternative-ich-glaube-nicht--01K99H9BXGZV64K5X48100A6F3",
     "title": "Ist Apple Music die beste Spotify-Alternative? Ich glaube nicht",
     "source": "GIGA Games",
@@ -4488,16 +4528,6 @@
     "link": "https://www.gamesradar.com/entertainment/sci-fi-movies/predator-badlands-stars-praise-director-dan-trachtenberg-for-adding-heart-to-the-sci-fi-horror-franchise-and-encouraging-play-on-set-whenever-there-was-an-ad-lib-he-had-to-learn-it-in-yautja/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/Lgrjn44ye8HqCBCAc7RANf-1280-80.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://www.4p.de/news/red-dead-redemption-2-thanksgiving-event-das-gibt-es-jetzt-kostenlos-aber-nur-fuer-kurze-zeit/3356250",
-    "title": "Red Dead Redemption 2: Das gibt es jetzt kostenlos – aber nur für kurze Zeit",
-    "source": "4P",
-    "publicationDate": "2025-11-05T12:54:53.000Z",
-    "summary": "Thanksgiving wird in Deutschland kaum gefeiert, in den USA hingegen schon. Passend dazu gibt es nun bei Red Dead Redemption 2 ein Gratis-Event.",
-    "link": "https://www.4p.de/news/red-dead-redemption-2-thanksgiving-event-das-gibt-es-jetzt-kostenlos-aber-nur-fuer-kurze-zeit/3356250",
-    "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/11/reddeadredemption2-thanksgiving.jpg?w=1200&#038;h=900&#038;crop=1",
-    "language": "de"
   },
   {
     "id": "https://www.rockpapershotgun.com/if-your-pc-is-too-puny-to-launch-europa-universalis-5-theres-a-secret-very-low-graphics-preset",
@@ -5780,16 +5810,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.4p.de/news/steam-absolute-schande-neuer-release-einer-beliebten-spielereihe-wird-zur-vollkatastrophe/3356161",
-    "title": "Steam: „Absolute Schande“ – neuer Release einer beliebten Spielereihe wird zur Vollkatastrophe",
-    "source": "4P",
-    "publicationDate": "2025-11-05T09:45:51.000Z",
-    "summary": "Der Football Manager 26 sollte den größten Sprung in der Reihe bilden. Jetzt sorgt er aber erst einmal für jede Menge Enttäuschung unter Fans.",
-    "link": "https://www.4p.de/news/steam-absolute-schande-neuer-release-einer-beliebten-spielereihe-wird-zur-vollkatastrophe/3356161",
-    "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/11/fm26-steam-flop.jpg?w=1200&#038;h=900&#038;crop=1",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/Kehrtwende-Donald-Trump-nominiert-Jared-Isaacman-zum-zweiten-Mal-als-NASA-Chef-11059300.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Kehrtwende: Donald Trump nominiert Jared Isaacman zum zweiten Mal als NASA-Chef",
     "source": "Heise Online",
@@ -6227,16 +6247,6 @@
     "summary": "In Monopoly Go! habt ihr keine Würfel mehr? Wir listen für euch alle aktuellen, kostenlose Würfel-Links.",
     "link": "https://www.gamepro.de/artikel/monopoly-go-kostenlose-wuerfel-links,3410726.html",
     "imageUrl": "https://images.cgames.de/images/gsgp/800/gp-monopoly-go_6283205.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.4p.de/news/kostenlos-steam-rpg-ueberwaeltigt-fans-absoluter-knaller-dinoblade/3356078",
-    "title": "Steam: Dino-Rollenspiel überwältigt unzählige Fans – „Absoluter Knaller!“",
-    "source": "4P",
-    "publicationDate": "2025-11-05T08:12:00.000Z",
-    "summary": "Da pressen sich Dino-Jünger ein Lächeln aus dem Gesicht – wenn diese RPG-Granate wie Heavy Metal im Jurassic Park explodiert.",
-    "link": "https://www.4p.de/news/kostenlos-steam-rpg-ueberwaeltigt-fans-absoluter-knaller-dinoblade/3356078",
-    "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/10/steam-color-explosion-generic-banner.jpg?w=1200&#038;h=900&#038;crop=1",
     "language": "de"
   },
   {
@@ -7710,16 +7720,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "TrueNAS 25.10 mit NVMe-oF-Unterstützung, schneller API und neuem OpenZFS",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-04T15:22:00.000Z",
-    "summary": "iXsystems hat TrueNAS 25.10 \"Goldeye\" vorgestellt, das mit NVMe-oF an superschnelle Storage-Systeme angebunden werden kann. Dazu kommen weitere neue F",
-    "link": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/2/8/NAS-e7e42cd3a07f171a.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Das dreifache Lottchen: Apples große TV-Ambitionen | Mac & i-Podcast",
     "source": "Heise Online",
@@ -7727,6 +7727,16 @@
     "summary": "Einen Apple-Fernseher gab es nie, ins Wohnzimmer will der Konzern trotzdem. In Episode 108 widmen wir uns Apple TV – Streaming-Dienst, App und Settop-",
     "link": "https://www.heise.de/news/Das-dreifache-Lottchen-Apples-grosse-TV-Ambitionen-Mac-i-Podcast-11056629.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/4/2/heise_Podcast_maci_16_9-5e3b2af672f36dae.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "TrueNAS 25.10 mit NVMe-oF-Unterstützung, schneller API und neuem OpenZFS",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-04T15:22:00.000Z",
+    "summary": "iXsystems hat TrueNAS 25.10 \"Goldeye\" vorgestellt, das mit NVMe-oF an superschnelle Storage-Systeme angebunden werden kann. Dazu kommen weitere neue F",
+    "link": "https://www.heise.de/news/TrueNAS-25-10-mit-NVMe-oF-Unterstuetzung-schneller-API-und-neuem-OpenZFS-11056587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/0/8/2/8/NAS-e7e42cd3a07f171a.jpeg",
     "language": "de"
   },
   {
@@ -9450,16 +9460,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Analyse-Bekommt-das-iPhone-18-vollwertigen-Satellitenfunk-10966223.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Analyse: Bekommt das iPhone 18 vollwertigen Satellitenfunk?",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-03T14:49:00.000Z",
-    "summary": "Jahrelang beherrschen iPhones die Nutzung schmalbandigen Satellitenfunks – und genauso lange gibt es Spekulationen, dass Apple die Funktion erweitert.",
-    "link": "https://www.heise.de/news/Analyse-Bekommt-das-iPhone-18-vollwertigen-Satellitenfunk-10966223.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/1/2/9/shutterstock_2472845667-68515fbb190fd38e.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.pcgamesn.com/nvidia/rtx-4060-steam-hardware-survey-october-2025",
     "title": "Shockingly, Nvidia's GeForce RTX 4060 just lost its top gaming GPU spot on Steam",
     "source": "PCGamesN",
@@ -10520,16 +10520,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
-    "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
-    "source": "Eurogamer",
-    "publicationDate": "2025-11-01T09:00:00.000Z",
-    "summary": "Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod für Doom 2, begin",
-    "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
-    "imageUrl": "https://assetsio.gnwcdn.com/Catharsis---Akira-Yamaoka-(1)-gigapixel-low_res-scale-4_00x-cropped.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
-  },
-  {
     "id": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
     "title": "ARC Raiders und KI: Embark Studios erklärt den Einsatz von TTS und Machine Learning – \"Keine generative KI\"",
     "source": "Eurogamer",
@@ -10537,6 +10527,16 @@
     "summary": "ARC Raiders ist seit dieser Woche erhältlich, und während eine große Zahl an Spielern zum Launch ins Spiel strömt, ist es kein Geheimnis, dass der Ext",
     "link": "https://www.eurogamer.de/arc-raiders-und-ki-embark-studios-erklart-den-einsatz-von-tts-und-machine-learning-keine-generative-ki",
     "imageUrl": "https://assetsio.gnwcdn.com/ARC-Raiders_bw7elrI.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
+    "title": "Akira Yamaoka liefert das Thema: Apogees Total Chaos wird musikalisch geadelt -behaltet diesen Cthulhu-esken Horror im Blick!",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-01T09:00:00.000Z",
+    "summary": "Apogees Total Chaos mausert sich langsam. Das psychologische Horrorspiel begann seine Existenz als hochgelobte Totaal-Conversion-Mod für Doom 2, begin",
+    "link": "https://www.eurogamer.de/akira-yamaoka-liefert-das-thema-apogees-total-chaos-wird-musikalisch-geadelt-behaltet-diesen-cthulhu-esken-horror-im-blick",
+    "imageUrl": "https://assetsio.gnwcdn.com/Catharsis---Akira-Yamaoka-(1)-gigapixel-low_res-scale-4_00x-cropped.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "de"
   },
   {
