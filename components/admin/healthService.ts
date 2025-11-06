@@ -70,32 +70,68 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
 function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; needsScraping: boolean } {
     let imageUrl: string | undefined;
 
+    // 1. enclosure (priority)
     if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) {
         imageUrl = item.enclosure.link;
     }
-    else if (item.thumbnail && typeof item.thumbnail === 'string') {
-        imageUrl = item.thumbnail;
-    }
-    else if (item['media:thumbnail'] && item['media:thumbnail'].url) {
+
+    // 2. media:thumbnail
+    if (!imageUrl && item['media:thumbnail'] && item['media:thumbnail'].url) {
         imageUrl = item['media:thumbnail'].url;
     }
-    else {
+
+    // 3. thumbnail fallback
+    if (!imageUrl && item.thumbnail && typeof item.thumbnail === 'string') {
+        imageUrl = item.thumbnail;
+    }
+
+    // 4. Parse HTML content for images (same logic as fetch-feeds.js)
+    if (!imageUrl) {
         const content = item.content || item.description || '';
         if (content) {
             try {
                 const doc = new DOMParser().parseFromString(content, 'text/html');
                 const images = Array.from(doc.querySelectorAll('img'));
-                const bestImage = images.find(img => {
-                    const src = img.getAttribute('src');
-                    if (!src || src.includes('cpx.golem.de')) return false;
-                    const width = parseInt(img.getAttribute('width') || '0', 10);
-                    const height = parseInt(img.getAttribute('height') || '0', 10);
-                    if (width <= 1 || height <= 1) return false;
-                    return true;
-                });
+
+                let bestImage: HTMLImageElement | null = null;
+                let maxSize = 0;
+
+                for (const img of images) {
+                    const src = img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy-src');
+                    if (!src) continue;
+
+                    // Tracking filter (same as fetch-feeds.js)
+                    if (
+                        src.includes('cpx.golem.de') ||
+                        src.includes('feedburner.com') ||
+                        src.includes('feedsportal.com') ||
+                        src.includes('tracking') ||
+                        src.includes('count.php') ||
+                        src.includes('vgc.php') ||
+                        src.includes('pixel') ||
+                        src.match(/[?&]width=1[&$]/) ||
+                        src.match(/[?&]height=1[&$]/) ||
+                        src.endsWith('1x1.gif') ||
+                        src.endsWith('1x1.png')
+                    ) {
+                        continue;
+                    }
+
+                    const width = parseInt(img.getAttribute('width') || '200', 10);
+                    const height = parseInt(img.getAttribute('height') || '200', 10);
+
+                    if (width <= 1 || height <= 1) continue;
+
+                    const size = width * height;
+                    if (size > maxSize) {
+                        maxSize = size;
+                        bestImage = img;
+                    }
+                }
+
                 if (bestImage) {
                     const src = bestImage.getAttribute('data-src') || bestImage.getAttribute('data-lazy-src') || bestImage.getAttribute('src');
-                    if(src) imageUrl = src;
+                    if (src) imageUrl = src;
                 }
             } catch (e) {
                 console.warn("DOMParser failed for content.", e);
@@ -108,7 +144,31 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
     if (imageUrl) {
         try {
             let processedUrl = new URL(imageUrl, item.link).href;
-            // Simplified version for health check: no domain-specific URL cleaning
+            const urlObject = new URL(processedUrl);
+
+            // URL optimizations (same as fetch-feeds.js)
+            if (urlObject.hostname.includes('giantbomb.com')) {
+                processedUrl = processedUrl.replace(/\/[^\/]+_(\d+)\.(jpg|jpeg|png)/, '/original.$2');
+            }
+            else if (urlObject.hostname.includes('gamespot.com')) {
+                processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
+            }
+            else if (urlObject.hostname.includes('gameswirtschaft.de')) {
+                processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)($|\?))/i, '');
+            }
+            else if (urlObject.hostname.includes('heise.de')) {
+                processedUrl = processedUrl.replace(/\/geometry\/\d+\//, '/geometry/800/');
+            }
+            else if (urlObject.hostname.includes('pcgames.de')) {
+                // Preserve original
+            }
+            else if (urlObject.hostname.includes('cgames.de')) {
+                processedUrl = processedUrl.replace(/\/\d{2,4}\//, '/800/');
+            }
+            else if (urlObject.hostname.includes('4players.de')) {
+                processedUrl = processedUrl.replace(/\/\d+\//, '/800/');
+            }
+
             return { imageUrl: processedUrl, needsScraping: false };
         } catch (e) {
             // Fallthrough on invalid URL
