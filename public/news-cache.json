@@ -1,12 +1,32 @@
 [
   {
-    "id": "https://playfront.de/bioshock-4-lebt-aber-der-weg-dorthin-bleibt-steinig/",
-    "title": "BioShock 4 lebt, aber der Weg dorthin bleibt steinig",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-07T07:41:32.000Z",
-    "summary": "BioShock 4 ist laut Take-Two weiter in Entwicklung. Trotz Studio-Turbulenzen bleibt das Projekt am Leben – ein Hoffnungsschimmer für Fans der Reihe.",
-    "link": "https://playfront.de/bioshock-4-lebt-aber-der-weg-dorthin-bleibt-steinig/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2025/08/bioshock-by-cloud-chamber.webp",
+    "id": "https://www.heise.de/hintergrund/Aus-Softwarefehlern-lernen-Teil-7-Der-Milliarden-Dollar-Fehler-11067587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Aus Softwarefehlern lernen – Teil 7: Der Milliarden-Dollar-Fehler",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-07T07:47:00.000Z",
+    "summary": "Ein Fehler im Konzept moderner Programmiersprachen hat laut des Erfinders Tony Hoare Schäden von vielen Milliarden Dollar verursacht.",
+    "link": "https://www.heise.de/hintergrund/Aus-Softwarefehlern-lernen-Teil-7-Der-Milliarden-Dollar-Fehler-11067587.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/2/0/4/4/shutterstock_204029239-f55b27e059c60f16.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.giga.de/tech/ea-server-down-ea-fc-26-geht-aktuell-nicht-server-status-stoerungen-pruefen--01J5QNT2QF9BMSQAYZKDA686CW",
+    "title": "EA Server down: EA FC 26 geht aktuell nicht – Server-Status & Störungen prüfen",
+    "source": "GIGA Games",
+    "publicationDate": "2025-11-07T07:45:05.000Z",
+    "summary": "Wollt ihr EA FC, Battlefield und Co. auf dem PC, PS4, PlayStation 5 oder einer Xbox-Konsole im Multiplayer-Spielen oder Online-Funktionen wie Ultimate",
+    "link": "https://www.giga.de/tech/ea-server-down-ea-fc-26-geht-aktuell-nicht-server-status-stoerungen-pruefen--01J5QNT2QF9BMSQAYZKDA686CW",
+    "imageUrl": "https://static.giga.de/43/b7/57/3d258d786b2d736bc0fc5870b1_cmUgMTkyMCADNDczNTdiN2JmOGI=.png",
+    "language": "de"
+  },
+  {
+    "id": "https://www.pcgameshardware.de/Steam-Software-69900/News/Monopol-Umfrage-Branche-PC-Gaming-Community-1485848/",
+    "title": "Hat Steam ein Monopol? Laut Branchenumfrage sagen 72 Prozent ja - Gegenwind aus der Community",
+    "source": "PC Games Hardware",
+    "publicationDate": "2025-11-07T07:44:00.000Z",
+    "summary": "In einer Umfrage unter \"hochrangigen Führungskräften der Spielebranche\" sehen 72 Prozent der Befragten Steam als ein Monopol an. Innerhalb der PC-Comm",
+    "link": "https://www.pcgameshardware.de/Steam-Software-69900/News/Monopol-Umfrage-Branche-PC-Gaming-Community-1485848/",
+    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2024/12/steam-beta-client-update-downloads-dez2024-valve-pcgh.jpg",
     "language": "de"
   },
   {
@@ -40,16 +60,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.giga.de/tech/ea-server-down-ea-fc-26-geht-aktuell-nicht-server-status-stoerungen-pruefen--01J5QNT2QF9BMSQAYZKDA686CW",
-    "title": "EA Server down: EA FC 26 geht aktuell nicht – Server-Status & Störungen prüfen",
-    "source": "GIGA Games",
-    "publicationDate": "2025-11-07T07:29:50.000Z",
-    "summary": "Wollt ihr EA FC, Battlefield und Co. auf dem PC, PS4, PlayStation 5 oder einer Xbox-Konsole im Multiplayer-Spielen oder Online-Funktionen wie Ultimate",
-    "link": "https://www.giga.de/tech/ea-server-down-ea-fc-26-geht-aktuell-nicht-server-status-stoerungen-pruefen--01J5QNT2QF9BMSQAYZKDA686CW",
-    "imageUrl": "https://static.giga.de/43/b7/57/3d258d786b2d736bc0fc5870b1_cmUgMTkyMCADNDczNTdiN2JmOGI=.png",
-    "language": "de"
-  },
-  {
     "id": "https://www.computerbase.de/news/netzteile/fractal-design-ion-3-gold-natives-12v-2x6-und-leise-netzteile-mit-momentum-luefter.94959/",
     "title": "Fractal Design Ion 3 Gold: Natives 12V-2x6 und leise Netzteile mit Momentum-Lüfter",
     "source": "ComputerBase",
@@ -58,6 +68,16 @@
     "link": "https://www.computerbase.de/news/netzteile/fractal-design-ion-3-gold-natives-12v-2x6-und-leise-netzteile-mit-momentum-luefter.94959/",
     "imageUrl": "https://pics.computerbase.de/1/2/0/0/4/1-bbf0fed28657d47e/article-640x360.16b462fc.jpg",
     "language": "de"
+  },
+  {
+    "id": "https://www.gamespot.com/articles/metroid-prime-action-figure-available-now-jakks-pacific-world-of-nintendo-toys/1100-6536022/?ftag=CAD-01-10abi2f",
+    "title": "New Metroid Prime Action Figure 3-Packs Launch At Walmart For Only $15",
+    "source": "GameSpot",
+    "publicationDate": "2025-11-07T07:19:00.000Z",
+    "summary": "Metroid Prime Ultraviolet Glow Metroid Figure $25 See at Amazon Metroid Prime Bounty Hunter Diorama Set $15 | Walmart Exclusive See at Walmart Metroid",
+    "link": "https://www.gamespot.com/articles/metroid-prime-action-figure-available-now-jakks-pacific-world-of-nintendo-toys/1100-6536022/?ftag=CAD-01-10abi2f",
+    "imageUrl": "https://www.gamespot.com/a/uploads/original/1595/15950357/4598302-metroid-toys.jpg",
+    "language": "en"
   },
   {
     "id": "https://www.heise.de/news/Elektroschrott-Recycling-Bundestag-vereinfacht-Rueckgabe-11068997.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
@@ -77,16 +97,6 @@
     "summary": "Das im Stil der Trials-Spiele entwickelte Stunt Paradise von 2024 bekommt 2026 einen zweiten Teil. Dieser soll viele Kritikpunkte verbessern und einig",
     "link": "https://www.pcgameshardware.de/Spiele-Thema-239104/News/Neuer-Arcade-Racer-Stunt-Paradise-2-angekuendigt-1485912/",
     "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/11/Stunt_Paradise_2-pcgh.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://playfront.de/gta-6-im-schatten-rockstar-mitarbeiter-berichten-von-angst-und-misstrauen-im-studio/",
-    "title": "GTA 6 im Schatten: Rockstar-Mitarbeiter berichten von Angst und Misstrauen im Studio",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-07T07:02:00.000Z",
-    "summary": "Nach Entlassungen und angeblichem Union-Busting soll die Stimmung bei Rockstar Games am Boden sein. Ein Mitarbeiter spricht von Angst, Misstrauen – un",
-    "link": "https://playfront.de/gta-6-im-schatten-rockstar-mitarbeiter-berichten-von-angst-und-misstrauen-im-studio/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2025/07/gta-6-online.webp",
     "language": "de"
   },
   {
@@ -930,16 +940,6 @@
     "language": "en"
   },
   {
-    "id": "https://playfront.de/gta-6-verschoben-rockstar-schwoert-diesmal-bleibts-beim-termin/",
-    "title": "GTA 6 verschoben: Rockstar schwört, diesmal bleibt’s beim Termin",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-06T23:17:38.000Z",
-    "summary": "Rockstar Games verschiebt GTA 6 erneut, diesmal auf den 19. November 2026. CEO Strauss Zelnick bleibt „hoch zuversichtlich“. Fans erwarten bald Traile",
-    "link": "https://playfront.de/gta-6-verschoben-rockstar-schwoert-diesmal-bleibts-beim-termin/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2025/05/gta-6-release-date.webp",
-    "language": "de"
-  },
-  {
     "id": "https://www.polygon.com/toy-hall-of-fame-2025-inductees-battleship-trivial-pursuit/",
     "title": "National Toy Hall of Fame inducts Battleship, slime, Trivial Pursuit",
     "source": "Polygon",
@@ -1118,16 +1118,6 @@
     "link": "https://www.pcgamer.com/games/sim/even-in-early-access-tavern-keeper-already-feels-like-the-fantasy-pub-sim-of-my-dreams/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/sXdHcE2d7borq2eNbuDgzL-1280-80.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://playfront.de/marvel-1943-rise-of-hydra-skydance-verschiebt-das-marvel-spiel-ebenfalls/",
-    "title": "Marvel 1943: Rise of Hydra – Skydance verschiebt das Marvel-Spiel ebenfalls",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-06T22:26:45.000Z",
-    "summary": "Skydance New Media verschiebt Marvel 1943: Rise of Hydra auf unbestimmte Zeit. Das ambitionierte Spiel braucht laut Entwickler „mehr Zeit für Qualität",
-    "link": "https://playfront.de/marvel-1943-rise-of-hydra-skydance-verschiebt-das-marvel-spiel-ebenfalls/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2025/03/Marvel-1943-Rise-of-Hydra-black-panther.webp",
-    "language": "de"
   },
   {
     "id": "https://www.pcgames.de/GTA-6-Spiel-55239/News/Release-Verschoben-Rockstar-Veroeffentlichung-Termin-1485964/",
@@ -1330,16 +1320,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.gamespot.com/gallery/outer-worlds-2-inez-graft-most-extraordinary-specimen-better-than-nature/2900-7239/",
-    "title": "The Best Inez Grafts To Choose In The Outer Worlds 2",
-    "source": "GameSpot",
-    "publicationDate": "2025-11-06T21:46:00.000Z",
-    "summary": "Are you still thinking of the best Inez grafts in The Outer Worlds 2? This soldier for Auntie's Choice has a plethora of abilities at her disposal, th",
-    "link": "https://www.gamespot.com/gallery/outer-worlds-2-inez-graft-most-extraordinary-specimen-better-than-nature/2900-7239/",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1816/18167535/4597345-outer-worlds-2-inez-grafts-most-extraordinary-specimen-better-than-nature-.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.pcgameshardware.de/Linux-Software-26761/News/NebiOS-ist-eine-Ubuntu-Distribution-mit-eigenem-Linux-Desktop-1485963/",
     "title": "NebiOS: Hobby-Projekt wird zur Linux-Distribution mit eigenem Desktop und Ökosystem",
     "source": "PC Games Hardware",
@@ -1410,16 +1390,6 @@
     "language": "en"
   },
   {
-    "id": "https://playfront.de/gta-vi-offiziell-verschoben-rockstar-nennt-neuen-termin-in-2026/",
-    "title": "GTA 6 offiziell verschoben: Rockstar nennt neuen Termin in 2026",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-06T21:25:00.000Z",
-    "summary": "Rockstar Games verschiebt GTA VI offiziell auf den 19. November 2026. Wir fassen Trailer, Verkaufszahlen und Infos aus dem Investor Call zusammen.",
-    "link": "https://playfront.de/gta-vi-offiziell-verschoben-rockstar-nennt-neuen-termin-in-2026/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2023/12/gta-vi-logo.webp",
-    "language": "de"
-  },
-  {
     "id": "https://www.gamesradar.com/games/of-course-you-must-be-on-steam-but-steam-isnt-the-entire-world-ceo-of-game-distribution-company-says-yes-some-pc-gamers-prefer-local-stores-to-valves-mega-shop-and-china-is-a-huge-factor/",
     "title": "\"Of course, you must be on Steam. But Steam isn't the entire world\": CEO of game distribution company says yes, some PC gamers prefer \"local\" stores to Valve's mega-shop, and China is a huge factor",
     "source": "GamesRadar+",
@@ -1448,16 +1418,6 @@
     "link": "https://www.pcgamesn.com/grand-theft-auto-vi/gta-6-delayed-november-2026",
     "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/11/gta-6-delayed-november-2026.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://playfront.de/playstation-portal-mit-cloud-gaming-endlich-fast-so-cool-wie-sony-es-immer-versprochen-hat/",
-    "title": "PlayStation Portal: Mit Cloud-Gaming endlich so cool, wie Sony es immer versprochen hat",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-06T21:18:34.000Z",
-    "summary": "Das größte Update für den PlayStation Portal ist da: Cloud-Gaming für deine eigenen Spiele! Doch macht das den Handheld endlich sinnvoll? Unsere Eindr",
-    "link": "https://playfront.de/playstation-portal-mit-cloud-gaming-endlich-fast-so-cool-wie-sony-es-immer-versprochen-hat/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2025/11/playstation-portal-cloud-gaming.webp",
-    "language": "de"
   },
   {
     "id": "https://www.polygon.com/gta-6-delayed-2026-release-date-rockstar-games/",
@@ -1877,16 +1837,6 @@
     "summary": "Zum Start der Dunkelflaute locken viele BKW-Händler mit starken Rabatten im \"Black Month\". Hier sind die besten Angebote.",
     "link": "https://www.heise.de/bestenlisten/deals/balkonkraftwerk-mit-und-ohne-speicher-zum-bestpreis-ist-schon-black-friday/qm90xn2?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
-    "language": "de"
-  },
-  {
-    "id": "https://playfront.de/mlb-the-show-26-offiziell-angekuendigt-mehr-tiefe-mehr-story-mehr-baseball/",
-    "title": "MLB The Show 26 offiziell angekündigt: Mehr Tiefe, mehr Story, mehr Baseball",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-06T18:52:45.000Z",
-    "summary": "Sony und San Diego Studio kündigen MLB The Show 26 an. Neue Karrierepfade, Storylines und Gameplay-Verbesserungen sollen die Serie auf das nächste Lev",
-    "link": "https://playfront.de/mlb-the-show-26-offiziell-angekuendigt-mehr-tiefe-mehr-story-mehr-baseball/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2025/01/mlb-the-show.webp",
     "language": "de"
   },
   {
@@ -2348,16 +2298,6 @@
     "link": "https://www.gamesradar.com/hardware/the-ps-portal-just-got-a-handy-new-upgrade-but-should-you-buy-one-instead-of-a-ps5/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/KiovRC4ixpEjDqR3gjDMaC-1280-80.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://playfront.de/assassins-creed-mirage-valley-of-memory-neues-kapitel-neue-freiheiten-neue-herausforderungen/",
-    "title": "Assassin’s Creed Mirage: Valley of Memory – Neues Kapitel, neue Freiheiten, neue Herausforderungen",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-06T17:36:45.000Z",
-    "summary": "Mit „Valley of Memory“ erhält Assassin’s Creed Mirage ein kostenloses Story-Update mit sechs Stunden Inhalt, neuen Parkour-Optionen und Gameplay-Featu",
-    "link": "https://playfront.de/assassins-creed-mirage-valley-of-memory-neues-kapitel-neue-freiheiten-neue-herausforderungen/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2025/10/Assassins-Creed-Mirage-Valley-of-Memory.webp",
-    "language": "de"
   },
   {
     "id": "https://www.gamepro.de/artikel/pokemon-legenden-z-a-geheimgeschenk,3442561.html",
@@ -3230,16 +3170,6 @@
     "language": "de"
   },
   {
-    "id": "https://playfront.de/jurassic-world-evolution-3-kentrosaurus-kehrt-zurueck-und-bringt-echte-verbesserungen/",
-    "title": "Jurassic World Evolution 3: Kentrosaurus kehrt zurück – und bringt echte Verbesserungen",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-06T16:12:59.000Z",
-    "summary": "Jurassic World Evolution 3 Update 1.1 bringt den Kentrosaurus als Familieneinheit, Performance-Optimierungen und smarte Sandbox-Verbesserungen für ein",
-    "link": "https://playfront.de/jurassic-world-evolution-3-kentrosaurus-kehrt-zurueck-und-bringt-echte-verbesserungen/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2025/06/jurassic-world-evolution-3-babys.webp",
-    "language": "de"
-  },
-  {
     "id": "https://www.gamepro.de/artikel/one-piece-netflix-cast-season-3-zweite-staffel,3442426.html",
     "title": "News: One Piece auf Netflix enthüllt weiteren Cast-Neuzugang für Season 3 - noch bevor die zweite Staffel erscheint",
     "source": "GamePro",
@@ -3527,16 +3457,6 @@
     "summary": "Sega setzt die monatlichen, kostenlosen Crossover-Erweiterungen für „Sonic Racing: CrossWorlds“ fort: Nachdem die virtuelle Pop-Ikone Hatsune Miku die",
     "link": "https://www.play3.de/2025/11/06/sonic-racing-crossworlds-gratis-dlc-bringt-den-naechsten-gastfahrer-auf-die-rennstrecke/",
     "imageUrl": "https://www.play3.de/wp-content/uploads/2025/05/Sonic-Racing-CrossWorlds-1.jpeg",
-    "language": "de"
-  },
-  {
-    "id": "https://playfront.de/hitman-world-of-assassination-bruce-lee-betritt-das-virtuelle-schlachtfeld/",
-    "title": "HITMAN World of Assassination: Bruce Lee betritt das virtuelle Schlachtfeld",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-06T15:42:57.000Z",
-    "summary": "Feiere Bruce Lees 85. Geburtstag in HITMAN World of Assassination mit einer neuen Elusive Target-Mission und dem Bruce Lee Pack (4,99 €), verfügbar bi",
-    "link": "https://playfront.de/hitman-world-of-assassination-bruce-lee-betritt-das-virtuelle-schlachtfeld/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2024/03/hitman.webp",
     "language": "de"
   },
   {
@@ -4597,16 +4517,6 @@
     "summary": "Hier sind alle 24 Operatoren, die ihr zum Start von Call of Duty: Black Ops 7 spielen könnt, im Überblick. Inklusive ihrer Standard-Skins und wie ihr ",
     "link": "https://www.gamepro.de/artikel/cod-black-ops-7-alle-24-operators-liste,3442546.html",
     "imageUrl": "https://images.cgames.de/images/gsgp/800/cod-black-ops-7_6384721.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.pcgameshardware.de/AMD-Zen-Architektur-261795/News/Ryzen-5-7500X3D-Neue-CPU-zeigt-sich-im-Geekbench-1485902/",
-    "title": "Ryzen 5 7500X3D: Neue AMD-CPU zeigt sich im Geekbench",
-    "source": "PC Games Hardware",
-    "publicationDate": "2025-11-06T13:45:00.000Z",
-    "summary": "Der zuvor bereits kolportierte Ryzen 5 7500X3D als neue Einstiegs-CPU mit 3D V-Cache für den Sockel AM5 zeigt sich erneut, diesmal in einem Benchmark.",
-    "link": "https://www.pcgameshardware.de/AMD-Zen-Architektur-261795/News/Ryzen-5-7500X3D-Neue-CPU-zeigt-sich-im-Geekbench-1485902/",
-    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/03/Ryzen-9000-pcgh.png",
     "language": "de"
   },
   {
@@ -9094,7 +9004,7 @@
     "title": "Top 10: Die beste Smartwatch mit EKG im Test",
     "source": "Heise Online",
     "publicationDate": "2025-11-04T19:00:00.000Z",
-    "summary": "Vorhofflimmern bleibt oft unentdeckt – Smartwatches mit EKG erkennen Herzrhythmusstörungen früh. Wir zeigen die besten Modelle für die Herzgesundheit.",
+    "summary": "Vorhofflimmern bleibt oft unentdeckt. Smartwatches mit EKG erkennen Herzrhythmusstörungen früh. Wir zeigen die besten Uhren.",
     "link": "https://www.heise.de/bestenlisten/testsieger/top-10-die-beste-smartwatch-mit-ekg-im-test-testsieger-misst-sogar-blutdruck/02n25tj?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
     "language": "de"
@@ -9557,16 +9467,6 @@
     "summary": "Vom Dongle zum Entertainment-Center: Der Carwave-Adapter von Atoto kombiniert Carplay, Android Auto und ein vollwertiges Android-System im Auto.",
     "link": "https://www.heise.de/bestenlisten/testbericht/test-atoto-carwave-cb6b-youtube-ohne-handy-android-auto-und-carplay-wireless/bw744fr?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Heise%20Online",
-    "language": "de"
-  },
-  {
-    "id": "https://www.heise.de/news/Magie-im-Alltag-Die-Bilder-der-Woche-44-10961863.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Magie im Alltag – Die Bilder der Woche 44",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-04T15:00:00.000Z",
-    "summary": "Von dynamischem Tanz bis zu majestätischen Hafenkränen erzählt jede Aufnahme dieser Woche ihre eigene Geschichte aus Licht und Gefühl.",
-    "link": "https://www.heise.de/news/Magie-im-Alltag-Die-Bilder-der-Woche-44-10961863.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/5/9/1/1/May-the-force-be-with-you-3e23693aca335719.jpeg",
     "language": "de"
   },
   {
