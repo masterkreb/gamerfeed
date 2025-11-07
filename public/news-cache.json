@@ -1,5 +1,65 @@
 [
   {
+    "id": "https://www.pcgames.de/Stranger-Things-Serie-264824/News/ohne-abo-5-minuten-youtube-staffel-5-1485967/",
+    "title": "Stranger Things Staffel 5: Netflix lässt uns jetzt schon ohne Abo die ersten 5 Minuten auf YouTube streamen",
+    "source": "PC Games",
+    "publicationDate": "2025-11-07T05:41:00.000Z",
+    "summary": "Die ersten 5 Minuten von Stranger Things Staffel 5 kann man jetzt schon, auch ohne Netflix-Abo, streamen.",
+    "link": "https://www.pcgames.de/Stranger-Things-Serie-264824/News/ohne-abo-5-minuten-youtube-staffel-5-1485967/",
+    "imageUrl": "https://www.pcgames.de/screenshots/970x546/2024/12/Stranger-Things-1-pc-games.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamezone.de/Stranger-Things-Serie-264824/News/ohne-abo-5-minuten-youtube-staffel-5-1485967/",
+    "title": "Stranger Things Staffel 5: Netflix lässt uns jetzt schon ohne Abo die ersten 5 Minuten auf YouTube streamen",
+    "source": "GameZone",
+    "publicationDate": "2025-11-07T05:41:00.000Z",
+    "summary": "Die ersten 5 Minuten von Stranger Things Staffel 5 kann man jetzt schon, auch ohne Netflix-Abo, streamen.",
+    "link": "https://www.gamezone.de/Stranger-Things-Serie-264824/News/ohne-abo-5-minuten-youtube-staffel-5-1485967/",
+    "imageUrl": "https://www.gamezone.de/screenshots/970x546/2024/12/Stranger-Things-1-pc-games.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.videogameszone.de/Stranger-Things-Serie-264824/News/ohne-abo-5-minuten-youtube-staffel-5-1485967/",
+    "title": "Stranger Things Staffel 5: Netflix lässt uns jetzt schon ohne Abo die ersten 5 Minuten auf YouTube streamen",
+    "source": "Video Games Zone",
+    "publicationDate": "2025-11-07T05:41:00.000Z",
+    "summary": "Die ersten 5 Minuten von Stranger Things Staffel 5 kann man jetzt schon, auch ohne Netflix-Abo, streamen.",
+    "link": "https://www.videogameszone.de/Stranger-Things-Serie-264824/News/ohne-abo-5-minuten-youtube-staffel-5-1485967/",
+    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2024/12/Stranger-Things-1-pc-games.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.xboxdynasty.de/news/arc-raiders/25-millionen-verkaeufe-in-der-ersten-woche/",
+    "title": "ARC Raiders: 2,5 Millionen Verkäufe in der ersten Woche",
+    "source": "XboxDynasty",
+    "publicationDate": "2025-11-07T05:30:24.000Z",
+    "summary": "Laut neuesten Schätzungen konnte sich ARC Raiders in der ersten Woche bereits 2,5 Millionen Mal verkaufen.",
+    "link": "https://www.xboxdynasty.de/news/arc-raiders/25-millionen-verkaeufe-in-der-ersten-woche/",
+    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2021/12/arc-raiders-15.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.nintendolife.com/news/2025/11/gallery-nintendo-updates-its-my-mario-product-line-with-multiple-new-yoshi-items-heres-a-look",
+    "title": "Gallery: Nintendo Updates Its 'My Mario' Product Line With Multiple New Yoshi Items, Here's A Look",
+    "source": "Nintendo Life",
+    "publicationDate": "2025-11-07T05:30:00.000Z",
+    "summary": "Fancy a singing and talking Yoshi?Nintendo's 'My Mario' campaign has lifted the lid on multiple Yoshi-themed announcements today, and apart from the n",
+    "link": "https://www.nintendolife.com/news/2025/11/gallery-nintendo-updates-its-my-mario-product-line-with-multiple-new-yoshi-items-heres-a-look",
+    "imageUrl": "https://images.nintendolife.com/31842fe5839e6/small.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.heise.de/news/Freitag-Tesla-Milliarden-fuer-Elon-Musk-US-Regierung-gegen-Boeing-Strafprozess-11068951.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Freitag: Tesla-Milliarden für Elon Musk, US-Regierung gegen Boeing-Strafprozess",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-07T05:15:00.000Z",
+    "summary": "Aktionäre für Musk-Milliarden + Boeing trotz Geständnis ohne Strafe + Vodafone für Privat-Peering + Apple streicht Watch-Funktion + Verbraucherschutz-",
+    "link": "https://www.heise.de/news/Freitag-Tesla-Milliarden-fuer-Elon-Musk-US-Regierung-gegen-Boeing-Strafprozess-11068951.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/2/7/4/1/friday-b0f16b0613f61a31.jpeg",
+    "language": "de"
+  },
+  {
     "id": "https://www.destructoid.com/fc-26-maintenance-countdown-november-7-when-will-the-servers-come-back/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=fc-26-maintenance-countdown-november-7-when-will-the-servers-come-back",
     "title": "FC 26 maintenance countdown (November 7): When will the servers come back",
     "source": "Destructoid",
@@ -4380,16 +4440,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.xboxdynasty.de/news/call-of-duty-black-ops-7/multiplayer-feuerwerk-zuendet-schon-zum-launch/",
-    "title": "Call of Duty: Black Ops 7: Multiplayer-Feuerwerk zündet schon zum Launch",
-    "source": "XboxDynasty",
-    "publicationDate": "2025-11-06T13:30:02.000Z",
-    "summary": "19 Karten, 24 Operatoren und neue Playlist-Details stehen zum Launch von Call of Duty: Black Ops 7 bereit.",
-    "link": "https://www.xboxdynasty.de/news/call-of-duty-black-ops-7/multiplayer-feuerwerk-zuendet-schon-zum-launch/",
-    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2025/06/call-of-duty-black-ops-7-35.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.pcgames.de/Nintendo-Firma-15624/News/Studios-Uebernahmen-Switch-2-Entwicklung-1485938/",
     "title": "Große Pläne bei Nintendo: Konzern kündigt an, neue Entwicklerstudios zu übernehmen",
     "source": "PC Games",
@@ -6330,26 +6380,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.pcgames.de/Nintendo-Switch-2-Konsolen-280469/News/nintendo-store-app-download-herunterladen-funktionen-app-store-iphone-ios-google-playstore-android-1485882/",
-    "title": "Neue Nintendo-App für Switch 2: Aber was macht die Wii U denn da?",
-    "source": "PC Games",
-    "publicationDate": "2025-11-06T07:26:00.000Z",
-    "summary": "Nintendo überrascht mit einer neuen App für die Switch 2 und älteren Konsolen als Gratis-Download.",
-    "link": "https://www.pcgames.de/Nintendo-Switch-2-Konsolen-280469/News/nintendo-store-app-download-herunterladen-funktionen-app-store-iphone-ios-google-playstore-android-1485882/",
-    "imageUrl": "https://www.pcgames.de/screenshots/970x546/2023/12/Mario_Vorhang-buffed21-pc-games.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamezone.de/Nintendo-Switch-2-Konsolen-280469/News/nintendo-store-app-download-herunterladen-funktionen-app-store-iphone-ios-google-playstore-android-1485882/",
-    "title": "Neue Nintendo-App für Switch 2: Aber was macht die Wii U denn da?",
-    "source": "GameZone",
-    "publicationDate": "2025-11-06T07:26:00.000Z",
-    "summary": "Nintendo überrascht mit einer neuen App für die Switch 2 und älteren Konsolen als Gratis-Download.",
-    "link": "https://www.gamezone.de/Nintendo-Switch-2-Konsolen-280469/News/nintendo-store-app-download-herunterladen-funktionen-app-store-iphone-ios-google-playstore-android-1485882/",
-    "imageUrl": "https://www.gamezone.de/screenshots/970x546/2023/12/Mario_Vorhang-buffed21-pc-games.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.videogameszone.de/Nintendo-Switch-2-Konsolen-280469/News/nintendo-store-app-download-herunterladen-funktionen-app-store-iphone-ios-google-playstore-android-1485882/",
     "title": "Neue Nintendo-App für Switch 2: Aber was macht die Wii U denn da?",
     "source": "Video Games Zone",
@@ -6448,16 +6478,6 @@
     "link": "https://www.destructoid.com/what-does-the-checkpoint-flag-do-in-peak/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=what-does-the-checkpoint-flag-do-in-peak",
     "imageUrl": "https://www.destructoid.com/wp-content/uploads/2025/11/peak-checkpoint-flag.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://www.videogameszone.de/World-of-Warcraft-Spiel-42971/News/ibelin-kinofilm-schauspieler-1485788/",
-    "title": "World of Warcraft im Kino: Oscar-Gewinner Anthony Hopkins und The Last of Us-Star Isabela Merced im Drama Ibelin dabei",
-    "source": "Video Games Zone",
-    "publicationDate": "2025-11-06T06:29:00.000Z",
-    "summary": "Im Drama Ibelin wird die Faszination von World of Warcraft auf sehr berührende Weise gezeigt.",
-    "link": "https://www.videogameszone.de/World-of-Warcraft-Spiel-42971/News/ibelin-kinofilm-schauspieler-1485788/",
-    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/01/Ibelin_Netflix-1--buffed.jpg",
-    "language": "de"
   },
   {
     "id": "https://www.eurogamer.de/dispatch-knackt-die-millionenmarke-nach-nur-zehn-tagen",
@@ -6618,16 +6638,6 @@
     "link": "https://www.computerbase.de/news/gaming/sony-cloud-streaming-auf-playstation-portal-startet-heute.94934/",
     "imageUrl": "https://pics.computerbase.de/1/2/0/0/1/3-64a0cac8f7af6c19/article-640x360.67f4ca10.jpg",
     "language": "de"
-  },
-  {
-    "id": "https://www.nintendolife.com/news/2025/11/hyrule-warriors-age-of-imprisonment-receives-its-first-switch-2-update-version-1-0-1",
-    "title": "Hyrule Warriors: Age Of Imprisonment Receives Its First Switch 2 Update (Version 1.0.1)",
-    "source": "Nintendo Life",
-    "publicationDate": "2025-11-06T03:15:00.000Z",
-    "summary": "Here's what you can expect.Hyrule Warriors: Age of Imprisonment is out today on the Switch 2, and as part of the launch, Nintendo has rolled out the f",
-    "link": "https://www.nintendolife.com/news/2025/11/hyrule-warriors-age-of-imprisonment-receives-its-first-switch-2-update-version-1-0-1",
-    "imageUrl": "https://images.nintendolife.com/86423fcc9cc4b/small.jpg",
-    "language": "en"
   },
   {
     "id": "https://www.pcgamer.com/games/action/in-a-true-nightmare-scenario-this-anticipated-indie-has-been-delayed-only-hours-before-launch-for-a-boring-and-frustrating-reason/",
@@ -9687,16 +9697,6 @@
     "summary": "Nvidia und Telekom hatten im Juni ihre Pläne einer 10.000 GPU starken „Industrial AI Cloud“ in Deutschland bekannt gegeben. Heute haben die Partner er",
     "link": "https://www.computerbase.de/news/internet/nvidia-telekom-sap-deutsche-ki-cloud-mit-10-000-gpus-geht-anfang-2026-online.94903/",
     "imageUrl": "https://pics.computerbase.de/1/1/9/9/7/9-51b3089536407430/article-640x360.8eed77e4.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.heise.de/news/Apple-TV-4K-und-HomePod-mini-Neue-Modelle-noch-im-November-10966249.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Apple-Zubehör: HomePod mini und Apple TV 4K im Anflug",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-04T13:07:00.000Z",
-    "summary": "Neuerungen in zwei kleineren Produktkategorien, die sich als Nikolaus-Geschenk eignen, stehen bei Apple offenbar kurz vor der Auslieferung",
-    "link": "https://www.heise.de/news/Apple-TV-4K-und-HomePod-mini-Neue-Modelle-noch-im-November-10966249.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/1/4/2/appletv_homepod-52965c62dca4da38.png",
     "language": "de"
   },
   {
