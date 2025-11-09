@@ -1,5 +1,65 @@
 [
   {
+    "id": "https://www.eurogamer.de/pokemon-legends-z-a-kundigt-neue-details-zum-ersten-dlc-fur-den-19-november-2025-an",
+    "title": "Pokémon Legends: Z-A kündigt neue Details zum ersten DLC für den 19. November 2025 an",
+    "source": "Eurogamer",
+    "publicationDate": "2025-11-09T18:14:41.000Z",
+    "summary": "Schon zur Veröffentlichung entpuppte sich Pok&eacute;mon Legenden: Z-A als großer Erfolg und überzeugte direkt mit einem satrken Verkaufsstart. Nun kü",
+    "link": "https://www.eurogamer.de/pokemon-legends-z-a-kundigt-neue-details-zum-ersten-dlc-fur-den-19-november-2025-an",
+    "imageUrl": "https://assetsio.gnwcdn.com/Pokemon-Legenden-Z-A_News.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.play3.de/?p=784483",
+    "title": "Predator Badlands: Sci-Fi-Hit lässt Kinokassen klingeln und stellt neue Franchise-Rekorde auf",
+    "source": "Play3",
+    "publicationDate": "2025-11-09T18:09:54.000Z",
+    "summary": "Bereits 2021 konnte Regisseur Dan Trachtenberg das „Predator“-Franchise mit „Prey“ erfolgreich wiederbeleben. Und mit „Predator: Badlands“ der in der ",
+    "link": "https://www.play3.de/2025/11/09/predator-badlands-sci-fi-hit-laesst-kinokassen-klingeln-und-stellt-neue-franchise-rekorde-auf/",
+    "imageUrl": "https://www.play3.de/wp-content/uploads/2025/11/Predator-Badlands-Filmkritiken-Reviews-Uebersicht-Sci-Fi-Actionfilm-Artikelbild.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.destructoid.com/?p=1139032",
+    "title": "I have no idea what I’m doing in Europa Universalis 5—and that’s what makes it Paradox’ finest",
+    "source": "Destructoid",
+    "publicationDate": "2025-11-09T18:04:52.000Z",
+    "summary": "Paradox Interactive has done it. I can't say it did it \"again,\" because it usually botches every single launch and release and forces us to wait for y",
+    "link": "https://www.destructoid.com/i-have-no-idea-what-im-doing-in-europa-universalis-5-and-thats-what-makes-it-paradox-finest/?utm_source=rss&utm_medium=rss&utm_campaign=i-have-no-idea-what-im-doing-in-europa-universalis-5-and-thats-what-makes-it-paradox-finest",
+    "imageUrl": "https://www.destructoid.com/wp-content/uploads/2025/11/eu5-cover.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.xboxdynasty.de/?p=1201381",
+    "title": "XboxDynasty: Gewinnspiel: Gewinnt Silent Hill f – aber nur noch heute",
+    "source": "XboxDynasty",
+    "publicationDate": "2025-11-09T17:50:28.000Z",
+    "summary": "Macht mit bei einem neuen XboxDynasty Gewinnspiel! Gewinnt dieses Wochenende das Horrorspiel Silent Hill f!",
+    "link": "https://www.xboxdynasty.de/news/xboxdynasty/gewinnspiel-gewinnt-silent-hill-f-aber-nur-dieses-wochenende/",
+    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2025/10/xboxdynasty-2.jpg",
+    "language": "de"
+  },
+  {
+    "id": "orMfY5Z2bFz7fvDzmSeGHA",
+    "title": "Vince Gilligan knows how he wants the Pluribus ending to go, but the Breaking Bad creator \"isn't precious\" about it either: \"If we come up with a better way to end this thing, we will\"",
+    "source": "GamesRadar+",
+    "publicationDate": "2025-11-09T17:47:37.000Z",
+    "summary": "Apple TV has committed to two seasons of Pluribus so far",
+    "link": "https://www.gamesradar.com/entertainment/sci-fi-shows/vince-gilligan-knows-how-he-wants-the-pluribus-ending-to-go-but-the-breaking-bad-creator-isnt-precious-about-it-either-if-we-come-up-with-a-better-way-to-end-this-thing-we-will/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/TysyP3ESLMtxKvpCgUB8CF-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.4p.de/?p=3356646",
+    "title": "GTA 6 verschoben: Neuer Releasetermin frustriert Fans – „Reißt euch mal zusammen“",
+    "source": "4P",
+    "publicationDate": "2025-11-09T17:40:28.000Z",
+    "summary": "Die nächste Hiobsbotschaft für Fans von GTA 6: Der Release wurde erneut verschoben. Rockstar Games bittet weiterhin um Geduld.",
+    "link": "https://www.4p.de/news/gta-6-verschoben-neuer-releasetermin-frustriert-fans-reisst-euch-mal-zusammen-laengerem/3356646",
+    "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/11/gta6-november-verschoben.jpg?w=1200&amp;h=900&amp;crop=1",
+    "language": "de"
+  },
+  {
     "id": "https://www.play3.de/?p=784476",
     "title": "Der Super Mario Galaxy Film: Miyamoto glaubt an großen Erfolg und spricht über die „Mario-ness“ künftiger Spiele",
     "source": "Play3",
@@ -57,6 +117,26 @@
     "summary": "Zack, wieder Geld verjubelt. Ein halbes Dutzend Resident Evil-Spiele auf einen Schlag? Da rutscht Albert Wesker das Toupet vom Kopf!",
     "link": "https://www.4p.de/news/steam-bringt-6-resident-evil-spiele-zum-schleuderpreis-ein-absolutes-muss-neuer/3356888",
     "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/11/resident-evil-neues-neu2-banner.jpg?w=1200&amp;h=900&amp;crop=1",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/borderlands-4-shift-codes-goldene-schluessel,3439325.html",
+    "title": "News: Borderlands 4 - Alle Shift-Codes für Goldene Schlüssel & Skins im Überblick (November 2025)",
+    "source": "GameStar",
+    "publicationDate": "2025-11-09T17:09:00.000Z",
+    "summary": "Auf der Suche nach aktiven Borderlands 4 Shift Codes? Unsere ständig aktualisierte Liste zeigt euch alle gültigen Codes für Goldene Schlüssel und exkl",
+    "link": "https://www.gamestar.de/artikel/borderlands-4-shift-codes-goldene-schluessel,3439325.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/borderlands-schl%C3%BCssel_6374352.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/beste-in-ear-kopfhoerer-noise-cancelling-sony-wf-1000xm5,3442413.html",
+    "title": "Deals: Die besten In-Ears - Die ich je hatte: Käufer sollten aber ein paar Dinge wissen! [Anzeige]",
+    "source": "GameStar",
+    "publicationDate": "2025-11-09T17:08:00.000Z",
+    "summary": "Ich habe ja ein Faible für guten Sound, aber bei Kopfhörern brauche ich Noise Cancelling - besonders beim Arbeiten im Büro. Die besten In-Ear-Kopfhöre",
+    "link": "https://www.gamestar.de/artikel/beste-in-ear-kopfhoerer-noise-cancelling-sony-wf-1000xm5,3442413.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/sony-wf-1000xm5-beste-earbuds-kopfh%C3%B6rer-noise-cancelling-anc-hifi-sony-bluetooth-kabellose-kopfh%C3%B6rer-in-ear-kopfh%C3%B6rer-headset-earbuds_6384351.jpg",
     "language": "de"
   },
   {
@@ -1291,7 +1371,7 @@
   },
   {
     "id": "https://www.gamestar.de/artikel/netflix-death-by-lightning-kritiken,3442651.html",
-    "title": "News: Neu auf Netflix - Jetzt startet die brandneue Serie der Macher von Game of Thrones und die ersten Kritiken sehen super aus!",
+    "title": "News: Death by Lightning - Jetzt startet die brandneue Netflix-Serie der Macher von Game of Thrones und die ersten Kritiken sehen super aus!",
     "source": "GameStar",
     "publicationDate": "2025-11-09T10:19:00.000Z",
     "summary": "Die tragische Geschichte des 20. US-Präsidenten James Garfield ist offenbar ein heißer Serien-Tipp für diesen Winter.",
@@ -2120,26 +2200,6 @@
     "language": "en"
   },
   {
-    "id": "https://www.gamestar.de/artikel/6-punkte-die-arc-raiders-dringend-besser-machen-muss-kolumne,3442467.html",
-    "title": "Kolumne: Arc Raiders - Diese 6 Punkte muss Embarks Shooter dringend verbessern, um für mich zum Genre-König zu werden",
-    "source": "GameStar",
-    "publicationDate": "2025-11-09T06:30:00.000Z",
-    "summary": "Arc Raiders ist bereits zum Release ein richtig guter Multiplayer-Shooter. Doch für den perfekten Endzeit-Ausflug muss das Spiel für unseren Autor Jes",
-    "link": "https://www.gamestar.de/artikel/6-punkte-die-arc-raiders-dringend-besser-machen-muss-kolumne,3442467.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/arc-raiders-peat_6384473.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamestar.de/artikel/bester-maehroboter-ohne-draht-amazon-eufy-e15,3442340.html",
-    "title": "Deals: Der \"Beste\"? - Das ist der bestbewertete Mähroboter ohne Draht auf Amazon! [Anzeige]",
-    "source": "GameStar",
-    "publicationDate": "2025-11-09T06:29:00.000Z",
-    "summary": "Wer antizyklisch kauft, kauft schlau: Produkte wie Mähroboter oder Grills sind im Winter häufig günstiger - und der bestbewertete Rasenmähroboter ohne",
-    "link": "https://www.gamestar.de/artikel/bester-maehroboter-ohne-draht-amazon-eufy-e15,3442340.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/eufy-e15-m%C3%A4hroboter-ohne-begrenzungskabel-ohne-draht-ohne-kabel-bester-m%C3%A4hroboter-amazon-test-bewertungen-tipp-_6384123.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.giga.de/games/testet-euren-iq-in-candy-riddles-seid-ihr-schlau-genug-fuer-das-spiel--01K8X76AQ8T22M9Z0NQM79R2WY",
     "title": "Testet euren IQ in Candy Riddles: Seid ihr schlau genug für das Spiel?",
     "source": "GIGA Games",
@@ -2147,16 +2207,6 @@
     "summary": "„Match 3“-Spiele sind unter Online-Spielen häufig zu finden. Dieser süße Ableger weiß eure grauen Zellen mit der Zeit immer mehr zu fordern.",
     "link": "https://www.giga.de/games/testet-euren-iq-in-candy-riddles-seid-ihr-schlau-genug-fuer-das-spiel--01K8X76AQ8T22M9Z0NQM79R2WY",
     "imageUrl": "https://static.giga.de/23/3f/35/37cc6ac8be475295282317782a_cmUgMTkyMCADMmYzY2NlNTUyNzI=.png",
-    "language": "de"
-  },
-  {
-    "id": "https://www.xboxdynasty.de/?p=1201381",
-    "title": "XboxDynasty: Gewinnspiel: Gewinnt Silent Hill f – aber nur noch heute",
-    "source": "XboxDynasty",
-    "publicationDate": "2025-11-09T06:20:28.000Z",
-    "summary": "Macht mit bei einem neuen XboxDynasty Gewinnspiel! Gewinnt dieses Wochenende das Horrorspiel Silent Hill f!",
-    "link": "https://www.xboxdynasty.de/news/xboxdynasty/gewinnspiel-gewinnt-silent-hill-f-aber-nur-dieses-wochenende/",
-    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2025/10/xboxdynasty-2.jpg",
     "language": "de"
   },
   {
@@ -4160,16 +4210,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.4p.de/?p=3356646",
-    "title": "GTA 6 verschoben: Neuer Releasetermin frustriert Fans – „Reißt euch mal zusammen“",
-    "source": "4P",
-    "publicationDate": "2025-11-08T08:34:45.000Z",
-    "summary": "Die nächste Hiobsbotschaft für Fans von GTA 6: Der Release wurde erneut verschoben. Rockstar Games bittet weiterhin um Geduld.",
-    "link": "https://www.4p.de/news/gta-6-verschoben-neuer-releasetermin-frustriert-fans-reisst-euch-mal-zusammen-spatzen/3356646",
-    "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/11/gta6-november-verschoben.jpg?w=1200&amp;h=900&amp;crop=1",
-    "language": "de"
-  },
-  {
     "id": "https://www.destructoid.com/?p=1138885",
     "title": "How to complete The Root of the Matter in ARC Raiders",
     "source": "Destructoid",
@@ -4417,16 +4457,6 @@
     "summary": "Beim Wiederfinden von verlorenen Gegenständen oder entlaufenden Haustieren können GPS-Tracker und BLE-Tags helfen. Im Podcast diskutieren wir beide Ba",
     "link": "https://www.heise.de/news/Vergessen-verloren-geklaut-So-helfen-AirTags-GPS-Tracker-Co-c-t-uplink-11068684.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/2/6/0/3/gps_tracker_V2-f526c820f8087d79.png",
-    "language": "de"
-  },
-  {
-    "id": "https://www.play3.de/?p=783752",
-    "title": "60 Prozent reduziert: Fordernder Indie-Hit zum bisherigen PSN-Bestpreis erhältlich",
-    "source": "Play3",
-    "publicationDate": "2025-11-08T05:10:00.000Z",
-    "summary": "In dieser Woche schaltete Sony den nächsten großen Sale im PlayStation Store frei, der mit mehr als 4.000 Angeboten lockt, […] Der Beitrag 60 Prozent ",
-    "link": "https://www.play3.de/2025/11/08/60-prozent-reduziert-fordernder-indie-hit-zum-bisherigen-psn-bestpreis-erhaeltlich/",
-    "imageUrl": "https://www.play3.de/wp-content/uploads/2025/11/Blasphemous-2-PSN-Deal.jpg",
     "language": "de"
   },
   {
@@ -5788,16 +5818,6 @@
     "link": "https://www.giga.de/games/switch-2-leak-wuerde-alle-treuen-nintendo-fans-gluecklich-machen--01K814DCAR4K01DJXGSY32ZZWR",
     "imageUrl": "https://static.giga.de/61/d7/a7/adbb13e358be13a713837ab228_ZmMgN2Q3Nzg1MzZmZmZmIDE5MjAgMAM2N2FiZTgxNzhhMg==.png",
     "language": "de"
-  },
-  {
-    "id": "q7bTyQxSJMKLGU5dWqrpRH",
-    "title": "How to complete A First Foothold in Arc Raiders",
-    "source": "GamesRadar+",
-    "publicationDate": "2025-11-07T16:34:19.000Z",
-    "summary": "The Arc Raiders First Foothold mission is about finding four locations in The Blue Gate map",
-    "link": "https://www.gamesradar.com/games/third-person-shooter/arc-raiders-a-first-foothold-walkthrough-locations/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/GwCUeNiXoveEzx4NzuXfSN-1280-80.jpg",
-    "language": "en"
   },
   {
     "id": "https://www.heise.de/news/Verbraucherschuetzer-1N-Telecom-ignoriert-Urteil-des-Bundesgerichtshofs-11071150.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
@@ -7707,16 +7727,6 @@
     "summary": "miHoYo has released a new trailer for cosmic life simulation game Petit Planet showcasing the … Source",
     "link": "https://www.gematsu.com/2025/11/petit-planet-planet-design-trailer",
     "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/Petit-Planet-PV_11-06-25.jpg",
-    "language": "en"
-  },
-  {
-    "id": "https://www.destructoid.com/?p=1025771",
-    "title": "GTA 6 official release date and trailers",
-    "source": "Destructoid",
-    "publicationDate": "2025-11-07T01:22:43.000Z",
-    "summary": "For months, Grand Theft Auto 6 was set for a 2025 release. But as of late 2025, the upcoming game has seen more than one delay, pushing its launch dat",
-    "link": "https://www.destructoid.com/gta-6-official-release-date-window-and-trailers/?utm_source=rss&utm_medium=rss&utm_campaign=gta-6-official-release-date-window-and-trailers",
-    "imageUrl": "https://www.destructoid.com/wp-content/uploads/2024/02/grand-theft-auto-6_4a843f.jpg",
     "language": "en"
   },
   {
@@ -10778,16 +10788,6 @@
     "link": "https://gameinformer.com/2025/11/04/warhammer-survivors-puts-space-marines-in-the-vampire-survivors-engine",
     "imageUrl": "https://www.gameinformer.com/sites/default/files/styles/body_default/public/2025/11/04/9b96d54c/warhammer%20survivors%201.jpg.webp",
     "language": "en"
-  },
-  {
-    "id": "https://www.eurogamer.de/geruchte-konnte-gta-6-erneut-verschoben-werden-entwickler-sollen-widerspruchliche-aussagen-gemacht-haben",
-    "title": "Gerüchte: Könnte GTA 6 erneut verschoben werden? Entwickler sollen widersprüchliche Aussagen gemacht haben",
-    "source": "Eurogamer",
-    "publicationDate": "2025-11-04T15:29:04.000Z",
-    "summary": "Grand Theft Auto 6 gehört zu den am meisten erwarteten Spielen des nächsten Jahres. Nachdem der Open-World-Blockbuster bereits einmal offiziell auf de",
-    "link": "https://www.eurogamer.de/geruchte-konnte-gta-6-erneut-verschoben-werden-entwickler-sollen-widerspruchliche-aussagen-gemacht-haben",
-    "imageUrl": "https://assetsio.gnwcdn.com/GTA-VI_News.png?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
   },
   {
     "id": "https://www.rockpapershotgun.com/arc-raiders-review",
