@@ -1,11 +1,14 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useFeeds } from '../../hooks/useFeeds';
-import type { FeedSource } from '../../types';
+import type { Article, FeedSource } from '../../types';
 import {
     ArrowLeftIcon,
     NewspaperIcon,
     HeartbeatIcon,
     QuestionMarkCircleIcon,
+    WarningIcon,
+    ChevronDownIcon,
+    ChevronUpIcon,
 } from '../Icons';
 import { FeedFormModal } from './FeedFormModal';
 import { checkFeedHealth as checkFeedHealthService, HealthState } from './healthService';
@@ -39,6 +42,51 @@ const TabButton: React.FC<{
     </button>
 );
 
+const MissingFeedsWarning: React.FC<{ missingFeeds: FeedSource[] }> = ({ missingFeeds }) => {
+    const [isExpanded, setIsExpanded] = useState(true);
+
+    if (missingFeeds.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="bg-amber-100 dark:bg-amber-900/30 border-l-4 border-amber-500 text-amber-800 dark:text-amber-200 p-4 rounded-lg mb-6 animate-fade-in">
+            <div className="flex items-start">
+                <div className="flex-shrink-0 mt-0.5">
+                    <WarningIcon className="w-6 h-6 text-amber-500" />
+                </div>
+                <div className="ml-3 flex-1">
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-medium">
+                            {missingFeeds.length} Missing Feed{missingFeeds.length > 1 ? 's' : ''} From Frontend Cache
+                        </h3>
+                        <button
+                            onClick={() => setIsExpanded(!isExpanded)}
+                            className="p-2 -m-2 rounded-full hover:bg-amber-200 dark:hover:bg-amber-800/50"
+                            aria-expanded={isExpanded}
+                        >
+                            {isExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+                        </button>
+                    </div>
+                    {isExpanded && (
+                        <div className="mt-2 text-sm">
+                            <p>The following feeds are not present in the live <code className="text-xs bg-amber-200 dark:bg-amber-800/50 p-1 rounded">news-cache.json</code> file. This indicates a potential issue with the automated feed fetching process (e.g., GitHub Action failure).</p>
+                            <ul className="list-none mt-3 space-y-2 text-xs">
+                                {missingFeeds.map(feed => (
+                                    <li key={feed.id} className="font-mono p-2 bg-slate-50 dark:bg-zinc-800/30 rounded">
+                                        <strong className="font-sans font-semibold text-base mr-2">{feed.name}</strong>
+                                        <a href={feed.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-600 dark:hover:text-amber-100 break-all">{feed.url}</a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 export const AdminPanel: React.FC = () => {
     const { feeds, addFeed, updateFeed, deleteFeed } = useFeeds();
@@ -47,6 +95,7 @@ export const AdminPanel: React.FC = () => {
     const [feedToDelete, setFeedToDelete] = useState<FeedSource | null>(null);
     const [feedHealth, setFeedHealth] = useState<FeedHealth>({});
     const [activeTab, setActiveTab] = useState<AdminTab>('management');
+    const [isCheckingAll, setIsCheckingAll] = useState(false);
 
     // Initialize health status for any new feeds
     useEffect(() => {
@@ -59,6 +108,13 @@ export const AdminPanel: React.FC = () => {
         if (Object.keys(initialHealth).length > 0) {
             setFeedHealth(prev => ({ ...prev, ...initialHealth }));
         }
+    }, [feeds, feedHealth]);
+
+    const missingFeeds = useMemo(() => {
+        return feeds.filter(feed =>
+            feedHealth[feed.id]?.status === 'warning' &&
+            feedHealth[feed.id]?.detail?.includes('not found in the live news cache')
+        ).sort((a,b) => a.name.localeCompare(b.name));
     }, [feeds, feedHealth]);
 
     const handleAddNew = () => { setEditingFeed(null); setIsModalOpen(true); };
@@ -78,18 +134,82 @@ export const AdminPanel: React.FC = () => {
     };
 
     // Health Check Logic
-    const checkFeedHealth = useCallback(async (feed: FeedSource) => {
-        setFeedHealth(prev => ({ ...prev, [feed.id]: { status: 'checking', detail: 'Initiating check...' } }));
+    const checkFeedHealth = useCallback(async (feed: FeedSource, sourcesInCache: Set<string>) => {
+        setFeedHealth(prev => ({ ...prev, [feed.id]: { status: 'checking', detail: 'Verifying presence in news cache...' } }));
+
+        if (!sourcesInCache.has(feed.name)) {
+            setFeedHealth(prev => ({
+                ...prev,
+                [feed.id]: {
+                    status: 'warning',
+                    detail: 'Feed not found in the live news cache. The automated GitHub Action might be failing for this source.'
+                }
+            }));
+            return; // Stop here. This is the most critical information.
+        }
+
+        // If present in cache, run the live check for deeper diagnostics.
+        setFeedHealth(prev => ({ ...prev, [feed.id]: { status: 'checking', detail: 'Cache OK. Initiating live check...' } }));
         const result = await checkFeedHealthService(feed);
         setFeedHealth(prev => ({ ...prev, [feed.id]: result }));
     }, []);
 
+    const handleCheckSingleFeed = useCallback(async (feed: FeedSource) => {
+        setFeedHealth(prev => ({ ...prev, [feed.id]: { status: 'checking', detail: 'Fetching live news cache...' } }));
+        try {
+            const response = await fetch('/news-cache.json?' + Date.now()); // Cache bust
+            if (!response.ok) {
+                throw new Error(`Failed to fetch news cache: ${response.status}`);
+            }
+            const articles: Article[] = await response.json();
+            const sourcesInCache = new Set(articles.map(a => a.source));
+
+            // Now call the core check function with the cache data
+            await checkFeedHealth(feed, sourcesInCache);
+
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "An unknown error occurred.";
+            console.error("Failed to fetch or parse news-cache.json", error);
+            setFeedHealth(prev => ({
+                ...prev,
+                [feed.id]: {
+                    status: 'error',
+                    detail: `Could not load news-cache.json to verify presence. Error: ${message}`
+                }
+            }));
+        }
+    }, [checkFeedHealth]);
+
+
     const checkAllFeeds = useCallback(async () => {
+        setIsCheckingAll(true);
+        // First, fetch the live cache to get the ground truth.
+        let sourcesInCache: Set<string>;
+        try {
+            const response = await fetch('/news-cache.json?' + Date.now()); // Cache bust
+            if (!response.ok) throw new Error(`Failed to fetch news cache: ${response.status}`);
+            const articles: Article[] = await response.json();
+            sourcesInCache = new Set(articles.map((a: Article) => a.source));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "An unknown server error occurred.";
+            console.error("Failed to fetch or parse news-cache.json for 'Check All'", error);
+            // Optionally update all feeds to show a cache error
+            const allFeedsErrorState: FeedHealth = {};
+            feeds.forEach(feed => {
+                allFeedsErrorState[feed.id] = { status: 'error', detail: `Could not load news-cache.json. Error: ${message}` };
+            });
+            setFeedHealth(allFeedsErrorState);
+            setIsCheckingAll(false);
+            return;
+        }
+
         // Sequentially check feeds to avoid rate limiting or browser connection limits.
         for (const feed of feeds) {
-            await checkFeedHealth(feed);
+            await checkFeedHealth(feed, sourcesInCache);
         }
+        setIsCheckingAll(false);
     }, [feeds, checkFeedHealth]);
+
 
     return (
         <div className="min-h-screen bg-slate-100 dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 animate-fade-in">
@@ -102,6 +222,7 @@ export const AdminPanel: React.FC = () => {
                 </div>
             </header>
             <main className="container mx-auto p-4 md:p-6">
+                <MissingFeedsWarning missingFeeds={missingFeeds} />
                 <nav className="mb-6 border-b border-slate-200 dark:border-zinc-700" role="tablist" aria-label="Admin Sections">
                     <div className="flex items-center space-x-2">
                         <TabButton
@@ -132,15 +253,16 @@ export const AdminPanel: React.FC = () => {
                         onAddNew={handleAddNew}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
-                        onCheckHealth={checkFeedHealth}
+                        onCheckHealth={handleCheckSingleFeed}
                     />
                 </div>
                 <div role="tabpanel" hidden={activeTab !== 'health'}>
                     <HealthCenterTab
                         feeds={feeds}
                         feedHealth={feedHealth}
-                        onCheckHealth={checkFeedHealth}
+                        onCheckHealth={handleCheckSingleFeed}
                         onCheckAll={checkAllFeeds}
+                        isCheckingAll={isCheckingAll}
                     />
                 </div>
                 <div role="tabpanel" hidden={activeTab !== 'legend'}>

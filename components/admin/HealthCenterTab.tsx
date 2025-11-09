@@ -65,15 +65,16 @@ interface HealthCenterTabProps {
     feedHealth: FeedHealth;
     onCheckHealth: (feed: FeedSource) => void;
     onCheckAll: () => void;
+    isCheckingAll: boolean;
 }
 
 export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                                                                     feeds,
                                                                     feedHealth,
                                                                     onCheckHealth,
-                                                                    onCheckAll
+                                                                    onCheckAll,
+                                                                    isCheckingAll
                                                                 }) => {
-    const [isCheckingAll, setIsCheckingAll] = useState(false);
     const [sortConfig, setSortConfig] = useState<{ key: SortableKey; direction: SortDirection } | null>({ key: 'status', direction: 'ascending' });
 
     const requestSort = (key: SortableKey) => {
@@ -82,12 +83,6 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
             direction = 'descending';
         }
         setSortConfig({ key, direction });
-    };
-
-    const handleCheckAll = async () => {
-        setIsCheckingAll(true);
-        await onCheckAll();
-        setIsCheckingAll(false);
     };
 
     const sortedFeeds = useMemo(() => {
@@ -133,7 +128,7 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                     <h2 className="text-lg font-semibold">Feed Health Diagnostics</h2>
                     <p className="text-sm text-slate-500 dark:text-zinc-400">Review the status of each feed and its first image.</p>
                 </div>
-                <button onClick={handleCheckAll} disabled={isCheckingAll} className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 text-slate-700 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-wait">
+                <button onClick={onCheckAll} disabled={isCheckingAll} className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 text-slate-700 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-wait">
                     {isCheckingAll ? <LoadingSpinner className="w-5 h-5"/> : <CheckCircleIcon className="w-5 h-5"/>}
                     <span>Check All Feeds</span>
                 </button>

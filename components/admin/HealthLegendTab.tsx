@@ -38,17 +38,17 @@ export const HealthLegendTab: React.FC = () => {
                     <LegendItem
                         icon={<CheckCircleIcon className="w-6 h-6 text-green-500" />}
                         title="OK"
-                        description="The feed URL was reached, the XML was parsed successfully, and the image from the first article was accessible."
+                        description="The feed is present in the live news cache, the URL was reached, the XML parsed, and the first image was accessible."
                     />
                     <LegendItem
                         icon={<WarningIcon className="w-6 h-6 text-amber-500" />}
                         title="Warning"
-                        description="The feed is accessible, but there's a potential issue. This could mean the feed is empty, an image couldn't be found (using a placeholder), or the image requires special scraping which cannot be live-checked."
+                        description="A non-critical issue. The most common reason is the feed was not found in the live news cache (indicating a failure in the automated GitHub Action). It can also mean the feed is present but empty, or an article image couldn't be found."
                     />
                     <LegendItem
                         icon={<XCircleIcon className="w-6 h-6 text-red-500" />}
                         title="Error"
-                        description="A critical failure occurred. This could be an unreachable feed URL, broken XML, or a dead image link from the first article. The details column provides more specific information."
+                        description="A critical failure occurred. This could be an unreachable feed URL, broken XML, or a failure to load the news cache for verification. The details column provides more specific information."
                     />
                     <LegendItem
                         icon={<LoadingSpinner className="w-5 h-5 text-indigo-500" />}
