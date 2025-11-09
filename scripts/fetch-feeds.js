@@ -1,7 +1,7 @@
 // scripts/fetch-feeds.js
 // Fetches RSS feeds and saves to public/news-cache.json
 // WITH image optimization and scraping support
-
+import 'dotenv/config'; // Load environment variables from .env file
 import { sql } from '@vercel/postgres';
 import fs from 'fs';
 import path from 'path';
@@ -291,10 +291,17 @@ function parseRssXml(xmlString, feed) {
 
 // === MAIN FETCH FUNCTION ===
 async function fetchArticles() {
+    const feedHealthStatus = {}; // Object to store health status
     try {
         // Get feeds from database
         const { rows: feeds } = await sql`SELECT * FROM feeds;`;
         console.log(`\n🔍 Found ${feeds.length} feeds in database\n`);
+
+        // Initialize all feeds as unknown
+        feeds.forEach(feed => {
+            feedHealthStatus[feed.id] = { status: 'unknown', message: 'Not processed yet.' };
+        });
+
 
         let articles = [];
 
@@ -312,19 +319,30 @@ async function fetchArticles() {
                 });
 
                 if (!response.ok) {
+                    const errorMsg = `Fetch failed with status ${response.status}`;
                     console.warn(`   ❌ Failed: ${feed.name} (${response.status})`);
-                    continue;
+                    feedHealthStatus[feed.id] = { status: 'error', message: errorMsg };
+                    continue; // Skip to the next feed
                 }
 
                 const xmlString = await response.text();
                 const feedArticles = parseRssXml(xmlString, feed);
+
+                if (feedArticles.length === 0) {
+                    feedHealthStatus[feed.id] = { status: 'warning', message: 'Feed fetched successfully, but no articles were found.' };
+                } else {
+                    feedHealthStatus[feed.id] = { status: 'success', message: `Successfully fetched and parsed ${feedArticles.length} articles.` };
+                }
+
                 articles.push(...feedArticles);
                 console.log(`   ✅ ${feed.name}: ${feedArticles.length} articles`);
 
                 await new Promise(r => setTimeout(r, 200));
 
             } catch (error) {
-                console.error(`   ❌ Error: ${feed.name} - ${error.message}`);
+                const message = error instanceof Error ? error.message : 'Unknown error';
+                console.error(`   ❌ Error: ${feed.name} - ${message}`);
+                feedHealthStatus[feed.id] = { status: 'error', message: `Failed during fetch or parse. Error: ${message}` };
             }
         }
 
@@ -384,10 +402,22 @@ async function fetchArticles() {
         const cachePath = path.join(cacheDir, 'news-cache.json');
         fs.writeFileSync(cachePath, JSON.stringify(sortedArticles, null, 2));
 
-        console.log(`\n✅ Saved ${sortedArticles.length} articles to ${cachePath}\n`);
+        console.log(`\n✅ Saved ${sortedArticles.length} articles to ${cachePath}`);
+
+        const healthStatusPath = path.join(cacheDir, 'feed-health-status.json');
+        fs.writeFileSync(healthStatusPath, JSON.stringify(feedHealthStatus, null, 2));
+        console.log(`\n📊 Saved health status for ${Object.keys(feedHealthStatus).length} feeds to ${healthStatusPath}\n`);
 
     } catch (error) {
         console.error('\n❌ Fatal error:', error);
+        // Also try to write the (partial) health status on fatal error
+        const cacheDir = path.join(process.cwd(), 'public');
+        if (!fs.existsSync(cacheDir)) {
+            fs.mkdirSync(cacheDir, { recursive: true });
+        }
+        const healthStatusPath = path.join(cacheDir, 'feed-health-status.json');
+        fs.writeFileSync(healthStatusPath, JSON.stringify(feedHealthStatus, null, 2));
+        console.log(`\n📊 Saved partial health status to ${healthStatusPath} before exiting.\n`);
         process.exit(1);
     }
 }
