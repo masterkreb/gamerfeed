@@ -124,6 +124,7 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
 
 export async function checkFeedHealth(feed: FeedSource): Promise<HealthState> {
     const proxies = (url: string) => [
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
         `https://corsproxy.io/?${encodeURIComponent(url)}`,
         `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     ];
