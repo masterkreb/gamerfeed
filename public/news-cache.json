@@ -1,5 +1,45 @@
 [
   {
+    "id": "https://www.golem.de/news/rockstar-games-gta-soll-content-complete-sein-2511-201995.html",
+    "title": "Rockstar Games: GTA soll \"Content Complete\" sein",
+    "source": "Golem",
+    "publicationDate": "2025-11-09T11:50:07.000Z",
+    "summary": "Laut Quellen soll der Inhalt von GTA 6 fertig sein. Die restliche Zeit bis zum Release Ende 2026 geht es um Feinschliff und Stabilität. (GTA 6, Take-T",
+    "link": "https://www.golem.de/news/rockstar-games-gta-soll-content-complete-sein-2511-201995.html",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/gaming-hardware-zusammenbruch-kolumne,3442652.html",
+    "title": "Special: Gaming-Hardware - Schlechte Nachrichten für Spieler: Die nächste große Krise auf dem Hardware-Markt könnte uns kurz bevor stehen",
+    "source": "GameStar",
+    "publicationDate": "2025-11-09T11:33:00.000Z",
+    "summary": "Die Anzeichen verdichten sich, dass wir relativ bald wieder mir Hardware-Knappheit und deutlich steigenden Preisen zu kämpfen haben werden.",
+    "link": "https://www.gamestar.de/artikel/gaming-hardware-zusammenbruch-kolumne,3442652.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/hardware-markt-krise-teaser-adobe-firefly_6385150.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/apple-watch-se-3-vs-apple-watch-series-11,3442316.html",
+    "title": "Special: Smartwatches - Apple Watch SE 3 vs. Series 11: Alle Unterschiede, welche wir empfehlen und weitere starke Alternativen",
+    "source": "GameStar",
+    "publicationDate": "2025-11-09T11:31:00.000Z",
+    "summary": "Neben der Apple Watch Series 11 gibt es in diesem Jahr die günstigere SE 3. Welche Smartwatch lohnt sich?",
+    "link": "https://www.gamestar.de/artikel/apple-watch-se-3-vs-apple-watch-series-11,3442316.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/apple-watches_6384041.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://de.ign.com/prime-video/149604/video/das-sind-die-streaming-highlights-auf-netflix-co-der-woche",
+    "title": "Das sind die Streaming-Highlights auf Netflix & Co. der Woche",
+    "source": "IGN",
+    "publicationDate": "2025-11-09T11:30:50.000Z",
+    "summary": "Alle Highlights der kommenden Woche auf den Streaming-Diensten",
+    "link": "https://de.ign.com/prime-video/149604/video/das-sind-die-streaming-highlights-auf-netflix-co-der-woche",
+    "imageUrl": "https://sm.ign.com/ign_de/screenshot/default/streaming-update_2ghq.png",
+    "language": "de"
+  },
+  {
     "id": "https://www.pcgames.de/Arc-Raiders-Spiel-73530/News/besser-als-battlefield-6-1486095/",
     "title": "Arc Raiders: Der Extraction-Shooter überholt für kurze Zeit sogar Battlefield 6 auf Steam",
     "source": "PC Games",
@@ -97,6 +137,16 @@
     "summary": "Datenverlust ist für viele Anwender kein Thema – bis es dann passiert. Ob die Community auf ComputerBase auch schon betroffen war, wie es im Detail da",
     "link": "https://www.computerbase.de/news/storage/sicherungen-und-backups-habt-ihr-schon-mal-daten-verloren-und-wie-schuetzt-ihr-euch.94977/",
     "imageUrl": "https://pics.computerbase.de/1/2/0/0/6/2-190af7ce13c73e0c/article-640x360.6eff69ed.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/the-witcher-beste-spielwelt-kolumne,3380782.html",
+    "title": "Plus - Kolumne: The Witcher 1 - Meinung: Die größte Stärke des Rollenspiels konnten die Nachfolger nie toppen [Best of GameStar]",
+    "source": "GameStar",
+    "publicationDate": "2025-11-09T10:45:00.000Z",
+    "summary": "Das erste PC-Abenteuer von Monsterjäger Geralt ist für mich bis heute der beste Serienteil. Das liegt vor allem an der einzigartigen Spielwelt.",
+    "link": "https://www.gamestar.de/artikel/the-witcher-beste-spielwelt-kolumne,3380782.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/800/witcher-1-spielwelt-kolumne-teaser_6180576.jpg",
     "language": "de"
   },
   {
@@ -1254,7 +1304,7 @@
     "title": "Kolumne: Rennspiele - Im Rennspiel-Genre geschieht gerade etwas Wundervolles",
     "source": "GameStar",
     "publicationDate": "2025-11-09T04:33:00.000Z",
-    "summary": "Need for Speed gilt als tot, im Genre der Racing Games herrscht Ebbe. Doch Hoffnung kommt aus einer ganz unscheinbaren Ecke.",
+    "summary": "Need for Speed gilt als tot, im Genre der Arcade Racing Games herrscht Ebbe. Doch Hoffnung kommt aus einer ganz unscheinbaren Ecke.",
     "link": "https://www.gamestar.de/artikel/im-rennspiel-genre-geschieht-gerade-etwas-wundervolles,3442515.html",
     "imageUrl": "https://images.cgames.de/images/gamestar/800/rennspiele_6384755.jpg",
     "language": "de"
@@ -1960,16 +2010,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamestar.de/artikel/borderlands-4-shift-codes-goldene-schluessel,3439325.html",
-    "title": "News: Borderlands 4 - Alle Shift-Codes für Goldene Schlüssel & Skins im Überblick (November 2025)",
-    "source": "GameStar",
-    "publicationDate": "2025-11-08T16:36:00.000Z",
-    "summary": "Auf der Suche nach aktiven Borderlands 4 Shift Codes? Unsere ständig aktualisierte Liste zeigt euch alle gültigen Codes für Goldene Schlüssel und exkl",
-    "link": "https://www.gamestar.de/artikel/borderlands-4-shift-codes-goldene-schluessel,3439325.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/borderlands-schl%C3%BCssel_6374352.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.4p.de/news/resident-evil-hd-0-release-begeistert-fans-werde-ich-kaufen-gog-berraschender/3356026",
     "title": "Überraschender Resident Evil-Release begeistert Fans – „Werde ich kaufen“",
     "source": "4P",
@@ -2020,16 +2060,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gamestar.de/artikel/black-friday-ecovacs-saugroboter-wischfunktion-station-guenstig-angebot,3442181.html",
-    "title": "Deals: Für unter 350€?! - Saugroboter mit All-In-One-Station und Kantenwischen im Sale! [Anzeige]",
-    "source": "GameStar",
-    "publicationDate": "2025-11-08T16:22:00.000Z",
-    "summary": "Normalerweise empfehle ich selten richtig günstige Saugroboter, denn die Kompromisse sind häufig zu groß. Schließlich soll so ein Roboter euch spürbar",
-    "link": "https://www.gamestar.de/artikel/black-friday-ecovacs-saugroboter-wischfunktion-station-guenstig-angebot,3442181.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/ecovacs-t30c-omni-saugroboter-mit-wischfunktion-all-in-one-station-kantenreinigung-wischen-angebot-_6383589.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://playfront.de/the-lord-of-the-rings-return-to-moria-sequel-in-arbeit-laut-linkedin-leak/",
     "title": "The Lord of the Rings: Return to Moria – Sequel in Arbeit laut LinkedIn-Leak",
     "source": "PlayFront",
@@ -2060,16 +2090,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.pcgamer.com/games/third-person-shooter/finally-arc-raiders-is-the-extraction-shooter-for-people-with-jobs-and-its-all-the-better-for-it/",
-    "title": "Finally, Arc Raiders is the extraction shooter for people with jobs, and it's all the better for it",
-    "source": "PC Gamer",
-    "publicationDate": "2025-11-08T16:00:00.000Z",
-    "summary": "The secret is scary robots, of course.",
-    "link": "https://www.pcgamer.com/games/third-person-shooter/finally-arc-raiders-is-the-extraction-shooter-for-people-with-jobs-and-its-all-the-better-for-it/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/7NRwHgLmahduxTnsJCVoHX-1280-80.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.pcgamer.com/games/you-use-steam-every-day-but-how-well-do-you-really-know-it-our-latest-quiz-tests-you-on-everything-from-long-lost-features-to-surprise-free-game-releases-to-the-most-expensive-thing-ever-sold-on-the-storefront/",
     "title": "You use Steam every day, but how well do you really know it? Our latest quiz tests you on everything from long-lost features to surprise free game releases to the most expensive thing ever sold on the storefront",
     "source": "PC Gamer",
@@ -2077,6 +2097,16 @@
     "summary": "Get in here and show Gabe what you've got.",
     "link": "https://www.pcgamer.com/games/you-use-steam-every-day-but-how-well-do-you-really-know-it-our-latest-quiz-tests-you-on-everything-from-long-lost-features-to-surprise-free-game-releases-to-the-most-expensive-thing-ever-sold-on-the-storefront/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/jZCgUatpArxVrg9n7S4TRb-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.pcgamer.com/games/third-person-shooter/finally-arc-raiders-is-the-extraction-shooter-for-people-with-jobs-and-its-all-the-better-for-it/",
+    "title": "Finally, Arc Raiders is the extraction shooter for people with jobs, and it's all the better for it",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-08T16:00:00.000Z",
+    "summary": "The secret is scary robots, of course.",
+    "link": "https://www.pcgamer.com/games/third-person-shooter/finally-arc-raiders-is-the-extraction-shooter-for-people-with-jobs-and-its-all-the-better-for-it/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/7NRwHgLmahduxTnsJCVoHX-1280-80.jpg",
     "language": "en"
   },
   {
@@ -2117,16 +2147,6 @@
     "summary": "Dem Suchtbeauftragten Streeck schwebt vor, dass bestimmte App-Funktionen und Inhalte erst mit höherem Alter freigeschaltet werden. Er hat Algorithmen ",
     "link": "https://www.heise.de/news/Drogenbeauftragter-Streeck-will-gestaffelte-Altersfreigaben-fuer-Social-Media-11071469.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/0/1/2/shutterstock_1862056645-de434006c1c56fd8.jpeg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamestar.de/videos/beim-neuen-steam-sale-kommen-tierfreunde-voll-auf-ihre-kosten-der-trailer-verraet-bereits-die-ersten-angebote,138312.html",
-    "title": "Video: Beim neuen Steam-Sale kommen Tierfreunde voll auf ihre Kosten - Der Trailer verrät bereits die ersten Angebote",
-    "source": "GameStar",
-    "publicationDate": "2025-11-08T15:54:00.000Z",
-    "summary": "Ihr kennt das Spiel mittlerweile sicher schon: Zusätzlich zu den großen saisonalen Sales gibt's bei Steam seit geraumer Zeit alle paar Wochen auch kle",
-    "link": "https://www.gamestar.de/videos/beim-neuen-steam-sale-kommen-tierfreunde-voll-auf-ihre-kosten-der-trailer-verraet-bereits-die-ersten-angebote,138312.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/videoimage_6384899.jpg",
     "language": "de"
   },
   {
@@ -10050,16 +10070,6 @@
     "language": "en"
   },
   {
-    "id": "https://de.ign.com/nintendo-switch-2/149578/news/nintendo-verlagert-entwicklungsschwerpunkt-auf-switch-2",
-    "title": "Nintendo verlagert Entwicklungsschwerpunkt auf Switch 2",
-    "source": "IGN",
-    "publicationDate": "2025-11-05T13:34:04.000Z",
-    "summary": "Die alte Switch wird überholt Einen Tag nach der Veröffentlichung der neuesten hervorragenden Verkaufszahlen hat Nintendo bestätigt, dass es den Entwi",
-    "link": "https://de.ign.com/nintendo-switch-2/149578/news/nintendo-verlagert-entwicklungsschwerpunkt-auf-switch-2",
-    "imageUrl": "https://sm.ign.com/ign_de/blogroll/n/nintendo-s/nintendo-signals-primary-development-focus-shift-to-switch-2_mv43.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.computerbase.de/news/gaming/call-of-duty-black-ops-7-activision-veroeffentlicht-pc-trailer-und-anforderungen.94913/",
     "title": "Call of Duty: Black Ops 7: Activision veröffentlicht PC-Trailer und -Anforderungen",
     "source": "ComputerBase",
@@ -12857,16 +12867,6 @@
     "summary": "Endlich! \"Plants vs. Zombies\" kehrt zurück: Das Reboot \"Replanted\" zeigt im Launch-Trailer überarbeitete Grafik, neue Spielmodi und eine ordentliche P",
     "link": "https://www.computerbild.de/artikel/News-Spiele-Plants-vs.-Zombies-Replanted-bringt-neuen-Glanz-ins-Beet-40448395.html",
     "imageUrl": "https://i.computer-bild.de/imgs/1/5/8/2/2/0/8/5/rss_newsletter.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.golem.de/news/anzeige-lego-game-boy-nur-kurz-fuer-unter-50-euro-im-angebot-2510-201323.html",
-    "title": "Anzeige: Lego Game Boy nur kurz für unter 50 Euro im Angebot",
-    "source": "Golem",
-    "publicationDate": "2025-10-21T06:08:04.000Z",
-    "summary": "Der Lego Game Boy ist aktuell Amazons meistverkauftes Klemmbaustein-Set und wird nur kurze Zeit für unter 50 Euro im Angebot verkauft. (Lego, Nintendo",
-    "link": "https://www.golem.de/news/anzeige-lego-game-boy-nur-kurz-fuer-unter-50-euro-im-angebot-2510-201323.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
     "language": "de"
   },
   {
