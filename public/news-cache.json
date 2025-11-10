@@ -1,5 +1,75 @@
 [
   {
+    "id": "oZim5tCrmbMZmHPqQjFVsd",
+    "title": "The dispatching minigame in Dispatch is good enough to be a standalone game",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-10T01:04:47.000Z",
+    "summary": "This must be what it feels like to be in charge of Damage Control Inc.",
+    "link": "https://www.pcgamer.com/games/adventure/the-dispatching-minigame-in-dispatch-is-good-enough-to-be-a-standalone-game/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/C6N9CmpNBVbHH8jBZiAyXL-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "1100-6535129",
+    "title": "Pokemon 3D Model Kits Drop To $15 With Limited-Time Amazon Deal",
+    "source": "GameSpot",
+    "publicationDate": "2025-11-10T00:48:00.000Z",
+    "summary": "4D Build: Pokemon Model Kits - Gen 1 Starters $15 (was $22) See at Amazon Spin Master's recently released 4D Build Pokemon model kits are on sale for ",
+    "link": "https://www.gamespot.com/articles/4d-build-pokemon-3d-model-kits-drop-to-15-with-limited-time-amazon-deal/1100-6535129/?ftag=CAD-01-10abi2f",
+    "imageUrl": "https://www.gamespot.com/a/uploads/original/1595/15950357/4578083-pokemon4dbuildmodelkit.png",
+    "language": "en"
+  },
+  {
+    "id": "https://www.pcgameshardware.de/Wirtschaft-Thema-238882/News/AMD-sieht-Risiko-im-Deal-zwischen-Nvidia-und-Intel-1486118/",
+    "title": "Nvidia × Intel: AMD sieht Deal als Risiko für Ryzen und Radeon",
+    "source": "PC Games Hardware",
+    "publicationDate": "2025-11-10T00:15:00.000Z",
+    "summary": "AMD sieht den Deal zwischen Nvidia und Intel als mögliches Risiko für die eigenen Ryzen-Prozessoren und Radeon-Grafikkarten, wie jetzt aus dem aktuell",
+    "link": "https://www.pcgameshardware.de/Wirtschaft-Thema-238882/News/AMD-sieht-Risiko-im-Deal-zwischen-Nvidia-und-Intel-1486118/",
+    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/09/intel-and-nvidia-1-pcgh.png",
+    "language": "de"
+  },
+  {
+    "id": "1100-6527905",
+    "title": "Grab Criterion's Godzilla 15-Film Collection For 50% Off At Amazon",
+    "source": "GameSpot",
+    "publicationDate": "2025-11-10T00:13:00.000Z",
+    "summary": "Godzilla: The Showa-Era 15-Film Box Set (Criterion Collection) $112.48 (was $225) See at Amazon Godzilla fans can save big on multiple Blu-ray and 4K ",
+    "link": "https://www.gamespot.com/articles/godzilla-showa-era-films-blu-ray-criterion-collection-box-set-black-friday-deal/1100-6527905/?ftag=CAD-01-10abi2f",
+    "imageUrl": "https://www.gamespot.com/a/uploads/original/1595/15950357/4402817-godzillashowa.png",
+    "language": "en"
+  },
+  {
+    "id": "uT8hm9rb2867rhswUeLc8Y",
+    "title": "Five new Steam games you probably missed (November 10, 2025)",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-09T23:50:23.000Z",
+    "summary": "Sorting through every new game on Steam so you don't have to.",
+    "link": "https://www.pcgamer.com/software/platforms/five-new-steam-games-you-probably-missed-november-10-2025/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/dBfFjSSKHgNGygpoDFsgeU-1280-80.png",
+    "language": "en"
+  },
+  {
+    "id": "QuJxfXr9PuhJrDUw6sQ5mT",
+    "title": "I've already been getting my hopes up for The Expanse game from RPG factory Owlcat, and its main theme just skewered my Mass Effect-loving lizard brain",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-09T23:48:09.000Z",
+    "summary": "The quickest way to my heart: Swelling, uplifting synths.",
+    "link": "https://www.pcgamer.com/games/rpg/ive-already-been-getting-my-hopes-up-for-the-expanse-game-from-rpg-factory-owlcat-and-its-main-theme-just-skewered-my-mass-effect-loving-lizard-brain/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/qabDxbQoMRPTH6QzGJxWf3-1280-80.png",
+    "language": "en"
+  },
+  {
+    "id": "uoG6iwnWuYYpAogAMHEweN",
+    "title": "This mad lad got Battlefield 6 to run on a 12-year-old AMD CPU, circumventing its stated anti-cheat requirements",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-09T23:35:59.000Z",
+    "summary": "It even runs at a, ahem, stunning 40 FPS in 786p.",
+    "link": "https://www.pcgamer.com/games/fps/this-mad-lad-got-battlefield-6-to-run-on-a-12-year-old-amd-cpu-circumventing-its-stated-anti-cheat-requirements/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/MYGtssCNTTs87Rv8Hr5YEZ-1280-80.png",
+    "language": "en"
+  },
+  {
     "id": "https://www.pcgameshardware.de/Retrospektive-Thema-214694/News/Windows-10-PCGH-Retro-10-November-666221/",
     "title": "Microsoft Windows 1.0 (PCGH-Retro, 10. November)",
     "source": "PC Games Hardware",
@@ -2460,16 +2530,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.pcgameshardware.de/Anno-117-Pax-Romana-Spiel-74719/News/Preload-und-Release-Zeit-fuer-Europa-stehen-fest-1486060/",
-    "title": "Anno 117: Pax Romana - Preload-Start und exakter Release-Zeitpunkt stehen fest",
-    "source": "PC Games Hardware",
-    "publicationDate": "2025-11-09T07:00:00.000Z",
-    "summary": "Ubisoft verrät, wann der Preload und Launch von Anno 117: Pax Romana starten. PC- und Konsolenspieler können ab dem 10. November downloaden und ab Mit",
-    "link": "https://www.pcgameshardware.de/Anno-117-Pax-Romana-Spiel-74719/News/Preload-und-Release-Zeit-fuer-Europa-stehen-fest-1486060/",
-    "imageUrl": "https://www.pcgameshardware.de/screenshots/original/2025/11/ANNO_Release_Schedule_16x9_EN-pcgh.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/ratgeber/BMWs-Kompakt-SUVs-im-Vergleich-Das-kosten-iX3-und-X3-10748743.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
     "title": "heise+ | BMWs Kompakt-SUVs im Vergleich: Das kosten iX3 und X3",
     "source": "Heise Online",
@@ -4800,26 +4860,6 @@
     "language": "en"
   },
   {
-    "id": "1100-6536059",
-    "title": "Baldur's Gate 3 Publishing Director Pushes Back At Square Enix's AI QA Plans",
-    "source": "GameSpot",
-    "publicationDate": "2025-11-08T00:57:00.000Z",
-    "summary": "Earlier this week, Square Enix disclosed its ambition to drastically cut its Quality Assurance employees and use generative AI to handle 70% of its ga",
-    "link": "https://www.gamespot.com/articles/baldurs-gate-3-publishing-director-pushes-back-at-square-enixs-ai-qa-plans/1100-6536059/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=GameSpot",
-    "language": "en"
-  },
-  {
-    "id": "1100-6536066",
-    "title": "Arc Raiders Eyes On The Prize Quest Guide",
-    "source": "GameSpot",
-    "publicationDate": "2025-11-08T00:30:00.000Z",
-    "summary": "Arc Raiders presents you with plenty of quests that require you to find materials or unique items, but only a few require you to use your materials to",
-    "link": "https://www.gamespot.com/articles/arc-raiders-eyes-on-the-prize-quest-guide/1100-6536066/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=GameSpot",
-    "language": "en"
-  },
-  {
     "id": "PFhDHNah3AjFRWbKQcFnSf",
     "title": "My return to Rust is going well, other than my freakish Guns N' Roses-loving neighbor shooting me every time I try to hang string lights on my roof",
     "source": "PC Gamer",
@@ -5870,16 +5910,6 @@
     "language": "en"
   },
   {
-    "id": "JfcrqGM4fkaKtiDzYAkGJm",
-    "title": "Take-Two's big boss Strauss Zelnick says it got the 'perfect result' from slimmed-down mob tale Mafia: The Old Country, so I'd brace for more games like that if I were you",
-    "source": "PC Gamer",
-    "publicationDate": "2025-11-07T16:54:28.000Z",
-    "summary": "Molto bene.",
-    "link": "https://www.pcgamer.com/games/action/take-twos-big-boss-strauss-zelnick-says-it-got-the-perfect-result-from-slimmed-down-mob-tale-mafia-the-old-country-so-id-brace-for-more-games-like-that-if-i-were-you/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/tJzpZZSnqcu9ttdrTnfek5-1280-80.jpg",
-    "language": "en"
-  },
-  {
     "id": "WZb8dMV4vFwZMJqHg4K8HM",
     "title": "The Glorious Model O 3 Wireless has some slick ideas, but those numbers need to fall fast | Review",
     "source": "GamesRadar+",
@@ -5887,16 +5917,6 @@
     "summary": "I really wanted to love the Glorious Model O 3 Wireless, and if that price drops significantly I may still.",
     "link": "https://www.gamesradar.com/hardware/gaming-mice/glorious-model-o-3-wireless-review/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/ZXsLhtmtztPYRy2nYjWMii-1280-80.jpg",
-    "language": "en"
-  },
-  {
-    "id": "FAHmsHdGTMsGnxQkpMyNxD",
-    "title": "23 years later, Morrowind on controller and Steam Deck just got a million times better: The latest version of OpenMW is out now",
-    "source": "PC Gamer",
-    "publicationDate": "2025-11-07T16:49:48.000Z",
-    "summary": "This is like Christmas to me.",
-    "link": "https://www.pcgamer.com/games/the-elder-scrolls/23-years-later-morrowind-on-controller-and-steam-deck-just-got-a-million-times-better-the-latest-version-of-openmw-is-out-now/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/KbxCjhpZh5WoSds5PibSaT-1280-80.jpg",
     "language": "en"
   },
   {
@@ -5940,16 +5960,6 @@
     "language": "en"
   },
   {
-    "id": "rjM33sdoGq2Wfpv6pyJgUF",
-    "title": "Windows 'really does suck for some people': Ex Microsoft engineer Dave Plummer explains how he would fix the popular OS",
-    "source": "PC Gamer",
-    "publicationDate": "2025-11-07T16:43:07.000Z",
-    "summary": "\"I think we've crossed the line over to where the operating system feels like a sales channel for all their other properties.\"",
-    "link": "https://www.pcgamer.com/software/windows/windows-really-does-suck-for-some-people-ex-microsoft-engineer-dave-plummer-explains-how-he-would-fix-the-popular-os/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/mXhqfN4LUybrURS5K6nQ4H-1280-80.png",
-    "language": "en"
-  },
-  {
     "id": "https://www.eurogamer.de/mass-effect-tv-serie-spielt-nach-der-originaltrilogie-und-erzahlt-eine-neue-geschichte-update-zu-teil-funf",
     "title": "Mass Effect TV-Serie spielt nach der Originaltrilogie und erzählt eine neue Geschichte – Update zu Teil fünf",
     "source": "Eurogamer",
@@ -5967,16 +5977,6 @@
     "summary": "Happy N7 Day",
     "link": "https://www.gamesradar.com/games/mass-effect/i-cant-describe-how-happy-this-makes-us-no-mans-sky-celebrates-mass-effect-day-with-the-return-of-commander-shepards-ship/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/TVyvWPpPoB2gN2BnBtURga-1280-80.jpg",
-    "language": "en"
-  },
-  {
-    "id": "8TXUE3SBsrnTJ2vqvqUzAe",
-    "title": "Right, that's it, I've already had enough of Arc Raiders' terrifying tumbleweeds",
-    "source": "PC Gamer",
-    "publicationDate": "2025-11-07T16:38:46.000Z",
-    "summary": "Who is that? Who is that?",
-    "link": "https://www.pcgamer.com/games/third-person-shooter/arc-raiders-tumbleweed-mimics/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/WEzcCGaDxY2Ym4t8aycNs5-1280-80.jpg",
     "language": "en"
   },
   {
