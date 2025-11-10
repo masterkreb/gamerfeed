@@ -3,7 +3,7 @@ name: Update RSS Feeds Cache
 on:
   schedule:
     # Run every 15 minutes
-    - cron: '*/30 * * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 # Grant write permissions to the GITHUB_TOKEN for this workflow
@@ -42,15 +42,16 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Add the cache file from the public directory
+          # Add the generated cache files from the public directory
           git add public/news-cache.json
+          git add public/feed-health-status.json
           
           # Check if there are staged changes, and only commit/push if there are.
           if ! git diff --staged --quiet; then
-            git commit -m "chore: update news cache [skip ci]"
+            git commit -m "chore: update feed cache [skip ci]"
             # Pull the latest changes before pushing to avoid conflicts
             git pull --rebase
             git push
           else
-            echo "No changes to the news cache. Skipping commit."
+            echo "No changes to the feed cache. Skipping commit."
           fi
