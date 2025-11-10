@@ -1,5 +1,35 @@
 [
   {
+    "id": "https://www.heise.de/news/Drohnensichtungen-ueber-belgischem-Kernkraftwerk-11071786.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Drohnensichtungen über belgischem Kernkraftwerk",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-10T05:31:00.000Z",
+    "summary": "In Belgien kam es zu drei Drohnensichtungen über einem Kernkraftwerk nahe Antwerpen. Die Polizei macht dazu keine Angaben.",
+    "link": "https://www.heise.de/news/Drohnensichtungen-ueber-belgischem-Kernkraftwerk-11071786.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/1/7/5/shutterstock_782313298-873699a3f2b1de9b.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.xboxdynasty.de/?p=1201540",
+    "title": "Grand Theft Auto VI: Hinweis auf möglichen Trailer 3 aufgetaucht",
+    "source": "XboxDynasty",
+    "publicationDate": "2025-11-10T05:30:26.000Z",
+    "summary": "Gerücht: Grand Theft Auto VI Trailer 3 bereits privat auf YouTube verfügbar! Rockstar Games fügt neues Video hinzu – Fans spekulieren über bevorstehen",
+    "link": "https://www.xboxdynasty.de/news/grand-theft-auto-vi/hinweis-auf-moeglichen-trailer-3-aufgetaucht/",
+    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2017/07/grand-theft-auto-vi-70.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Montag-Digitaler-Omnibus-schwaecht-Datenschutz-Stop-Killing-Games-hat-Folgen-11071776.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Montag: Digitaler Omnibus schwächt Datenschutz, Stop Killing Games hat Folgen",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-10T05:15:00.000Z",
+    "summary": "EU-Vorschläge gegen Datenschutz + Briten über Online-Spiele + USA im Jobless Boom + Nachfolge von Linux-Vater Linux Torvalds + Windows 11 26H1 für neu",
+    "link": "https://www.heise.de/news/Montag-Digitaler-Omnibus-schwaecht-Datenschutz-Stop-Killing-Games-hat-Folgen-11071776.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/1/7/0/monday-2dd7c6607587b93e.jpeg",
+    "language": "de"
+  },
+  {
     "id": "https://www.heise.de/news/Stop-Killing-Games-Debatte-im-britischen-Parlament-11071636.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Stop Killing Games: Debatte im britischen Parlament",
     "source": "Heise Online",
@@ -17,6 +47,16 @@
     "summary": "Von epischen Missionen bis zu tierischem Chaos: Sechs neue Spiele im Xbox Game Pass sorgen für Spannung, Humor und Abwechslung!",
     "link": "https://www.xboxdynasty.de/news/xbox-game-pass/blockbuster-und-mehr-diese-woche-im-abo/",
     "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2017/02/xbox-game-pass-203.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamepro.de/artikel/lego-konkurrent-pantasy-dragon-ball,3442477.html",
+    "title": "News: Ein LEGO-Konkurrent hat jetzt erste, richtig coole Dragon Ball-Sets - nur die Figuren sind gewöhnungsbedürftig",
+    "source": "GamePro",
+    "publicationDate": "2025-11-10T05:00:00.000Z",
+    "summary": "Wer ein bisschen Dragon-Ball-Flair für zu Hause sucht, sollte hier zuschlagen.",
+    "link": "https://www.gamepro.de/artikel/lego-konkurrent-pantasy-dragon-ball,3442477.html",
+    "imageUrl": "https://images.cgames.de/images/gsgp/800/pantasy-kame-house_6384505.jpg",
     "language": "de"
   },
   {
@@ -2460,16 +2500,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.xboxdynasty.de/?p=1201407",
-    "title": "Call of Duty: Black Ops 7: Um diese Uhrzeit könnt ihr spielen, ROG Xbox Ally optimiert",
-    "source": "XboxDynasty",
-    "publicationDate": "2025-11-09T08:00:20.000Z",
-    "summary": "Call of Duty: Black Ops 7 startet am 14. November 2025 durch. Nun wurde bekannt gegeben, dass der Shooter auch für ROG Xbox Ally optimiert wurde!",
-    "link": "https://www.xboxdynasty.de/news/call-of-duty-black-ops-7/um-diese-uhrzeit-koennt-ihr-spielen-rog-xbox-ally-optimiert/",
-    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2025/06/call-of-duty-black-ops-7-16.jpg",
-    "language": "de"
-  },
-  {
     "id": "https://www.gamepro.de/artikel/ps4-spiele-2025,3411729.html",
     "title": "Special: PS4-Spiele 2025: Alle neuen PlayStation 4-Releases für das aktuelle Jahr",
     "source": "GamePro",
@@ -3467,16 +3497,6 @@
     "summary": "Free Range Games arbeitet laut LinkedIn-Profil bereits an einem Sequel zu The Lord of the Rings: Return to Moria – plus neuem AAA-Projekt mit 100 Mio.",
     "link": "https://playfront.de/the-lord-of-the-rings-return-to-moria-sequel-in-arbeit-laut-linkedin-leak/",
     "imageUrl": "https://cdn.playfront.de/uploads/2023/06/The-Lord-of-the-Rings-Return-to-Moria.webp",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamepro.de/artikel/nintendo-switch-2-spiele-2025,3430730.html",
-    "title": "Special: Nintendo Switch 2-Spiele 2025: Alle Releases, die euch dieses Jahr auf der neuen Konsole erwarten",
-    "source": "GamePro",
-    "publicationDate": "2025-11-08T16:00:00.000Z",
-    "summary": "In unserer Release-Liste findet ihr alle Spiele-Neuerscheinungen in 2025 für Nintendo Switch 2.",
-    "link": "https://www.gamepro.de/artikel/nintendo-switch-2-spiele-2025,3430730.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/switch-2-2025-releases_6347090.jpg",
     "language": "de"
   },
   {
@@ -9810,16 +9830,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/KI-schlaegt-Meteorologen-DeepMind-hatte-in-der-Hurrikan-Saison-die-Nase-vorn-11067107.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Google-KI triumphiert bei Hurrikan-Vorhersagen – US-Modell versagt",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-05T18:10:00.000Z",
-    "summary": "Die Hurrikan-Saison 2025 war ein Lackmustest für Künstliche Intelligenz in der Wettervorhersage – und Google DeepMind hat bestanden.",
-    "link": "https://www.heise.de/news/KI-schlaegt-Meteorologen-DeepMind-hatte-in-der-Hurrikan-Saison-die-Nase-vorn-11067107.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/8/0/2/hurricane-melissa-natu-940x529-ce5b6b64a1745daa.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.pcgamesn.com/vpn/nordvpn-survery-antivirus",
     "title": "Oh no, 73% of Americans think their antivirus alone keeps them safe on public WiFi",
     "source": "PCGamesN",
@@ -9848,16 +9858,6 @@
     "link": "https://news.xbox.com/en-us/2025/11/05/how-treyarch-bringing-rusted-pick-up-truck-to-life-black-ops-7-zombies/",
     "imageUrl": "https://secure.gravatar.com/avatar/09561158186f9cd1d42eabceb54fedea?s=144&d=mm&r=g",
     "language": "en"
-  },
-  {
-    "id": "https://www.heise.de/news/Digitalfunk-Desaster-der-Bundeswehr-Millionen-fuer-Berater-sollen-es-richten-11067079.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Digitalfunk-Desaster der Bundeswehr: Millionen für Berater sollen es richten",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-05T17:53:00.000Z",
-    "summary": "Capgemini, PwC & Co. sollen helfen, die Probleme beim Digitalfunk des Heeres in den Griff zu bekommen. Es geht um Aufträge in Höhe von knapp 160 Milli",
-    "link": "https://www.heise.de/news/Digitalfunk-Desaster-der-Bundeswehr-Millionen-fuer-Berater-sollen-es-richten-11067079.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/7/8/8/shutterstock_630490922-1403106e70355ade.jpeg",
-    "language": "de"
   },
   {
     "id": "https://www.computerbase.de/news/mobilitaet/digitalisierung-bundesregierung-legt-grundstein-fuer-digitalen-fuehrerschein.94933/",
