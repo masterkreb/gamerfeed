@@ -56,8 +56,8 @@
     "message": "Successfully fetched and parsed 30 articles."
   },
   "gamersglobal": {
-    "status": "success",
-    "message": "Successfully fetched and parsed 60 articles."
+    "status": "error",
+    "message": "All fetch attempts failed. Last error: The operation was aborted due to timeout"
   },
   "gamesradar+": {
     "status": "success",
