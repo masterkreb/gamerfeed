@@ -3,7 +3,7 @@ name: Update RSS Feeds Cache
 on:
   schedule:
     # Run every 60 minutes (on the hour)
-    - cron: '0 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 # Grant write permissions to the GITHUB_TOKEN for this workflow
