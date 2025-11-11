@@ -83,10 +83,6 @@
     "status": "success",
     "message": "Successfully fetched and parsed 40 articles."
   },
-  "golem": {
-    "status": "success",
-    "message": "Successfully fetched and parsed 40 articles."
-  },
   "jpgames": {
     "status": "success",
     "message": "Successfully fetched and parsed 15 articles."
@@ -158,5 +154,9 @@
   "playstation-blog": {
     "status": "success",
     "message": "Successfully fetched and parsed 10 articles."
+  },
+  "golem": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 40 articles."
   }
 }
