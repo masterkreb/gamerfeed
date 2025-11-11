@@ -1,5 +1,25 @@
 [
   {
+    "id": "https://playfront.de/?p=1146916",
+    "title": "PlayStation’s 27” Gaming Monitor enthüllt: Sonys Desktop-Display für PS5-Spieler",
+    "source": "PlayFront",
+    "publicationDate": "2025-11-11T23:27:18.000Z",
+    "summary": "Sony stellt mit dem PlayStation’s 27” Gaming Monitor ein QHD-Display für PS5-Spieler vor – mit HDR, 240 Hz und integriertem DualSense-Ladehaken.",
+    "link": "https://playfront.de/playstations-27-gaming-monitor-enthuellt-sonys-desktop-display-fuer-ps5-spieler/",
+    "imageUrl": "https://cdn.playfront.de/uploads/2025/11/playstation-27-monitor.webp",
+    "language": "de"
+  },
+  {
+    "id": "https://kotaku.com/?p=2000643048",
+    "title": "Pixel 9 Now Priced Like Budget Android Phones, Amazon Strikes Hard at Google",
+    "source": "Kotaku",
+    "publicationDate": "2025-11-11T23:25:01.000Z",
+    "summary": "Google's Pixel 9 brings flagship AI, exceptional camera tech and all-day power - at a record low price. The post Pixel 9 Now Priced Like Budget Androi",
+    "link": "https://kotaku.com/pixel-9-now-priced-like-budget-android-phones-amazon-strikes-hard-at-google-2000643048",
+    "imageUrl": "https://kotaku.com/app/uploads/2025/11/pixel-9-1280x853.jpg",
+    "language": "en"
+  },
+  {
     "id": "https://www.polygon.com/elden-ring-nightreign-dlc-release-date-trailer-forsaken-hollows/",
     "title": "Elden Ring Nightreign DLC release date revealed at State of Play",
     "source": "Polygon",
@@ -141,12 +161,12 @@
   },
   {
     "id": "Xsf8MgLrHhmvnX8MQDQhMH",
-    "title": "Elden Ring: Nightreign DLC is hot dropping with new bosses and characters right before the end of the year",
+    "title": "Elden Ring Nightreign DLC is hot dropping with new bosses and characters right before the end of the year",
     "source": "PC Gamer",
     "publicationDate": "2025-11-11T22:49:43.000Z",
     "summary": "There's a new map, new characters, and the return of a fan-favorite Dark Souls boss.",
     "link": "https://www.pcgamer.com/games/rpg/elden-ring-nightreign-dlc-is-hot-dropping-with-new-bosses-and-characters-right-before-the-end-of-the-year/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/BU36a8eChRRaMuEAmeBpVG-1280-80.jpg",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/pdZfCWcJzcX9AcTyNvdJvc-1280-80.jpg",
     "language": "en"
   },
   {
@@ -390,6 +410,16 @@
     "language": "en"
   },
   {
+    "id": "https://www.gematsu.com/?p=1006057",
+    "title": "Digimon Story: Time Stranger DLC ‘Additional Digimon & Episode Pack 1: Alternate Dimension’ launches this winter",
+    "source": "Gematsu",
+    "publicationDate": "2025-11-11T22:20:58.000Z",
+    "summary": "Digimon Story: Time Stranger downloadable content “Additional Digimon & Episode Pack 1: Alternate Dimension” will … Source",
+    "link": "https://www.gematsu.com/2025/11/digimon-story-time-stranger-dlc-additional-digimon-episode-pack-1-alternate-dimension-launches-this-winter",
+    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/Digimon-Story-TS-DLC_11-11-25.jpg",
+    "language": "en"
+  },
+  {
     "id": "https://playfront.de/?p=1146881",
     "title": "Gran Turismo 7 Power Pack enthüllt: Hardcore-Racing mit 24 Stunden voller Action!",
     "source": "PlayFront",
@@ -420,6 +450,16 @@
     "language": "en"
   },
   {
+    "id": "https://www.gematsu.com/?p=1006055",
+    "title": "Tokyo Xtreme Racer for PS5 launches February 26, 2026",
+    "source": "Gematsu",
+    "publicationDate": "2025-11-11T22:17:20.000Z",
+    "summary": "The PlayStation 5 version of street racing game Tokyo Xtreme Racer will launch on February … Source",
+    "link": "https://www.gematsu.com/2025/11/tokyo-xtreme-racer-for-ps5-launches-february-26-2026",
+    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/Tokyo-Xtreme-Racer_11-11-25.jpg",
+    "language": "en"
+  },
+  {
     "id": "urn:uuid:7469c83e-b403-4688-9a06-480fafca279c",
     "title": "Gran Turismo 7 Power Pack DLC coming December 4",
     "source": "PlayStation.Blog",
@@ -427,6 +467,16 @@
     "summary": "Gran Turismo 7 fans, on December 4, 2025, the highly anticipated Power Pack DLC arrives for the PlayStation 5 console available through PlayStation St",
     "link": "https://blog.playstation.com/2025/11/11/gran-turismo-7-power-pack-dlc-coming-december-4/",
     "imageUrl": "https://live.staticflickr.com/65535/54917835076_41589e60ac_b.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.gematsu.com/?p=1006052",
+    "title": "No Sleep For Kaname Date – From AI: The Somnium Files coming to PS5, Xbox Series, and PS4 on February 26, 2026",
+    "source": "Gematsu",
+    "publicationDate": "2025-11-11T22:16:49.000Z",
+    "summary": "Spike Chunsoft will release No Sleep For Kaname Date – From AI: The Somnium Files … Source",
+    "link": "https://www.gematsu.com/2025/11/no-sleep-for-kaname-date-from-ai-the-somnium-files-coming-to-ps5-xbox-series-and-ps4-on-february-26-2026",
+    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/No-Sleep-Kaname-Date_11-11-25.jpg",
     "language": "en"
   },
   {
@@ -456,7 +506,7 @@
     "publicationDate": "2025-11-11T22:11:02.000Z",
     "summary": "During today’s show, the BrokenLore series shared two major updates: a brand-new trailer and the January 16 release date announcement for BrokenLore: ",
     "link": "https://blog.playstation.com/2025/11/11/brokenlore-unfollow-out-jan-16-on-ps5-brokenlore-ascend-revealed/",
-    "imageUrl": "https://live.staticflickr.com/65535/54917984259_a5f1e2135a_k.jpg",
+    "imageUrl": "https://blog.playstation.com/tachyon/2025/11/22bb1e4773473194d9501ac466343949a5dbc2e3.jpg?fit=1024%2C1024",
     "language": "en"
   },
   {
@@ -497,6 +547,16 @@
     "summary": "Survival horror game BrokenLore: UNFOLLOW will launch for PlayStation 5, Xbox Series, and PC via … Source",
     "link": "https://www.gematsu.com/2025/11/brokenlore-unfollow-launches-january-16-2026",
     "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/BrokenLore-UNFOLLOW-Date_11-11-25.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.gematsu.com/?p=1006045",
+    "title": "Coffee Talk Tokyo launches March 5, 2026",
+    "source": "Gematsu",
+    "publicationDate": "2025-11-11T22:04:17.000Z",
+    "summary": "Coffee Talk Tokyo will launch for PlayStation 5, Xbox Series, Switch, and PC via Steam … Source",
+    "link": "https://www.gematsu.com/2025/11/coffee-talk-tokyo-launches-march-5-2026",
+    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/Coffee-Talk-Tokyo-Date_11-11-25.jpg",
     "language": "en"
   },
   {
@@ -1920,16 +1980,6 @@
     "language": "en"
   },
   {
-    "id": "https://playfront.de/?p=1146844",
-    "title": "Marvel’s Wolverine: Sonys größter Release 2026 – Intergalactic erst 2027",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-11T16:52:12.000Z",
-    "summary": "Sony bestätigt Marvel's Wolverine als wichtigsten First-Party-Release 2026. Intergalactic: The Heretic Prophet erscheint frühestens 2027.",
-    "link": "https://playfront.de/marvels-wolverine-wird-zu-sonys-wichtigstem-first-party-release-in-2026/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2025/09/marvels-wolverine-cover.webp",
-    "language": "de"
-  },
-  {
     "id": "https://www.destructoid.com/?p=1139636",
     "title": "A genre I never thought I’d play now has me wanting more, all because of this one game",
     "source": "Destructoid",
@@ -3078,16 +3128,6 @@
     "link": "https://www.4p.de/news/nintendo-switch-2-neuer-exklusivtitel-mit-grossartigen-neuigkeiten-doch-eine-sache-nervt-die-fans/3357366",
     "imageUrl": "https://www.4p.de/wp-content/uploads/sites/13/2025/11/pokemon-pokopia-1.jpg?w=1200&amp;h=900&amp;crop=1",
     "language": "de"
-  },
-  {
-    "id": "https://kotaku.com/?p=2000642541",
-    "title": "Lenovo Clears Out AMD Ryzen 5 Gaming Laptop at 62% Off, From Premium to Practically Budget",
-    "source": "Kotaku",
-    "publicationDate": "2025-11-11T15:15:17.000Z",
-    "summary": "This Lenovo laptop is listed on Amazon at a 62% discount for a limited time. The post Lenovo Clears Out AMD Ryzen 5 Gaming Laptop at 62% Off, From Pre",
-    "link": "https://kotaku.com/this-lenovo-ideapad-slim-3-has-dropped-down-to-just-650-2000642541",
-    "imageUrl": "https://kotaku.com/app/uploads/2025/11/Lenovo15inchGamingLaptop-1280x853.jpg",
-    "language": "en"
   },
   {
     "id": "https://www.eurogamer.de/arc-raiders-begeistert-700000-spieler-auf-allen-plattformen",
@@ -6900,16 +6940,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gematsu.com/?p=1005734",
-    "title": "The Super Mario Galaxy Movie Direct set for November 12",
-    "source": "Gematsu",
-    "publicationDate": "2025-11-10T22:10:08.000Z",
-    "summary": "Nintendo will host The Super Mario Galaxy Movie Direct on November 12 at 6:00 a.m. … Source",
-    "link": "https://www.gematsu.com/2025/11/the-super-mario-galaxy-movie-direct-set-for-november-12",
-    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/Super-Mario-Galaxy-Movie-Direct_11-10-25.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.nintendolife.com/#article-193683",
     "title": "Super Mario Galaxy Movie Nintendo Direct Announced For Wednesday, 12th November",
     "source": "Nintendo Life",
@@ -7117,16 +7147,6 @@
     "summary": "Call of Duty: Black Ops 7 is now just days away, and Activision is only just now revealing some more information about the franchise's newest addition",
     "link": "https://www.destructoid.com/bo7-endgame-pve-mode-part-roguelike-part-extraction/?utm_source=rss&utm_medium=rss&utm_campaign=bo7-endgame-pve-mode-part-roguelike-part-extraction",
     "imageUrl": "https://www.destructoid.com/wp-content/uploads/2025/11/image-2025-11-10T132402.655.jpg",
-    "language": "en"
-  },
-  {
-    "id": "https://www.gematsu.com/?p=1002791",
-    "title": "MySims: Cozy Bundle coming to PS5, Xbox Series on November 18",
-    "source": "Gematsu",
-    "publicationDate": "2025-11-10T18:34:45.000Z",
-    "summary": "Publisher Electronic Arts and developer Maxis will release MySims: Cozy Bundle for PlayStation 5 and … Source",
-    "link": "https://www.gematsu.com/2025/11/mysims-cozy-bundle-coming-to-ps5-xbox-series-on-november-18",
-    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/10/My-Sims-Consoles_11-10-25.jpg",
     "language": "en"
   },
   {
@@ -7630,16 +7650,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.gematsu.com/?p=1005676",
-    "title": "3D action platformer Junkster announced for PS5, Xbox Series, Switch 2, and PC",
-    "source": "Gematsu",
-    "publicationDate": "2025-11-10T15:53:08.000Z",
-    "summary": "Stormcloud Games, the studio behind the 2016-released ASCII dungeon crawler Brut@l, has announced Junkster, a … Source",
-    "link": "https://www.gematsu.com/2025/11/3d-action-platformer-junkster-announced-for-ps5-xbox-series-switch-2-and-pc",
-    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/Junkster-Ann_11-10-25.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.playstationinfo.de/?p=162025",
     "title": "Battlefield 6 – Dataminer finden Hinweise auf neun neue Spielmodi",
     "source": "PlayStationInfo",
@@ -7708,16 +7718,6 @@
     "link": "https://www.eurogamer.de/the-elder-scrolls-6-todd-howard-sagt-selbst-sieben-jahre-nach-der-ankundigung-ist-die-veroffentlichung-noch-in-weiter-ferne",
     "imageUrl": "https://assetsio.gnwcdn.com/Elder-Scrolls-6-Xbox-exklusiv.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "de"
-  },
-  {
-    "id": "https://www.gematsu.com/?p=1005652",
-    "title": "Cozy farming life simulation game Fourleaf Fields announced for PC",
-    "source": "Gematsu",
-    "publicationDate": "2025-11-10T15:37:09.000Z",
-    "summary": "Publisher HypeTrain Digital and developer BEHEMUTT have announced Fourleaf Fields, a cozy farming life simulation … Source",
-    "link": "https://www.gematsu.com/2025/11/cozy-farming-life-simulation-game-fourleaf-fields-announced-for-pc",
-    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/Fourleaf-Fields_2025_11-10-25_016.jpg",
-    "language": "en"
   },
   {
     "id": "https://www.eurogamer.de/link-und-zelda-sind-laut-hyrule-warriors-einfach-nur-freunde-doch-fans-sehen-das-anders",
@@ -10330,16 +10330,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/ratgeber/BMWs-Kompakt-SUVs-im-Vergleich-Das-kosten-iX3-und-X3-10748743.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
-    "title": "heise+ | BMWs Kompakt-SUVs im Vergleich: Das kosten iX3 und X3",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-07T13:30:00.000Z",
-    "summary": "BMW nutzt für den iX3 und X3 erstmals unterschiedliche Plattformen. Das hat Auswirkungen auf Optik, Ausstattung – und die Kosten.",
-    "link": "https://www.heise.de/ratgeber/BMWs-Kompakt-SUVs-im-Vergleich-Das-kosten-iX3-und-X3-10748743.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/5/3/7/3/2/aufmacher-4ac616ef8fbbe1c9.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/news/Deutschlandticket-Finanzierung-bis-2030-zugesagt-aber-ohne-Preisdeckel-11070805.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Bundesfinanzierung für Deutschlandticket bis 2030 klar – Preissteigerungen nicht",
     "source": "Heise Online",
@@ -10347,6 +10337,16 @@
     "summary": "Eine Absicherung mit öffentlichen Zuschüssen für das Deutschlandticket muss nur noch durch den Bundesrat. Weitere Preissteigerungen bleiben ein Kritik",
     "link": "https://www.heise.de/news/Deutschlandticket-Finanzierung-bis-2030-zugesagt-aber-ohne-Preisdeckel-11070805.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/3/6/7/7/shutterstock_640657270-ad807ff718ef433e.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/ratgeber/BMWs-Kompakt-SUVs-im-Vergleich-Das-kosten-iX3-und-X3-10748743.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
+    "title": "heise+ | BMWs Kompakt-SUVs im Vergleich: Das kosten iX3 und X3",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-07T13:30:00.000Z",
+    "summary": "BMW nutzt für den iX3 und X3 erstmals unterschiedliche Plattformen. Das hat Auswirkungen auf Optik, Ausstattung – und die Kosten.",
+    "link": "https://www.heise.de/ratgeber/BMWs-Kompakt-SUVs-im-Vergleich-Das-kosten-iX3-und-X3-10748743.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/5/3/7/3/2/aufmacher-4ac616ef8fbbe1c9.jpeg",
     "language": "de"
   },
   {
