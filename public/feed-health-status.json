@@ -4,8 +4,8 @@
     "message": "Successfully fetched and parsed 25 articles."
   },
   "game-informer": {
-    "status": "success",
-    "message": "Successfully fetched and parsed 50 articles."
+    "status": "error",
+    "message": "All fetch attempts failed. Last error: The operation was aborted due to timeout"
   },
   "gamepro": {
     "status": "success",
@@ -141,7 +141,7 @@
   },
   "heise-online": {
     "status": "success",
-    "message": "Successfully fetched and parsed 154 articles."
+    "message": "Successfully fetched and parsed 156 articles."
   },
   "pixelcritics": {
     "status": "success",
