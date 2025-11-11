@@ -1,5 +1,35 @@
 [
   {
+    "id": "https://playfront.de/?p=1146874",
+    "title": "Where Winds Meet – Eindrucksvoller Gameplay-Trailer vor dem Release",
+    "source": "PlayFront",
+    "publicationDate": "2025-11-11T21:35:24.000Z",
+    "summary": "Where Winds Meet erscheint am 14. November für PS5. Der neue Gameplay-Trailer zeigt, wie Everstone das Wuxia-Genre in eine offene Welt bringt.",
+    "link": "https://playfront.de/where-winds-meet-eindrucksvoller-gameplay-trailer-vor-dem-release/",
+    "imageUrl": "https://cdn.playfront.de/uploads/2025/08/where-winds-meet.webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.xboxdynasty.de/?p=1201654",
+    "title": "Showcase 2025: State of Play Japan startet um 23:00 Uhr",
+    "source": "XboxDynasty",
+    "publicationDate": "2025-11-11T21:30:54.000Z",
+    "summary": "Die 40-minütige Präsentation State of Play Japan wird gleich um 23:00 Uhr starten.",
+    "link": "https://www.xboxdynasty.de/news/showcase-2025/state-of-play-japan-startet-um-2300-uhr/",
+    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2024/06/showcase-2025-73.jpg",
+    "language": "de"
+  },
+  {
+    "id": "82HaS3tb2TeK5uZYcD9MYK",
+    "title": "'I think we're in the fight of our lives': Fired Rockstar employees and IWGB are confident the GTA 6 developer will be held accountable for its alleged union busting",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-11T21:22:05.000Z",
+    "summary": "People Make Games spoke to developers protesting outside Rockstar and Take-Two's offices.",
+    "link": "https://www.pcgamer.com/games/action/i-think-were-in-the-fight-of-our-lives-fired-rockstar-employees-and-iwgb-are-confident-the-gta-6-developer-will-be-held-accountable-for-its-alleged-union-busting/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/YaUq2tUybUPd6bHhaoTV97-1280-80.jpg",
+    "language": "en"
+  },
+  {
     "id": "https://mein-mmo.de/?p=1310333",
     "title": "CoD Black Ops 7: Alle Infos zum Release, Uhrzeit, Preload und Beta",
     "source": "Mein-MMO",
@@ -2080,16 +2110,6 @@
     "language": "de"
   },
   {
-    "id": "Jaw2nF4GjDvWGFJg5ftdk5",
-    "title": "How to craft a plague mask in Kingdom Come: Deliverance 2",
-    "source": "PC Gamer",
-    "publicationDate": "2025-11-11T16:00:00.000Z",
-    "summary": "Complete the Prevention quest in Mysteria Ecclesiae.",
-    "link": "https://www.pcgamer.com/games/rpg/kingdom-come-deliverance-2-plague-mask-prevention/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/dqvp957KpCDqd6QERTzP5U-1280-80.jpg",
-    "language": "en"
-  },
-  {
     "id": "Zm69vds3VGPEmMKVwX675Z",
     "title": "Where to find Slavek's purse in Kingdom Come: Deliverance 2",
     "source": "PC Gamer",
@@ -2097,6 +2117,16 @@
     "summary": "Help this injured soldier recover his coin in Mysteria Ecclesiae.",
     "link": "https://www.pcgamer.com/games/rpg/kingdom-come-deliverance-2-purse-location-slavek/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/o6bC3Tz6SwdPrW7UYF9ry5-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "Jaw2nF4GjDvWGFJg5ftdk5",
+    "title": "How to craft a plague mask in Kingdom Come: Deliverance 2",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-11T16:00:00.000Z",
+    "summary": "Complete the Prevention quest in Mysteria Ecclesiae.",
+    "link": "https://www.pcgamer.com/games/rpg/kingdom-come-deliverance-2-plague-mask-prevention/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/dqvp957KpCDqd6QERTzP5U-1280-80.jpg",
     "language": "en"
   },
   {
@@ -3880,16 +3910,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/iX-Workshop-Netzwerkanalyse-und-Fehlersuche-mit-Wireshark-10995833.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "heise-Angebot: iX-Workshop: Netzwerkanalyse und Fehlersuche mit Wireshark",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-11T13:00:00.000Z",
-    "summary": "Praktische Übungen, Experten-Tipps und fundiertes Wissen: Lernen Sie, wie Sie mit Wireshark Netzwerkprobleme erkennen und beheben.",
-    "link": "https://www.heise.de/news/iX-Workshop-Netzwerkanalyse-und-Fehlersuche-mit-Wireshark-10995833.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/9/2/0/1/netzwerkanalyse_und_fehlersuche_mit_wireshark_ticker-1920x1080px-69cfacac8e430811.png",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/tests/Wasserstoff-Auto-Hyundai-Nexo-im-Fahrbericht-Besser-und-weiter-aussichtslos-11073330.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Fahrbericht Hyundai Nexo: Schafft das H2-Auto die Trendwende?",
     "source": "Heise Online",
@@ -3897,6 +3917,16 @@
     "summary": "Der neue Hyundai Nexo macht alles besser als sein Vorgänger. Die Idee eines Brennstoffzellenautos ist trotz Aussichtslosigkeit offenbar nicht totzukri",
     "link": "https://www.heise.de/tests/Wasserstoff-Auto-Hyundai-Nexo-im-Fahrbericht-Besser-und-weiter-aussichtslos-11073330.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/9/6/2/Hyundai_Nexo_2026-18-93f534da20b0d026.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/iX-Workshop-Netzwerkanalyse-und-Fehlersuche-mit-Wireshark-10995833.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "heise-Angebot: iX-Workshop: Netzwerkanalyse und Fehlersuche mit Wireshark",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-11T13:00:00.000Z",
+    "summary": "Praktische Übungen, Experten-Tipps und fundiertes Wissen: Lernen Sie, wie Sie mit Wireshark Netzwerkprobleme erkennen und beheben.",
+    "link": "https://www.heise.de/news/iX-Workshop-Netzwerkanalyse-und-Fehlersuche-mit-Wireshark-10995833.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/9/2/0/1/netzwerkanalyse_und_fehlersuche_mit_wireshark_ticker-1920x1080px-69cfacac8e430811.png",
     "language": "de"
   },
   {
@@ -3986,7 +4016,7 @@
     "publicationDate": "2025-11-11T12:45:10.000Z",
     "summary": "Der neue Extraction-Shooter ARC Raiders wird dem Hype gerecht und meldet weiter steigende Spielerzahlen. (Spiele, Steam)",
     "link": "https://www.golem.de/news/neuer-shooter-arc-raiders-meldet-beeindruckende-spielerzahlen-2511-202069.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/202069-544843-544840.jpg",
     "language": "de"
   },
   {
@@ -4028,16 +4058,6 @@
     "link": "https://www.pcgamesn.com/arc-raiders/four-million-sales",
     "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/11/arc-raiders-four-million-sales.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://playfront.de/?p=1146819",
-    "title": "Battlefield 6: Patch 1.1.1.5 stopft Exploits und stabilisiert REDSEC",
-    "source": "PlayFront",
-    "publicationDate": "2025-11-11T12:37:33.000Z",
-    "summary": "Der neue Battlefield 6 Patch 1.1.1.5 bringt dringend nötige Fixes für Waffen, Fahrzeuge und Battle Royale – inklusive Exploit- und Stabilitätsverbesse",
-    "link": "https://playfront.de/battlefield-6-patch-1-1-1-5-stopft-exploits-und-stabilisiert-battle-royale/",
-    "imageUrl": "https://cdn.playfront.de/uploads/2025/10/battlefield-6-redsec.webp",
-    "language": "de"
   },
   {
     "id": "https://www.heise.de/hintergrund/Zahlen-bitte-Jupitermond-Europa-Spannender-Kandidat-auf-der-Suche-nach-Leben-11073440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
@@ -4127,16 +4147,6 @@
     "summary": "Wer schon immer davon geträumt hat, sich als 5-Sterne-Koch im Weltraum einen Namen zu machen, hat jetzt die Gelegenheit dazu! Doch Vorsicht, nicht all",
     "link": "https://www.videogameszone.de/Spiele-Thema-239104/News/Space-Chef-Restaurant-Manager-RPG-Survival-1486230/",
     "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/11/Space-Chef-Screenshot-04-pc-games.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.xboxdynasty.de/?p=1201628",
-    "title": "Battlefield 6: Drohnen-Exploit und mehr gefixt",
-    "source": "XboxDynasty",
-    "publicationDate": "2025-11-11T12:30:16.000Z",
-    "summary": "Ladet euch das neue Update für Battlefield 6 herunter, das Fehler behebt und Verbesserungen vornimmt.",
-    "link": "https://www.xboxdynasty.de/news/battlefield-6/drohnen-exploit-und-mehr-gefixt/",
-    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2025/07/battlefield-6-9.jpg",
     "language": "de"
   },
   {
@@ -6620,16 +6630,6 @@
     "language": "en"
   },
   {
-    "id": "ysw4fpvy7Y3qe6psy2vpW",
-    "title": "Diablo 4 devs refuse to hint at the next expansion but urge fans to watch The Game Awards this year: 'Everyone should be watching it'",
-    "source": "PC Gamer",
-    "publicationDate": "2025-11-10T21:51:09.000Z",
-    "summary": "Someone ask Geoff Keighley if Diablo 4 will finally get paladins.",
-    "link": "https://www.pcgamer.com/games/rpg/diablo-4-devs-refuse-to-hint-at-the-next-expansion-but-urge-fans-to-watch-the-game-awards-this-year-everyone-should-be-watching-it/",
-    "imageUrl": "https://cdn.mos.cms.futurecdn.net/tFisAwksXZ4c3A7BNv3SKb-1280-80.jpg",
-    "language": "en"
-  },
-  {
     "id": "https://www.destructoid.com/?p=1139684",
     "title": "How to complete Digging up Dirt in ARC Raiders",
     "source": "Destructoid",
@@ -7086,7 +7086,7 @@
     "publicationDate": "2025-11-10T17:00:10.000Z",
     "summary": "Römische Ordnung trifft auf entspanntes Aufbauen: Anno 117 verbindet klassisches Ressourcenmanagement mit neuen Ideen. Ein Test von Peter Steinlechner",
     "link": "https://www.golem.de/news/anno-117-im-test-ich-kam-ich-sah-ich-baute-2511-201998.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201998-544501-544498.jpg",
     "language": "de"
   },
   {
@@ -8836,7 +8836,7 @@
     "publicationDate": "2025-11-09T11:50:07.000Z",
     "summary": "Laut Quellen soll der Inhalt von GTA 6 fertig sein. Die restliche Zeit bis zum Release Ende 2026 geht es um Feinschliff und Stabilität. (GTA 6, Take-T",
     "link": "https://www.golem.de/news/rockstar-games-gta-soll-content-complete-sein-2511-201995.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201995-544471-544468.jpg",
     "language": "de"
   },
   {
@@ -10230,16 +10230,6 @@
     "language": "de"
   },
   {
-    "id": "https://www.heise.de/news/Deutschlandticket-Finanzierung-bis-2030-zugesagt-aber-ohne-Preisdeckel-11070805.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "Bundesfinanzierung für Deutschlandticket bis 2030 klar – Preissteigerungen nicht",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-07T13:30:00.000Z",
-    "summary": "Eine Absicherung mit öffentlichen Zuschüssen für das Deutschlandticket muss nur noch durch den Bundesrat. Weitere Preissteigerungen bleiben ein Kritik",
-    "link": "https://www.heise.de/news/Deutschlandticket-Finanzierung-bis-2030-zugesagt-aber-ohne-Preisdeckel-11070805.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/3/6/7/7/shutterstock_640657270-ad807ff718ef433e.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.heise.de/ratgeber/BMWs-Kompakt-SUVs-im-Vergleich-Das-kosten-iX3-und-X3-10748743.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
     "title": "heise+ | BMWs Kompakt-SUVs im Vergleich: Das kosten iX3 und X3",
     "source": "Heise Online",
@@ -10247,6 +10237,16 @@
     "summary": "BMW nutzt für den iX3 und X3 erstmals unterschiedliche Plattformen. Das hat Auswirkungen auf Optik, Ausstattung – und die Kosten.",
     "link": "https://www.heise.de/ratgeber/BMWs-Kompakt-SUVs-im-Vergleich-Das-kosten-iX3-und-X3-10748743.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
     "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/5/3/7/3/2/aufmacher-4ac616ef8fbbe1c9.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Deutschlandticket-Finanzierung-bis-2030-zugesagt-aber-ohne-Preisdeckel-11070805.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Bundesfinanzierung für Deutschlandticket bis 2030 klar – Preissteigerungen nicht",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-07T13:30:00.000Z",
+    "summary": "Eine Absicherung mit öffentlichen Zuschüssen für das Deutschlandticket muss nur noch durch den Bundesrat. Weitere Preissteigerungen bleiben ein Kritik",
+    "link": "https://www.heise.de/news/Deutschlandticket-Finanzierung-bis-2030-zugesagt-aber-ohne-Preisdeckel-11070805.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/3/6/7/7/shutterstock_640657270-ad807ff718ef433e.jpeg",
     "language": "de"
   },
   {
@@ -10516,7 +10516,7 @@
     "publicationDate": "2025-11-06T21:41:05.000Z",
     "summary": "Lucia und Jason müssen sich weiter gedulden: Rockstar hat den Start von GTA 6 auf November 2026 verschoben - sehr zum Ärger vieler Fans. (GTA 6, Take-",
     "link": "https://www.golem.de/news/rockstar-games-gta-6-erneut-verschoben-2511-201933.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201933-544197-544194.jpg",
     "language": "de"
   },
   {
@@ -10706,7 +10706,7 @@
     "publicationDate": "2025-11-06T14:36:09.000Z",
     "summary": "Dank Firmware-Update wird PS Portal zum vollwertigen Handheld: Endlich lassen sich PS5-Spiele aus der Cloud streamen. Wir haben es ausprobiert. Ein Ha",
     "link": "https://www.golem.de/news/playstation-so-ist-mobiles-spielestreaming-super-2511-201918.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201918-544095-544092.jpg",
     "language": "de"
   },
   {
@@ -10806,7 +10806,7 @@
     "publicationDate": "2025-11-06T11:15:06.000Z",
     "summary": "Ungewöhnlich offene Kritik: Kingdom-Come-Deliverance-2-Macher Daniel Vávra hat The Outer Worlds 2 für mangelnde Innovation gerügt. (Kingdom Come Deliv",
     "link": "https://www.golem.de/news/daniel-vavra-kcd2-entwickler-kritisiert-the-outer-worlds-2-2511-201904.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201904-544032-544029.jpg",
     "language": "de"
   },
   {
@@ -10996,7 +10996,7 @@
     "publicationDate": "2025-11-05T15:28:06.000Z",
     "summary": "Die beliebte Playstation-Glitzerlampe sinkt erstmals auf ihren Tiefstpreis und eignet sich perfekt als Geschenk für Fans der Kult-Konsole. (Playstatio",
     "link": "https://www.golem.de/news/anzeige-playstation-glitzerlampe-bei-amazon-jetzt-so-guenstig-wie-nie-2511-201874.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201874-543872-543869.jpg",
     "language": "de"
   },
   {
@@ -11036,7 +11036,7 @@
     "publicationDate": "2025-11-05T14:50:04.000Z",
     "summary": "Massive Aufwertung für Playstation Portal: Es dient nun auch zum Spielestreaming von neuen PS5-Spielen - ohne, dass die PS5 an sein muss. (Playstation",
     "link": "https://www.golem.de/news/spielestreaming-ps-portal-wird-endgueltig-zum-cloud-handheld-2511-201872.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201872-543868-543865.jpg",
     "language": "de"
   },
   {
@@ -11146,7 +11146,7 @@
     "publicationDate": "2025-11-05T10:11:04.000Z",
     "summary": "Mit besserer Technik als früher, offiziellen Lizenzen und Frauenfußball versucht Football Manager 26 frisch ins Spiel zu kommen. (Sportspiel, Sega)",
     "link": "https://www.golem.de/news/football-manager-26-neustart-auf-der-trainerbank-2511-201853.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201853-543764-543761.jpg",
     "language": "de"
   },
   {
@@ -11326,7 +11326,7 @@
     "publicationDate": "2025-11-04T14:05:05.000Z",
     "summary": "Mehr Kills als in Doom: Die brave Prinzessin Zelda kämpft in Hyrule Warriors - Chronik der Versiegelung an der Fantasy-Front (Switch 2). Ein Test von ",
     "link": "https://www.golem.de/news/hyrule-warriors-im-kurztest-mit-prinzessin-zelda-durch-massenschlachten-2511-201793.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201793-543447-543444.jpg",
     "language": "de"
   },
   {
@@ -11376,7 +11376,7 @@
     "publicationDate": "2025-11-04T11:13:07.000Z",
     "summary": "Laut einer neuen Analyse geben Gamer doppelt so viel Geld für Remakes aus wie für Remasters. Große Ausnahme ist The Elder Scrolls 4. (The Elder Scroll",
     "link": "https://www.golem.de/news/spielebranche-remakes-bringen-doppelt-so-viel-geld-wie-remasters-2511-201815.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201815-543562-543559.jpg",
     "language": "de"
   },
   {
@@ -11396,7 +11396,7 @@
     "publicationDate": "2025-11-04T09:42:09.000Z",
     "summary": "Die Switch 2 verkauft sich besser als erwartet: Rund 10,36 Millionen Geräte wurden abgesetzt, Mario und Donkey Kong sind Spiele-Besteller. (Nintendo S",
     "link": "https://www.golem.de/news/hybridkonsole-nintendo-hebt-verkaufsprognose-fuer-die-switch-2-an-2511-201807.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201807-543524-543521.jpg",
     "language": "de"
   },
   {
@@ -11656,7 +11656,7 @@
     "publicationDate": "2025-11-03T10:28:04.000Z",
     "summary": "Sandy Petersen behauptet, Mattrick habe Ensemble Studios (Age of Empires) und ein Halo-MMO gezielt beendet, um eigene Aktienboni zu sichern. (Xbox, Mi",
     "link": "https://www.golem.de/news/don-mattrick-doom-designer-erhebt-schwere-vorwuerfe-gegen-ex-xbox-chef-2511-201773.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201773-543346-543343.jpg",
     "language": "de"
   },
   {
@@ -11666,7 +11666,7 @@
     "publicationDate": "2025-11-03T09:36:11.000Z",
     "summary": "Donuts fallen vom Himmel, Bart baut Barrikaden: In der neuen Season von Fortnite gibt es eine Springfield-Insel. (Fortnite, Disney)",
     "link": "https://www.golem.de/news/homer-und-bart-die-simpsons-ziehen-auf-eigene-insel-in-fortnite-ein-2511-201769.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201769-543319-543316.jpg",
     "language": "de"
   },
   {
@@ -11756,7 +11756,7 @@
     "publicationDate": "2025-11-02T12:00:04.000Z",
     "summary": "In einem Interview hat sich Rockstar-Mitgründer Dan Houser über nie veröffentlichte Erweiterungen zu GTA 5 und Singleplayer geäußert. (GTA 5, Rockstar",
     "link": "https://www.golem.de/news/rockstar-games-trevor-sollte-geheimagent-in-gta-5-erweiterung-werden-2511-201752.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2511/201752-543220-543217.jpg",
     "language": "de"
   },
   {
@@ -12046,7 +12046,7 @@
     "publicationDate": "2025-10-31T11:46:04.000Z",
     "summary": "Vor einem Gericht in den USA hat sich Nintendo zum Teil gegen den Streamer EveryGameGuru durchgesetzt - wegen der besonderen Umstände. (Nintendo, Spie",
     "link": "https://www.golem.de/news/streamer-nintendo-gewinnt-rechtsstreit-gegen-everygameguru-2510-201723.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201723-543046-543043.jpg",
     "language": "de"
   },
   {
@@ -12086,7 +12086,7 @@
     "publicationDate": "2025-10-31T10:15:07.000Z",
     "summary": "Der neue Sci-Fi-Shooter Arc Raiders kommt gut an: Auf Steam und Playstation fallen die ersten Bewertungen überwiegend positiv aus. (Arc Raiders, Spiel",
     "link": "https://www.golem.de/news/extraction-shooter-spieler-loben-atmosphaere-und-gunplay-von-arc-raiders-2510-201715.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201715-543006-543003.jpg",
     "language": "de"
   },
   {
@@ -12186,7 +12186,7 @@
     "publicationDate": "2025-10-30T16:57:07.000Z",
     "summary": "Für ein 70 Euro teures Spiel noch einmal 25 Euro bezahlen: Viele Spieler sind von Battlefield 6 enttäuscht. Zuvor wurde es hoch gelobt. (Battlefield, ",
     "link": "https://www.golem.de/news/battle-pass-fuer-25-euro-es-hagelt-schlechte-kritiken-fuer-battlefield-6-auf-steam-2510-201705.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201705-542941-542938.png",
     "language": "de"
   },
   {
@@ -12206,7 +12206,7 @@
     "publicationDate": "2025-10-30T15:28:01.000Z",
     "summary": "Bessere Grafik, Unterstützung der Joy-Con-Maus und Lego: Nintendo hat große Updates für Animal Crossing vorgestellt. (Animal Crossing, Nintendo)",
     "link": "https://www.golem.de/news/new-horizons-nintendo-erweitert-animal-crossing-fuer-die-switch-2-2510-201700.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201700-542919-542913.jpg",
     "language": "de"
   },
   {
@@ -12296,7 +12296,7 @@
     "publicationDate": "2025-10-30T12:15:11.000Z",
     "summary": "Der Brick Boy ist ein kleiner Bausatz samt Mikrocontroller und Display. Damit kann ein Lego Game Boy funktionsfähig gemacht werden. (Game Boy, Nintend",
     "link": "https://www.golem.de/news/brickboy-bestellbarer-bausatz-macht-lego-game-boy-zur-echten-konsole-2510-201689.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201689-542864-542861.png",
     "language": "de"
   },
   {
@@ -12366,7 +12366,7 @@
     "publicationDate": "2025-10-30T06:30:07.000Z",
     "summary": "Der Battle-Royale-Modus von Battlefield 6 kommt bei Spielern nicht gut an. Besonders zwei Kritikpunkte fallen auf. (Battlefield, Spiele)",
     "link": "https://www.golem.de/news/battlefield-6-redsec-scheitert-zum-start-an-den-eigenen-spielern-2510-201666.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201666-542709-542706.jpg",
     "language": "de"
   },
   {
@@ -12476,7 +12476,7 @@
     "publicationDate": "2025-10-29T15:00:01.000Z",
     "summary": "Verhilft Arc Raiders den Extraction-Shootern zum Durchbruch? Unsere Solopartie hat jedenfalls sehr viel Spaß gemacht. Ein Hands-on von Peter Steinlech",
     "link": "https://www.golem.de/news/vorschau-arc-raiders-wenn-looten-zur-ueberlebensfrage-wird-2510-201640.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201640-542588-542585.jpg",
     "language": "de"
   },
   {
@@ -12536,7 +12536,7 @@
     "publicationDate": "2025-10-29T09:51:09.000Z",
     "summary": "Eine Zeitlang war New World extrem erfolgreich, nun steht wohl der Abschied bevor: Amazon Games will das MMOG vermutlich Ende 2026 abschalten. (New Wo",
     "link": "https://www.golem.de/news/amazon-games-new-world-vor-dem-aus-2510-201637.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201637-542575-542572.jpg",
     "language": "de"
   },
   {
@@ -12556,7 +12556,7 @@
     "publicationDate": "2025-10-29T08:35:03.000Z",
     "summary": "Bis zu vier Spieler dürfen nun online gemeinsam durch Monsterhorden jagen. Das Update bringt außerdem ein kurioses Poker-Crossover. (Actionspiel, Spie",
     "link": "https://www.golem.de/news/actionspiel-vampire-survivors-bekommt-online-koop-2510-201621.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201621-542452-542449.jpg",
     "language": "de"
   },
   {
@@ -12566,7 +12566,7 @@
     "publicationDate": "2025-10-29T07:42:10.000Z",
     "summary": "Das neue Zelda Hyrule Warriors: Chronik der Versiegelung für Nintendo Switch 2 ist derzeit 15 Euro günstiger bei Amazon vorzubestellen. (Spiele, Ninte",
     "link": "https://www.golem.de/news/anzeige-neues-zelda-fuer-switch-2-15-euro-guenstiger-vorbestellen-2510-201629.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201629-542491-542488.jpg",
     "language": "de"
   },
   {
@@ -12596,7 +12596,7 @@
     "publicationDate": "2025-10-28T15:49:08.000Z",
     "summary": "Mit Battlefield 6 Redsec startet EAs neuer Free-to-Play-Battle-Royale-Modus. Wer die Feuerzone berührt, ist sofort tot. (Battlefield, Electronic Arts)",
     "link": "https://www.golem.de/news/battlefield-6-redsec-schickt-elitesoldaten-in-sofort-toedliche-zone-2510-201616.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201616-542419-542416.jpg",
     "language": "de"
   },
   {
@@ -12626,7 +12626,7 @@
     "publicationDate": "2025-10-28T09:15:02.000Z",
     "summary": "Mit einer neuen KI-Funktion im Google AI Studio sollen bald kleine Spiele allein durch Texteingaben entstehen - ganz ohne klassischen Code. (Spiele-En",
     "link": "https://www.golem.de/news/vibe-coding-google-bringt-spiele-programmierung-nach-gefuehl-2510-201590.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201590-542301-542298.jpg",
     "language": "de"
   },
   {
@@ -12646,7 +12646,7 @@
     "publicationDate": "2025-10-27T14:55:01.000Z",
     "summary": "Steine im Weg: Der Missionsdesigner von Halo wirft den neuen Entwicklern vor, zentrale Elemente und den Geist des Originals zu verfälschen. (Halo, Mic",
     "link": "https://www.golem.de/news/campaign-evolved-original-designer-kritisiert-neuauflage-von-halo-2510-201570.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201570-542195-542192.jpg",
     "language": "de"
   },
   {
@@ -12666,7 +12666,7 @@
     "publicationDate": "2025-10-27T09:55:06.000Z",
     "summary": "Ein früher Prototyp enthüllt ein nie veröffentlichtes God-of-War-Spiel mit griechischen Ruinen und der geheimnisvollen Schmiede des Hades. (God of War",
     "link": "https://www.golem.de/news/multiplayer-leak-zeigt-hades-schmiede-aus-eingestelltem-god-of-war-2510-201554.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201554-542076-542070.jpg",
     "language": "de"
   },
   {
@@ -12696,7 +12696,7 @@
     "publicationDate": "2025-10-27T08:21:09.000Z",
     "summary": "Laut den Daten von ProtonDB steigt die Zahl der mit Linux kompatiblen Titel stetig weiter. Allerdings lässt das Wachstum wieder nach. (Linux, Steam)",
     "link": "https://www.golem.de/news/protondb-fast-90-prozent-der-games-funktionieren-auf-linux-2510-201548.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201548-542045-542042.jpg",
     "language": "de"
   },
   {
@@ -12746,7 +12746,7 @@
     "publicationDate": "2025-10-25T09:30:11.000Z",
     "summary": "Die Unreal Engine als Basis, drei zusätzliche Prequel-Missionen: Microsoft hat ein Remake des ersten Halo angekündigt. (Halo, Microsoft)",
     "link": "https://www.golem.de/news/campaign-evolved-halo-remake-schickt-den-master-chief-auch-auf-die-ps5-2510-201529.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201529-541939-541936.jpg",
     "language": "de"
   },
   {
@@ -12816,7 +12816,7 @@
     "publicationDate": "2025-10-24T12:33:09.000Z",
     "summary": "Electronic Arts arbeitet mit Stability AI an neuen Entwicklungstools - dabei sehen viele Spieler den Einsatz von KI in Games eher skeptisch. (Spiele-E",
     "link": "https://www.golem.de/news/spielebranche-ea-und-krafton-oeffnen-die-studiotueren-fuer-ki-2510-201517.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201517-541890-541887.jpg",
     "language": "de"
   },
   {
@@ -12846,7 +12846,7 @@
     "publicationDate": "2025-10-24T09:03:10.000Z",
     "summary": "Ein Skin für Battlefield 6 führt vor dem Start der ersten Season zu Kritik. Spieler drohen sogar mit Boykott in Matches. (Battlefield, Electronic Arts",
     "link": "https://www.golem.de/news/keine-wiederbelebungen-battlefield-6-spieler-protestieren-gegen-bunte-skin-2510-201499.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201499-541780-541777.jpg",
     "language": "de"
   },
   {
@@ -12886,7 +12886,7 @@
     "publicationDate": "2025-10-23T14:00:07.000Z",
     "summary": "Eine interne Vorgabe von Finanzchefin Amy Hood erklärt womöglich viele der jüngsten Entscheidungen rund um Spielepreise und den Xbox Game Pass. (Xbox,",
     "link": "https://www.golem.de/news/medienbericht-microsoft-zwingt-xbox-sparte-zu-30-prozent-gewinnmarge-2510-201476.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201476-541654-541651.jpg",
     "language": "de"
   },
   {
@@ -12896,7 +12896,7 @@
     "publicationDate": "2025-10-23T13:15:06.000Z",
     "summary": "Ein Update für Counter-Strike 2 hat den milliardenschweren Skin-Markt in Aufruhr versetzt. (Counter-Strike 2, Steam)",
     "link": "https://www.golem.de/news/stat-trak-valve-hat-die-cs2-oekonomie-erschuettert-2510-201474.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201474-541645-541642.jpg",
     "language": "de"
   },
   {
@@ -12906,7 +12906,7 @@
     "publicationDate": "2025-10-23T13:00:04.000Z",
     "summary": "Zwischen Star Trek und Fallout: The Outer Worlds 2 ist ein cleveres Sci-Fi-Rollenspiel voller Entscheidungen und wunderbar schräger Figuren. Ein Test ",
     "link": "https://www.golem.de/news/the-outer-worlds-2-im-test-das-beste-nerd-rollenspiel-seit-jahren-2510-201433.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201433-541445-541442.jpg",
     "language": "de"
   },
   {
@@ -12936,7 +12936,7 @@
     "publicationDate": "2025-10-23T08:58:07.000Z",
     "summary": "Copilot nimmt offenbar Spielinhalte auf und sendet diese für KI-Trainings an Microsoft. Das ist teils standardmäßig eingeschaltet. (Windows 11, KI)",
     "link": "https://www.golem.de/news/gaming-copilot-windows-11-sendet-ungefragt-spieldaten-an-microsoft-2510-201455.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201455-541610-541607.png",
     "language": "de"
   },
   {
@@ -12976,7 +12976,7 @@
     "publicationDate": "2025-10-22T12:29:09.000Z",
     "summary": "Viele Spieler jubeln, andere sind empört: Dice hat in Battlefield 6 viele Server deaktiviert, auf denen Spieler Erfahrungspunkte gesammelt haben. (Bat",
     "link": "https://www.golem.de/news/dice-entwickler-legen-xp-farmen-in-battlefield-6-lahm-2510-201428.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201428-541427-541424.png",
     "language": "de"
   },
   {
@@ -13006,7 +13006,7 @@
     "publicationDate": "2025-10-22T09:05:06.000Z",
     "summary": "Xbox-Chefin Sarah Bond deutet eine teure High-End-Konsole an. Microsoft erhöht die Devkit-Preise für die aktuelle Generation. (Xbox, Microsoft)",
     "link": "https://www.golem.de/news/spielebranche-naechste-xbox-wird-ein-premium-erlebnis-2510-201414.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201414-541364-541361.jpg",
     "language": "de"
   },
   {
@@ -13046,7 +13046,7 @@
     "publicationDate": "2025-10-21T14:14:01.000Z",
     "summary": "Einfach nur schönere Grafik reicht nicht: Der langjährige Playstation-Manager Shuhei Yoshida sieht sehr spezielle Probleme bei neuen Konsolen. (Playst",
     "link": "https://www.golem.de/news/shuhei-yoshida-die-playstation-6-braucht-etwas-neues-2510-201390.html",
-    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
+    "imageUrl": "https://www.golem.de/2510/201390-541248-541245.jpg",
     "language": "de"
   },
   {
