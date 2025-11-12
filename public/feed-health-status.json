@@ -28,8 +28,8 @@
     "message": "Successfully fetched and parsed 20 articles."
   },
   "mein-mmo": {
-    "status": "success",
-    "message": "Successfully fetched and parsed 10 articles."
+    "status": "error",
+    "message": "All fetch attempts failed. Last error: The operation was aborted due to timeout"
   },
   "pc-gamer": {
     "status": "success",
@@ -88,8 +88,8 @@
     "message": "Successfully fetched and parsed 15 articles."
   },
   "pcgamesn": {
-    "status": "success",
-    "message": "Successfully fetched and parsed 75 articles."
+    "status": "error",
+    "message": "All fetch attempts failed. Last error: The operation was aborted due to timeout"
   },
   "rock-paper-shotgun": {
     "status": "success",
@@ -137,7 +137,7 @@
   },
   "heise-online": {
     "status": "success",
-    "message": "Successfully fetched and parsed 159 articles."
+    "message": "Successfully fetched and parsed 153 articles."
   },
   "pixelcritics": {
     "status": "success",
