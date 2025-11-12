@@ -127,6 +127,10 @@
     "status": "success",
     "message": "Successfully fetched and parsed 12 articles."
   },
+  "playstation-blog": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 10 articles."
+  },
   "computerbase": {
     "status": "success",
     "message": "Successfully fetched and parsed 50 articles."
@@ -154,9 +158,5 @@
   "golem": {
     "status": "success",
     "message": "Successfully fetched and parsed 40 articles."
-  },
-  "playstation-blog": {
-    "status": "success",
-    "message": "Successfully fetched and parsed 10 articles."
   }
 }
