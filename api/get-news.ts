@@ -565,17 +565,42 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
 
     if (imageUrl) {
         try {
-            // Use the URL directly from the feed without modifications.
-            const processedUrl = new URL(imageUrl, item.link).href;
+            let processedUrl = new URL(imageUrl, item.link).href;
+            const urlObject = new URL(processedUrl);
+
+            // GameStar & GamePro (cgames.de)
+            if (urlObject.hostname.includes('cgames.de')) {
+                // Replace resolution identifiers like /800/ with /original/ for max quality
+                processedUrl = processedUrl.replace(/\/(\d{3,4})\//, '/original/');
+            }
+            // GamesWirtschaft (WordPress standard)
+            else if (feed.name.includes('GamesWirtschaft')) {
+                // Remove WP image size suffixes like "-150x150"
+                processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|webp)$)/i, '');
+            }
+            // Nintendo Life
+            else if (urlObject.hostname.includes('nintendolife.com')) {
+                processedUrl = processedUrl.replace('small.jpg', 'large.jpg');
+            }
+
             return { imageUrl: processedUrl, needsScraping: false };
         } catch (e) {
             console.warn('Error processing image URL:', e);
+            // Fallback to trying to create a valid URL without optimizations
+            try {
+                return { imageUrl: new URL(imageUrl, item.link).href, needsScraping: false };
+            } catch {
+                // Final fallback to the raw URL if it's not even a valid partial URL
+                return { imageUrl: imageUrl, needsScraping: false };
+            }
         }
     }
+
 
     const placeholderUrl = `https://placehold.co/600x400/374151/d1d5db?text=${encodeURIComponent(feed.name.substring(0, 30))}`;
     return { imageUrl: placeholderUrl, needsScraping };
 }
+
 
 function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
     try {

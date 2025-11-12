@@ -789,13 +789,35 @@ function parseRssXml(xmlString, feed) {
         let finalImageUrl = null;
         if (imageUrl) {
             try {
-                // Use the URL directly from the feed without modifications.
-                const processedUrl = new URL(imageUrl, link).href;
+                let processedUrl = new URL(imageUrl, link).href;
+                const urlObject = new URL(processedUrl);
+
+                // GameStar & GamePro (cgames.de)
+                if (urlObject.hostname.includes('cgames.de')) {
+                    // Replace resolution identifiers like /800/ with /original/ for max quality
+                    processedUrl = processedUrl.replace(/\/(\d{3,4})\//, '/original/');
+                }
+                // GamesWirtschaft (WordPress standard)
+                else if (feed.name === 'GamesWirtschaft') {
+                    // Remove WP image size suffixes like "-150x150"
+                    processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|webp)$)/i, '');
+                }
+                else if (urlObject.hostname.includes('nintendolife.com')) {
+                    processedUrl = processedUrl.replace('small.jpg', 'large.jpg');
+                }
+
                 finalImageUrl = processedUrl;
             } catch (e) {
-                finalImageUrl = imageUrl;
+                // If URL processing fails, fall back to the original URL and try to make it absolute
+                try {
+                    finalImageUrl = new URL(imageUrl, link).href;
+                } catch {
+                    finalImageUrl = imageUrl;
+                }
+                console.warn(`Could not process image URL '${imageUrl}': ${e.message}`);
             }
         }
+
 
         articles.push({
             id: getText('guid') || link,
