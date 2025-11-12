@@ -283,9 +283,13 @@ function parseRssXml(xmlString, feed) {
                         console.warn(`Could not parse image URL for optimization: ${processedUrl}`);
                     }
                 }
-                // GameStar and GamePro use a path segment for resolution, e.g., /800/.
-                else if (['GameStar', 'GamePro'].includes(feedName) && hostname.includes('cgames.de')) {
-                    processedUrl = processedUrl.replace(/(images\/(gamestar|gamepro)\/)(\d+)(\/.*)/i, '$11200$4');
+                // GameStar uses a path segment for resolution.
+                else if (feedName === 'GameStar' && hostname.includes('cgames.de')) {
+                    processedUrl = processedUrl.replace(/(images\/gamestar\/)(\d+)(\/.*)/i, '$11200$3');
+                }
+                // GamePro uses a different path segment ('gsgp') for resolution.
+                else if (feedName === 'GamePro' && hostname.includes('cgames.de')) {
+                    processedUrl = processedUrl.replace(/(images\/gsgp\/)(\d+)(\/.*)/i, '$11200$3');
                 }
                 // GamesWirtschaft (WordPress standard)
                 else if (feedName === 'GamesWirtschaft') {
