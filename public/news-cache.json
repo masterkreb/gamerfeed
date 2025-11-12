@@ -1,5 +1,55 @@
 [
   {
+    "id": "https://www.polygon.com/steam-machine-announcement-revives-half-life-3-rumors/",
+    "title": "Half-Life 3 rumors swirl in the wake of Valve's Steam Machine announcement",
+    "source": "Polygon",
+    "publicationDate": "2025-11-12T22:02:55.000Z",
+    "summary": "An unlisted, untitled game has appeared on Valve's Steam page, sparking rumors that it could be the long-awaited Half-Life 3.",
+    "link": "https://www.polygon.com/steam-machine-announcement-revives-half-life-3-rumors/",
+    "imageUrl": "https://static0.polygonimages.com/wordpress/wp-content/uploads/2025/11/half-life-alyx.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.pcgamesn.com/vpn/free-vpn-privacy-issues-report",
+    "title": "I am once again begging free VPN users to keep these privacy issues in mind following a new report",
+    "source": "PCGamesN",
+    "publicationDate": "2025-11-12T22:00:49.000Z",
+    "summary": "Free VPNs on mobile app stores might seem attractive, but once again we learn that these tools hide vulnerabilities and security risks.",
+    "link": "https://www.pcgamesn.com/vpn/free-vpn-privacy-issues-report",
+    "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/11/free-vpn-research.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://kotaku.com/?p=2000643629",
+    "title": "The Hoarder’s Guide To Managing Your Arc Raiders Inventory",
+    "source": "Kotaku",
+    "publicationDate": "2025-11-12T21:58:48.000Z",
+    "summary": "You don’t want to end up on one of those messy reality shows, do you? The post The Hoarder’s Guide To Managing Your Arc Raiders Inventory appeared...",
+    "link": "https://kotaku.com/arc-raiders-inventory-full-stash-loadout-crafting-cheat-sheet-2000643629",
+    "imageUrl": "https://kotaku.com/app/uploads/2025/11/1inventorymanagement-1280x720.jpg",
+    "language": "en"
+  },
+  {
+    "id": "3ANukts9g54m7xnbCA47jJ",
+    "title": "Rockstar faces legal action from UK union after firing more than 30 employees last week: 'We are confident that what we’ve seen here is plain and simple union busting'",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-12T21:52:18.000Z",
+    "summary": "The IWGB union says Rockstar has refused to meet with it to negotiate, so it's time to get the courts involved.",
+    "link": "https://www.pcgamer.com/gaming-industry/rockstar-faces-legal-action-from-uk-union-after-firing-more-than-30-employees-last-week-we-are-confident-that-what-weve-seen-here-is-plain-and-simple-union-busting/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/Gd3xV4UvEbhuoBkj9hCaUR-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.heise.de/news/Steam-Frame-Valves-VR-Brille-rueckt-klassisches-Gaming-und-VR-naeher-zusammen-11076307.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Steam Frame: Valves VR-Brille rückt klassisches Gaming und VR näher zusammen",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-12T21:46:00.000Z",
+    "summary": "Steam Frame ist für kabelloses Streaming von klassischen Bildschirm- und VR-Spielen vom PC ausgelegt, läuft dank ARM-Chip aber auch ohne PC-Anbindung.",
+    "link": "https://www.heise.de/news/Steam-Frame-Valves-VR-Brille-rueckt-klassisches-Gaming-und-VR-naeher-zusammen-11076307.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/4/7/1/Steam-Frame-0e8a8dafba0806e7.jpeg",
+    "language": "de"
+  },
+  {
     "id": "https://kotaku.com/?p=2000643572",
     "title": "16 Cool Details About Valve’s New Steam Console, Controller, And VR Headset",
     "source": "Kotaku",
@@ -158,6 +208,16 @@
     "link": "https://www.pcgamer.com/hardware/valve-fat-fingering-something/",
     "imageUrl": "https://cdn.mos.cms.futurecdn.net/PMAUh6XNUGq7CTNsvza3M4-1280-80.jpg",
     "language": "en"
+  },
+  {
+    "id": "https://www.gamestar.de/artikel/anno-117-gespielt-fehler-gemacht-nicht-wiederholen,3442830.html",
+    "title": "Plus - Guide: Anno 117: Pax Romana - Ich habe schon über 100 Stunden gespielt und dabei 7 Fehler gemacht, die ihr nicht wiederholen solltet",
+    "source": "GameStar",
+    "publicationDate": "2025-11-12T21:00:00.000Z",
+    "summary": "Für den Test habe ich eine Menge Anno 117 gespielt und dabei so einige Fehler begangen, von denen ich euch nun abraten möchte.",
+    "link": "https://www.gamestar.de/artikel/anno-117-gespielt-fehler-gemacht-nicht-wiederholen,3442830.html",
+    "imageUrl": "https://images.cgames.de/images/gamestar/1200/anno-117-fehler-plus_6386144.jpg",
+    "language": "de"
   },
   {
     "id": "https://www.destructoid.com/?p=1140678",
@@ -3626,7 +3686,7 @@
     "publicationDate": "2025-11-12T15:12:00.000Z",
     "summary": "Nintendo held a special Direct for The Super Mario Galaxy Movie ahead of its release in theaters next year on April 3, 2026. Though the Direct...",
     "link": "https://gameinformer.com/nintendo-direct/2025/11/12/everything-we-learned-in-nintendos-direct-for-the-super-mario-galaxy",
-    "imageUrl": "https://img.ytimg.com/vi/GuCejewteF8/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/GuCejewteF8/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -4036,7 +4096,7 @@
     "publicationDate": "2025-11-12T14:40:15.000Z",
     "summary": "Nintendo aired a special Direct for The Super Mario Galaxy Movie today and released a brand-new trailer for the upcoming film, set to hit theaters in...",
     "link": "https://gameinformer.com/nintendo-direct/2025/11/12/new-planet-hopping-trailer-for-the-super-mario-galaxy-movie-shows",
-    "imageUrl": "https://img.ytimg.com/vi/GuCejewteF8/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/GuCejewteF8/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -9506,7 +9566,7 @@
     "publicationDate": "2025-11-11T22:50:34.000Z",
     "summary": "Today, during Sony's Japanese-focused State of Play presentation, From Software announced The Forsaken Hollows DLC coming to Elden Ring Nightreign on...",
     "link": "https://gameinformer.com/state-of-play/2025/11/11/elden-ring-nightreign-is-getting-the-forsaken-hollows-dlc-in-december",
-    "imageUrl": "https://img.ytimg.com/vi/n58X9-5pVgk/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/n58X9-5pVgk/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -9526,7 +9586,7 @@
     "publicationDate": "2025-11-11T22:47:52.000Z",
     "summary": "Octopath Traveler 0 comes out for PS5 and PS4 on December 4, 2025… but who wants to wait that long? You can start your adventure today in the new...",
     "link": "https://blog.playstation.com/2025/11/11/octopath-traveler-0-demo-out-today-on-ps5-and-ps4/",
-    "imageUrl": "https://i.ytimg.com/vi/FBzEhPDvYlY/maxresdefault.jpg",
+    "imageUrl": "https://i.ytimg.com/vi/FBzEhPDvYlY/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -9556,7 +9616,7 @@
     "publicationDate": "2025-11-11T22:43:22.000Z",
     "summary": "Marvel Tōkon: Fighting Souls, a tag-team fighter from the studio behind such hits as Dragon Ball FighterZ and Guilty Gear Strive, is getting another...",
     "link": "https://gameinformer.com/state-of-play/2025/11/11/marvel-tokon-fighting-souls-adds-x-mansion-stage-another-closed-beta-in",
-    "imageUrl": "https://img.ytimg.com/vi/CHHTVR47-8k/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/CHHTVR47-8k/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -9586,7 +9646,7 @@
     "publicationDate": "2025-11-11T22:39:52.000Z",
     "summary": "Thank you for checking out our PS Blog post. Elden Ring Nightreign is a co-op action survival game in which up to 3 players can band together,...",
     "link": "https://blog.playstation.com/2025/11/11/elden-ring-nightreign-the-forsaken-hollows-dlc-launches-dec-4-on-ps5-ps4/",
-    "imageUrl": "https://i.ytimg.com/vi/d7GO1FjenwI/maxresdefault.jpg",
+    "imageUrl": "https://i.ytimg.com/vi/d7GO1FjenwI/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -9666,7 +9726,7 @@
     "publicationDate": "2025-11-11T22:30:28.000Z",
     "summary": "Hi everyone. I am Michael Jiang, CEO at 91Act and Director of BlazBlue Entropy Effect X. In our latest reveal today you’ll see a glimpse of a world...",
     "link": "https://blog.playstation.com/2025/11/11/blazblue-entropy-effect-x-launches-february-12-on-ps5/",
-    "imageUrl": "https://i.ytimg.com/vi/F0-IoidwojI/maxresdefault.jpg",
+    "imageUrl": "https://i.ytimg.com/vi/F0-IoidwojI/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -9676,7 +9736,7 @@
     "publicationDate": "2025-11-11T22:30:24.000Z",
     "summary": "Today we revealed new DLC coming to four Bandai Namco Entertainment PlayStation games in the future. Digimon Story Time Stranger will enjoy...",
     "link": "https://blog.playstation.com/2025/11/11/bandai-namco-unveils-digimon-story-time-stranger-season-pass-dlc-super-robot-wars-y-crossover-content-and-more/",
-    "imageUrl": "https://i.ytimg.com/vi/23zcUXGyxr4/maxresdefault.jpg",
+    "imageUrl": "https://i.ytimg.com/vi/23zcUXGyxr4/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -9906,7 +9966,7 @@
     "publicationDate": "2025-11-11T21:59:52.000Z",
     "summary": "Today's State of Play Japan revealed that a new rendition of BlazBlue Entropy Effect is coming to next February. The side-scrolling roguelike...",
     "link": "https://gameinformer.com/state-of-play/2025/11/11/blazblue-entropy-effect-x-is-coming-in-february",
-    "imageUrl": "https://img.ytimg.com/vi/F0-IoidwojI/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/F0-IoidwojI/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -10966,7 +11026,7 @@
     "publicationDate": "2025-11-11T17:00:00.000Z",
     "summary": "Reviewed on: PC Platform: PlayStation 5, PC Publisher: Devolver Digital Developer: Heart Machine Release: November 11, 2025 Regardless of whether you...",
     "link": "https://gameinformer.com/review/possessors/possessed-by-a-familiar-demon",
-    "imageUrl": "https://img.ytimg.com/vi/6la77h-t7rU/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/6la77h-t7rU/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -11446,7 +11506,7 @@
     "publicationDate": "2025-11-11T16:17:00.000Z",
     "summary": "Mixtape, the coming-of-age adventure by the creators of The Artful Escape, has been delayed to 2026. First revealed during the 2024 Xbox Showcase,...",
     "link": "https://gameinformer.com/2025/11/11/mixtape-the-90s-coming-of-age-adventure-by-the-creators-of-the-artful-escape-delayed-to",
-    "imageUrl": "https://img.ytimg.com/vi/F6TQF6eJa3Y/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/F6TQF6eJa3Y/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -12446,7 +12506,7 @@
     "publicationDate": "2025-11-11T14:00:00.000Z",
     "summary": "Reviewed on: PlayStation 5, PlayStation VR2 Platform: PlayStation 5, PlayStation VR2, PC Publisher: Enhance Games Developer: Monstars Release:...",
     "link": "https://gameinformer.com/review/lumines-arise/its-all-connected",
-    "imageUrl": "https://img.ytimg.com/vi/SwuqiVNs058/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/SwuqiVNs058/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -14796,7 +14856,7 @@
     "publicationDate": "2025-11-10T23:00:00.000Z",
     "summary": "The Super Mario Galaxy Movie, a sequel to 2023's Super Mario Bros. Movie, is getting a dedicated Nintendo Direct later this week. According to the...",
     "link": "https://gameinformer.com/2025/11/10/a-nintendo-direct-for-the-super-mario-galaxy-movie-blasts-off-november-12",
-    "imageUrl": "https://img.ytimg.com/vi/RC56sjMdKuU/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/RC56sjMdKuU/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -14906,7 +14966,7 @@
     "publicationDate": "2025-11-10T20:32:10.000Z",
     "summary": "Reviewed on: PC Platform: PlayStation 5, Xbox Series X/S, Switch, PC Publisher: Skybound Games Developer: Nice Dream Release: November 11, 2025...",
     "link": "https://gameinformer.com/review/goodnight-universe/a-psychic-joy-with-a-few-stumbles",
-    "imageUrl": "https://img.ytimg.com/vi/Kw7_zMDuQ3Y/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/Kw7_zMDuQ3Y/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -14916,7 +14976,7 @@
     "publicationDate": "2025-11-10T20:27:00.000Z",
     "summary": "The nominations list for the 2026 Grammy awards dropped recently, renewing the fierce yearly debates over what should win, what should lose, and what...",
     "link": "https://gameinformer.com/2025/11/10/best-video-game-soundtrack-grammy-nominations-dont-include-clair-obscur-expedition-33",
-    "imageUrl": "https://img.ytimg.com/vi/Vo1By2krjCY/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/Vo1By2krjCY/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -15566,7 +15626,7 @@
     "publicationDate": "2025-11-10T15:00:00.000Z",
     "summary": "Developer Bethesda Game Studios announced The Elder Scrolls VI more than half a decade ago, at E3 2018, but according to executive producer and game...",
     "link": "https://gameinformer.com/2025/11/10/todd-howard-says-the-elder-scrolls-6-is-still-a-long-way-off-but-teases-it-could-be",
-    "imageUrl": "https://img.ytimg.com/vi/OkFdqqyI8y4/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/OkFdqqyI8y4/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -17386,7 +17446,7 @@
     "publicationDate": "2025-11-08T04:56:23.000Z",
     "summary": "In this week's episode of The Game Informer Show, the crew dives into Arc Raiders, the highly anticipated extraction shooter making waves with its...",
     "link": "https://gameinformer.com/video-podcast/2025/11/07/weekly-podcast-arc-raiders-dispatch-and-game-of-the-year-catch-up",
-    "imageUrl": "https://img.ytimg.com/vi/H3ylJ9m4L0A/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/H3ylJ9m4L0A/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -17986,7 +18046,7 @@
     "publicationDate": "2025-11-06T21:29:00.000Z",
     "summary": "Grand Theft Auto is one of the most successful franchises in the history of gaming, so it's only natural that people are eager to see the newest...",
     "link": "https://gameinformer.com/2025/11/06/grand-theft-auto-vi-release-date-delayed-to-november-2026",
-    "imageUrl": "https://img.ytimg.com/vi/VQRLujxTm3c/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/VQRLujxTm3c/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -18006,7 +18066,7 @@
     "publicationDate": "2025-11-06T18:03:00.000Z",
     "summary": "Kingdom Come: Deliverance II is one of the year’s most celebrated games, and if you’ve been on the fence about diving in, this weekend is your...",
     "link": "https://gameinformer.com/2025/11/06/kingdom-come-deliverance-ii-is-free-to-play-this-weekend-on-xbox-and-steam",
-    "imageUrl": "https://img.ytimg.com/vi/7ynJN-HejlY/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/7ynJN-HejlY/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -18126,7 +18186,7 @@
     "publicationDate": "2025-11-06T14:15:16.000Z",
     "summary": "Pokémon Legends: Z-A launched last month on October 16, with the promise of the previously announced Mega Dimension DLC on the way. In a new trailer...",
     "link": "https://gameinformer.com/2025/11/06/pokemon-legends-z-a-mega-dimension-dlc-launches-next-month-with-pokemon-over-level-100",
-    "imageUrl": "https://img.ytimg.com/vi/_DHozr0ZBcE/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/_DHozr0ZBcE/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -18306,7 +18366,7 @@
     "publicationDate": "2025-11-05T20:10:29.000Z",
     "summary": "Unbeatable is an anime-inspired \"arcade-flawless\" rhythm game that was set to launch tomorrow, November 6, on PlayStation 5, Xbox Series X/S, and PC...",
     "link": "https://gameinformer.com/2025/11/05/anime-inspired-rhythm-game-unbeatable-delayed-to-december-hours-before-its-launch",
-    "imageUrl": "https://img.ytimg.com/vi/ASRfsN8-okg/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/ASRfsN8-okg/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -18316,7 +18376,7 @@
     "publicationDate": "2025-11-05T19:56:00.000Z",
     "summary": "Dispatch, the episodic superhero narrative adventure, has been a critical success since the launch of its first two episodes on October 22. This...",
     "link": "https://gameinformer.com/2025/11/05/dispatch-sells-over-1-million-copies-in-first-10-days",
-    "imageUrl": "https://img.ytimg.com/vi/fTVgX7b1N8E/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/fTVgX7b1N8E/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -18326,7 +18386,7 @@
     "publicationDate": "2025-11-05T19:09:34.000Z",
     "summary": "When Square Enix announced Dragon Quest VII Reimagined during a Nintendo Direct held in September, players were left with all kinds of questions...",
     "link": "https://gameinformer.com/exclusive-interview/2025/11/05/who-is-takeshi-ichikawa-the-producer-of-dragon-quest-vii-reimagined",
-    "imageUrl": "https://img.ytimg.com/vi/z13aCVkZaaw/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/z13aCVkZaaw/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -18616,7 +18676,7 @@
     "publicationDate": "2025-11-04T18:32:34.000Z",
     "summary": "Dragon Quest VII Reimagined is gracing the cover of the latest Game Informer issue, and the digital version of the issue is live today ahead of...",
     "link": "https://gameinformer.com/exclusive/2025/11/04/dragon-quest-vii-reimagined-will-have-a-new-never-before-seen-conclusion",
-    "imageUrl": "https://img.ytimg.com/vi/z13aCVkZaaw/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/z13aCVkZaaw/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -18646,7 +18706,7 @@
     "publicationDate": "2025-11-04T16:12:00.000Z",
     "summary": "Publisher NetEase is planning to shut down Fantastic Pixel Castle, a studio it founded in 2023 and led by Greg Street, formerly of Blizzard and Riot...",
     "link": "https://gameinformer.com/2025/11/04/fantastic-pixel-castle-a-studio-helmed-by-former-world-of-warcraft-lead-faces-closure",
-    "imageUrl": "https://img.ytimg.com/vi/XVX2OfQ8LV0/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/XVX2OfQ8LV0/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -18666,7 +18726,7 @@
     "publicationDate": "2025-11-04T15:49:00.000Z",
     "summary": "Vampire Survivors is one of the best indie games of recent memory, distilling the risk/reward formula of roguelikes into a concentrated rush of...",
     "link": "https://gameinformer.com/2025/11/04/warhammer-survivors-puts-space-marines-in-the-vampire-survivors-engine",
-    "imageUrl": "https://img.ytimg.com/vi/P5E_EaxN1qo/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/P5E_EaxN1qo/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -18846,7 +18906,7 @@
     "publicationDate": "2025-11-03T18:16:00.000Z",
     "summary": "I reached 30 hours in Ghost of Yōtei last night. Since picking it back up again after a quick review departure to cover Little Nightmares III for...",
     "link": "https://gameinformer.com/opinion/2025/11/03/ghost-of-yoteis-fox-puzzles-think-im-stupid",
-    "imageUrl": "https://img.ytimg.com/vi/PWSPKRXpwUI/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/PWSPKRXpwUI/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -19286,7 +19346,7 @@
     "publicationDate": "2025-10-31T19:06:19.000Z",
     "summary": "Earlier this year, I called ARC Raiders “the most promising extraction shooter I’ve played,” and after spending many hours with the final release, it...",
     "link": "https://gameinformer.com/review-in-progress/2025/10/31/arc-raiders-review-in-progress",
-    "imageUrl": "https://img.ytimg.com/vi/IpeJjQDXNAE/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/IpeJjQDXNAE/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -19356,7 +19416,7 @@
     "publicationDate": "2025-10-31T16:47:27.000Z",
     "summary": "It's Halloween on The Game Informer Show, and that means costumes, candy, and frights! Marcus, Kyle, and Eric take some time to discuss the latest...",
     "link": "https://gameinformer.com/2025/10/31/our-favorite-scary-games-the-seance-of-blake-manor-the-game-informer-show",
-    "imageUrl": "https://img.ytimg.com/vi/IFz6tra1xJM/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/IFz6tra1xJM/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -19376,7 +19436,7 @@
     "publicationDate": "2025-10-31T16:00:10.000Z",
     "summary": "Six One Publishing, the new publishing arm of excellent games showcase maker Six One Indie, has revealed its first game: a co-op horror-adventure set...",
     "link": "https://gameinformer.com/2025/10/31/six-one-publishings-first-game-is-a-co-op-appalachian-horror-adventure-called-blue-ridge",
-    "imageUrl": "https://img.ytimg.com/vi/iEUYlSMeKLY/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/iEUYlSMeKLY/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -19526,7 +19586,7 @@
     "publicationDate": "2025-10-30T19:46:00.000Z",
     "summary": "Heart Machine is laying off more employees this month, just a couple of weeks before the launch of its next game, Possessor(s), on November 11....",
     "link": "https://gameinformer.com/2025/10/30/report-heart-machine-is-laying-off-employees-a-second-time-this-month-weeks-before-its",
-    "imageUrl": "https://img.ytimg.com/vi/ZzAy9k9fvCk/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/ZzAy9k9fvCk/hqdefault.jpg",
     "language": "en"
   },
   {
@@ -19536,7 +19596,7 @@
     "publicationDate": "2025-10-30T19:20:00.000Z",
     "summary": "Paramount, the movie and television studio behind Top Gun: Maverick and the now-canceled Halo live-action series, announced in September that it was...",
     "link": "https://gameinformer.com/2025/10/30/call-of-duty-movie-to-be-directed-by-lone-survivor-deepwater-horizon-director-peter-berg",
-    "imageUrl": "https://img.ytimg.com/vi/9txkGBj_trg/maxresdefault.jpg",
+    "imageUrl": "https://img.ytimg.com/vi/9txkGBj_trg/hqdefault.jpg",
     "language": "en"
   },
   {
