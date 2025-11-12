@@ -1,5 +1,65 @@
 [
   {
+    "id": "https://playfront.de/?p=1147008",
+    "title": "Steam Frame – Valve präsentiert neue Steam-Konsole und VR-Headset",
+    "source": "PlayFront",
+    "publicationDate": "2025-11-12T18:51:14.000Z",
+    "summary": "Valve kündigt mit Steam Machine, Steam Controller und Steam Frame drei neue Hardware-Produkte an – ein klarer Angriff auf Konsolen und VR-Markt...",
+    "link": "https://playfront.de/steam-frame-valve-praesentiert-neue-steam-konsole-und-vr-headset/",
+    "imageUrl": "https://cdn.playfront.de/uploads/2025/11/steam-frame.webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.play3.de/?p=785573",
+    "title": "Battlefield 6: Großes Phase 2-Update für Season 1 bringt verbesserte Zielhilfe, Bloom-Fixes und mehr",
+    "source": "Play3",
+    "publicationDate": "2025-11-12T18:47:55.000Z",
+    "summary": "Nachdem erst gestern das neue Update 1.1.1.5 für „Battlefield 6“ veröffentlicht wurde, das unter anderem den berüchtigten Drohnen-Exploit ausmerzte,...",
+    "link": "https://www.play3.de/2025/11/12/battlefield-6-grosses-phase-2-update-fuer-season-1-bringt-verbesserte-zielhilfe-bloom-fixes-und-mehr/",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Play3",
+    "language": "de"
+  },
+  {
+    "id": "https://www.computerbase.de/news/gehaeuse/cooler-master-masterframe-400-premium-gehaeuse-bleibt-sich-auch-in-klein-treu.95022/",
+    "title": "Cooler Master MasterFrame 400: Premium-Gehäuse bleibt sich auch in klein treu",
+    "source": "ComputerBase",
+    "publicationDate": "2025-11-12T18:46:00.000Z",
+    "summary": "Das MasterFrame 400 komplettiert Cooler Masters Serie flexibler Premium-Gehäuse mit einem Micro-ATX-Modell. Schlichte Formsprache und Variabilität...",
+    "link": "https://www.computerbase.de/news/gehaeuse/cooler-master-masterframe-400-premium-gehaeuse-bleibt-sich-auch-in-klein-treu.95022/",
+    "imageUrl": "https://pics.computerbase.de/1/2/0/1/0/8-79b2f2ebd1534735/article-640x360.481a5a8a.jpg",
+    "language": "de"
+  },
+  {
+    "id": "125389",
+    "title": "Valve Announces Console-Like Steam Machine, Steam Frame VR Headset, And New Steam Controller",
+    "source": "Game Informer",
+    "publicationDate": "2025-11-12T18:45:24.000Z",
+    "summary": "Valve has revealed the Steam Machine, a cubical device that's six times more powerful than the Steam Deck and lets you play your entire Steam Library...",
+    "link": "https://gameinformer.com/2025/11/12/valve-announces-console-like-steam-machine-steam-frame-vr-headset-and-new-steam",
+    "imageUrl": "https://www.gameinformer.com/sites/default/files/styles/body_default/public/2025/11/12/6c9534b4/steam_header.jpg.webp",
+    "language": "en"
+  },
+  {
+    "id": "https://www.nintendolife.com/#article-193812",
+    "title": "Super Slick Roguelike 'The Rogue Prince Of Persia' Finally Dashes Onto Switch 2 Next Month",
+    "source": "Nintendo Life",
+    "publicationDate": "2025-11-12T18:45:00.000Z",
+    "summary": "The Evil Empire expands.We've assumed that it would be coming our way for some time now, but Dead Cells developer Evil Empire has today finally given...",
+    "link": "https://www.nintendolife.com/news/2025/11/super-slick-roguelike-the-rogue-prince-of-persia-finally-dashes-onto-switch-2-next-month",
+    "imageUrl": "https://images.nintendolife.com/68635ce78e314/large.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.pcgameshardware.de/Notebook_Laptop-Hardware-201330/Specials/HP-Omen-Max-Asus-Pro-Art-P16-Acer-Predator-Triton-AI-Preis-Umfang-1485620/",
+    "title": "[PLUS] High End oder nur hoher Preis? HP Omen Max, Asus Proart P16 und Acer Predator Triton 14 AI im Test",
+    "source": "PC Games Hardware",
+    "publicationDate": "2025-11-12T18:45:00.000Z",
+    "summary": "Acer, Asus und HP schicken mit dem Predator Triton 14 AI, Proart P16 und Omen Max 16 drei High-End-Notebooks ins Rennen. Alle versprechen...",
+    "link": "https://www.pcgameshardware.de/Notebook_Laptop-Hardware-201330/Specials/HP-Omen-Max-Asus-Pro-Art-P16-Acer-Predator-Triton-AI-Preis-Umfang-1485620/",
+    "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/11/Acer-Asus-Hp-pcgh.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://playfront.de/?p=1147003",
     "title": "Fünf Jahre PS5: Wie Sony die Konsole weitergedacht hat",
     "source": "PlayFront",
@@ -26,7 +86,7 @@
     "publicationDate": "2025-11-12T18:34:00.000Z",
     "summary": "Ein Jahrzehnt nach dem Scheitern der Steam Machines wagt Valve einen neuen Versuch: Die neue Steam-Machine ist ein Würfel mit SteamOS.",
     "link": "https://www.heise.de/news/Linux-Konsole-Valve-kuendigt-neue-Steam-Machine-an-11076221.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/4/2/6/Screenshot_2025-11-12_192955-dfaeb6f8c5d19b86.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/4/2/6/Screenshot_2025-11-12_192955-dfaeb6f8c5d19b86.png",
     "language": "de"
   },
   {
@@ -78,6 +138,16 @@
     "link": "https://www.pcgameshardware.de/Fallout-4-Spiel-18293/News/Anniversary-Edition-mit-grossen-Problemen-1486385/",
     "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/11/Fallout-4-Anniversary-Edition-pcgh.jpeg",
     "language": "de"
+  },
+  {
+    "id": "1100-6536068",
+    "title": "Fortnite Chapter 7: Start Date, New Map, And Everything We Know So Far",
+    "source": "GameSpot",
+    "publicationDate": "2025-11-12T18:29:00.000Z",
+    "summary": "Simpsons season is the talk of the Fortnite town right now, but this crossover event is only gonna last four weeks. Before we know it, Epic's...",
+    "link": "https://www.gamespot.com/articles/fortnite-chapter-7-start-date-new-map-and-everything-we-know-so-far/1100-6536068/?ftag=CAD-01-10abi2f",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1632/16320660/4601178-image%2810%29.jpg",
+    "language": "en"
   },
   {
     "id": "https://www.destructoid.com/?p=1140642",
@@ -216,7 +286,7 @@
     "publicationDate": "2025-11-12T18:12:40.000Z",
     "summary": "Hesse goes Hessen: Games- und Medien-Profi Joachim Hesse soll als Chefredakteur das Portal Speedruns ausbauen – vor und hinter der Kamera. Die...",
     "link": "https://www.gameswirtschaft.de/karriere/moonflow-media-speedruns-joachim-hesse-121125/",
-    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/Moonflow-Media-Speedruns-de-Jo-Hesse-121125.jpg",
+    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/Moonflow-Media-Speedruns-de-Jo-Hesse-121125-150x150.jpg",
     "language": "de"
   },
   {
@@ -310,23 +380,13 @@
     "language": "en"
   },
   {
-    "id": "https://www.heise.de/news/Demokratieschild-EU-Kommission-will-Integritaet-des-Informationsraums-wahren-11076151.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "title": "EU plant \"Demokratieschild\" für die \"Integrität des Informationsraums\"",
-    "source": "Heise Online",
-    "publicationDate": "2025-11-12T18:02:00.000Z",
-    "summary": "Die EU soll ein Netz von Faktenprüfern einrichten und den Kampf gegen Desinformation stärken. Just bedrohliche Social-Media-Algorithmen bleiben...",
-    "link": "https://www.heise.de/news/Demokratieschild-EU-Kommission-will-Integritaet-des-Informationsraums-wahren-11076151.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/3/9/0/shutterstock_2567369203-4ef03edc20884f9b.jpeg",
-    "language": "de"
-  },
-  {
     "id": "https://www.gamepro.de/artikel/lego-fan-baut-aus-lebkuchen-at-at-eigene-enterprise,3442778.html",
     "title": "News: \"LEGO, heuert diesen Mann an!\" - Bastler schnappt sich den Lebkuchen AT-AT und baut daraus einfach seine eigene U.S.S. Enterprise",
     "source": "GamePro",
     "publicationDate": "2025-11-12T18:02:00.000Z",
     "summary": "Star Trek oder Star Wars? Das ist eine der ältesten Fragen unter Fans. Zumindest bei LEGO müsst ihr euch aber nicht entscheiden, wenn ihr einfach...",
     "link": "https://www.gamepro.de/artikel/lego-fan-baut-aus-lebkuchen-at-at-eigene-enterprise,3442778.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/bild-reddituserminute-food-2881_6385620.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/bild-reddituserminute-food-2881_6385620.jpg",
     "language": "de"
   },
   {
@@ -408,6 +468,16 @@
     "link": "https://www.rockpapershotgun.com/valve-announce-a-new-steam-machine-steam-controller-and-the-steam-frame-vr-headset-and-ive-played-them",
     "imageUrl": "https://assetsio.gnwcdn.com/Steam-Machine-Steam-Controller-and-Steam-Frame-preview.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
     "language": "en"
+  },
+  {
+    "id": "https://www.heise.de/news/Demokratieschild-EU-Kommission-will-Integritaet-des-Informationsraums-wahren-11076151.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "EU plant \"Demokratieschild\" für die \"Integrität des Informationsraums\"",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-12T18:00:00.000Z",
+    "summary": "Die EU soll ein Netz von Faktenprüfern einrichten und den Kampf gegen Desinformation stärken. Just bedrohliche Social-Media-Algorithmen bleiben...",
+    "link": "https://www.heise.de/news/Demokratieschild-EU-Kommission-will-Integritaet-des-Informationsraums-wahren-11076151.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/3/9/0/shutterstock_2567369203-4ef03edc20884f9b.jpeg",
+    "language": "de"
   },
   {
     "id": "ovYanRQSaFyU7UyWHE4M7H",
@@ -556,7 +626,7 @@
     "publicationDate": "2025-11-12T17:50:00.000Z",
     "summary": "Open Reception entwickelt ein Terminportal, das Praxis und Patient datenschutzfreundlich verbinden soll.",
     "link": "https://www.heise.de/hintergrund/Open-Reception-Open-Source-Terminbuchungstool-fuer-Arztpraxen-steht-bald-bereit-11076033.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/3/2/7/OVERLAY_Interview_PNG_V2_9_-d8169c9c4dcdaef3.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/3/2/7/OVERLAY_Interview_PNG_V2_9_-d8169c9c4dcdaef3.png",
     "language": "de"
   },
   {
@@ -636,7 +706,7 @@
     "publicationDate": "2025-11-12T17:43:00.000Z",
     "summary": "Forschende haben einen Spielzeug-Prototypen namens \"SquidKid\" entwickelt, in dem Kinder sich um Bakterien kümmern können.",
     "link": "https://www.gamepro.de/artikel/spielzeug-mit-leuchtenden-bakterien,3442846.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/tamagotchi-gp_6386055.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/tamagotchi-gp_6386055.jpg",
     "language": "de"
   },
   {
@@ -646,7 +716,7 @@
     "publicationDate": "2025-11-12T17:40:00.000Z",
     "summary": "Ein Universal-Notebook, mit dem ihr auch ein wenig Zeit beim Zocken totschlagen könnt, muss gar nicht so teuer sein. Eine RTX 5060 steckt trotzdem...",
     "link": "https://www.gamestar.de/artikel/lenovo-laptop-rtx-5060-guenstig-amazon,3442868.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/titelbild-gaming-laptop-1000-euro-black-friday_6386074.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/titelbild-gaming-laptop-1000-euro-black-friday_6386074.jpg",
     "language": "de"
   },
   {
@@ -696,7 +766,7 @@
     "publicationDate": "2025-11-12T17:33:00.000Z",
     "summary": "Die popkulturelle Bedeutung von Mangas und Animes wie Chainsaw Man sind nicht zu unterschätzen: Jetzt wurde ein Sägehai nach einer Figur aus der...",
     "link": "https://www.gamepro.de/artikel/fossilien-saegehai-chainsaw-man-charakter,3442849.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/chainsaw-man-pochita_6386002.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/chainsaw-man-pochita_6386002.jpg",
     "language": "de"
   },
   {
@@ -706,7 +776,7 @@
     "publicationDate": "2025-11-12T17:32:00.000Z",
     "summary": "In wenigen Jahren will Indien erstmals Menschen ins All schießen. Dafür wurde erfolgreich die Landung der Raumkapsel Gaganyaan getestet.",
     "link": "https://www.heise.de/news/Indien-testet-Fallschirme-der-Raumkapsel-Gaganyaan-11076122.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/3/7/3/hp-08685708f7f936f0.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/3/7/3/hp-08685708f7f936f0.jpeg",
     "language": "de"
   },
   {
@@ -776,7 +846,7 @@
     "publicationDate": "2025-11-12T17:30:00.000Z",
     "summary": "Mit einer neu vorgestellten Quantenchip-Architektur kündigt IBM an, in den kommenden vier Jahren die Basis für wertvolle Quantencomputeranwendungen...",
     "link": "https://www.heise.de/news/Mit-Nighthawk-Chip-will-IBM-2026-Quantenueberlegenheit-erreichen-11076005.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/3/1/3/IBM_Quantum_Nighthawk_Render_Image-6c778d6f26749c59.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/3/1/3/IBM_Quantum_Nighthawk_Render_Image-6c778d6f26749c59.jpeg",
     "language": "de"
   },
   {
@@ -786,7 +856,7 @@
     "publicationDate": "2025-11-12T17:30:00.000Z",
     "summary": "Ja, ich weiß. Viele Horror-Fans warten gebannt auf den Release von Resident Evil Requiem im Februar 2026. Mein Horror-Highlight erscheint aber nur...",
     "link": "https://www.gamestar.de/videos/project-zero-2-remake-mein-horror-highlight-2026-hat-endlich-einen-release-termin,138380.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/videoimage_6386068.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/videoimage_6386068.jpg",
     "language": "de"
   },
   {
@@ -886,7 +956,7 @@
     "publicationDate": "2025-11-12T17:23:33.000Z",
     "summary": "Der Games-Standort Köln verliert eines seiner größten Studios: Infolge einer Verschmelzung mit der Mutterfirma HandyGames endet die Ära von Massive...",
     "link": "https://www.gameswirtschaft.de/wirtschaft/masssive-miniteam-koeln-verschmelzung-handygames-121125/",
-    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/Massive-Miniteam-Koeln-Logo-2025-121125.jpg",
+    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/Massive-Miniteam-Koeln-Logo-2025-121125-150x150.jpg",
     "language": "de"
   },
   {
@@ -926,7 +996,7 @@
     "publicationDate": "2025-11-12T17:20:00.000Z",
     "summary": "Keine Lust auf überfüllte Fitnessstudios mit seltsamen Leuten? Mit diesem smarten All-in-One Home-Gym im frühen Black-Friday-Angebot trainiert ihr...",
     "link": "https://www.gamestar.de/artikel/smart-home-gym-fitnessstudio-sport-black-friday-2025,3442463.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/speediance-teaser-neu_6385197.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/speediance-teaser-neu_6385197.jpg",
     "language": "de"
   },
   {
@@ -986,7 +1056,7 @@
     "publicationDate": "2025-11-12T17:14:00.000Z",
     "summary": "Google Drive erhält eine neue KI-Funktion, die wichtige PDF-Dokumente automatisch in Audio-Zusammenfassungen im Podcast-Stil umwandelt.",
     "link": "https://www.heise.de/news/Google-Jetzt-liest-die-KI-den-Geschaeftsvertrag-als-Podcast-vor-11076027.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/3/2/4/shutterstock_2355630879-93a134b2540b7055.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/3/2/4/shutterstock_2355630879-93a134b2540b7055.jpeg",
     "language": "de"
   },
   {
@@ -996,7 +1066,7 @@
     "publicationDate": "2025-11-12T17:14:00.000Z",
     "summary": "Anna (Zooey Deschanel) und Russ (Charlie Cox) trennen sich nach einer langen Partnerschaft, doch was sie dabei nicht bedacht haben: ihren Hund Merv....",
     "link": "https://www.gamestar.de/videos/in-der-komoedie-merv-machen-marvel-star-charlie-cox-und-new-girl-darstellerin-zooey-deschanel-eine-harte-trennung-durch-und-ein-hund-geraet-ins-kreuzfeuer,138381.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/videoimage_6386067.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/videoimage_6386067.jpg",
     "language": "de"
   },
   {
@@ -1036,7 +1106,7 @@
     "publicationDate": "2025-11-12T17:12:00.000Z",
     "summary": "EA hat offenbar große Pläne für den neuen Multiplayer-Shooter und feilt an neuen Modi.",
     "link": "https://www.gamepro.de/artikel/battlefield-6-9-neue-spielmodi,3442786.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/battlefield-6-redsec_6383380.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/battlefield-6-redsec_6383380.jpg",
     "language": "de"
   },
   {
@@ -1120,13 +1190,23 @@
     "language": "en"
   },
   {
+    "id": "1100-6536156",
+    "title": "Ratchet & Clank: Ranger Rumble Is A Brand-New Game, And Probably Not What You Expected",
+    "source": "GameSpot",
+    "publicationDate": "2025-11-12T17:05:00.000Z",
+    "summary": "Sony Interactive Entertainment and French developer Oh BiBi have announced Ratchet & Clank: Ranger Rumble, a free-to-play multiplayer arena shooter...",
+    "link": "https://www.gamespot.com/articles/ratchet-clank-ranger-rumble-is-a-brand-new-game-and-probably-not-what-you-expected/1100-6536156/?ftag=CAD-01-10abi2f",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1597/15976769/4601160-bafkreieccnb345g4yjzecds5qirdp35omlxhl7udb4hf6qxuof2stjyrkm.jpg",
+    "language": "en"
+  },
+  {
     "id": "https://www.heise.de/news/Uno-Platform-Studio-2-0-und-Uno-Platform-6-4-KI-Assistent-und-NET-10-0-Support-11075898.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
     "title": "Uno Platform Studio 2.0 und Uno Platform 6.4: KI-Assistent und .NET-10.0-Support",
     "source": "Heise Online",
     "publicationDate": "2025-11-12T17:04:00.000Z",
     "summary": "Mit .NET 10.0 und Visual Studio 2026 kompatibel, ist die neue Uno-Platform-Version erschienen. Für die kommerzielle Variante gibt es neue KI-Features.",
     "link": "https://www.heise.de/news/Uno-Platform-Studio-2-0-und-Uno-Platform-6-4-KI-Assistent-und-NET-10-0-Support-11075898.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/2/5/6/shutterstock_1551193994-5c067204f7227585.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/2/5/6/shutterstock_1551193994-5c067204f7227585.jpeg",
     "language": "de"
   },
   {
@@ -1136,7 +1216,7 @@
     "publicationDate": "2025-11-12T17:04:00.000Z",
     "summary": "Ihr braucht wieder kostenlose Spins für Coin Master? Wir zeigen euch hier die tagesaktuellen Gratis-Spin-Links.",
     "link": "https://www.gamepro.de/artikel/coin-master-kostenlose-spin-links-aktuell,3439854.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/gp-cm-spin_6376555.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/gp-cm-spin_6376555.jpg",
     "language": "de"
   },
   {
@@ -1146,7 +1226,7 @@
     "publicationDate": "2025-11-12T17:03:00.000Z",
     "summary": "Während der State of Play im November 2025 enthüllte Bandai Namco mit einem Trailer erste Ausschnite zum kommenden DLC \"Alternate Dimension\" für...",
     "link": "https://www.gamepro.de/videos/digimon-story-time-stranger-erster-dlc-teast-die-rueckkehr-einer-der-beliebtesten-formen-von-omegamon-an,138395.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/videoimage_6386148.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/videoimage_6386148.jpg",
     "language": "de"
   },
   {
@@ -1156,7 +1236,7 @@
     "publicationDate": "2025-11-12T17:03:00.000Z",
     "summary": "Unser KCD2-Guide zeigt euch, wie ihr in Kingdom Come: Deliverance 2 mit Cheats, Console Commands und dem Entwicklermodus reich und mächtig werdet.",
     "link": "https://www.gamestar.de/artikel/kingdom-come-2-cheats,3427243.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/kcd2-cheats_6335231.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/kcd2-cheats_6335231.jpg",
     "language": "de"
   },
   {
@@ -1336,7 +1416,7 @@
     "publicationDate": "2025-11-12T16:55:00.000Z",
     "summary": "Fuchsschwanz stumpf? Kettensäge springt nicht an? Dieses Jahr gestaltet sich eure Weihnachtsbaumjagd so einfach wie noch nie dank einer...",
     "link": "https://www.gamestar.de/artikel/weihnachtsbaum-faellen-stutzen-akku-kettensaege-blitzangebot-amazon,3442875.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/mini-kettens%C3%A4ge-teaserbild_6386096.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/mini-kettens%C3%A4ge-teaserbild_6386096.jpg",
     "language": "de"
   },
   {
@@ -1536,7 +1616,7 @@
     "publicationDate": "2025-11-12T16:42:00.000Z",
     "summary": "Ein ehrgeiziges Fanprojekt erweitert Rockstars Westernwelt um ein riesiges Gebiet, zu dem es im zweiten RDR bislang keinen Zutritt gibt.",
     "link": "https://www.gamepro.de/artikel/rdr2-mexico-mod,3442845.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/red-dead-redemption-2_6385981.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/red-dead-redemption-2_6385981.jpg",
     "language": "de"
   },
   {
@@ -1546,7 +1626,7 @@
     "publicationDate": "2025-11-12T16:42:00.000Z",
     "summary": "In The Witcher 3 könnt ihr versteckte Cheats nutzen, um euch die beste Ausrüstung zu verschaffen oder Geralts Aussehen zu verändern. Wir haben alle...",
     "link": "https://www.gamestar.de/artikel/cheats-the-witcher-3-geld-items-132,3357891.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/the-witcher-3-geralt-hearts-of-stone_6040303.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/the-witcher-3-geralt-hearts-of-stone_6040303.jpg",
     "language": "de"
   },
   {
@@ -1556,7 +1636,7 @@
     "publicationDate": "2025-11-12T16:41:00.000Z",
     "summary": "Es ist mal wieder Zeit für den Reveal der PS Plus Extra/Premium-Spiele. Wir begleiten die Ankündigung der Neuzugänge und verraten, welche Abgänge es...",
     "link": "https://www.gamepro.de/artikel/ps-plus-extra-premium-november-2025-spiele,3442678.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/gta-5-ps-plus_6320666.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/gta-5-ps-plus_6320666.jpg",
     "language": "de"
   },
   {
@@ -1616,7 +1696,7 @@
     "publicationDate": "2025-11-12T16:32:00.000Z",
     "summary": "Ich mag Züge und Deutschland auch – wer also ein richtig gutes Weihnachtsgeschenk sucht, wird mit diesem Set jeden Eisenbahn-Fan glücklich machen!",
     "link": "https://www.gamestar.de/artikel/noch-vorm-black-friday-gibts-dieses-maerklin-gesamtpaket-fuer-weniger-als-drei-monate-deutschlandticket,3442874.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/m%C3%A4rklin-digital-starterpackung-dhg-500-diesellok-modelleisenbahn-teaser_6386111.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/m%C3%A4rklin-digital-starterpackung-dhg-500-diesellok-modelleisenbahn-teaser_6386111.jpg",
     "language": "de"
   },
   {
@@ -1686,7 +1766,7 @@
     "publicationDate": "2025-11-12T16:30:00.000Z",
     "summary": "Von Studiolicht bis Wetterplanung: Diese Apps helfen bei der Vorbereitung Ihrer nächsten Fotoaktion.",
     "link": "https://www.heise.de/tests/Verschiedene-Apps-zur-Planung-von-Fotos-im-Praxistest-11071939.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/2/5/4/df_0625_simulationsapps_aufmacher_digital-d33f1c0aa27e3bbb.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/2/5/4/df_0625_simulationsapps_aufmacher_digital-d33f1c0aa27e3bbb.png",
     "language": "de"
   },
   {
@@ -1816,7 +1896,7 @@
     "publicationDate": "2025-11-12T16:22:00.000Z",
     "summary": "Einige Prominente können sich nicht von ihren Haustieren lösen und lassen sie in Klonen weiterleben. Wissenschaftler sehen hier Chancen für andere...",
     "link": "https://www.heise.de/news/50-000-US-Dollar-fuer-ein-geklontes-Haustier-Wo-die-Technologie-nuetzlicher-waere-11076054.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/3/3/8/shutterstock_1939660903-bed0df82ad82a8fc.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/3/3/8/shutterstock_1939660903-bed0df82ad82a8fc.jpeg",
     "language": "de"
   },
   {
@@ -1936,7 +2016,7 @@
     "publicationDate": "2025-11-12T16:03:00.000Z",
     "summary": "Ich habe ja ein Faible für guten Sound, aber bei Kopfhörern brauche ich Noise Cancelling - besonders beim Arbeiten im Büro. Die besten...",
     "link": "https://www.gamestar.de/artikel/beste-in-ear-kopfhoerer-noise-cancelling-sony-wf-1000xm5,3442413.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/sony-wf-1000xm5-beste-earbuds-kopfh%C3%B6rer-noise-cancelling-anc-hifi-sony-bluetooth-kabellose-kopfh%C3%B6rer-in-ear-kopfh%C3%B6rer-headset-earbuds_6384351.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/sony-wf-1000xm5-beste-earbuds-kopfh%C3%B6rer-noise-cancelling-anc-hifi-sony-bluetooth-kabellose-kopfh%C3%B6rer-in-ear-kopfh%C3%B6rer-headset-earbuds_6384351.jpg",
     "language": "de"
   },
   {
@@ -2086,7 +2166,7 @@
     "publicationDate": "2025-11-12T16:00:00.000Z",
     "summary": "Das Verspechen, ein Gaming-Notebook später mit einer besseren GPU aufzurüsten, haben schon mehrere Hersteller gebrochen. Framework hält seines.",
     "link": "https://www.heise.de/tests/Framework-Laptop-16-Aufruestbares-Gaming-Notebook-im-Test-10963107.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/6/5/4/1/mue-4d2cfd4e002fb005.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/6/6/5/4/1/mue-4d2cfd4e002fb005.jpeg",
     "language": "de"
   },
   {
@@ -2096,7 +2176,7 @@
     "publicationDate": "2025-11-12T16:00:00.000Z",
     "summary": "Die Vorschriften des Digital Markets Act (DMA) sollten für mehr Wettbewerb in App Stores sorgen, doch eine neue Studie zeigt: Nutzer sehen kaum...",
     "link": "https://www.heise.de/news/Studie-DMA-bringt-Nutzern-keine-guenstigeren-App-Preise-11075918.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/2/6/6/shutterstock_2425555977-ead5710ea2cf66d8.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/2/6/6/shutterstock_2425555977-ead5710ea2cf66d8.jpeg",
     "language": "de"
   },
   {
@@ -2106,7 +2186,7 @@
     "publicationDate": "2025-11-12T16:00:00.000Z",
     "summary": "Zum 10. Jubiläum hat Fallout 4 eine Anniversary Edition erhalten, die allerdings teilweise zu massiven Problemen führt. Manch Fan kann das Spiel...",
     "link": "https://www.gamepro.de/artikel/fallout-4-anniversary-edition-macht-spiel-kaputt,3442840.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/fallout-4-fans-patch_6289274.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/fallout-4-fans-patch_6289274.jpg",
     "language": "de"
   },
   {
@@ -2116,7 +2196,7 @@
     "publicationDate": "2025-11-12T16:00:00.000Z",
     "summary": "Where Winds Meet kann wunderschön sein, Messiah Engine von NetEase sei Dank. Aber manchmal ist das Free2Play-Spiel aus China auch einfach nur schräg,...",
     "link": "https://www.gamestar.de/videos/in-where-winds-meet-zeigen-wir-keine-gnade-und-bekommen-deswegen-stress-mit-einem-echten-hengst,138387.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/videoimage_6386114.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/videoimage_6386114.jpg",
     "language": "de"
   },
   {
@@ -2126,7 +2206,7 @@
     "publicationDate": "2025-11-12T16:00:00.000Z",
     "summary": "Wie viel ist zu viel? Where Winds Meet packt seine zauberhaften Wuxia-Open-World voll mit Aktivitäten. Im unkommentierten Gameplay zeigen wir euch...",
     "link": "https://www.gamestar.de/videos/auf-der-suche-nach-aerger-finden-wir-ihn-in-where-winds-meet-sehr-fix-und-gewinnen-einen-kampf,138389.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/videoimage_6386115.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/videoimage_6386115.jpg",
     "language": "de"
   },
   {
@@ -2136,7 +2216,7 @@
     "publicationDate": "2025-11-12T16:00:00.000Z",
     "summary": "Fabiano mag Anno, unser GameStar-Gründungschefredakteur Jörg Langer war hingegen immer eher Siedler-Fan. Kann das Römer-Setting von Anno 117 den...",
     "link": "https://www.gamestar.de/videos/kann-anno-117-seinen-groessten-skeptiker-ueberzeugen-mit-joerg-langer,138393.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/videoimage_6386141.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/videoimage_6386141.jpg",
     "language": "de"
   },
   {
@@ -2146,7 +2226,7 @@
     "publicationDate": "2025-11-12T16:00:00.000Z",
     "summary": "Where Winds Meet ist nach Ghost of Yotei und Assassin's Creed Shadows schon der dritte große asiatische Grafikkracher. Der Test zeigt: Für diese...",
     "link": "https://www.gamestar.de/artikel/where-winds-meet-test-steam-review-wertung,3442847.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/gs-plus-where-winds-meet_6385983.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/gs-plus-where-winds-meet_6385983.jpg",
     "language": "de"
   },
   {
@@ -2156,7 +2236,7 @@
     "publicationDate": "2025-11-12T16:00:00.000Z",
     "summary": "Fabiano mag Anno, unser GameStar-Gründungschefredakteur Jörg Langer war hingegen immer eher Siedler-Fan. Kann das Römer-Setting von Anno 117 den...",
     "link": "https://www.gamestar.de/artikel/podcast-anno-117-langer,3442877.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/gamestar-talk-anno-117-j%C3%B6rg-langer_6386140.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/gamestar-talk-anno-117-j%C3%B6rg-langer_6386140.jpg",
     "language": "de"
   },
   {
@@ -2226,7 +2306,7 @@
     "publicationDate": "2025-11-12T15:49:00.000Z",
     "summary": "Wir fassen in diesem Artikel knapp und übersichtlich die wichtigsten Informationen rund um das neue Anno zusammen.",
     "link": "https://www.gamestar.de/artikel/anno-117-pax-romana-release-inhalte-plattform-gameplay,3415057.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/anno-hub_6359929.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/anno-hub_6359929.jpg",
     "language": "de"
   },
   {
@@ -2266,7 +2346,7 @@
     "publicationDate": "2025-11-12T15:45:00.000Z",
     "summary": "Angeheizt von einer negativen Rezension steht Arc Raiders plötzlich im Zentrum einer hitzigen Debatte über die Nutzung von generativer KI in...",
     "link": "https://www.gamestar.de/artikel/arc-raiders-streit-wegen-ki-negatives-testergebis-embark,3442854.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/arc-raiders_6382778.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/arc-raiders_6382778.jpg",
     "language": "de"
   },
   {
@@ -2286,7 +2366,7 @@
     "publicationDate": "2025-11-12T15:41:00.000Z",
     "summary": "Das Online-Buchungssystem des Miniatur Wunderlands wurde Ziel eines IT-Angriffs. Untersuchungen laufen derzeit noch.",
     "link": "https://www.heise.de/news/Miniatur-Wunderland-Ziel-von-IT-Angriff-Kreditkartendaten-abgeflossen-11076011.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/3/1/6/shutterstock_1690708759-138573e3cc00644f.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/3/1/6/shutterstock_1690708759-138573e3cc00644f.jpeg",
     "language": "de"
   },
   {
@@ -2376,7 +2456,7 @@
     "publicationDate": "2025-11-12T15:29:54.000Z",
     "summary": "Wett- und Glücksspiel-Anbieter drängen mit Macht in den E-Sport – jüngster Neuzugang: BIG unterschreibt bei der Merkur-Gruppe. 750.000 Fans folgen...",
     "link": "https://www.gameswirtschaft.de/sport/merkur-gruppe-big-esports-gluecksspiel-kritik-121125/",
-    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/G2-Sports-Merkur-Cash-Cup-121125.jpg",
+    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/G2-Sports-Merkur-Cash-Cup-121125-150x150.jpg",
     "language": "de"
   },
   {
@@ -2696,7 +2776,7 @@
     "publicationDate": "2025-11-12T15:04:00.000Z",
     "summary": "Jetzt gibt's einen Überraschungshit zum Schnäppchenpreis: Das Open-World-Spiel für Switch könnt ihr bei Amazon gerade 67 Prozent günstiger als im...",
     "link": "https://www.gamepro.de/artikel/open-world-hit-switch-angebot-spiel-release-millionen-seller,3442867.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/sonic-frontiers-open-world-spiel-switch-d_6386095.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/sonic-frontiers-open-world-spiel-switch-d_6386095.jpg",
     "language": "de"
   },
   {
@@ -2866,7 +2946,7 @@
     "publicationDate": "2025-11-12T14:58:00.000Z",
     "summary": "Wa-hoo! Super Mario kehrt mit einem neuen Film zurück. Zwar erst im April 2026, aber schon jetzt gibt es einen ersten deutschen Trailer zum...",
     "link": "https://www.gamestar.de/videos/der-super-mario-galaxy-film-hat-einen-ersten-trailer-und-der-platzt-vor-lauter-fan-service-aus-allen-naehten,138390.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/videoimage_6386116.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/videoimage_6386116.jpg",
     "language": "de"
   },
   {
@@ -2886,7 +2966,7 @@
     "publicationDate": "2025-11-12T14:55:00.000Z",
     "summary": "Mit Where Winds Meet erscheint am 14. November um 23 Uhr auch im Westen ein überaus vielversprechendes Action-RPG, das ihr kostenlos auf PS5, PC und...",
     "link": "https://www.gamepro.de/videos/kostenloses-action-rpg-where-winds-meet-gibt-euch-einen-gameplay-ueberblick,138391.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/videoimage_6386121.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/videoimage_6386121.jpg",
     "language": "de"
   },
   {
@@ -2896,7 +2976,7 @@
     "publicationDate": "2025-11-12T14:54:00.000Z",
     "summary": "Mit The Witcher 4 startet CD Projekt eine neue Ära und bringt neue Abenteuer mit Ciri. Die wichtigsten Infos zum Release des Rollenspiels findet ihr...",
     "link": "https://www.gamestar.de/artikel/the-witcher-4-release-alle-infos,3431493.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/the-witcher-4-alle-infos-zum-release_6349114.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/the-witcher-4-alle-infos-zum-release_6349114.jpg",
     "language": "de"
   },
   {
@@ -2946,7 +3026,7 @@
     "publicationDate": "2025-11-12T14:50:00.000Z",
     "summary": "Ein 3D-gedruckter Tischtennisschläger nutzt einen Arduino, Bewegungssensoren und KI, um Schläge zu zählen und zu bewerten.",
     "link": "https://www.heise.de/news/Smarter-Tischtennisschlaeger-mit-Arduino-11075890.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/2/5/2/Tischtennis-58a3b4344914b61b.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/2/5/2/Tischtennis-58a3b4344914b61b.png",
     "language": "de"
   },
   {
@@ -2966,7 +3046,7 @@
     "publicationDate": "2025-11-12T14:49:00.000Z",
     "summary": "Smartwatches sehen oft eher nach „praktisch, aber öde“ aus. Zum Glück gibt’s aber auch echte Hingucker und einen davon habe ich schon im Warenkorb:...",
     "link": "https://www.gamestar.de/artikel/xiaomi-smart-band-9-pro-smartwatch-uhr-laufuhr-sportuhr-apple-watch-klon,3442857.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/smart-band-9-_6386061.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/smart-band-9-_6386061.jpg",
     "language": "de"
   },
   {
@@ -3016,7 +3096,7 @@
     "publicationDate": "2025-11-12T14:42:00.000Z",
     "summary": "In einer Spezialausgabe der Nintendo Direct wurde heute der erste Trailer zu The Super Mario Galaxy Movie gezeigt. Hier bekommt ihr alle Infos.",
     "link": "https://www.gamepro.de/artikel/nintendo-direct-super-mario-galaxy-film-ticker,3442772.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/mario_6386106.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/mario_6386106.jpg",
     "language": "de"
   },
   {
@@ -3066,7 +3146,7 @@
     "publicationDate": "2025-11-12T14:33:00.000Z",
     "summary": "Die Server-Management-Software Webmin ist jetzt in Version 2.600 verfügbar. Das Update bringt das größte UI-Redesign der Projektgeschichte.",
     "link": "https://www.heise.de/news/Webmin-2-600-Groesstes-UI-Update-der-Server-Management-Software-11075882.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/2/4/8/webmin-c1ec30961dcfbec9.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/2/4/8/webmin-c1ec30961dcfbec9.jpeg",
     "language": "de"
   },
   {
@@ -3316,7 +3396,7 @@
     "publicationDate": "2025-11-12T14:15:00.000Z",
     "summary": "Nintendo hat den ersten richtigen Trailer für The Super Mario Galaxy Movie enthüllt, der im April 2026 in die deutschen Kinos kommt.",
     "link": "https://www.gamepro.de/videos/der-erste-trailer-zum-the-super-mario-galaxy-film-ist-da,138385.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/videoimage_6386093.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/videoimage_6386093.jpg",
     "language": "de"
   },
   {
@@ -3356,7 +3436,7 @@
     "publicationDate": "2025-11-12T14:13:00.000Z",
     "summary": "Der geschätzte Aufwand eines Softwareprojekts bezieht sich meist auf das jeweilige Team. Aber Aufwand ist nicht objektiv und unabhängig vom Team...",
     "link": "https://www.heise.de/blog/Warum-objektive-Schaetzungen-in-der-Softwareentwicklung-nicht-funktionieren-11074323.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/4/6/2/shutterstock_712434244-b44e93ada2e3c948.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/4/6/2/shutterstock_712434244-b44e93ada2e3c948.jpeg",
     "language": "de"
   },
   {
@@ -3376,7 +3456,7 @@
     "publicationDate": "2025-11-12T14:10:00.000Z",
     "summary": "Volkswagen will künftig Milliarden sparen, auch bei Löhnen und Gehältern. Die Verhandlungen über das Entgeltsystem beginnen nun früher als geplant.",
     "link": "https://www.heise.de/news/Entgelt-Verhandlungen-zur-Kostendaempfung-bei-Volkswagen-vorgezogen-11075764.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/1/8/8/Handarbeit_bei_der_Produktion_des_VW_Golf-1e8b639e5a6cff6b.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/1/8/8/Handarbeit_bei_der_Produktion_des_VW_Golf-1e8b639e5a6cff6b.jpeg",
     "language": "de"
   },
   {
@@ -3386,7 +3466,7 @@
     "publicationDate": "2025-11-12T14:10:00.000Z",
     "summary": "In Bottrop findet sich ein Raumschiffmodell, das Hardware-Enthusiasten, egal ob Trekkie oder nicht, das manch einem Tränen in die Augen treiben...",
     "link": "https://www.gamestar.de/artikel/star-trek-borg-kubus-mainboards-2025,3422316.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/borg-w%C3%BCrfel-gs_6318837.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/borg-w%C3%BCrfel-gs_6318837.jpg",
     "language": "de"
   },
   {
@@ -3426,7 +3506,7 @@
     "publicationDate": "2025-11-12T14:07:56.000Z",
     "summary": "Nächster Etat-Erfolg für MSM.digital: Der finnische Mobilegames-Riese Supercell legt den Integrated Communications-Etat in die Hände der Hamburger...",
     "link": "https://www.gameswirtschaft.de/marketing-pr/msm-digital-integrated-communications-supercell-121125/",
-    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/MSM-Digital-Communications-Nils-Kedeinis-MD-12125.jpg",
+    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/MSM-Digital-Communications-Nils-Kedeinis-MD-12125-150x150.jpg",
     "language": "de"
   },
   {
@@ -3466,7 +3546,7 @@
     "publicationDate": "2025-11-12T14:03:00.000Z",
     "summary": "Das Update auf Android 16 QPR1 ist endlich im AOSP angekommen. Custom-ROM-Entwickler und Bastler warteten seit zwei Monaten darauf.",
     "link": "https://www.heise.de/news/Mit-2-Monaten-Verzoegerung-Android-16-QPR1-landet-im-AOSP-11075822.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/2/1/7/google-android-16-876349540ca58c48.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/2/1/7/google-android-16-876349540ca58c48.jpeg",
     "language": "de"
   },
   {
@@ -3646,7 +3726,7 @@
     "publicationDate": "2025-11-12T14:00:00.000Z",
     "summary": "Smartphonetarife mit großem Volumen gelten als teuer. Doch das stimmt längst nicht mehr. Viele Tarifschnäppchen gibt es sogar mit kurzen...",
     "link": "https://www.heise.de/tests/Mobilfunkvertraege-ab-50-Gigabyte-Tarifvergleich-und-Auswahltipps-10708512.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/4/9/6/5/5/uma-106426a2b0cf4417.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/4/9/6/5/5/uma-106426a2b0cf4417.jpeg",
     "language": "de"
   },
   {
@@ -3656,7 +3736,7 @@
     "publicationDate": "2025-11-12T14:00:00.000Z",
     "summary": "Das \"KI-Update\" liefert werktäglich eine Zusammenfassung der wichtigsten KI-Entwicklungen.",
     "link": "https://www.heise.de/news/KI-Update-Gema-vs-OpenAI-KI-als-Machtinstrument-raeumliche-KI-Country-KI-11074906.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/5/6/heise_Podcasts_KIUpdate_ho_16_9-4969325966652080.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/5/6/heise_Podcasts_KIUpdate_ho_16_9-4969325966652080.jpeg",
     "language": "de"
   },
   {
@@ -3666,7 +3746,7 @@
     "publicationDate": "2025-11-12T14:00:00.000Z",
     "summary": "AMD schickt einen neuen X3D-Prozessor mit sechs Kernen für unter 280 Euro ins Rennen. Doch lohnt er sich für Gamer im Vergleich zu noch günstigeren...",
     "link": "https://www.heise.de/tests/Ryzen-5-7500X3D-Bezahlbare-Gaming-CPU-mit-besonders-viel-Cache-im-Test-11074174.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/3/8/5/https___xp-e4f1f2458fd848a0.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/3/8/5/https___xp-e4f1f2458fd848a0.jpeg",
     "language": "de"
   },
   {
@@ -3686,7 +3766,7 @@
     "publicationDate": "2025-11-12T14:00:00.000Z",
     "summary": "Hier gibt's alle Infos zum riesigen Update North Line.",
     "link": "https://www.gamestar.de/artikel/arc-raiders-north-line-update-neue-map-stella-montis-infos,3442783.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/arc-raiders-update-teaser_6386053.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/arc-raiders-update-teaser_6386053.jpg",
     "language": "de"
   },
   {
@@ -3706,7 +3786,7 @@
     "publicationDate": "2025-11-12T13:58:00.000Z",
     "summary": "Bei den neuen RTX-Grafikkarten sollte man die richtige Stromversorgung im Gehäuse haben. Dank dieser PSU von Corsair ist mein PC nicht nur mächtig...",
     "link": "https://www.gamestar.de/artikel/rtx-50-beste-psu-netzteil-12v-2x6-850-watt-corsair,3442750.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/corsair-rm850x-shift-atx-31-psu-netzteil-rtx-50-12v-2x6-kabel-teaser_6385509.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/corsair-rm850x-shift-atx-31-psu-netzteil-rtx-50-12v-2x6-kabel-teaser_6385509.jpg",
     "language": "de"
   },
   {
@@ -3816,7 +3896,7 @@
     "publicationDate": "2025-11-12T13:40:00.000Z",
     "summary": "In den Virenscannern von Avast und AVG konnten Angreifer ihre Rechte im System ausweiten. Updates hat der Hersteller stillschweigend verteilt.",
     "link": "https://www.heise.de/news/Avast-und-AVG-Kritische-Sicherheitsluecke-stillschweigend-behoben-11075740.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/1/7/6/shutterstock_164928812-6efa93099b00a470.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/1/7/6/shutterstock_164928812-6efa93099b00a470.jpeg",
     "language": "de"
   },
   {
@@ -3856,7 +3936,7 @@
     "publicationDate": "2025-11-12T13:33:00.000Z",
     "summary": "BUND und das Land Schleswig-Holstein haben sich nach einem Jahrzehnt geeinigt: Die A20 kann weitergebaut werden.",
     "link": "https://www.heise.de/news/Kuestenautobahn-A20-kann-weitergebaut-werden-11075780.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/1/9/6/004-61fd53a0fa0471b1.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/1/9/6/004-61fd53a0fa0471b1.jpeg",
     "language": "de"
   },
   {
@@ -3956,7 +4036,7 @@
     "publicationDate": "2025-11-12T13:28:00.000Z",
     "summary": "In Baden-Württemberg hat der Landtag Änderungen am Polizeigesetz beschlossen, um die Nutzung von Palantir rechtlich abzusichern.",
     "link": "https://www.heise.de/news/Baden-Wuerttemberg-entscheidet-ueber-Einsatz-von-Palantir-11072840.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/7/1/2/shutterstock_2287062989-7ec0af941802a6ff.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/7/1/2/shutterstock_2287062989-7ec0af941802a6ff.jpeg",
     "language": "de"
   },
   {
@@ -3986,7 +4066,7 @@
     "publicationDate": "2025-11-12T13:25:00.000Z",
     "summary": "Disney hat Disneyland, Netflix hat jetzt das Netflix House. Die erste Erlebniswelt des Streaming-Riesen geht in den USA an den Start. Weitere sollen...",
     "link": "https://www.heise.de/news/Netflix-House-Netflix-eroeffnet-erstes-Erlebniszentrum-11075802.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/2/0/7/AAAATNKLu8X_NXwhDQIGN1gamv36UT8tKuMr08JlVmTb7uPm7tHo_VRNozsMDHZKFKhVe8lkqM17IWGY1yUPsJASBGkusFw6wmW9gQHP-0f57736e8c751561.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/2/0/7/AAAATNKLu8X_NXwhDQIGN1gamv36UT8tKuMr08JlVmTb7uPm7tHo_VRNozsMDHZKFKhVe8lkqM17IWGY1yUPsJASBGkusFw6wmW9gQHP-0f57736e8c751561.jpeg",
     "language": "de"
   },
   {
@@ -4176,7 +4256,7 @@
     "publicationDate": "2025-11-12T13:04:00.000Z",
     "summary": "In unserem großen KCD2-Walkthrough gibt es die Lösung zu jeder Hauptquest von Kingdom Come: Deliverance 2. Wir verraten euch alle Lösungen, denn oft...",
     "link": "https://www.gamestar.de/artikel/kingdom-come-2-walkthrough,3426053.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/kcd2-komplettl%C3%B6sung_6334842.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/kcd2-komplettl%C3%B6sung_6334842.jpg",
     "language": "de"
   },
   {
@@ -4186,7 +4266,7 @@
     "publicationDate": "2025-11-12T13:04:00.000Z",
     "summary": "Wenn ihr euch nicht sicher seid, ob ihr euer Spiel in Latium oder Albion beginnen sollt, findet ihr hier die Stärken und Schwächen der beiden...",
     "link": "https://www.gamestar.de/artikel/anno-117-latium-oder-albion-die-wahl-eurer-startregion-wirkt-sich-stark-aus-wir-helfen-euch-bei-der-entscheidung,3442817.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/anno-117-latium-vs-albion-teaser_6385810.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/anno-117-latium-vs-albion-teaser_6385810.jpg",
     "language": "de"
   },
   {
@@ -4256,7 +4336,7 @@
     "publicationDate": "2025-11-12T13:00:00.000Z",
     "summary": "Lernen Sie, wie Sie ein hochverfügbares Proxmox VE-Clusters mit Ceph-Speicher einrichten und verwalten.",
     "link": "https://www.heise.de/news/iX-Workshop-Hochverfuegbares-Proxmox-VE-Cluster-mit-Ceph-Storage-10966389.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/2/1/3/hands-on_fuer_admins_proxmox_ve_cluster_mit_ceph_storage_ticker-1920x1080px-848867800e4c14ec.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/6/8/2/1/3/hands-on_fuer_admins_proxmox_ve_cluster_mit_ceph_storage_ticker-1920x1080px-848867800e4c14ec.png",
     "language": "de"
   },
   {
@@ -4316,7 +4396,7 @@
     "publicationDate": "2025-11-12T12:55:00.000Z",
     "summary": "380 Euro teuer und 3.600 Steine groß: Der neue Lego-Baukasten zu Star Trek: The Next Generation steht bei GameStar-Redakteur Peter und erkundet...",
     "link": "https://www.gamestar.de/videos/die-enterprise-fliegt-los-wir-zeigen-das-neue-lego-modell-aus-next-generation-von-allen-seiten,138379.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/videoimage_6385834.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/videoimage_6385834.jpg",
     "language": "de"
   },
   {
@@ -4326,7 +4406,7 @@
     "publicationDate": "2025-11-12T12:55:00.000Z",
     "summary": "Das Lego-Set 10356 USS Enterprise-D sorgt gerade für Spott im Netz. Denn im Herzen des Raumschiffs steckt ein Sticker mit falscher Beschriftung.",
     "link": "https://www.gamestar.de/artikel/star-trek-lego-enterprise-d-sticker-schreibfehler-bodly-go,3442797.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/gs-lego-star-trek-10356-enterprise_6385927.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/gs-lego-star-trek-10356-enterprise_6385927.jpg",
     "language": "de"
   },
   {
@@ -4466,7 +4546,7 @@
     "publicationDate": "2025-11-12T12:37:00.000Z",
     "summary": "Lego veröffentlicht einen knapp zwölf Sekunden langen Teaser, der ein neues Set zu The Legend of Zelda für 2026 ankündigt.",
     "link": "https://www.gamestar.de/artikel/legend-of-zelda-neues-set-2026-teaser,3442836.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/lego-zelda-ocarina-of-time-teaser-heller_6386004.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/lego-zelda-ocarina-of-time-teaser-heller_6386004.jpg",
     "language": "de"
   },
   {
@@ -4476,7 +4556,7 @@
     "publicationDate": "2025-11-12T12:36:00.000Z",
     "summary": "Die Koalition will Preise für fossile Energien stabil halten. Der CO₂-Preiskorridor von 55 bis 65 Euro pro Tonne soll dazu von 2026 auf 2027...",
     "link": "https://www.heise.de/news/Weiter-billig-Tanken-und-Heizen-Koalition-will-CO-Preis-fuer-2027-nicht-erhoehen-11075412.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/0/1/0/BP_Tanklastzug-08ba2718363844f0.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/0/1/0/BP_Tanklastzug-08ba2718363844f0.jpeg",
     "language": "de"
   },
   {
@@ -4536,7 +4616,7 @@
     "publicationDate": "2025-11-12T12:32:00.000Z",
     "summary": "Kalifornien als vielleicht wichtigster Tech-Standort der Welt hält sich mit Regulierung nicht zurück. Kann die EU vom \"Golden State\" in der Hinsicht...",
     "link": "https://www.heise.de/news/Tech-Regulierung-Was-die-EU-von-Kalifornien-lernen-kann-11075580.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/0/9/5/shutterstock_584623753-b038f2ddcc758728.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/0/9/5/shutterstock_584623753-b038f2ddcc758728.jpeg",
     "language": "de"
   },
   {
@@ -4566,7 +4646,7 @@
     "publicationDate": "2025-11-12T12:30:00.000Z",
     "summary": "Wie üblich bringt Entwickler Warhorse zum Addon auch einen kostenlosen großen Patch raus. Diesmal ist es das finale große Update 1.5, mit dem auch...",
     "link": "https://www.gamestar.de/artikel/kingdom-come-2-update-15-lippensynchron-patch-notes,3442798.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/kingdom-come-2-update-15_6385713.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/kingdom-come-2-update-15_6385713.jpg",
     "language": "de"
   },
   {
@@ -4616,7 +4696,7 @@
     "publicationDate": "2025-11-12T12:23:00.000Z",
     "summary": "Intel hat auch einen Patchday veranstaltet und 30 Sicherheitsmitteilungen mit Updates veröffentlicht. Davon sind sieben hochriskant.",
     "link": "https://www.heise.de/news/Patchday-Intel-dichtet-zig-Sicherheitsluecken-ab-11075454.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/0/3/1/Intel-Santa-Clara-2023-ciw-16-9-7f927f6dee5bffb3.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/0/3/1/Intel-Santa-Clara-2023-ciw-16-9-7f927f6dee5bffb3.jpeg",
     "language": "de"
   },
   {
@@ -4636,7 +4716,7 @@
     "publicationDate": "2025-11-12T12:20:00.000Z",
     "summary": "Zum Release sind in Battlefield 6 insgesamt 9 Karten enthalten und die erste Season 1 erweitert den Shooter um neue Maps. Wir stellen sie vor und...",
     "link": "https://www.gamestar.de/artikel/battlefield-6-alle-maps-zum-launch-und-sesaon-1,3437623.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/battlefieldmaps_6368671.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/battlefieldmaps_6368671.jpg",
     "language": "de"
   },
   {
@@ -4666,7 +4746,7 @@
     "publicationDate": "2025-11-12T12:15:00.000Z",
     "summary": "Kurz vor Weihnachten startet bei Netflix eine neue Comedy-Serie mit Festtage-Flair: In Man Vs Baby spielt Rowan Atkinson (Mr. Bean) die Hauptrolle....",
     "link": "https://www.gamestar.de/videos/man-vs-baby-in-der-comedy-serie-muss-sich-mr-bean-darsteller-rowan-atkinson-ploetzlich-um-ein-baby-kuemmern,138377.html",
-    "imageUrl": "https://images.cgames.de/images/gamestar/800/videoimage_6386040.jpg",
+    "imageUrl": "https://images.cgames.de/images/gamestar/112/videoimage_6386040.jpg",
     "language": "de"
   },
   {
@@ -4706,7 +4786,7 @@
     "publicationDate": "2025-11-12T12:12:00.000Z",
     "summary": "In Tokyo könnt ihr schon bald den ersten Freizeitpark besuchen, der sich den kleinen Taschenmonstern widmet.",
     "link": "https://www.gamepro.de/artikel/pokemon-freizeitpark,3442837.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/pok%C3%A9park-kanto_6385961.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/pok%C3%A9park-kanto_6385961.jpg",
     "language": "de"
   },
   {
@@ -4716,7 +4796,7 @@
     "publicationDate": "2025-11-12T12:11:00.000Z",
     "summary": "Apple verkauft seit September erstmals eigene iPhone-Lanyards. Die sind nicht nur zu Smartphones kompatibel.",
     "link": "https://www.heise.de/news/Crossbody-Band-Apples-iPhone-Leine-auch-fuer-Kameras-geeignet-10988514.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/9/0/1/2/crossbody-5eb1676f782f6764.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/6/9/0/1/2/crossbody-5eb1676f782f6764.png",
     "language": "de"
   },
   {
@@ -4726,7 +4806,7 @@
     "publicationDate": "2025-11-12T12:10:00.000Z",
     "summary": "Eine in dem Bundesland entwickelte Software soll Sachsens Steuerfahndung dabei helfen, in der Steuererklärung verschwiegene Kryptotransaktionen...",
     "link": "https://www.heise.de/news/Bitcoin-Co-Sachsen-fahndet-mit-KI-Hilfe-nach-steuerpflichtigen-Transaktionen-11075548.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/0/7/9/shutterstock_2006405243-bfe8735f27371942.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/0/7/9/shutterstock_2006405243-bfe8735f27371942.jpeg",
     "language": "de"
   },
   {
@@ -4796,7 +4876,7 @@
     "publicationDate": "2025-11-12T12:00:00.000Z",
     "summary": "Um Oberflächen zu enteisen, werden meist Hitze oder Chemikalien verwendet. Ein neues Verfahren setzt dagegen auf Elektrostatik.",
     "link": "https://www.heise.de/news/Electrostatic-Defrosting-Forscher-entfernen-Frost-ohne-Hitze-und-Chemie-11075534.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/0/7/2/EDF_Frost-c64c114796113f3d.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/0/7/2/EDF_Frost-c64c114796113f3d.jpeg",
     "language": "de"
   },
   {
@@ -4836,7 +4916,7 @@
     "publicationDate": "2025-11-12T11:55:00.000Z",
     "summary": "Die AMD-Führungsriege präsentierte auf dem Financial Analyst Day viele Pläne für die kommenden Jahre. Vieles blieb unkonkret, aber es gab spannende...",
     "link": "https://www.heise.de/news/AMD-bestaetigt-Zen-6-Prozessoren-fuer-2026-und-nennt-erste-Zen-7-Details-11075358.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/9/8/3/AMD-Zen-Roadmap-11-11-2025-f870483f5438154f.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/9/8/3/AMD-Zen-Roadmap-11-11-2025-f870483f5438154f.jpeg",
     "language": "de"
   },
   {
@@ -4876,7 +4956,7 @@
     "publicationDate": "2025-11-12T11:51:00.000Z",
     "summary": "Mit einem neuen M365-Kit, aktualisiertem Cloud Compendium und DSFA-Vorlagen will Microsoft Unternehmen die DSGVO-Dokumentation erleichtern.",
     "link": "https://www.heise.de/news/Microsoft-veroeffentlicht-Datenschutz-Hilfen-fuer-M365-und-Copilot-11075444.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/0/2/6/recht_dsfa_ms365-0012439f49503470.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/0/2/6/recht_dsfa_ms365-0012439f49503470.png",
     "language": "de"
   },
   {
@@ -4976,7 +5056,7 @@
     "publicationDate": "2025-11-12T11:37:00.000Z",
     "summary": "Bei Amazon könnt ihr euch jetzt den aktuell besten 4K-Fernseher auf dem Markt im Top-Angebot schnappen! Den 65 Zoll LG OLED-TV gibt's 60% günstiger...",
     "link": "https://www.gamepro.de/artikel/bester-oled-tv-amazon-angebot-65-zoll-high-end-fernseher-guenstiger,3442834.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/lg-oled-g59-65-zoll-amazon-sale-bestpreis-c_6385978.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/lg-oled-g59-65-zoll-amazon-sale-bestpreis-c_6385978.jpg",
     "language": "de"
   },
   {
@@ -4996,7 +5076,7 @@
     "publicationDate": "2025-11-12T11:36:00.000Z",
     "summary": "Das Oberlandesgericht Dresden hat den Nutzer einer Falschparker-App wegen Datenschutzverstößen verurteilt. Ist die Nutzung jetzt illegal?",
     "link": "https://www.heise.de/news/Falschparkerfotograf-als-Datensuender-Ein-Grundsatzurteil-das-keines-ist-11075486.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/0/4/8/shutterstock_1200880819-f706a17968c031d3.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/0/4/8/shutterstock_1200880819-f706a17968c031d3.jpeg",
     "language": "de"
   },
   {
@@ -5176,7 +5256,7 @@
     "publicationDate": "2025-11-12T11:23:00.000Z",
     "summary": "Apple hat die Form seiner App-Icons in macOS 26 alias Tahoe überarbeitet. Halten sich Apps nicht daran, gibt es einen optischen Eingriff. Das hilft...",
     "link": "https://www.heise.de/news/Icons-in-macOS-26-Kampf-gegen-das-Squircle-Gefaengnis-11073775.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/1/8/5/tahoeicons-b03a010ff88984c5.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/1/8/5/tahoeicons-b03a010ff88984c5.png",
     "language": "de"
   },
   {
@@ -5226,7 +5306,7 @@
     "publicationDate": "2025-11-12T11:15:00.000Z",
     "summary": "Im Februar 2026 eröffnet in Tokyo der weltweit erste Pok&eacute;mon-Freizeitpark, der Pok&eacute;Park Kanto. Alle Infos zum Park findet ihr hier.",
     "link": "https://www.gamepro.de/videos/der-erste-trailer-des-pokepark-kanto-in-japan,138374.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/videoimage_6385980.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/videoimage_6385980.jpg",
     "language": "de"
   },
   {
@@ -5296,7 +5376,7 @@
     "publicationDate": "2025-11-12T11:08:00.000Z",
     "summary": "Mit der Galaxy XR kehrt Samsung eindrucksvoll auf den XR-Markt zurück – flankiert von Google und Qualcomm. Ein echtes Ausrufezeichen dürfte dennoch...",
     "link": "https://www.heise.de/hintergrund/Kein-Beben-auf-dem-XR-Markt-Auch-Samsung-Galaxy-XR-wird-es-schwer-haben-11075308.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/9/5/8/Samsung_Galaxy_XR-08c48c4fe86304af.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/9/5/8/Samsung_Galaxy_XR-08c48c4fe86304af.jpeg",
     "language": "de"
   },
   {
@@ -5316,7 +5396,7 @@
     "publicationDate": "2025-11-12T11:05:00.000Z",
     "summary": "Wer nicht an einem TV, sondern dem Schreibtisch zocken will, kann seine PS5 bald auch an einen richtigen PlayStation 5-Monitor anschließen.",
     "link": "https://www.gamepro.de/artikel/sony-kuendigt-ps5-monitor-mit-240hz-120hz,3442825.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/ps5-monitor_6385924.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/ps5-monitor_6385924.jpg",
     "language": "de"
   },
   {
@@ -5346,7 +5426,7 @@
     "publicationDate": "2025-11-12T11:01:34.000Z",
     "summary": "Indie-Games, E-Sport, Cosplay, Popkultur und mehr: Die bayerische Gaming-Messe GG Bavaria wird im März 2026 in München fortgesetzt – dann erneut im...",
     "link": "https://www.gameswirtschaft.de/events/gg-bavaria-2026-muenchen-termin-121126/",
-    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/GG-Bavaria-2026-Muenchen-Termin-121125.jpg",
+    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/GG-Bavaria-2026-Muenchen-Termin-121125-150x150.jpg",
     "language": "de"
   },
   {
@@ -5416,7 +5496,7 @@
     "publicationDate": "2025-11-12T11:00:00.000Z",
     "summary": "Der Call for Proposals für die enterJS 2026 in Mannheim läuft noch bis zum 19. November. Die Veranstalter suchen nach Ideen für Vorträge und...",
     "link": "https://www.heise.de/news/enterJS-2026-in-Mannheim-Jetzt-noch-Vortragsideen-einreichen-11073581.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/0/8/8/ejs261920-1080-max-865578f39d3ce495.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/0/8/8/ejs261920-1080-max-865578f39d3ce495.jpeg",
     "language": "de"
   },
   {
@@ -5596,7 +5676,7 @@
     "publicationDate": "2025-11-12T10:45:00.000Z",
     "summary": "Microsoft hat die Passkey-Verwaltung in Windows 11 aufgebohrt. Nun können das externe Programme übernehmen – etwa 1Password und Bitwarden.",
     "link": "https://www.heise.de/news/Microsoft-ermoeglicht-externe-Passkey-Verwaltung-in-Windows-11-11075235.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/9/2/1/2025-11-12-Microsoft-1Password_Blog_Screenshot-Aufmacher-89b20f13c05ec1a5.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/9/2/1/2025-11-12-Microsoft-1Password_Blog_Screenshot-Aufmacher-89b20f13c05ec1a5.png",
     "language": "de"
   },
   {
@@ -5626,7 +5706,7 @@
     "publicationDate": "2025-11-12T10:37:00.000Z",
     "summary": "Cybersecurity-Anbieter Check Point kündigt eine Kooperation mit Nvidia an. Zusammen wollen sie eine integrierte Sicherheitsumgebung für KI-Fabriken...",
     "link": "https://www.heise.de/news/Check-Point-kooperiert-mit-Nvidia-fuer-KI-Sicherheitsplattform-11075284.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/9/4/6/shutterstock_1670527117-9eeb8927150ae50b.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/9/4/6/shutterstock_1670527117-9eeb8927150ae50b.jpeg",
     "language": "de"
   },
   {
@@ -5746,7 +5826,7 @@
     "publicationDate": "2025-11-12T10:32:00.000Z",
     "summary": "Hier sind alle 24 Operatoren, die ihr zum Start von Call of Duty: Black Ops 7 spielen könnt, im Überblick. Inklusive ihrer Standard-Skins und wie ihr...",
     "link": "https://www.gamepro.de/artikel/cod-black-ops-7-alle-24-operators-liste,3442546.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/cod-black-ops-7_6384721.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/cod-black-ops-7_6384721.jpg",
     "language": "de"
   },
   {
@@ -5966,7 +6046,7 @@
     "publicationDate": "2025-11-12T10:15:01.000Z",
     "summary": "Kurz vor dem 5. PlayStation-5-Jubiläum verzeichnet Sony eine anhaltende Nachfrage: Die Konsole zeigt sich resilient gegen Preiserhöhungen und Zölle....",
     "link": "https://www.gameswirtschaft.de/wirtschaft/playstation-5-verkaufszahlen-sony-q3-2025-121125/",
-    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/01/Sony-Interactive-PlayStation-290125.jpg",
+    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/01/Sony-Interactive-PlayStation-290125-150x150.jpg",
     "language": "de"
   },
   {
@@ -6086,7 +6166,7 @@
     "publicationDate": "2025-11-12T10:03:00.000Z",
     "summary": "Ein Fake-Video auf YouTube wurde so häufig angezeigt, dass viele dachten, Rockstar hätte einen neuen Trailer veröffentlicht.",
     "link": "https://www.gamepro.de/artikel/gta-6-fake-trailer,3442829.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/gta-6_6385934.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/gta-6_6385934.jpg",
     "language": "de"
   },
   {
@@ -6096,7 +6176,7 @@
     "publicationDate": "2025-11-12T10:03:00.000Z",
     "summary": "Sony bringt einen eigens auf die PS5 zugeschnittenen Monitor auf den Markt. Es handelt sich um einen Bildschirm mit 27-Zoll, 1440p-Auflösung und...",
     "link": "https://www.gamepro.de/videos/trailer-zeigt-den-ersten-ps5-monitor-von-sony-mit-1440p-und-240hz,138372.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/videoimage_6385937.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/videoimage_6385937.jpg",
     "language": "de"
   },
   {
@@ -6176,7 +6256,7 @@
     "publicationDate": "2025-11-12T09:58:00.000Z",
     "summary": "Google hat neue Funktionen für seine Pixel-Geräte veröffentlicht. Unter anderem sind im \"Pixel Drop\" KI-Zusammenfassungen für Nachrichten und mehr an...",
     "link": "https://www.heise.de/news/Pixel-Drop-bringt-KI-Zusammenfassungen-Themenpakete-und-mehr-11075203.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/9/0/5/thread-382454522-4024558655883913599-220cad12e497eb70.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/9/0/5/thread-382454522-4024558655883913599-220cad12e497eb70.png",
     "language": "de"
   },
   {
@@ -6206,7 +6286,7 @@
     "publicationDate": "2025-11-12T09:52:00.000Z",
     "summary": "Deutschland will Raketen von der Nordsee aus starten. Die mobilen Startrampen soll die neue OHB-Tochter European Spaceport Company bauen.",
     "link": "https://www.heise.de/news/OHB-Tochter-European-Spaceport-Company-soll-mobile-Raketenstartrampen-bauen-11075276.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/9/4/2/hp-da4c64e5511b3f53.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/9/4/2/hp-da4c64e5511b3f53.jpeg",
     "language": "de"
   },
   {
@@ -6226,7 +6306,7 @@
     "publicationDate": "2025-11-12T09:46:00.000Z",
     "summary": "Randy Pitchford von Gearbox spendiert euch nach mehreren Tagen endlich mal wieder einen neuen Shiftcode für Borderlands 4.",
     "link": "https://www.gamepro.de/artikel/borderlands-4-shiftcodes-12-november-2025,3442813.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/borderlands-4_6376441.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/borderlands-4_6376441.jpg",
     "language": "de"
   },
   {
@@ -6406,7 +6486,7 @@
     "publicationDate": "2025-11-12T09:30:00.000Z",
     "summary": "Mit der dritten Erweiterung \"Mysteria Ecclesiae\" ist Kingdom Come: Deliverance 2 endgültig abgeschlossen. Und Warhorse liefert uns zum Schluss...",
     "link": "https://www.gamepro.de/videos/das-ende-von-kingdom-come-2-ist-nochmal-ein-richtiges-story-highlight,138371.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/videoimage_6385782.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/videoimage_6385782.jpg",
     "language": "de"
   },
   {
@@ -6436,7 +6516,7 @@
     "publicationDate": "2025-11-12T09:24:00.000Z",
     "summary": "Mit Private AI Compute macht Google das große Datenschutzversprechen: Leistungsfähige Cloud-KI soll sich ohne Datenabfluss nutzen lassen.",
     "link": "https://www.heise.de/news/Google-Private-AI-Compute-soll-Cloud-KI-mit-Datenschutz-vereinen-11075038.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/8/2/2/google_private_ai_compute-f193643e50a59484.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/8/2/2/google_private_ai_compute-f193643e50a59484.png",
     "language": "de"
   },
   {
@@ -6476,7 +6556,7 @@
     "publicationDate": "2025-11-12T09:21:28.000Z",
     "summary": "Welche Neuheit wird ‚Spiel des Jahres‘? Das Peacock Theatre in Los Angeles ist am 11.12. abermals Austragungsort der The Game Awards. Update vom 12....",
     "link": "https://www.gameswirtschaft.de/events/the-game-awards-2025-termin-livestream-121125/",
-    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/10/The-Game-Awards-2025-Termin-311025.jpg",
+    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/10/The-Game-Awards-2025-Termin-311025-150x150.jpg",
     "language": "de"
   },
   {
@@ -6516,7 +6596,7 @@
     "publicationDate": "2025-11-12T09:14:00.000Z",
     "summary": "Polarlichter gab es in den vergangenen Monaten schon häufiger mal zu sehen – am frühen Mittwoch erneut und so weit südlich wie selten. Es gibt weiter...",
     "link": "https://www.heise.de/news/Kraeftiger-Sonnensturm-sorgt-fuer-Polarlichter-bis-nach-Bayern-11075171.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/8/8/9/shutterstock_2459274045-50c00ab6148edc1b.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/8/8/9/shutterstock_2459274045-50c00ab6148edc1b.jpeg",
     "language": "de"
   },
   {
@@ -6566,7 +6646,7 @@
     "publicationDate": "2025-11-12T09:09:00.000Z",
     "summary": "Australiens Geheimdienst ASIO schlägt Alarm: Chinesische Hackergruppen attackieren Telekommunikations- und Kritische Infrastruktur des Landes.",
     "link": "https://www.heise.de/news/Australien-Geheimdienstchef-warnt-vor-chinesischen-Hackern-11075137.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/8/7/2/shutterstock_1110248891-d59150f04e2fbac9.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/8/7/2/shutterstock_1110248891-d59150f04e2fbac9.jpeg",
     "language": "de"
   },
   {
@@ -6676,7 +6756,7 @@
     "publicationDate": "2025-11-12T09:00:00.000Z",
     "summary": "In fünf Terminen lernen Admins und Security-Verantwortliche ab dem 3. Februar 2026, wie sie mit Ethical Hacking Systeme absichern und Schwachstellen...",
     "link": "https://www.heise.de/news/Proaktive-IT-Security-mit-Pentesting-Ethical-Hacking-fuer-Admins-11070849.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/3/7/0/0/Ethical-Hacking-Ticker-Header-16-9-6c98ae74fd7f22d1.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/3/7/0/0/Ethical-Hacking-Ticker-Header-16-9-6c98ae74fd7f22d1.png",
     "language": "de"
   },
   {
@@ -6736,7 +6816,7 @@
     "publicationDate": "2025-11-12T08:44:00.000Z",
     "summary": "In einer riesigen Operation hat eine Chinesin in ihrer Heimat Menschen jahrelang Geld aus der Tasche gezogen, dann ist sie geflohen. Jetzt muss sie...",
     "link": "https://www.heise.de/news/Grossbritannien-Chinesin-muss-fuer-illegalen-Besitz-von-61-000-Bitcoin-in-Haft-11074986.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/9/6/shutterstock_1937129161-60493a37ba10b1d2.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/9/6/shutterstock_1937129161-60493a37ba10b1d2.jpeg",
     "language": "de"
   },
   {
@@ -6786,7 +6866,7 @@
     "publicationDate": "2025-11-12T08:38:00.000Z",
     "summary": "Mit Shift-Codes sichert ihr euch in Borderlands 4 wieder die goldenen Schlüssel und kostenloses Loot. Diese Belohnungen gibt es aktuell.",
     "link": "https://www.gamepro.de/artikel/borderlands-4-alle-shift-codes-goldene-schluessel,3439314.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/borderlands-4-vex_6374404.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/borderlands-4-vex_6374404.jpg",
     "language": "de"
   },
   {
@@ -6806,7 +6886,7 @@
     "publicationDate": "2025-11-12T08:38:00.000Z",
     "summary": "Alu-Räder sind nicht besonders ökologisch. Um die CO₂-Bilanz der Felgen zu verbessern, arbeiten Forscher an neuen Legierungen und Designs.",
     "link": "https://www.heise.de/news/FH-Dortmund-gestaltet-Alu-Felgen-oekologischer-und-energieeffizienter-11075002.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/8/0/4/Alufelge-1323ba6c1661f8b0.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/8/0/4/Alufelge-1323ba6c1661f8b0.jpeg",
     "language": "de"
   },
   {
@@ -6856,7 +6936,7 @@
     "publicationDate": "2025-11-12T08:31:00.000Z",
     "summary": "Sony verkauft eine vergünstigte Playstation 5 nur auf dem japanischen Markt – und trifft Vorkehrungen, dass man sie nirgendwo anders benutzen kann.",
     "link": "https://www.heise.de/news/Mit-Region-Lock-Sony-bietet-in-Japan-guenstigere-Playstation-5-an-11074974.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/9/0/shutterstock_2047435856-001d6021c014f8be.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/9/0/shutterstock_2047435856-001d6021c014f8be.jpeg",
     "language": "de"
   },
   {
@@ -6936,7 +7016,7 @@
     "publicationDate": "2025-11-12T08:27:00.000Z",
     "summary": "Yann LeCun soll Berichten zufolge Meta verlassen wollen und sich selbstständig machen. Mit einem Startup für Weltenmodelle.",
     "link": "https://www.heise.de/news/Meta-Chefwissenschaftler-LeCun-plant-wohl-eigenes-Startup-11074902.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/5/4/IMG_8436-2f006d814a6efb36.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/5/4/IMG_8436-2f006d814a6efb36.jpeg",
     "language": "de"
   },
   {
@@ -6956,7 +7036,7 @@
     "publicationDate": "2025-11-12T08:24:00.000Z",
     "summary": "In Monopoly Go! habt ihr keine Würfel mehr? Wir listen für euch alle aktuellen, kostenlose Würfel-Links.",
     "link": "https://www.gamepro.de/artikel/monopoly-go-kostenlose-wuerfel-links,3410726.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/gp-monopoly-go_6283205.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/gp-monopoly-go_6283205.jpg",
     "language": "de"
   },
   {
@@ -6996,7 +7076,7 @@
     "publicationDate": "2025-11-12T08:19:00.000Z",
     "summary": "Es sind wichtige Sicherheitsupdates für unter anderem Adobe Illustrator, InCopy und Photoshop erschienen.",
     "link": "https://www.heise.de/news/Patchday-Adobe-Schadcode-Luecken-bedrohen-InDesign-Co-11074930.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/6/8/adobe_patchday-53cdad4f30d511ba.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/6/8/adobe_patchday-53cdad4f30d511ba.jpeg",
     "language": "de"
   },
   {
@@ -7106,7 +7186,7 @@
     "publicationDate": "2025-11-12T08:11:00.000Z",
     "summary": "Microsoft hat die produktionsreifen Versionen von .NET 10.0 und Visual Studio 2026 veröffentlicht. Spannende Neuerungen gibt es vor allem für C# und...",
     "link": "https://www.heise.de/news/NET-10-0-ist-fertig-11074367.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/4/8/4/dotnet-sign-b922a1793256c1e8.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/4/8/4/dotnet-sign-b922a1793256c1e8.jpeg",
     "language": "de"
   },
   {
@@ -7256,7 +7336,7 @@
     "publicationDate": "2025-11-12T07:46:00.000Z",
     "summary": "Seit Anfang des Jahres können Forschende in der Schweiz wieder an Horizon Europe, Euratom sowie Digital Europe teilnehmen.",
     "link": "https://www.heise.de/news/Forschungsprogramme-zwischen-der-EU-und-der-Schweiz-reaktiviert-11074864.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/3/5/shutterstock_1640657776-f6358d350fc32b48.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/3/5/shutterstock_1640657776-f6358d350fc32b48.jpeg",
     "language": "de"
   },
   {
@@ -7286,7 +7366,7 @@
     "publicationDate": "2025-11-12T07:43:00.000Z",
     "summary": "Warhorse hat den vermutlich letzten DLC für \"Kingdom Come Deliverance 2\" veröffentlicht. Dazu kommt ein neuer Patch, der die Lippensynchronisation...",
     "link": "https://www.heise.de/news/Kingdom-Come-Deliverance-2-Letzter-DLC-fuehrt-zurueck-ins-Kloster-11074896.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/5/1/ss_038017d3fb06f5acb1c4b6f3ea908985203b4acd-c22e83f863731c2e.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/5/1/ss_038017d3fb06f5acb1c4b6f3ea908985203b4acd-c22e83f863731c2e.jpeg",
     "language": "de"
   },
   {
@@ -7306,7 +7386,7 @@
     "publicationDate": "2025-11-12T07:36:00.000Z",
     "summary": "Microsofts Entwickler haben Sicherheitslücken in unter anderem Azure, Office und Windows geschlossen. Es gibt bereits Attacken.",
     "link": "https://www.heise.de/news/Patchday-Microsoft-Attacken-auf-Windows-Kernel-beobachtet-11074858.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/3/2/win1-3ec2f3061dcfac52.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/3/2/win1-3ec2f3061dcfac52.png",
     "language": "de"
   },
   {
@@ -7316,7 +7396,7 @@
     "publicationDate": "2025-11-12T07:32:00.000Z",
     "summary": "Während der State of Play Japan wurde gestern Nacht die neue Erweiterung The Forsaken Hollows angekündigt. Wir haben den Trailer und alle Infos für...",
     "link": "https://www.gamepro.de/artikel/elden-ring-nightreign-dlc-mit-datum-enthuellt,3442812.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/elden-ring-nightreign-the-forsaken-hollows-gp_6386147.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/elden-ring-nightreign-the-forsaken-hollows-gp_6386147.jpg",
     "language": "de"
   },
   {
@@ -7396,7 +7476,7 @@
     "publicationDate": "2025-11-12T07:26:00.000Z",
     "summary": "Gut ein Jahr nach dem Ende der Ampel-Koalition wechselt der ehemalige Bundesfinanzminister Christian Lindner in den Autohandel.",
     "link": "https://www.heise.de/news/Christian-Lindner-wechselt-in-die-Autobranche-11074890.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/4/8/Pressefoto_Christian_Lindner-06c154b5fd747413.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/4/8/Pressefoto_Christian_Lindner-06c154b5fd747413.jpeg",
     "language": "de"
   },
   {
@@ -7406,7 +7486,7 @@
     "publicationDate": "2025-11-12T07:25:00.000Z",
     "summary": "Jakob Czekansky erläutert, wieso Embedded Systems wichtiger Teil unseres Alltags sind, wie sie entwickelt werden und wie sie die technologische...",
     "link": "https://www.heise.de/blog/programmier-bar-Embedded-Development-mit-Jakob-Czekansky-11074291.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/4/4/5/thumbnail_Deep_Dive_195_Embedded_Software_Development-9c680092c6c5b7d7.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/4/4/5/thumbnail_Deep_Dive_195_Embedded_Software_Development-9c680092c6c5b7d7.png",
     "language": "de"
   },
   {
@@ -7436,7 +7516,7 @@
     "publicationDate": "2025-11-12T07:21:00.000Z",
     "summary": "Der Linux-Erfinder will KI-Tools genauso behandeln wie andere Werkzeuge – und sieht auch beim Copyright von KI-Beiträgen keine Gründe für...",
     "link": "https://www.heise.de/news/Linux-KI-Richtlinien-fuer-Kernel-Entwickler-in-der-Diskussion-11074886.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/4/6/shutterstock_2603902713-1589cc8276b2a580.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/4/6/shutterstock_2603902713-1589cc8276b2a580.jpeg",
     "language": "de"
   },
   {
@@ -7486,7 +7566,7 @@
     "publicationDate": "2025-11-12T07:07:00.000Z",
     "summary": "Das nächste Set des Pokémon-Sammelkartenspiels ist fast hier und ihr könnt die Karten vorbestellen – nehmt euch aber vor Scalpern in acht!",
     "link": "https://www.gamepro.de/artikel/pokemon-fatale-flammen-neue-set-sammelkarten-jetzt-vorbestellen,3442665.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/pok%C3%A9mon-tcg-fatale-flammen-teaser_6385175.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/pok%C3%A9mon-tcg-fatale-flammen-teaser_6385175.jpg",
     "language": "de"
   },
   {
@@ -7566,7 +7646,7 @@
     "publicationDate": "2025-11-12T07:00:00.000Z",
     "summary": "Mass Effect bekommt eine eigene Fernsehserie spendiert. Abseits davon sind aber nur wenige Infos bisher bekannt. Wir tragen sie zusammen.",
     "link": "https://www.gamepro.de/artikel/mass-effect-serie-amazon-release-cast-story,3436726.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/mass-effect-female-shepard_6365423.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/mass-effect-female-shepard_6365423.jpg",
     "language": "de"
   },
   {
@@ -7606,7 +7686,7 @@
     "publicationDate": "2025-11-12T07:00:00.000Z",
     "summary": "Lernen Sie, wie Sie Entra ID einschließlich Azure-Diensten härten und effektiv vor Angriffen schützen.",
     "link": "https://www.heise.de/news/iX-Workshop-Angriffe-auf-Entra-ID-abwehren-10966385.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/2/1/1/Angriff-Absicherung-Azure-Ticker-Header-16-9-535890277b8e665d.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/6/8/2/1/1/Angriff-Absicherung-Azure-Ticker-Header-16-9-535890277b8e665d.png",
     "language": "de"
   },
   {
@@ -7626,7 +7706,7 @@
     "publicationDate": "2025-11-12T06:57:00.000Z",
     "summary": "LEGO hat ein komplett neues The Legend of Zelda-Set angekündigt. Ein erster Teaser-Trailer zum 77093-Set zeigt, das wahrscheinlich erneut an Ocarina...",
     "link": "https://www.gamepro.de/artikel/lego-zelda-77093-neues-set-2026-teaser,3442811.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/lego-zelda-77093_6385794.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/lego-zelda-77093_6385794.jpg",
     "language": "de"
   },
   {
@@ -7636,7 +7716,7 @@
     "publicationDate": "2025-11-12T06:50:00.000Z",
     "summary": "Dass die Bahn ab Freitag den Kölner Hauptbahnhof sperrt, sorgt schon jetzt für Unmut. Es wird nicht die einzige Sperrung bleiben – wegen eines...",
     "link": "https://www.heise.de/news/Softwarefehler-zwingt-Bahn-zu-zweiter-Sperrung-in-Koeln-11074854.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/3/0/shutterstock_2590016865-91a85829b6d3121b.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/3/0/shutterstock_2590016865-91a85829b6d3121b.jpeg",
     "language": "de"
   },
   {
@@ -7646,7 +7726,7 @@
     "publicationDate": "2025-11-12T06:47:00.000Z",
     "summary": "Einige Windows-10-Nutzer erhalten ein Update-Angebot nach dem Support-Ende. Es korrigiert Probleme mit der Supportverlängerung.",
     "link": "https://www.heise.de/news/Windows-10-22H2-Update-ausser-der-Reihe-korrigiert-ESU-Probleme-11074832.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/1/9/shutterstock_293983433-b06a5b6daf22283a.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/1/9/shutterstock_293983433-b06a5b6daf22283a.jpeg",
     "language": "de"
   },
   {
@@ -7676,7 +7756,7 @@
     "publicationDate": "2025-11-12T06:44:00.000Z",
     "summary": "Während der State of Play Japan wurde gestern überraschend der DLC zum Elden Ring-Spin off Nightreign enthüllt. Bisher war nur klar, dass dieser noch...",
     "link": "https://www.gamepro.de/videos/elden-ring-nightreign-dlc-the-forsaken-hollows-mit-neuen-bossen-und-neuen-klassen-enthuellt,138365.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/videoimage_6385795.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/videoimage_6385795.jpg",
     "language": "de"
   },
   {
@@ -7686,7 +7766,7 @@
     "publicationDate": "2025-11-12T06:36:48.000Z",
     "summary": "Für die Launch-Kampagne des Action-Blockbusters Call of Duty: Black Ops 7 reaktiviert Activision den kultigen ‚Replacer‘ mit Nura. Update vom 12....",
     "link": "https://www.gameswirtschaft.de/marketing-pr/call-of-duty-black-ops-7-nura-replacer-121125/",
-    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/10/Call-of-Duty-Black-Ops-7-Nura-281025.jpg",
+    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/10/Call-of-Duty-Black-Ops-7-Nura-281025-150x150.jpg",
     "language": "de"
   },
   {
@@ -7736,7 +7816,7 @@
     "publicationDate": "2025-11-12T06:15:00.000Z",
     "summary": "Das Limit dürften nur die allerwenigsten erreichen, dennoch ist es ein Ärgernis.",
     "link": "https://www.gamepro.de/artikel/battlefield-6-taegliches-xp-limit-spieler-sauer,3442773.html",
-    "imageUrl": "https://images.cgames.de/images/gsgp/800/battlefield-6-season-1_6382353.jpg",
+    "imageUrl": "https://images.cgames.de/images/gsgp/112/battlefield-6-season-1_6382353.jpg",
     "language": "de"
   },
   {
@@ -7786,7 +7866,7 @@
     "publicationDate": "2025-11-12T06:10:00.000Z",
     "summary": "Vor fünf Jahren wurden einer Kryptofirma über 127.000 Bitcoin gestohlen, jetzt werden Details bekannt. Nun wirft China der US-Regierung vor,...",
     "link": "https://www.heise.de/news/Ueber-127-000-Bitcoin-entwendet-China-wirft-US-Regierung-Milliardendiebstahl-vor-11074826.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/1/6/shutterstock_2633539361-4ff4903c6c1394a3.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/1/6/shutterstock_2633539361-4ff4903c6c1394a3.jpeg",
     "language": "de"
   },
   {
@@ -7986,7 +8066,7 @@
     "publicationDate": "2025-11-12T05:15:00.000Z",
     "summary": "KI-Server in Portugal + Softbanks Refinanzierung + Wiki-Gebühren für KI-Firmen + Kanzleramt-IT streng geheim + Brandenburgs Mega-Akku + Googles...",
     "link": "https://www.heise.de/news/Mittwoch-Microsoft-Milliarden-fuer-Portugal-Server-Softbanks-KI-Investitionen-11074814.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/1/0/mittwoch-40ef67b9ff539105.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/1/0/mittwoch-40ef67b9ff539105.jpeg",
     "language": "de"
   },
   {
@@ -8116,7 +8196,7 @@
     "publicationDate": "2025-11-12T04:02:00.000Z",
     "summary": "Aktienverkäufe in Milliardenhöhe befeuern Befürchtungen um ein Platzen der KI-Blase. Doch Softbank braucht wohl nur neue Finanzmittel für OpenAI und...",
     "link": "https://www.heise.de/news/Softbank-verkauft-Millionen-Nvidia-und-Telekom-Aktien-fuer-neue-KI-Investitionen-11074800.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/7/0/3/shutterstock_1467319280-be580f329b97da35.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/7/0/3/shutterstock_1467319280-be580f329b97da35.jpeg",
     "language": "de"
   },
   {
@@ -8706,7 +8786,7 @@
     "publicationDate": "2025-11-11T22:29:00.000Z",
     "summary": "90 Kilometer südlich Lissabons entsteht ein Campus für KI-Rechenanlagen. Microsoft steigt groß ein.",
     "link": "https://www.heise.de/news/Microsoft-investiert-Milliarden-in-portugiesisches-KI-Rechenzentrum-11074762.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/6/8/4/shutterstock_270152252-12a9fcd54616081a.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/6/8/4/shutterstock_270152252-12a9fcd54616081a.jpeg",
     "language": "de"
   },
   {
@@ -9016,7 +9096,7 @@
     "publicationDate": "2025-11-11T20:53:00.000Z",
     "summary": "Die Wikimedia-Stiftung möchte das Überleben der Wikipedia im KI-Zeitalter sichern. Die Profiteure sollen für Aufwand zahlen, den sie verursachen.",
     "link": "https://www.heise.de/news/Wikipedia-wird-kostenpflichtig-fuer-KI-Bots-11074749.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/6/7/7/Wikipedia-243f2d31870f62fe.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/6/7/7/Wikipedia-243f2d31870f62fe.jpeg",
     "language": "de"
   },
   {
@@ -9126,7 +9206,7 @@
     "publicationDate": "2025-11-11T20:10:00.000Z",
     "summary": "Informationen über die IT-Infrastruktur im Kanzleramt würden laut der Exekutive das Staatswohl gefährden. Etwaige Angreifer könnten konkrete Hinweise...",
     "link": "https://www.heise.de/news/Bundesregierung-IT-Sicherheit-im-Kanzleramt-ist-ueber-geheim-11074714.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/6/5/8/shutterstock_1774035905-9f5cc1b9a0ddcab1.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/6/5/8/shutterstock_1774035905-9f5cc1b9a0ddcab1.jpeg",
     "language": "de"
   },
   {
@@ -9236,7 +9316,7 @@
     "publicationDate": "2025-11-11T19:36:00.000Z",
     "summary": "Die Energiewende braucht Speicher. Der Energieversorger LEAG baut einen großen Akku in Brandenburg, der in etwa zwei Jahren in Betrieb gehen soll.",
     "link": "https://www.heise.de/news/Gigawattstunden-Netzspeicher-wird-in-Brandenburg-gebaut-11074581.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/5/9/1/hp-7c4198e072cbc955.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/5/9/1/hp-7c4198e072cbc955.jpeg",
     "language": "de"
   },
   {
@@ -9316,7 +9396,7 @@
     "publicationDate": "2025-11-11T19:03:00.000Z",
     "summary": "Google kündigt 5,5 Mrd. Euro Privatinvestitionen bis 2029 an für Cloud-Infrastruktur, Rechenzentren und grüne Energielösungen in Deutschland.",
     "link": "https://www.heise.de/news/5-5-Milliarden-Euro-Googles-BIP-Booster-fuer-KI-in-Deutschland-11074613.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/6/0/7/2025-Google-Pressekonferenz_Pressekonferenz_Bildquelle_Google_9-68d30bcf51e1216d.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/6/0/7/2025-Google-Pressekonferenz_Pressekonferenz_Bildquelle_Google_9-68d30bcf51e1216d.jpeg",
     "language": "de"
   },
   {
@@ -10026,7 +10106,7 @@
     "publicationDate": "2025-11-11T17:00:00.000Z",
     "summary": "Mercedes erneuert nun zügig sein E-Auto-Angebot. Der GLB EQ stellt den noch aktuellen EQB in mindestens einer Hinsicht in den Schatten.",
     "link": "https://www.heise.de/news/Ein-erster-Ausblick-auf-den-Mercedes-GLB-EQ-11074427.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/5/1/4/001-61b87d6b5cd6118f.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/5/1/4/001-61b87d6b5cd6118f.jpeg",
     "language": "de"
   },
   {
@@ -10556,7 +10636,7 @@
     "publicationDate": "2025-11-11T16:07:00.000Z",
     "summary": "Mit dem Kubernetes-AI-Conformance-Programm legt die CNCF einen technischen Standard für KI-Plattformen vor, der Portabilität und Souveränität...",
     "link": "https://www.heise.de/news/CNCF-standardisiert-KI-Infrastruktur-mit-neuem-Kubernetes-Programm-11074337.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/4/6/9/devops_ki_aufmacher_digi-d9aee9f92117ac0a.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/4/6/9/devops_ki_aufmacher_digi-d9aee9f92117ac0a.jpeg",
     "language": "de"
   },
   {
@@ -10756,7 +10836,7 @@
     "publicationDate": "2025-11-11T15:43:00.000Z",
     "summary": "Ein Gerichtsurteil in München könnte weitreichende Folgen für die KI-Branche haben. Das eigentliche Dilemma erscheint kaum auflösbar, analysiert...",
     "link": "https://www.heise.de/meinung/Analyse-Das-GEMA-Urteil-ruettelt-am-Selbstverstaendnis-der-KI-Branche-11074431.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/5/1/6/analysechatgpt-a8e679443db639d4.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/5/1/6/analysechatgpt-a8e679443db639d4.png",
     "language": "de"
   },
   {
@@ -11176,7 +11256,7 @@
     "publicationDate": "2025-11-11T14:44:00.000Z",
     "summary": "Kieler Forscher haben ein laserbasiertes 3D-Druckverfahren für Glas entwickelt. Es vereinfacht den 3D-Druck mit Glas deutlich.",
     "link": "https://www.heise.de/news/Kieler-Forscher-entwickeln-3D-Druckverfahren-fuer-Glas-11074343.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/4/7/2/hp-e418be736b934443.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/4/7/2/hp-e418be736b934443.jpeg",
     "language": "de"
   },
   {
@@ -11286,7 +11366,7 @@
     "publicationDate": "2025-11-11T14:28:00.000Z",
     "summary": "Freifunker warnen: Der Regierungsplan zum anlasslosen Protokollieren von Nutzerspuren bedroht offene WLANs. Eine Zuordnung von IP-Adressen sei kaum...",
     "link": "https://www.heise.de/news/Aus-fuer-offenes-WLAN-Vorratsdatenspeicherung-gefaehrdet-digitale-Teilhabe-11074279.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/4/3/9/wlan-zone-d59c723b3f1abbbf.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/4/3/9/wlan-zone-d59c723b3f1abbbf.jpeg",
     "language": "de"
   },
   {
@@ -11346,7 +11426,7 @@
     "publicationDate": "2025-11-11T14:15:00.000Z",
     "summary": "Das aktuelle BSI-Lagebild zeigt eklatante Probleme auf – während der zuständige Minister auf die Wirksamkeit neuer Maßnahmen hofft.",
     "link": "https://www.heise.de/news/BSI-zur-Cybersicherheit-Stabil-unsicher-11074222.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/4/1/0/shutterstock_1483190885-ee0af1a691aee6c6.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/4/1/0/shutterstock_1483190885-ee0af1a691aee6c6.jpeg",
     "language": "de"
   },
   {
@@ -11556,7 +11636,7 @@
     "publicationDate": "2025-11-11T13:50:00.000Z",
     "summary": "Zusammen mit Issey Miyake hat Apple zwei neue Taschen fürs iPhone ins Programm genommen. Ihr Look erinnert an die gute, alte iPod-Socke.",
     "link": "https://www.heise.de/news/Apple-belebt-alte-iPod-Socken-wieder-als-iPhone-Umhaengsel-von-Designermarke-11073936.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/2/6/6/iphoneissey-603ae7eb0c207c6f.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/2/6/6/iphoneissey-603ae7eb0c207c6f.png",
     "language": "de"
   },
   {
@@ -11586,7 +11666,7 @@
     "publicationDate": "2025-11-11T13:45:00.000Z",
     "summary": "Eine Umfrage von MongoDB zeigt: Vier von fünf Unternehmen modernisieren ihre IT. Doch die vollständige Ablösung alter Systeme scheitert oft.",
     "link": "https://www.heise.de/news/KI-treibt-IT-Modernisierung-doch-Altsysteme-bleiben-11074094.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/3/4/5/shutterstock_2397910217-275fc8b85059d8d3.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/3/4/5/shutterstock_2397910217-275fc8b85059d8d3.jpeg",
     "language": "de"
   },
   {
@@ -11636,7 +11716,7 @@
     "publicationDate": "2025-11-11T13:40:00.000Z",
     "summary": "Still Bright hat ein chemisches Verfahren entwickelt, das umweltschädigende Kupferschmelzanlagen ersetzen könnte.",
     "link": "https://www.heise.de/news/US-Start-up-will-die-Kupferindustrie-gruen-machen-11074104.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/3/5/0/shutterstock_2633885129-57be213b244ed3ec.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/3/5/0/shutterstock_2633885129-57be213b244ed3ec.jpeg",
     "language": "de"
   },
   {
@@ -11816,7 +11896,7 @@
     "publicationDate": "2025-11-11T13:19:00.000Z",
     "summary": "Eine neue Studie legt nahe, dass KI-Systeme Persönlichkeitsmerkmale vom Aussehen ableiten können. Die Ergebnisse werfen weitreichende ethische Fragen...",
     "link": "https://www.heise.de/news/Gesichtserkennung-Wie-KI-darueber-entscheiden-koennte-wer-eingestellt-wird-11074078.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/3/3/7/shutterstock_719572552-9db0fc1f1a9b76f0.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/3/3/7/shutterstock_719572552-9db0fc1f1a9b76f0.jpeg",
     "language": "de"
   },
   {
@@ -11916,7 +11996,7 @@
     "publicationDate": "2025-11-11T13:06:00.000Z",
     "summary": "Apps geräteübergreifend verwalten, Videos bei Notrufen teilen: Google liefert mit dem November-Update neue Android-Funktionen über Play-Store und...",
     "link": "https://www.heise.de/news/Android-Google-System-Update-fuer-November-mit-Neuerungen-11074042.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/3/1/9/android-update-cbfcec3927bc56c5.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/3/1/9/android-update-cbfcec3927bc56c5.jpeg",
     "language": "de"
   },
   {
@@ -11926,7 +12006,7 @@
     "publicationDate": "2025-11-11T13:05:00.000Z",
     "summary": "Die Diplom-Informatikerin Karin Schuler und der Jurist Thilo Weichert vom Netzwerk Datenschutzexpertise warnen davor, dass Digitalzwang zu...",
     "link": "https://www.heise.de/hintergrund/Interview-Digitalzwang-ist-nicht-Fortschritt-sondern-kurzsichtig-11073402.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/9/9/8/OVERLAY_Interview_PNG_V2_8_-ecc60876e218fb7c.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/9/9/8/OVERLAY_Interview_PNG_V2_8_-ecc60876e218fb7c.png",
     "language": "de"
   },
   {
@@ -11986,7 +12066,7 @@
     "publicationDate": "2025-11-11T13:00:00.000Z",
     "summary": "Praktische Übungen, Experten-Tipps und fundiertes Wissen: Lernen Sie, wie Sie mit Wireshark Netzwerkprobleme erkennen und beheben.",
     "link": "https://www.heise.de/news/iX-Workshop-Netzwerkanalyse-und-Fehlersuche-mit-Wireshark-10995833.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/9/2/0/1/netzwerkanalyse_und_fehlersuche_mit_wireshark_ticker-1920x1080px-69cfacac8e430811.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/6/9/2/0/1/netzwerkanalyse_und_fehlersuche_mit_wireshark_ticker-1920x1080px-69cfacac8e430811.png",
     "language": "de"
   },
   {
@@ -11996,7 +12076,7 @@
     "publicationDate": "2025-11-11T13:00:00.000Z",
     "summary": "Der neue Hyundai Nexo macht alles besser als sein Vorgänger. Die Idee eines Brennstoffzellenautos ist trotz Aussichtslosigkeit offenbar nicht...",
     "link": "https://www.heise.de/tests/Wasserstoff-Auto-Hyundai-Nexo-im-Fahrbericht-Besser-und-weiter-aussichtslos-11073330.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/9/6/2/Hyundai_Nexo_2026-18-93f534da20b0d026.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/9/6/2/Hyundai_Nexo_2026-18-93f534da20b0d026.jpeg",
     "language": "de"
   },
   {
@@ -12116,7 +12196,7 @@
     "publicationDate": "2025-11-11T12:37:00.000Z",
     "summary": "Durch einen riesigen Ozean ist Jupitermond Europa ein spannendes Ziel der Forschung auf der Suche nach Leben. Mehr Erkenntnisse sollen zwei...",
     "link": "https://www.heise.de/hintergrund/Zahlen-bitte-Jupitermond-Europa-Spannender-Kandidat-auf-der-Suche-nach-Leben-11073440.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/0/1/7/Overlay_Zahlenbitte_1_84_-ab2679c000ecfd33.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/0/1/7/Overlay_Zahlenbitte_1_84_-ab2679c000ecfd33.png",
     "language": "de"
   },
   {
@@ -12146,7 +12226,7 @@
     "publicationDate": "2025-11-11T12:33:00.000Z",
     "summary": "SAP korrigiert Schwachstellen in mehrere Produkten und dokumentiert dies in 18 Sicherheitsmitteilungen zum November-Patchday.",
     "link": "https://www.heise.de/news/SAP-Patchday-bringt-18-neue-Sicherheitsmitteilungen-11073912.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/2/5/4/2025-08-12-SAP-Patchday-6afc6321a0dc36fc.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/2/5/4/2025-08-12-SAP-Patchday-6afc6321a0dc36fc.png",
     "language": "de"
   },
   {
@@ -12206,7 +12286,7 @@
     "publicationDate": "2025-11-11T12:22:00.000Z",
     "summary": "Der Bau an der 170 Kilometer langen Stadt The Line ist gestoppt. Von offizieller Seite wird aber an dem Megaprojekt festgehalten.",
     "link": "https://www.heise.de/news/Megaprojekt-The-Line-ist-wohl-gescheitert-11073902.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/2/4/9/hp-2adadf2c869c9dc0.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/2/4/9/hp-2adadf2c869c9dc0.jpeg",
     "language": "de"
   },
   {
@@ -12236,7 +12316,7 @@
     "publicationDate": "2025-11-11T12:10:00.000Z",
     "summary": "Während Konkurrenten wie Netflix oder Prime mehr und mehr auf TV-Spots setzen, will Apple das nicht tun. Das sagt Diensteboss Eddy Cue.",
     "link": "https://www.heise.de/news/Apple-TV-soll-werbefrei-bleiben-zumindest-vorerst-11073006.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/7/9/6/Screenshot_2025-11-11_at_12-f94c7c3020e3a0a0.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/7/9/6/Screenshot_2025-11-11_at_12-f94c7c3020e3a0a0.png",
     "language": "de"
   },
   {
@@ -12276,7 +12356,7 @@
     "publicationDate": "2025-11-11T12:02:00.000Z",
     "summary": "Für bessere Aufnahmen kann die Europäische Südsternwarte vier optische Teleskope zusammenschalten. Nun steht dank Lasertechnik ein großer...",
     "link": "https://www.heise.de/news/Astronomie-Virtuelles-Teleskop-dank-Lasertechnik-deutlich-leistungsfaehiger-11073544.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/0/6/9/eso2519a-1d6ba432950ce9f0.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/0/6/9/eso2519a-1d6ba432950ce9f0.jpeg",
     "language": "de"
   },
   {
@@ -12396,7 +12476,7 @@
     "publicationDate": "2025-11-11T11:48:00.000Z",
     "summary": "Die Shell fish 4.2.0 bietet mehrzeilige Befehle in der Autovervollständigung und setzt UTF-8 als Standard voraus.",
     "link": "https://www.heise.de/news/fish-4-2-0-Mehrzeilige-Befehle-und-UTF-8-als-Standard-11073639.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/1/1/7/opensource-4b5bd847a44315af.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/1/1/7/opensource-4b5bd847a44315af.png",
     "language": "de"
   },
   {
@@ -12436,7 +12516,7 @@
     "publicationDate": "2025-11-11T11:43:00.000Z",
     "summary": "Weitere Instanzen der Schadsoftware, die Credentials und Kryptowährung abgreift, sind auf Open VSX aufgetaucht und wollen sich auf GitHub einnisten.",
     "link": "https://www.heise.de/news/Schadsoftware-weiter-aktiv-GlassWorm-erneut-in-Open-VSX-Paketen-gefunden-11073146.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/8/6/9/shutterstock_680078968-00668b2b94b9b807.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/8/6/9/shutterstock_680078968-00668b2b94b9b807.jpeg",
     "language": "de"
   },
   {
@@ -12686,7 +12766,7 @@
     "publicationDate": "2025-11-11T11:00:00.000Z",
     "summary": "Unser Webinar erklärt, ob Ihr Unternehmen von NIS-2 betroffen ist, welche Pflichten da auf Sie zukommen und wie Sie das praktisch hinbekommen.",
     "link": "https://www.heise.de/news/heise-security-Webinar-NIS-2-rechtssicher-im-Unternehmen-umsetzen-11073382.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/9/8/8/anforderungen_des_nis-2-umsetzungsgesetzes_ticker-1920x1080px-04db37cc9ace05ad.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/9/8/8/anforderungen_des_nis-2-umsetzungsgesetzes_ticker-1920x1080px-04db37cc9ace05ad.png",
     "language": "de"
   },
   {
@@ -12726,7 +12806,7 @@
     "publicationDate": "2025-11-11T10:57:00.000Z",
     "summary": "Um Badegäste an australischen Stränden zu schützen, wurden Drohnen zur Ortung von Haien eingesetzt. Die Studie sei ein Erfolg, das Programm wird...",
     "link": "https://www.heise.de/news/Drohnen-zur-Haifischbeobachtung-an-Straenden-sind-effektiver-als-Netze-11073482.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/0/3/8/Haifisch-bc8d36074a7057e7.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/0/3/8/Haifisch-bc8d36074a7057e7.jpeg",
     "language": "de"
   },
   {
@@ -12746,7 +12826,7 @@
     "publicationDate": "2025-11-11T10:49:00.000Z",
     "summary": "Fingereingaben beherrscht die Vision Pro präzise. Wenn das nicht ausreicht, gibt es nun ein neues Eingabegerät von Logitech. Mit visionOS 26.2 wird...",
     "link": "https://www.heise.de/news/Muse-Stift-von-Logitech-wird-in-visionOS-26-2-zur-Luftmaus-11072880.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/7/3/2/museplay-c88bf856721604fb.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/7/3/2/museplay-c88bf856721604fb.jpeg",
     "language": "de"
   },
   {
@@ -12786,7 +12866,7 @@
     "publicationDate": "2025-11-11T10:41:00.000Z",
     "summary": "MX Linux 25 aktualisiert den Unterbau auf Debian Trixie. Beim Download müssen Interessierte entscheiden, ob sie systemd oder sysVinit wollen.",
     "link": "https://www.heise.de/news/MX-Linux-25-Umstieg-auf-Debian-Trixie-Basis-11073538.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/0/6/6/2025-11-11-Desktop-MX_Linux_25_Xfce-Auf_Notebook-645a92fe0ecb8d4a.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/0/6/6/2025-11-11-Desktop-MX_Linux_25_Xfce-Auf_Notebook-645a92fe0ecb8d4a.jpeg",
     "language": "de"
   },
   {
@@ -12826,7 +12906,7 @@
     "publicationDate": "2025-11-11T10:35:00.000Z",
     "summary": "Die EU-Kommission plant laut einem Bericht, eine Empfehlung zum Verzicht auf chinesische Netzwerktechnik in eine rechtlich bindende Verpflichtung...",
     "link": "https://www.heise.de/news/Bericht-EU-will-haertere-Massnahmen-gegen-Huawei-und-ZTE-11073661.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/1/2/8/huawei-symbol-dunkel-schatten-mwc-2019-250219-vbr-ca9b67c372a406ba.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/1/2/8/huawei-symbol-dunkel-schatten-mwc-2019-250219-vbr-ca9b67c372a406ba.jpeg",
     "language": "de"
   },
   {
@@ -12846,7 +12926,7 @@
     "publicationDate": "2025-11-11T10:30:00.000Z",
     "summary": "Flash-Speicher wird knapp und teuer, während die DRAM-Preise massiv steigen und Festplatten lange Lieferzeiten haben.",
     "link": "https://www.heise.de/news/Speicherkrise-Flash-ist-knapp-wie-nie-11073558.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/0/7/6/shutterstock_2136020447-794c6ab3ecb926b1.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/0/7/6/shutterstock_2136020447-794c6ab3ecb926b1.jpeg",
     "language": "de"
   },
   {
@@ -12916,7 +12996,7 @@
     "publicationDate": "2025-11-11T10:22:00.000Z",
     "summary": "Sicherheitsupdates schließen mehrere Lücken in IBM Db2 und Business Automation Workflow.",
     "link": "https://www.heise.de/news/Root-Sicherheitsluecke-bedroht-IBMs-Datenbanksystem-Db2-11073372.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/9/8/3/shutterstock_1024271563-0c1d5f41e4170267.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/9/8/3/shutterstock_1024271563-0c1d5f41e4170267.jpeg",
     "language": "de"
   },
   {
@@ -12946,7 +13026,7 @@
     "publicationDate": "2025-11-11T10:11:00.000Z",
     "summary": "Nach Verlust von 4 Millionen Fernsehkunden und sechs Quartalen Umsatzrückgang hat Vodafone Deutschland erstmals wieder ein Umsatzplus erzielt.",
     "link": "https://www.heise.de/news/Mit-Vodafone-geht-es-wieder-etwas-aufwaerts-11073562.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/0/7/8/vodafone-db2eaf3fecffd0b6.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/0/7/8/vodafone-db2eaf3fecffd0b6.jpeg",
     "language": "de"
   },
   {
@@ -12996,7 +13076,7 @@
     "publicationDate": "2025-11-11T10:02:00.000Z",
     "summary": "Neil Wyler alias Grifter erzählt seine unglaubliche Reise: vom jugendlichen Cyberkriminellen zum Sicherheitsexperten, der Großkonzerne und...",
     "link": "https://www.heise.de/news/Darknet-Diaries-Deutsch-Grifter-von-der-Strasse-zur-Security-10985295.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/9/0/7/Darknet-Diaries-16-9_1-bec039e7a38a477a.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/6/8/9/0/7/Darknet-Diaries-16-9_1-bec039e7a38a477a.jpeg",
     "language": "de"
   },
   {
@@ -13076,7 +13156,7 @@
     "publicationDate": "2025-11-11T09:57:00.000Z",
     "summary": "Das dünnste iPhone aller Zeiten kommt Analysten zufolge schlechter an als von Apple erhofft. Das ändert nun offenbar den Release-Plan für ein neues...",
     "link": "https://www.heise.de/news/iPhone-Air-2-Schlechte-Verkaeufe-sorgen-angeblich-fuer-Verschiebung-11073002.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/7/9/4/iPhones-2025_tre__3-c2e9f05a473a349c.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/7/9/4/iPhones-2025_tre__3-c2e9f05a473a349c.jpeg",
     "language": "de"
   },
   {
@@ -13136,7 +13216,7 @@
     "publicationDate": "2025-11-11T09:44:00.000Z",
     "summary": "Der neue Firefox 145 bietet PDF-Kommentarfunktionen, Text-Highlighting-Links und einen verbesserten Fingerprinting-Schutz. Für 32-Bit-Linux endet der...",
     "link": "https://www.heise.de/news/Firefox-145-bringt-PDF-Kommentare-und-verbesserten-Fingerprinting-Schutz-11073174.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/8/8/3/shutterstock_2229747127-2fb94428d70eb496.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/8/8/3/shutterstock_2229747127-2fb94428d70eb496.jpeg",
     "language": "de"
   },
   {
@@ -13156,7 +13236,7 @@
     "publicationDate": "2025-11-11T09:41:00.000Z",
     "summary": "Das Landgericht München hat gegen OpenAI entschieden. Geklagt hatte die GEMA – es geht um Liedtexte von Helene Fischer und mehr.",
     "link": "https://www.heise.de/news/GEMA-vs-OpenAI-Niederlage-fuer-ChatGPT-vor-Muenchner-Gericht-11073532.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/5/0/6/3/shutterstock_1860209500-e7e144e3b9a74f67.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/5/0/6/3/shutterstock_1860209500-e7e144e3b9a74f67.jpeg",
     "language": "de"
   },
   {
@@ -13196,7 +13276,7 @@
     "publicationDate": "2025-11-11T09:33:00.000Z",
     "summary": "Die PDF Association will JPEG XL in die PDF-Spezifikation aufnehmen. Das könnte dem von Google 2022 für obsolet erklärten Bildformat neuen Schwung...",
     "link": "https://www.heise.de/news/PDF-Association-will-JPEG-XL-unterstuetzen-zweite-Chance-fuer-das-Format-11073342.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/9/6/8/dokumente-efd5740b5b841c52.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/9/6/8/dokumente-efd5740b5b841c52.png",
     "language": "de"
   },
   {
@@ -13226,7 +13306,7 @@
     "publicationDate": "2025-11-11T09:30:00.000Z",
     "summary": "Google will übermäßig energiehungrigen Apps an den Kragen. Eine neue Metrik soll unter anderem Nutzer vor stromfressenden Anwendungen im Play Store...",
     "link": "https://www.heise.de/news/Google-warnt-kuenftig-vor-stromfressenden-Apps-im-Play-Store-11073354.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/9/7/4/shutterstock_2542034813-020ad75bdc644835.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/9/7/4/shutterstock_2542034813-020ad75bdc644835.jpeg",
     "language": "de"
   },
   {
@@ -13256,7 +13336,7 @@
     "publicationDate": "2025-11-11T09:21:00.000Z",
     "summary": "Nachdem KI-Musik in den vergangenen Monaten immer wieder für Aufsehen gesorgt hat, hat jetzt erstmals ein KI-Song die Spitze einer US-Hitliste...",
     "link": "https://www.heise.de/news/Walk-My-Walk-KI-generierter-Song-erstmals-an-Spitze-einer-Billboard-Liste-11073272.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/9/3/2/Screenshot_2025-11-11_at_09-31-47_Instagram-9d199afb04e0ccd5.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/9/3/2/Screenshot_2025-11-11_at_09-31-47_Instagram-9d199afb04e0ccd5.png",
     "language": "de"
   },
   {
@@ -13306,7 +13386,7 @@
     "publicationDate": "2025-11-11T09:07:00.000Z",
     "summary": "In dieser Episode des Podcasts sprechen Richard Seidl und Sam Goetjes über Vertrauen in KI-Ergebnisse.",
     "link": "https://www.heise.de/blog/Software-Testing-Mensch-vs-Maschine-wer-urteilt-fairer-11073300.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/9/4/6/vorurteile-ki-2560x1440-9bd122fd1ac7dbda.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/9/4/6/vorurteile-ki-2560x1440-9bd122fd1ac7dbda.jpeg",
     "language": "de"
   },
   {
@@ -13336,7 +13416,7 @@
     "publicationDate": "2025-11-11T09:00:00.000Z",
     "summary": "Werden Sie zum Certified Professional for Software Architecture (CPSA). Online Intensiv-Schulung mit anschließender iSAQB-Zertifizierung.",
     "link": "https://www.heise.de/news/iX-Workshop-Der-schnelle-Weg-zum-zertifizierten-Softwarearchitekten-CPSA-F-11072676.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/6/3/0/Softwarearchitektur--Ticker-Header-16-9-3c2ce1002c310077.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/6/3/0/Softwarearchitektur--Ticker-Header-16-9-3c2ce1002c310077.jpeg",
     "language": "de"
   },
   {
@@ -13356,7 +13436,7 @@
     "publicationDate": "2025-11-11T08:35:00.000Z",
     "summary": "Ein Sicherheitspatch beugt mögliche Attacken auf Windows-PCs mit Dell Display and Peripheral Manager vor.",
     "link": "https://www.heise.de/news/Sicherheitsluecke-in-Dell-Display-and-Peripheral-Manager-gefaehrdet-PCs-11073226.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/9/0/9/shutterstock_1864224370-2ff4a35cb772de7c.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/9/0/9/shutterstock_1864224370-2ff4a35cb772de7c.jpeg",
     "language": "de"
   },
   {
@@ -13366,7 +13446,7 @@
     "publicationDate": "2025-11-11T08:32:00.000Z",
     "summary": "Kieler Forscher untersuchen in einem Forschungsprojekt, wie Naturfasern teure und umweltbelastende Verbundstoffe in Rotorblättern ersetzen können.",
     "link": "https://www.heise.de/news/Kieler-Forscher-entwickeln-Rotorblaetter-fuer-Kleinwindkraftanlagen-aus-Naturfaser-11073268.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/9/3/0/Naturfaserrotor-bc7677e64f3d594c.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/9/3/0/Naturfaserrotor-bc7677e64f3d594c.jpeg",
     "language": "de"
   },
   {
@@ -13426,7 +13506,7 @@
     "publicationDate": "2025-11-11T08:22:00.000Z",
     "summary": "Herzlos geht Peking neuerlich gegen Schwule vor. Diesmal werden Dating-Apps verboten.",
     "link": "https://www.heise.de/news/Volksrepublik-China-sperrt-schwule-Dating-Apps-11073056.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/8/2/4/Finka-2d1b27ad30ce873b.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/8/2/4/Finka-2d1b27ad30ce873b.png",
     "language": "de"
   },
   {
@@ -13456,7 +13536,7 @@
     "publicationDate": "2025-11-11T08:19:00.000Z",
     "summary": "Paradox hat ein Remaster seines Terraforming-Aufbaustrategiespiels \"Surviving Mars\" veröffentlicht. Weitere neue Inhalte sollen im kommenden Jahr...",
     "link": "https://www.heise.de/news/Surviving-Mars-Paradox-Ausbaustrategie-in-neuer-Version-erschienen-11073182.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/8/8/7/ss_2a6cbb8aa84b4183aeb819581e7b7e3f03266d4b-68960e766d7744d6.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/8/8/7/ss_2a6cbb8aa84b4183aeb819581e7b7e3f03266d4b-68960e766d7744d6.jpeg",
     "language": "de"
   },
   {
@@ -13476,7 +13556,7 @@
     "publicationDate": "2025-11-11T08:13:00.000Z",
     "summary": "Bei mobile.de muss für Inserate von E-Autos, die \"mit Batterie-Zertifikat\" eingetragen werden, nun auch tatsächlich das Zertifikat hochgeladen werden.",
     "link": "https://www.heise.de/news/Batteriezertifikate-fuer-Elektroautos-Manchmal-nun-Pflicht-bei-mobile-de-11072672.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/6/2/8/ZER05-1862d56146acd10d.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/6/2/8/ZER05-1862d56146acd10d.jpeg",
     "language": "de"
   },
   {
@@ -13526,7 +13606,7 @@
     "publicationDate": "2025-11-11T07:39:00.000Z",
     "summary": "In den BeeStation-NAS-Systemen von Synology haben IT-Forscher auf der Pwn2Own eine Sicherheitslücke gefunden. Updates stopfen sie.",
     "link": "https://www.heise.de/news/Synology-schliesst-kritische-Pwn2Own-Sicherheitsluecke-11073160.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/8/7/6/2025-11-11-Synology-Beestation-Prouctshot-ec_1_2x-Cropped-added_Background-64e5ba244adae8bf.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/8/7/6/2025-11-11-Synology-Beestation-Prouctshot-ec_1_2x-Cropped-added_Background-64e5ba244adae8bf.jpeg",
     "language": "de"
   },
   {
@@ -13546,7 +13626,7 @@
     "publicationDate": "2025-11-11T07:32:00.000Z",
     "summary": "Vor gut zehn Jahren verschwand E-Plus, es gab nur noch drei Handynetze. Inzwischen ist mit 1&1 wieder eine Nummer vier aufgetaucht.",
     "link": "https://www.heise.de/news/1-1-hat-seine-Handykunden-im-eigenen-Netz-ueberwiegend-mit-Vodafone-Roaming-11073132.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/8/6/2/1und1-64a1d4269d81ae9b.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/8/6/2/1und1-64a1d4269d81ae9b.jpeg",
     "language": "de"
   },
   {
@@ -13566,7 +13646,7 @@
     "publicationDate": "2025-11-11T07:31:00.000Z",
     "summary": "Oft scheitern IT-Projekte an unklaren Anforderungen und unrealistischen Deadlines. Strategien zur Rettung können entscheidende Verbesserungen bringen.",
     "link": "https://www.heise.de/hintergrund/Sanierungsfaelle-Erfolgreiche-Strategien-gegen-Projektchaos-11069022.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/2/7/7/7/shutterstock_1051949438-06eb6315e24ae78f.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/2/7/7/7/shutterstock_1051949438-06eb6315e24ae78f.jpeg",
     "language": "de"
   },
   {
@@ -13616,7 +13696,7 @@
     "publicationDate": "2025-11-11T07:00:00.000Z",
     "summary": "Die neue Long-Term-Support-Version .NET 10.0 bringt einige neue Features. Am 18. November zeigen erfahrene .NET-Entwickler die Änderungen im Detail.",
     "link": "https://www.heise.de/news/betterCode-NET-10-0-Jetzt-noch-Tickets-sichern-11072289.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/4/3/0/dotnet1920-1080-max-b193c19b9a76077a.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/4/3/0/dotnet1920-1080-max-b193c19b9a76077a.jpeg",
     "language": "de"
   },
   {
@@ -13646,7 +13726,7 @@
     "publicationDate": "2025-11-11T06:32:00.000Z",
     "summary": "Ryanair hat der ausgedruckten Bordkarte den Kampf angesagt. Passagiere sollen ihre Smartphones nutzen und auf die hauseigene App gezwungen werden.",
     "link": "https://www.heise.de/news/Ab-12-November-Ryanair-zwingt-Passagiere-auf-den-digitalen-Weg-11073108.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/8/5/0/ryan-air-d668fcab299e823a.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/8/5/0/ryan-air-d668fcab299e823a.jpeg",
     "language": "de"
   },
   {
@@ -13666,7 +13746,7 @@
     "publicationDate": "2025-11-11T06:20:00.000Z",
     "summary": "15 Jahre lang gehörte der Like-Button von Facebook zu einem festen Bestandteil des Internets. Nun steht das Ende an, am 10. Februar soll er...",
     "link": "https://www.heise.de/news/Nach-15-Jahren-Facebook-nimmt-Like-und-Kommentar-Buttons-offline-11073094.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/8/4/3/shutterstock_1076226410-42a49c1cf61bc55b.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/8/4/3/shutterstock_1076226410-42a49c1cf61bc55b.jpeg",
     "language": "de"
   },
   {
@@ -13676,7 +13756,7 @@
     "publicationDate": "2025-11-11T06:15:00.000Z",
     "summary": "Maschinenausfälle in der Landwirtschaft können die Ernte und die Existenz bedrohen. Smarte Sensoren und KI-gestützte Wartung sollen vorbeugen.",
     "link": "https://www.heise.de/news/Wenn-jede-Minute-zaehlt-Predictive-Maintenance-in-der-modernen-Landwirtschaft-11072991.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/7/8/8/shutterstock_2142155903-a06c3e6af0357c5e.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/7/8/8/shutterstock_2142155903-a06c3e6af0357c5e.jpeg",
     "language": "de"
   },
   {
@@ -13686,7 +13766,7 @@
     "publicationDate": "2025-11-11T06:14:00.000Z",
     "summary": "In der Klage der Gema gegen OpenAI geht es um neun Lieder, von \"Atemlos\" über \"Männer\" bis \"Über den Wolken\" – und um Umgang von KI mit...",
     "link": "https://www.heise.de/news/Entscheidung-erwartet-Was-darf-ChatGPT-mit-Songtexten-tun-11073104.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/8/4/8/shutterstock_1490653877-28f2bd96f52b704a.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/8/4/8/shutterstock_1490653877-28f2bd96f52b704a.jpeg",
     "language": "de"
   },
   {
@@ -13716,7 +13796,7 @@
     "publicationDate": "2025-11-11T05:56:00.000Z",
     "summary": "In Russland geht das mobile Internet der SIM-Karte Einreisender nicht mehr. Die Regierung erklärt nun, warum die Funktion beim Mobilfunk blockiert...",
     "link": "https://www.heise.de/news/Russland-blockiert-SIM-Karten-zum-Schutz-vor-Drohnen-11073098.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/8/4/5/shutterstock_1389198959-2f2c9a85706db6b2.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/8/4/5/shutterstock_1389198959-2f2c9a85706db6b2.jpeg",
     "language": "de"
   },
   {
@@ -13726,7 +13806,7 @@
     "publicationDate": "2025-11-11T05:15:00.000Z",
     "summary": "Rumble steigt ins Cloudgeschäft ein + Mindestalter für Social Media + Allianz von Europol und US-Tech + Fernzugriff auf Elektro-Busse + Google-Deal...",
     "link": "https://www.heise.de/news/Dienstag-Rumble-uebernimmt-Northern-Data-Debatte-um-Social-Media-ab-16-Jahren-11073052.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/8/2/2/Wochentage-source-sans-9972a3d5a5b48b9b.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/8/2/2/Wochentage-source-sans-9972a3d5a5b48b9b.png",
     "language": "de"
   },
   {
@@ -13746,7 +13826,7 @@
     "publicationDate": "2025-11-11T05:03:00.000Z",
     "summary": "Opera Neon soll dem Nutzer beim Surfen mit reichlich KI unter die Arme greifen. Doch wie gut funktioniert der agentische Browser?",
     "link": "https://www.heise.de/tests/Opera-Neon-ausprobiert-was-kann-der-agentische-Browser-10973645.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/5/1/3/Bildschirmfoto_2025-11-10_um_15-feedc6cc4acc199b.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/6/8/5/1/3/Bildschirmfoto_2025-11-10_um_15-feedc6cc4acc199b.png",
     "language": "de"
   },
   {
@@ -13756,7 +13836,7 @@
     "publicationDate": "2025-11-11T04:27:00.000Z",
     "summary": "Milliardenprofite aus Verbrechen wurden über das Samourai Wallet verschleiert. Einer der beiden Gründer kennt nun sein Urteil.",
     "link": "https://www.heise.de/news/Richterin-erkennt-keine-Reue-5-Jahre-Haft-fuer-Krypto-Mixer-11073066.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/8/2/9/shutterstock_1840858240-d713f9473317fbe1.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/8/2/9/shutterstock_1840858240-d713f9473317fbe1.jpeg",
     "language": "de"
   },
   {
@@ -13846,7 +13926,7 @@
     "publicationDate": "2025-11-10T22:10:38.000Z",
     "summary": "Ein ganzes Konsortium an Studios verhilft Sacred 2 zu einem Remaster: THQ Nordic hat das „deutsche Diablo“ aus dem Jahr 2008 komplett überarbeiten...",
     "link": "https://www.gameswirtschaft.de/news/sacred-2-remaster-release-111125/",
-    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/Sacred-2-Remaster-THQ-Nordic-111125.jpg",
+    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/Sacred-2-Remaster-THQ-Nordic-111125-150x150.jpg",
     "language": "de"
   },
   {
@@ -13896,7 +13976,7 @@
     "publicationDate": "2025-11-10T21:18:04.000Z",
     "summary": "Die Hamburger Mooneye Studios bringen am 27. November die Neuauflage des Debüts Lost Ember sowie die neue Erweiterung Legendary Souls für PC, PS5 und...",
     "link": "https://www.gameswirtschaft.de/news/lost-ember-rekindled-edition-mooneye-101125/",
-    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/Mooneye-Studios-Logo-2025-101125.jpg",
+    "imageUrl": "https://www.gameswirtschaft.de/wp-content/uploads/2025/11/Mooneye-Studios-Logo-2025-101125-150x150.jpg",
     "language": "de"
   },
   {
@@ -13906,7 +13986,7 @@
     "publicationDate": "2025-11-10T21:03:00.000Z",
     "summary": "Google kauft Ausgleichszertifikate für 200.000 Tonnen CO₂ von dem brasilianischen Wiederraufforstungs-Startup Mombak. Der Deal wird kurz vor der...",
     "link": "https://www.heise.de/news/Amazonas-Aufforstung-Google-Deal-mit-brasilianischem-Startup-11072971.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/7/7/8/shutterstock_1332125609-b7108051cdaaf569.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/7/7/8/shutterstock_1332125609-b7108051cdaaf569.jpeg",
     "language": "de"
   },
   {
@@ -13956,7 +14036,7 @@
     "publicationDate": "2025-11-10T20:15:00.000Z",
     "summary": "Truth-Social-Host Rumble steigt ins Cloudgeschäft ein und übernimmt die deutsche Cloudfirma Northern Data. Deren Aktionäre erhalten weniger als...",
     "link": "https://www.heise.de/news/Rumble-uebernimmt-deutschen-Cloudbetreiber-Northern-Data-11072950.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/7/6/7/shutterstock_388797439-a0339c76fca30eb7.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/7/6/7/shutterstock_388797439-a0339c76fca30eb7.jpeg",
     "language": "de"
   },
   {
@@ -14316,7 +14396,7 @@
     "publicationDate": "2025-11-10T17:00:00.000Z",
     "summary": "Produktionsketten sind wichtig, aber auch nicht alles: Mit \"Anno 117\" bedient die Serie alte Stärken und punktet vor allem mit einer wunderschönen...",
     "link": "https://www.heise.de/tests/Anno-117-im-Test-Rom-fuer-Zuckerbaecker-11072013.html?wt_mc=rss.red.ho.ho.atom.beitrag_plus.beitrag_plus",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/2/9/1/Anno_117__Ubisoft__4_-8d7240231bef470c.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/2/9/1/Anno_117__Ubisoft__4_-8d7240231bef470c.png",
     "language": "de"
   },
   {
@@ -14396,7 +14476,7 @@
     "publicationDate": "2025-11-10T16:22:00.000Z",
     "summary": "Die ESA entwickelt mit Solar Foods ein System zur Protein-Herstellung im All. Mikroben sollen aus Luft, Strom und Astronautenurin essbare Nährstoffe...",
     "link": "https://www.heise.de/news/ESA-will-Astronautennahrung-aus-Luft-und-Urin-herstellen-11072760.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/6/7/2/health___nutrition_Hero_2500x1500px-d870529d48d0af1e.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/6/7/2/health___nutrition_Hero_2500x1500px-d870529d48d0af1e.jpeg",
     "language": "de"
   },
   {
@@ -14406,7 +14486,7 @@
     "publicationDate": "2025-11-10T16:19:00.000Z",
     "summary": "Braucht es ein allgemeines Social-Media-Mindestalter? Dieser Frage widmete sich der Petitionsausschuss des Deutschen Bundestages am Montagmittag.",
     "link": "https://www.heise.de/hintergrund/Social-Media-ab-16-Jahren-Grosser-Bahnhof-fuer-Mindestalterforderung-11072772.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/6/7/8/Medien-21fa9cfc2c9627d8.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/6/7/8/Medien-21fa9cfc2c9627d8.jpeg",
     "language": "de"
   },
   {
@@ -14416,7 +14496,7 @@
     "publicationDate": "2025-11-10T16:18:00.000Z",
     "summary": "Laut BGH sind Online-Kurse ohne behördliche Zulassung nichtig. Die Regierungskoalition hat sich vorgenommen, das Fernunterrichtsschutzgesetz zu...",
     "link": "https://www.heise.de/news/Zertifikate-BGH-Urteil-bringt-Anbieter-von-Online-Lernkursen-auf-die-Barrikaden-11072820.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/7/0/2/shutterstock_2175850117-c2d7f3de10f59ccf.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/7/0/2/shutterstock_2175850117-c2d7f3de10f59ccf.jpeg",
     "language": "de"
   },
   {
@@ -14466,7 +14546,7 @@
     "publicationDate": "2025-11-10T15:49:00.000Z",
     "summary": "Statewatch beklagt eine unheilige Allianz zwischen Europol und US-Tech-Unternehmen, die massive Interessenkonflikte und Transparenzprobleme mit sich...",
     "link": "https://www.heise.de/news/Wie-Europol-mit-Microsoft-Palantir-Clearview-Co-auf-Kuschelkurs-geht-11072724.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/6/5/4/shutterstock_2514605451-02e57ab8743c4e51.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/6/5/4/shutterstock_2514605451-02e57ab8743c4e51.jpeg",
     "language": "de"
   },
   {
@@ -14486,7 +14566,7 @@
     "publicationDate": "2025-11-10T15:48:00.000Z",
     "summary": "Trotz Milliardenverlusten und KI-Blasen-Alarm steigen die Kurse weiter. KI ist das neue Manhattan-Projekt der USA, meint Hartmut Gieselmann.",
     "link": "https://www.heise.de/hintergrund/Kommentar-zur-KI-Blase-Sam-Altman-mimt-den-Oppenheimer-des-21-Jahrhunderts-10794233.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/0/8/1/8/shutterstock_2368436525-de4ee58261cf3bbc.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/6/0/8/1/8/shutterstock_2368436525-de4ee58261cf3bbc.jpeg",
     "language": "de"
   },
   {
@@ -14526,7 +14606,7 @@
     "publicationDate": "2025-11-10T15:34:00.000Z",
     "summary": "Apples nach wie vor umstrittenes neues Designsystem wird in immer mehr Anwendungen verwendet. Der Konzern hat nun eine Beispielsammlung für Devs...",
     "link": "https://www.heise.de/news/Apple-zeigt-wie-App-Entwickler-Liquid-Glass-einsetzen-11071320.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/3/9/3/2/cnnios26-c382aa580ec21b2b.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/3/9/3/2/cnnios26-c382aa580ec21b2b.png",
     "language": "de"
   },
   {
@@ -14536,7 +14616,7 @@
     "publicationDate": "2025-11-10T15:33:00.000Z",
     "summary": "Der KI-Boom lässt Rechenzentrumskapazitäten in Deutschland stark wachsen. Bis 2030 soll die Leistung um 70 Prozent steigen.",
     "link": "https://www.heise.de/news/KI-Boom-Rechenzentren-in-Deutschland-wachsen-rasant-11072620.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/6/0/2/rz_ha_zerts-75a72b3833f7883b.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/6/0/2/rz_ha_zerts-75a72b3833f7883b.png",
     "language": "de"
   },
   {
@@ -14576,7 +14656,7 @@
     "publicationDate": "2025-11-10T15:07:00.000Z",
     "summary": "Im Mystery-Abenteuer \"Rue Valley\" gerät die Zeit aus den Fugen und zwingt einen depressiven Autor dazu, sich seinen inneren Dämonen zu stellen. Ein...",
     "link": "https://www.heise.de/tests/Geheimtipp-Rue-Valley-im-Test-Immer-und-immer-und-immer-wieder-ein-Hit-11072556.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/5/7/0/Rue_Valley_-_Header-8b6927c3ff299b96.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/5/7/0/Rue_Valley_-_Header-8b6927c3ff299b96.jpeg",
     "language": "de"
   },
   {
@@ -14626,7 +14706,7 @@
     "publicationDate": "2025-11-10T14:40:00.000Z",
     "summary": "Der plattformübergreifende SSH-Client erhält umfangreiche Terminal-Anpassungen, SSH-Snippets und erweiterte Server-Überwachung.",
     "link": "https://www.heise.de/news/Termix-1-8-0-SSH-Client-mit-komplett-ueberarbeitetem-Server-Monitoring-11072277.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/4/2/4/termix-8fb4fc68a960475f.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/4/2/4/termix-8fb4fc68a960475f.png",
     "language": "de"
   },
   {
@@ -14706,7 +14786,7 @@
     "publicationDate": "2025-11-10T14:00:00.000Z",
     "summary": "Das \"KI-Update\" liefert werktäglich eine Zusammenfassung der wichtigsten KI-Entwicklungen.",
     "link": "https://www.heise.de/news/KI-Update-US-Jobless-Boom-Meta-will-bauen-DSGVO-in-Gefahr-Siri-mit-Gemini-11071844.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/2/0/5/heise_Podcasts_KIUpdate_ho_16_9-4969325966652080.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/2/0/5/heise_Podcasts_KIUpdate_ho_16_9-4969325966652080.jpeg",
     "language": "de"
   },
   {
@@ -14766,7 +14846,7 @@
     "publicationDate": "2025-11-10T13:08:00.000Z",
     "summary": "In Monsta FTP, einem Web-basierten FTP-Client, können Angreifer durch eine Schwachstelle Schadcode einschleusen und ausführen.",
     "link": "https://www.heise.de/news/Monsta-FTP-Kritische-Luecke-ermoeglicht-Angreifern-Schadcode-Ausfuehrung-11072415.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/4/9/7/shutterstock_1378498490-65e3a04582fa4edf.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/4/9/7/shutterstock_1378498490-65e3a04582fa4edf.jpeg",
     "language": "de"
   },
   {
@@ -14806,7 +14886,7 @@
     "publicationDate": "2025-11-10T13:00:00.000Z",
     "summary": "Erfahren Sie, wie künstliche Intelligenz in der IT-Sicherheit eingesetzt werden kann: Überblick, Methoden, Werkzeuge und praktische Anwendung.",
     "link": "https://www.heise.de/news/iX-Workshop-KI-Methoden-und-Werkzeuge-fuer-die-IT-Sicherheit-10966373.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/6/8/2/0/5/it-security_kuenstliche_intelligenz_fuer_effiziente_verteidigungsstrategien_ticker-1920x1080px-739e6c9efabcfcb0.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/6/8/2/0/5/it-security_kuenstliche_intelligenz_fuer_effiziente_verteidigungsstrategien_ticker-1920x1080px-739e6c9efabcfcb0.png",
     "language": "de"
   },
   {
@@ -14866,7 +14946,7 @@
     "publicationDate": "2025-11-10T12:28:00.000Z",
     "summary": "Der japanische Spielekonzern betreibt schon seit 2020 in Japan eine eigene Shopping-App. Die landet nun auch im Westen – inklusive EU.",
     "link": "https://www.heise.de/news/iOS-und-Android-Neue-Nintendo-App-erlaubt-auch-Shopping-11070779.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/3/6/6/4/nintios-68301dcfd6f1b988.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/3/6/6/4/nintios-68301dcfd6f1b988.png",
     "language": "de"
   },
   {
@@ -14936,7 +15016,7 @@
     "publicationDate": "2025-11-10T12:01:00.000Z",
     "summary": "Nach dem russischen Angriff auf die Ukraine wurde das Tierbeobachtungsprogramm Icarus beendet. Die Max-Planck-Gesellschaft reaktiviert es, mit...",
     "link": "https://www.heise.de/news/Tierbeobachtung-aus-dem-All-Neuer-Icarus-Empfaenger-wird-ins-All-geschossen-11072365.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/4/6/9/hp-bcfb97919524d623.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/4/6/9/hp-bcfb97919524d623.jpeg",
     "language": "de"
   },
   {
@@ -14996,7 +15076,7 @@
     "publicationDate": "2025-11-10T11:46:00.000Z",
     "summary": "10 Euro im Monat kosten Apples Sportvideos. Intern gibt es angeblich Erwägungen, die Zukunft von Fitness+ zu überdenken.",
     "link": "https://www.heise.de/news/Fitness-Dienst-bei-Apple-Zu-viele-Kuendigungen-zu-wenig-Kunden-11071674.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/1/1/8/applefitness-0e3247096cc24be6.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/1/1/8/applefitness-0e3247096cc24be6.png",
     "language": "de"
   },
   {
@@ -15016,7 +15096,7 @@
     "publicationDate": "2025-11-10T11:40:00.000Z",
     "summary": "Experten zeigen, wie KI Machtverhältnisse verstärkt und soziale Ungleichheit vertieft. Regulierung könne helfen.",
     "link": "https://www.heise.de/news/Philosoph-KI-ist-kein-Werkzeug-sondern-ein-Machtinstrument-11071893.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/2/3/0/Mu__hlhoff-da7be8e05e1e52ea.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/2/3/0/Mu__hlhoff-da7be8e05e1e52ea.jpeg",
     "language": "de"
   },
   {
@@ -15066,7 +15146,7 @@
     "publicationDate": "2025-11-10T11:25:00.000Z",
     "summary": "Wie Product Owner ihren Einfluss auf die Retrospektive bewusst nutzen und damit Vertrauen und Teamwirksamkeit fördern, erklärt Bernd Joussen in...",
     "link": "https://www.heise.de/blog/Die-Produktwerker-Welchen-Einfluss-auf-die-Retrospektive-hat-ein-Product-Owner-11072217.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/3/9/4/produktwerker-d0b11786e2ca9669.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/3/9/4/produktwerker-d0b11786e2ca9669.png",
     "language": "de"
   },
   {
@@ -15086,7 +15166,7 @@
     "publicationDate": "2025-11-10T11:12:00.000Z",
     "summary": "Behörden in Großbritannien prüfen, ob chinesische Elektrobusse per Fernzugriff deaktiviert werden können. Die Möglichkeit war in Norwegen entdeckt...",
     "link": "https://www.heise.de/news/Untersuchung-Elektrobusse-in-Grossbritannien-aus-China-abschaltbar-11072255.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/4/1/3/bb1a0b7a732a62a68210118c90bf8e0124668bac-6240x4160-bb5e8a1a85567a2e.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/4/1/3/bb1a0b7a732a62a68210118c90bf8e0124668bac-6240x4160-bb5e8a1a85567a2e.jpeg",
     "language": "de"
   },
   {
@@ -15096,7 +15176,7 @@
     "publicationDate": "2025-11-10T11:03:00.000Z",
     "summary": "Die Multimediabox lässt sich bald einfacher an andere Zuseher anpassen. Apple überarbeitet die Verwaltung von Profilen und verlangt keine...",
     "link": "https://www.heise.de/news/tvOS-26-2-Erleichtertes-Management-von-Profilen-fuer-Kinder-und-Gaeste-11071678.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/1/2/0/tvos_26-768a2e5ead9f6acf.png",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/1/2/0/tvos_26-768a2e5ead9f6acf.png",
     "language": "de"
   },
   {
@@ -15116,7 +15196,7 @@
     "publicationDate": "2025-11-10T11:00:00.000Z",
     "summary": "Watchguard versieht die Firebox-Firewalls mit Standardpasswörtern. Angreifer können sich dadurch angeblich Admin-Rechte verschaffen.",
     "link": "https://www.heise.de/news/Watchguard-Firebox-Gefaehrdung-durch-Standardpasswort-fuer-Admin-11072045.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/4/3/0/7/shutterstock_691484410-d78d0c001ca0635f.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/4/3/0/7/shutterstock_691484410-d78d0c001ca0635f.jpeg",
     "language": "de"
   },
   {
@@ -15126,7 +15206,7 @@
     "publicationDate": "2025-11-10T11:00:00.000Z",
     "summary": "Die OOP by heise stellt Wandel in den Mittelpunkt: Im Februar geht es um Softwareentwicklung, -architektur, Agilität und KI. Frühbucherrabatt bis 21....",
     "link": "https://www.heise.de/news/OOP-by-heise-in-Muenchen-Konferenz-ruft-zum-mutigen-Umgang-mit-Veraenderung-auf-11067135.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
-    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/1/8/1/6/Tickermeldung_OOP_2026-9e84d3a73531403f.jpeg",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/1/8/1/6/Tickermeldung_OOP_2026-9e84d3a73531403f.jpeg",
     "language": "de"
   },
   {
@@ -19126,7 +19206,7 @@
     "publicationDate": "2025-10-24T12:33:09.000Z",
     "summary": "Electronic Arts arbeitet mit Stability AI an neuen Entwicklungstools - dabei sehen viele Spieler den Einsatz von KI in Games eher skeptisch....",
     "link": "https://www.golem.de/news/spielebranche-ea-und-krafton-oeffnen-die-studiotueren-fuer-ki-2510-201517.html",
-    "imageUrl": "https://www.golem.de/2510/201517-541890-541887.jpg",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
     "language": "de"
   },
   {
@@ -19156,7 +19236,7 @@
     "publicationDate": "2025-10-24T09:03:10.000Z",
     "summary": "Ein Skin für Battlefield 6 führt vor dem Start der ersten Season zu Kritik. Spieler drohen sogar mit Boykott in Matches. (Battlefield, Electronic...",
     "link": "https://www.golem.de/news/keine-wiederbelebungen-battlefield-6-spieler-protestieren-gegen-bunte-skin-2510-201499.html",
-    "imageUrl": "https://www.golem.de/2510/201499-541780-541777.jpg",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
     "language": "de"
   },
   {
@@ -19196,7 +19276,7 @@
     "publicationDate": "2025-10-23T14:00:07.000Z",
     "summary": "Eine interne Vorgabe von Finanzchefin Amy Hood erklärt womöglich viele der jüngsten Entscheidungen rund um Spielepreise und den Xbox Game Pass....",
     "link": "https://www.golem.de/news/medienbericht-microsoft-zwingt-xbox-sparte-zu-30-prozent-gewinnmarge-2510-201476.html",
-    "imageUrl": "https://www.golem.de/2510/201476-541654-541651.jpg",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
     "language": "de"
   },
   {
