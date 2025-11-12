@@ -1,5 +1,55 @@
 [
   {
+    "id": "https://playfront.de/?p=1147022",
+    "title": "Steam Machine vs Xbox Next: Microsofts Phil Spencer begrüßt Valves neue Mini-Konsole",
+    "source": "PlayFront",
+    "publicationDate": "2025-11-12T19:54:03.000Z",
+    "summary": "Phil Spencer lobt Valves neue Steam Machine – ein kompakter PC für den TV. Warum Microsoft das als gutes Zeichen für die Zukunft des Gamings sieht.",
+    "link": "https://playfront.de/steam-machine-vs-xbox-next-microsofts-phil-spencer-begruesst-valves-neue-mini-konsole/",
+    "imageUrl": "https://cdn.playfront.de/uploads/2025/11/steam-machine-valve.webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.play3.de/?p=785590",
+    "title": "Where Winds Meet: Gratis-Highlight oder überambitioniertes Chaos? Das sagen die ersten Tests",
+    "source": "Play3",
+    "publicationDate": "2025-11-12T19:53:45.000Z",
+    "summary": "Am kommenden Freitag erscheint „Where Winds Meet“ vom chinesischen Everstone Studio für die PS5 und den PC, nachdem der überaus […] Der Beitrag Where...",
+    "link": "https://www.play3.de/2025/11/12/where-winds-meet-gratis-highlight-oder-ueberambitioniertes-chaos-das-sagen-die-ersten-tests/",
+    "imageUrl": "https://www.play3.de/wp-content/uploads/2025/11/Where-Winds-Meet-2.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "4b3iCjd23H4c6iHFZckzpC",
+    "title": "Forgotten Realms designer can't get over the fact that someone out there has a PhD in the D&D setting he created: \"You do know I make this all up, you know?\"",
+    "source": "GamesRadar+",
+    "publicationDate": "2025-11-12T19:52:57.000Z",
+    "summary": "How much charisma do you think that dissertation needed",
+    "link": "https://www.gamesradar.com/games/rpg/forgotten-realms-designer-cant-get-over-the-fact-that-someone-out-there-has-a-phd-in-the-d-and-d-setting-he-created-you-do-know-i-make-this-all-up-you-know/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/GabYxU3n3HKCaH7qbuFVyF-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.xboxdynasty.de/?p=1201864",
+    "title": "Steam: Neue Steam Machine-Konsole, Steam Frame VR und mehr im Jahr 2026",
+    "source": "XboxDynasty",
+    "publicationDate": "2025-11-12T19:52:18.000Z",
+    "summary": "Valve kündigt neue Steam-Hardware für 2026 an – Controller, Steam Machine und Steam Frame VR im Fokus!",
+    "link": "https://www.xboxdynasty.de/news/steam/neue-steam-machine-konsole-steam-frame-vr-und-mehr-im-jahr-2026/",
+    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2018/10/steam.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "yGMwiq3bZxCPWpv3KubRJ5",
+    "title": "\"We would rather cut off our own arms\": Indie devs react to Arc Raiders CEO saying people should assume everyone's using generative AI these days",
+    "source": "GamesRadar+",
+    "publicationDate": "2025-11-12T19:48:24.000Z",
+    "summary": "\"We don't use generative AI at Strange Scaffold and I can confirm that a lot of other studios are not—whether indie or AAA.\"",
+    "link": "https://www.gamesradar.com/games/third-person-shooter/we-would-rather-cut-off-our-own-arms-indie-devs-react-to-arc-raiders-ceo-saying-people-should-assume-everyones-using-generative-ai-these-days/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/wZ4gGusWM5ZhCvdEA5mHxC-1280-80.jpg",
+    "language": "en"
+  },
+  {
     "id": "https://www.computerbase.de/news/gaming/analogue-3d-nintendo-64-retro-konsole-wird-in-kuerze-ausgeliefert.95025/",
     "title": "Analogue 3D: Nintendo-64-Retro-Konsole wird in Kürze ausgeliefert",
     "source": "ComputerBase",
@@ -47,6 +97,16 @@
     "summary": "SteamCube.Rumours have been rumbling about Valve — the Washington-based developer responsible for creating Steam, but for also bringing us some of...",
     "link": "https://www.nintendolife.com/news/2025/11/random-steams-brand-new-game-console-sure-looks-awfully-familiar",
     "imageUrl": "https://images.nintendolife.com/284a11b641d01/large.jpg",
+    "language": "en"
+  },
+  {
+    "id": "1100-6536159",
+    "title": "Arc Raiders Adds Duo-Queue Matchmaking",
+    "source": "GameSpot",
+    "publicationDate": "2025-11-12T19:25:00.000Z",
+    "summary": "Less than two weeks after its official launch, Arc Raiders now has duo matchmaking. Developer Embark Studios quietly tested the feature before fully...",
+    "link": "https://www.gamespot.com/articles/arc-raiders-adds-duo-queue-matchmaking/1100-6536159/?ftag=CAD-01-10abi2f",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1837/18375603/4601184-arcraidersduos.jpg",
     "language": "en"
   },
   {
@@ -17606,7 +17666,7 @@
     "publicationDate": "2025-11-06T11:15:06.000Z",
     "summary": "Ungewöhnlich offene Kritik: Kingdom-Come-Deliverance-2-Macher Daniel Vávra hat The Outer Worlds 2 für mangelnde Innovation gerügt. (Kingdom Come...",
     "link": "https://www.golem.de/news/daniel-vavra-kcd2-entwickler-kritisiert-the-outer-worlds-2-2511-201904.html",
-    "imageUrl": "https://www.golem.de/2511/201904-544032-544029.jpg",
+    "imageUrl": "https://placehold.co/600x400/374151/d1d5db?text=Golem",
     "language": "de"
   },
   {
