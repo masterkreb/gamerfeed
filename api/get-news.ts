@@ -93,7 +93,7 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
             // 1. Prioritize YouTube iframe embeds to get high-quality thumbnails
             const youtubeIframeMatch = content.match(/<iframe[^>]+src=["']https?:\/\/(?:www\.)?youtube\.com\/embed\/([\w-]{11})[^"']*["']/i);
             if (youtubeIframeMatch && youtubeIframeMatch[1]) {
-                imageUrl = `https://img.ytimg.com/vi/${youtubeIframeMatch[1]}/maxresdefault.jpg`;
+                imageUrl = `https://img.ytimg.com/vi/${youtubeIframeMatch[1]}/hqdefault.jpg`;
             }
 
             // 2. If no iframe, fall back to searching for <img> tags
@@ -135,7 +135,7 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
                         break;
                     } else if (!youtubeFallback) {
                         // Also try to get a higher quality version from img tags
-                        youtubeFallback = src.replace('/default.jpg', '/maxresdefault.jpg').replace('/sddefault.jpg', '/maxresdefault.jpg').replace('/hqdefault.jpg', '/maxresdefault.jpg');
+                        youtubeFallback = src.replace('/default.jpg', '/hqdefault.jpg').replace('/sddefault.jpg', '/hqdefault.jpg').replace('/maxresdefault.jpg', '/hqdefault.jpg');
                     }
                 }
 

@@ -220,7 +220,7 @@ function parseRssXml(xmlString, feed) {
                 // 5a. Prioritize YouTube iframe embeds
                 const youtubeIframeMatch = contentText.match(/<iframe[^>]+src=["']https?:\/\/(?:www\.)?youtube\.com\/embed\/([\w-]{11})[^"']*["']/i);
                 if (youtubeIframeMatch && youtubeIframeMatch[1]) {
-                    imageUrl = `https://img.ytimg.com/vi/${youtubeIframeMatch[1]}/maxresdefault.jpg`;
+                    imageUrl = `https://img.ytimg.com/vi/${youtubeIframeMatch[1]}/hqdefault.jpg`;
                 } else {
                     // 5b. Fallback to parsing content for <img> tags
                     try {
@@ -258,7 +258,7 @@ function parseRssXml(xmlString, feed) {
                                 bestImg = src;
                                 break; // Found a good non-youtube image
                             } else if (!youtubeFallback) {
-                                youtubeFallback = src.replace('/default.jpg', '/maxresdefault.jpg').replace('/sddefault.jpg', '/maxresdefault.jpg').replace('/hqdefault.jpg', '/maxresdefault.jpg');
+                                youtubeFallback = src.replace('/default.jpg', '/hqdefault.jpg').replace('/sddefault.jpg', '/hqdefault.jpg').replace('/maxresdefault.jpg', '/hqdefault.jpg');
                             }
                         }
 
