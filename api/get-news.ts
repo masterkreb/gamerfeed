@@ -565,25 +565,37 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
 
     if (imageUrl) {
         try {
+            // Start with a valid, absolute URL
             let processedUrl = new URL(imageUrl, item.link).href;
             const urlObject = new URL(processedUrl);
 
+            // Source-specific optimizations
+            const hostname = urlObject.hostname;
+            const feedName = feed.name;
+
             // GameStar & GamePro (cgames.de)
-            if (urlObject.hostname.includes('cgames.de')) {
-                // Replace resolution identifiers like /800/ with /original/ for max quality
+            if (hostname.includes('cgames.de')) {
                 processedUrl = processedUrl.replace(/\/(\d{3,4})\//, '/original/');
             }
+            // PC Games, GameZone etc. (computec.de network)
+            else if (hostname.includes('pcgames.de') || hostname.includes('gamezone.de') || hostname.includes('videogameszone.de')) {
+                // Remove width/height query parameters to get original image
+                urlObject.searchParams.delete('w');
+                urlObject.searchParams.delete('h');
+                processedUrl = urlObject.toString();
+            }
             // GamesWirtschaft (WordPress standard)
-            else if (feed.name.includes('GamesWirtschaft')) {
-                // Remove WP image size suffixes like "-150x150"
+            else if (feedName === 'GamesWirtschaft') {
                 processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|webp)$)/i, '');
             }
             // Nintendo Life
-            else if (urlObject.hostname.includes('nintendolife.com')) {
+            else if (hostname.includes('nintendolife.com')) {
                 processedUrl = processedUrl.replace('small.jpg', 'large.jpg');
             }
+            // IMPORTANT: No rule for GameSpot, it passes through unmodified.
 
             return { imageUrl: processedUrl, needsScraping: false };
+
         } catch (e) {
             console.warn('Error processing image URL:', e);
             // Fallback to trying to create a valid URL without optimizations
