@@ -232,7 +232,8 @@ function parseRssXml(xmlString, feed) {
                             src.includes('placeholder.svg') ||
                             src.includes('cpx.golem.de') ||
                             src.includes('feedburner.com') ||
-                            src.includes('feedsportal.com')
+                            src.includes('feedsportal.com') ||
+                            src.includes('gravatar.com')
                         ) {
                             continue;
                         }
