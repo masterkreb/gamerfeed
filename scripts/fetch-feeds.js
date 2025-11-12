@@ -272,15 +272,17 @@ function parseRssXml(xmlString, feed) {
                 const hostname = new URL(processedUrl).hostname;
                 const feedName = feed.name;
 
-                // GameStar & GamePro (cgames.de)
-                if (hostname.includes('cgames.de')) {
-                    // Using /1600/ instead of /original/ as a safer high-res option to prevent broken links.
-                    processedUrl = processedUrl.replace(/\/(\d{3,4})\//, '/1600/');
-                }
-                // PC Games, GameZone, Video Games Zone (computec.de backend)
-                else if (['PC Games', 'GameZone', 'Video Games Zone'].includes(feedName)) {
-                    // This pattern removes low-resolution URL parameters to fetch the original image.
-                    processedUrl = processedUrl.replace(/\?w=\d+(&h=\d+)?/i, '');
+                // PC Games, GameZone, Video Games Zone (and affiliates like GameStar) often use URL params for resolution.
+                // This is a safe optimization that removes them to get the original image.
+                if (['PC Games', 'GameZone', 'Video Games Zone', 'GameStar', 'GamePro'].includes(feedName)) {
+                    try {
+                        const url = new URL(processedUrl);
+                        url.searchParams.delete('w');
+                        url.searchParams.delete('h');
+                        processedUrl = url.toString();
+                    } catch (e) {
+                        console.warn(`Could not parse image URL for optimization: ${processedUrl}`);
+                    }
                 }
                 // GamesWirtschaft (WordPress standard)
                 else if (feedName === 'GamesWirtschaft') {
