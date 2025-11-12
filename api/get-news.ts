@@ -512,7 +512,7 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
     let imageUrl: string | undefined;
 
     // More robust extraction order
-    if (item['media:content']?.url && item['media:content']?.medium === 'image') {
+    if (item['media:content']?.url && (item['media:content']?.medium === 'image' || item['media:content']?.type?.startsWith('image'))) {
         imageUrl = item['media:content'].url;
     } else if (item.enclosure?.link && item.enclosure?.type?.startsWith('image')) {
         imageUrl = item.enclosure.link;
@@ -568,9 +568,7 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
             let processedUrl = new URL(imageUrl, item.link).href;
             const urlObject = new URL(processedUrl);
 
-            if (urlObject.hostname.includes('gamespot.com')) {
-                processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
-            } else if (urlObject.hostname.includes('cgames.de') || feed.name.includes('GameStar') || feed.name.includes('GamePro')) {
+            if (urlObject.hostname.includes('cgames.de') || feed.name.includes('GameStar') || feed.name.includes('GamePro')) {
                 processedUrl = processedUrl.replace(/\/(\d{2,4})\//, '/800/');
             } else if (feed.name.includes('GamesWirtschaft')) {
                 processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)$)/i, '');
@@ -639,7 +637,11 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
                 guid: guidMatch ? guidMatch[1].trim() : link,
                 description: descMatch ? descMatch[1].trim() : '',
                 content: contentMatch ? contentMatch[1].trim() : '',
-                'media:content': { url: mediaContentMatch ? mediaContentMatch[1] : null, medium: 'image' },
+                'media:content': {
+                    url: mediaContentMatch ? mediaContentMatch[1] : null,
+                    medium: 'image',
+                    type: mediaContentMatch ? (mediaContentMatch[0].match(/type=["']([^"']+)["']/i)?.[1] || null) : null
+                },
                 'media:thumbnail': { url: mediaThumbnailMatch ? mediaThumbnailMatch[1] : null },
                 enclosure: enclosureMatch ? {
                     link: enclosureMatch[1],

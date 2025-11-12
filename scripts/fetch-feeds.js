@@ -795,9 +795,6 @@ function parseRssXml(xmlString, feed) {
                 if (urlObject.hostname.includes('giantbomb.com')) {
                     processedUrl = processedUrl.replace(/\/[^\/]+_(\d+)\.(jpg|jpeg|png)/, '/original.$2');
                 }
-                else if (urlObject.hostname.includes('gamespot.com')) {
-                    processedUrl = processedUrl.replace(/\/uploads\/[^\/]+\//, '/uploads/original/');
-                }
                 else if (feed.name.includes('GamesWirtschaft') || urlObject.hostname.includes('gameswirtschaft.de')) {
                     processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)($|\?))/i, '');
                 }
