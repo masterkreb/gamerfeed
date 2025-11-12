@@ -139,9 +139,8 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
             const hostname = new URL(processedUrl).hostname;
             const feedName = feed.name;
 
-            // PC Games, GameZone, Video Games Zone (and affiliates like GameStar) often use URL params for resolution.
-            // This is a safe optimization that removes them to get the original image.
-            if (['PC Games', 'GameZone', 'Video Games Zone', 'GameStar', 'GamePro'].includes(feedName)) {
+            // PC Games, GameZone, Video Games Zone use URL params for resolution.
+            if (['PC Games', 'GameZone', 'Video Games Zone'].includes(feedName)) {
                 try {
                     const url = new URL(processedUrl);
                     url.searchParams.delete('w');
@@ -150,6 +149,10 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
                 } catch (e) {
                     console.warn(`Could not parse image URL for optimization: ${processedUrl}`);
                 }
+            }
+            // GameStar and GamePro use a path segment for resolution, e.g., /800/.
+            else if (['GameStar', 'GamePro'].includes(feedName) && hostname.includes('cgames.de')) {
+                processedUrl = processedUrl.replace(/(images\/(gamestar|gamepro)\/)(\d+)(\/.*)/i, '$11200$4');
             }
             // GamesWirtschaft (WordPress standard)
             else if (feedName === 'GamesWirtschaft') {
