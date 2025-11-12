@@ -522,8 +522,6 @@
 //     }
 // }
 //
-// fetchArticles();
-
 // scripts/fetch-feeds.js
 // Fetches RSS feeds and saves to public/news-cache.json
 // WITH image optimization and scraping support
