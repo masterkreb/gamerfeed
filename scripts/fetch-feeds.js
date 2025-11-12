@@ -694,19 +694,25 @@ function parseRssXml(xmlString, feed) {
             imageUrl = enclosure.getAttribute('url');
         }
 
-        // 2. media:content (using getElementsByTagName for namespace compatibility)
+        // 2. media:content (iterating children to avoid namespace issues)
         if (!imageUrl) {
-            const mediaContentNodes = node.getElementsByTagName('media:content');
-            const mediaContent = Array.from(mediaContentNodes).find(el => {
-                const medium = el.getAttribute('medium');
-                const type = el.getAttribute('type');
-                // Check if medium is 'image' OR if type starts with 'image/'
-                return medium === 'image' || (type && type.startsWith('image/'));
-            });
-            if (mediaContent) {
-                imageUrl = mediaContent.getAttribute('url');
+            const children = node.children;
+            for (let i = 0; i < children.length; i++) {
+                const child = children[i];
+                if (child.tagName.toLowerCase() === 'media:content') {
+                    const type = child.getAttribute('type');
+                    const medium = child.getAttribute('medium');
+                    if (medium === 'image' || (type && type.startsWith('image/'))) {
+                        const url = child.getAttribute('url');
+                        if (url) {
+                            imageUrl = url;
+                            break; // Found it, stop searching
+                        }
+                    }
+                }
             }
         }
+
 
         // 3. media:thumbnail (using getElementsByTagName)
         if (!imageUrl) {
