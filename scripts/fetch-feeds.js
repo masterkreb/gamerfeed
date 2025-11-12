@@ -96,7 +96,7 @@ async function getOgImageFromUrl(url) {
 // === PARSE RSS/ATOM FEED ===
 function parseRssXml(xmlString, feed) {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(xmlString, "application/xml");
+    const doc = parser.parseFromString(xmlString, "text/xml");
     const errorNode = doc.querySelector("parsererror");
     if (errorNode) {
         console.error(`XML Parsing Error for ${feed.url}:`, errorNode.textContent);

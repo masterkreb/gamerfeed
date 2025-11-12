@@ -33,60 +33,63 @@ export const HealthLegendTab: React.FC = () => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <section className="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
-                <h3 className="text-xl font-bold mb-4">Status Icon Legend</h3>
+                <h3 className="text-xl font-bold mb-4">Backend Status Legend</h3>
+                <p className="text-sm text-slate-500 dark:text-zinc-400 mb-4">
+                    The health status is now based entirely on the result of the last automated backend script (GitHub Action). It reflects what is actually live on the site, not a live check from your browser.
+                </p>
                 <div className="space-y-4">
                     <LegendItem
                         icon={<CheckCircleIcon className="w-6 h-6 text-green-500" />}
                         title="OK"
-                        description="The feed is present in the live news cache, the URL was reached, the XML parsed, and the first image was accessible."
+                        description="The backend script successfully fetched the feed, AND its articles are present in the live `news-cache.json` file. The feed is working correctly."
                     />
                     <LegendItem
                         icon={<WarningIcon className="w-6 h-6 text-amber-500" />}
                         title="Warning"
-                        description="A non-critical issue. The most common reason is the feed was not found in the live news cache (indicating a failure in the automated GitHub Action). It can also mean the feed is present but empty, or an article image couldn't be found."
+                        description="The backend script successfully fetched the feed, but NO articles from it are in the live cache. This usually means the feed was valid but empty, or all its articles were too old to be included."
                     />
                     <LegendItem
                         icon={<XCircleIcon className="w-6 h-6 text-red-500" />}
                         title="Error"
-                        description="A critical failure occurred. This could be an unreachable feed URL, broken XML, or a failure to load the news cache for verification. The details column provides more specific information."
+                        description="A critical failure occurred during the backend process. This means the script could not fetch or parse the feed XML. The details column provides the specific error message from the server."
                     />
                     <LegendItem
                         icon={<LoadingSpinner className="w-5 h-5 text-indigo-500" />}
                         title="Checking"
-                        description="A health check is currently in progress for this feed."
+                        description="The admin panel is currently fetching the latest status reports from the backend-generated files (`feed-health-status.json` and `news-cache.json`)."
                     />
                     <LegendItem
                         icon={<QuestionMarkCircleIcon className="w-6 h-6 text-slate-400" />}
                         title="Unknown"
-                        description="The health status for this feed has not been checked yet."
+                        description="The health status for this feed has not been checked yet, or the status report could not be loaded."
                     />
                 </div>
             </section>
             <section className="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
-                <h3 className="text-xl font-bold mb-4">Common Error Explanations</h3>
+                <h3 className="text-xl font-bold mb-4">Common Backend Error Explanations</h3>
                 <p className="text-sm text-slate-500 dark:text-zinc-400 mb-4">
-                    When a feed or image check fails, it often returns a standard HTTP status code. Here are some of the most common ones you might see in the 'Details' column.
+                    When a feed check fails, it's often due to an issue with the feed provider's server. The backend script will report these issues. Here are some common ones you might see.
                 </p>
                 <div className="space-y-4">
                     <ErrorCodeItem
-                        code="403 Forbidden"
-                        meaning="Access Denied"
-                        details="The server understood the request but refuses to authorize it. This often happens when a feed or image host has hotlink protection or requires a specific user agent to be accessed."
+                        code="Failed to parse XML"
+                        meaning="Invalid Feed Format"
+                        details="The backend was able to download the feed, but the content was not valid XML. This often indicates the feed URL is broken or pointing to a non-feed webpage."
                     />
                     <ErrorCodeItem
-                        code="404 Not Found"
-                        meaning="Resource Does Not Exist"
-                        details="The requested feed URL or image URL does not exist on the server. The link is likely broken or has been moved."
+                        code="Fetch failed"
+                        meaning="Unreachable URL"
+                        details="The backend server could not reach the feed's URL. This could be due to a server timeout, a DNS issue, or the feed's server actively blocking requests from the script's host."
                     />
                     <ErrorCodeItem
-                        code="500 Internal Server Error"
-                        meaning="Server Problem"
-                        details="Something went wrong on the website's server. This is not a problem with our app, but an issue with the source itself. It's usually temporary."
+                        code="Status 403 / 404 / 500"
+                        meaning="Server Errors"
+                        details="The feed's server responded with a standard HTTP error code. 403 means access is forbidden, 404 means the URL does not exist, and 500+ errors indicate a problem on the source's server."
                     />
                     <ErrorCodeItem
-                        code="CORS Error"
-                        meaning="Cross-Origin Request Blocked"
-                        details="The browser blocked the request for security reasons. Our proxy services attempt to fix this, but some servers are too restrictive. If all proxies fail with CORS errors, the feed cannot be checked."
+                        code="Not processed"
+                        meaning="Script Failure"
+                        details="If a feed is marked as not processed, it means the entire backend script may have failed before it could even attempt to fetch this specific feed. Check the GitHub Action logs for fatal errors."
                     />
                 </div>
             </section>

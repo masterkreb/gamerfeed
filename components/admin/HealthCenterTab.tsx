@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import type { FeedSource } from '../../types';
 import type { FeedHealth } from './AdminPanel';
-import { HealthState } from './healthService';
+// FIX: Correctly import HealthState as a type. The original error "not a module" is resolved by adding content to healthService.ts.
+import type { HealthState } from './healthService';
 import {
-    CheckCircleIcon, XCircleIcon, QuestionMarkCircleIcon, LoadingSpinner, ResetIcon, WarningIcon, ChevronDownIcon, ChevronUpIcon
+    CheckCircleIcon, XCircleIcon, QuestionMarkCircleIcon, LoadingSpinner, WarningIcon, ChevronDownIcon, ChevronUpIcon
 } from '../Icons';
 
 // --- Types ---
@@ -63,7 +64,6 @@ const SortableHeader: React.FC<{
 interface HealthCenterTabProps {
     feeds: FeedSource[];
     feedHealth: FeedHealth;
-    onCheckHealth: (feed: FeedSource) => void;
     onCheckAll: () => void;
     isCheckingAll: boolean;
 }
@@ -71,7 +71,6 @@ interface HealthCenterTabProps {
 export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                                                                     feeds,
                                                                     feedHealth,
-                                                                    onCheckHealth,
                                                                     onCheckAll,
                                                                     isCheckingAll
                                                                 }) => {
@@ -125,12 +124,12 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
         <section className="bg-white dark:bg-zinc-800 rounded-lg shadow overflow-hidden">
             <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-slate-200 dark:border-zinc-700">
                 <div className="text-center sm:text-left">
-                    <h2 className="text-lg font-semibold">Feed Health Diagnostics</h2>
-                    <p className="text-sm text-slate-500 dark:text-zinc-400">Review the status of each feed and its first image.</p>
+                    <h2 className="text-lg font-semibold">Backend Feed Status</h2>
+                    <p className="text-sm text-slate-500 dark:text-zinc-400">Shows the result of the last automated backend fetch (GitHub Action).</p>
                 </div>
                 <button onClick={onCheckAll} disabled={isCheckingAll} className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 text-slate-700 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-wait">
                     {isCheckingAll ? <LoadingSpinner className="w-5 h-5"/> : <CheckCircleIcon className="w-5 h-5"/>}
-                    <span>Check All Feeds</span>
+                    <span>Refresh Backend Status</span>
                 </button>
             </div>
 
@@ -142,7 +141,6 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                         <SortableHeader label="Name" sortKey="name" sortConfig={sortConfig} requestSort={requestSort} className="w-1/4"/>
                         <SortableHeader label="Status" sortKey="status" sortConfig={sortConfig} requestSort={requestSort} className="w-40"/>
                         <SortableHeader label="Details" sortKey="details" sortConfig={sortConfig} requestSort={requestSort} className="w-1/2"/>
-                        <th scope="col" className="p-4 w-28 text-right">Actions</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -151,11 +149,6 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                             <td className="p-4 font-medium truncate">{feed.name}</td>
                             <td className="p-4"><HealthStatusCell state={feedHealth[feed.id]} /></td>
                             <td className="p-4 text-slate-500 dark:text-zinc-400">{feedHealth[feed.id]?.detail || 'N/A'}</td>
-                            <td className="p-4 text-right">
-                                <button onClick={() => onCheckHealth(feed)} className="p-2 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors" aria-label={`Re-check health for ${feed.name}`}>
-                                    <ResetIcon className="w-5 h-5"/>
-                                </button>
-                            </td>
                         </tr>
                     ))}
                     </tbody>
@@ -168,9 +161,6 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                     <div key={feed.id} className="bg-white dark:bg-zinc-800 rounded-lg shadow p-4 space-y-3">
                         <div className="flex justify-between items-start gap-2">
                             <p className="font-bold text-lg break-words">{feed.name}</p>
-                            <button onClick={() => onCheckHealth(feed)} className="p-2 text-slate-500 dark:text-zinc-400 rounded-md flex-shrink-0" aria-label={`Re-check health for ${feed.name}`}>
-                                <ResetIcon className="w-5 h-5"/>
-                            </button>
                         </div>
                         <div>
                             <HealthStatusCell state={feedHealth[feed.id]} />

@@ -11,15 +11,15 @@ import {
     ChevronUpIcon,
 } from '../Icons';
 import { FeedFormModal } from './FeedFormModal';
-import { checkFeedHealth as checkFeedHealthService, HealthState } from './healthService';
 import { FeedManagementTab } from './FeedManagementTab';
 import { HealthCenterTab } from './HealthCenterTab';
 import { HealthLegendTab } from './HealthLegendTab';
-
+import type { HealthState } from './healthService';
 
 // Types
 type AdminTab = 'management' | 'health' | 'legend';
 export type FeedHealth = Record<string, HealthState>;
+type BackendHealthStatus = Record<string, { status: 'success' | 'warning' | 'error'; message: string }>;
 
 const TabButton: React.FC<{
     isActive: boolean;
@@ -42,52 +42,6 @@ const TabButton: React.FC<{
     </button>
 );
 
-const MissingFeedsWarning: React.FC<{ missingFeeds: FeedSource[] }> = ({ missingFeeds }) => {
-    const [isExpanded, setIsExpanded] = useState(true);
-
-    if (missingFeeds.length === 0) {
-        return null;
-    }
-
-    return (
-        <div className="bg-amber-100 dark:bg-amber-900/30 border-l-4 border-amber-500 text-amber-800 dark:text-amber-200 p-4 rounded-lg mb-6 animate-fade-in">
-            <div className="flex items-start">
-                <div className="flex-shrink-0 mt-0.5">
-                    <WarningIcon className="w-6 h-6 text-amber-500" />
-                </div>
-                <div className="ml-3 flex-1">
-                    <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-medium">
-                            {missingFeeds.length} Missing Feed{missingFeeds.length > 1 ? 's' : ''} From Frontend Cache
-                        </h3>
-                        <button
-                            onClick={() => setIsExpanded(!isExpanded)}
-                            className="p-2 -m-2 rounded-full hover:bg-amber-200 dark:hover:bg-amber-800/50"
-                            aria-expanded={isExpanded}
-                        >
-                            {isExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
-                        </button>
-                    </div>
-                    {isExpanded && (
-                        <div className="mt-2 text-sm">
-                            <p>The following feeds are not present in the live <code className="text-xs bg-amber-200 dark:bg-amber-800/50 p-1 rounded">news-cache.json</code> file. This indicates a potential issue with the automated feed fetching process (e.g., GitHub Action failure).</p>
-                            <ul className="list-none mt-3 space-y-2 text-xs">
-                                {missingFeeds.map(feed => (
-                                    <li key={feed.id} className="font-mono p-2 bg-slate-50 dark:bg-zinc-800/30 rounded">
-                                        <strong className="font-sans font-semibold text-base mr-2">{feed.name}</strong>
-                                        <a href={feed.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-600 dark:hover:text-amber-100 break-all">{feed.url}</a>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-
 export const AdminPanel: React.FC = () => {
     const { feeds, addFeed, updateFeed, deleteFeed } = useFeeds();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,6 +50,10 @@ export const AdminPanel: React.FC = () => {
     const [feedHealth, setFeedHealth] = useState<FeedHealth>({});
     const [activeTab, setActiveTab] = useState<AdminTab>('management');
     const [isCheckingAll, setIsCheckingAll] = useState(false);
+
+    // State for alert box visibility
+    const [isErrorsExpanded, setIsErrorsExpanded] = useState(true);
+    const [isWarningsExpanded, setIsWarningsExpanded] = useState(true);
 
     // Initialize health status for any new feeds
     useEffect(() => {
@@ -110,11 +68,15 @@ export const AdminPanel: React.FC = () => {
         }
     }, [feeds, feedHealth]);
 
-    const missingFeeds = useMemo(() => {
-        return feeds.filter(feed =>
-            feedHealth[feed.id]?.status === 'warning' &&
-            feedHealth[feed.id]?.detail?.includes('not found in the live news cache')
-        ).sort((a,b) => a.name.localeCompare(b.name));
+
+    const failingFeeds = useMemo(() => {
+        return feeds.filter(feed => feedHealth[feed.id]?.status === 'error')
+            .sort((a,b) => a.name.localeCompare(b.name));
+    }, [feeds, feedHealth]);
+
+    const warningFeeds = useMemo(() => {
+        return feeds.filter(feed => feedHealth[feed.id]?.status === 'warning')
+            .sort((a,b) => a.name.localeCompare(b.name));
     }, [feeds, feedHealth]);
 
     const handleAddNew = () => { setEditingFeed(null); setIsModalOpen(true); };
@@ -134,115 +96,144 @@ export const AdminPanel: React.FC = () => {
     };
 
     // Health Check Logic
-    const checkFeedHealth = useCallback(async (feed: FeedSource, sourcesInCache: Set<string>) => {
-        setFeedHealth(prev => ({ ...prev, [feed.id]: { status: 'checking', detail: 'Verifying presence in news cache...' } }));
-
-        if (!sourcesInCache.has(feed.name)) {
-            setFeedHealth(prev => ({
-                ...prev,
-                [feed.id]: {
-                    status: 'warning',
-                    detail: 'Feed not found in the live news cache. The automated GitHub Action might be failing for this source.'
-                }
-            }));
-            return; // Stop here. This is the most critical information.
-        }
-
-        // If present in cache, run the live check for deeper diagnostics.
-        setFeedHealth(prev => ({ ...prev, [feed.id]: { status: 'checking', detail: 'Cache OK. Initiating live check...' } }));
-        const result = await checkFeedHealthService(feed);
-        setFeedHealth(prev => ({ ...prev, [feed.id]: result }));
-    }, []);
-
-    const handleCheckSingleFeed = useCallback(async (feed: FeedSource) => {
-        setFeedHealth(prev => ({ ...prev, [feed.id]: { status: 'checking', detail: 'Fetching live news cache...' } }));
-        try {
-            const response = await fetch('/news-cache.json?' + Date.now()); // Cache bust
-            if (!response.ok) {
-                throw new Error(`Failed to fetch news cache: ${response.status}`);
-            }
-            const articles: Article[] = await response.json();
-            const sourcesInCache = new Set(articles.map(a => a.source));
-
-            // Now call the core check function with the cache data
-            await checkFeedHealth(feed, sourcesInCache);
-
-        } catch (error) {
-            const message = error instanceof Error ? error.message : "An unknown error occurred.";
-            console.error("Failed to fetch or parse news-cache.json", error);
-            setFeedHealth(prev => ({
-                ...prev,
-                [feed.id]: {
-                    status: 'error',
-                    detail: `Could not load news-cache.json to verify presence. Error: ${message}`
-                }
-            }));
-        }
-    }, [checkFeedHealth]);
-
-
-    const checkAllFeeds = useCallback(async () => {
+    const refreshHealthStatus = useCallback(async () => {
         setIsCheckingAll(true);
-        // First, fetch the live cache to get the ground truth.
-        let sourcesInCache: Set<string>;
         try {
-            const response = await fetch('/news-cache.json?' + Date.now()); // Cache bust
-            if (!response.ok) throw new Error(`Failed to fetch news cache: ${response.status}`);
-            const articles: Article[] = await response.json();
-            sourcesInCache = new Set(articles.map((a: Article) => a.source));
-        } catch (error) {
-            const message = error instanceof Error ? error.message : "An unknown server error occurred.";
-            console.error("Failed to fetch or parse news-cache.json for 'Check All'", error);
-            // Optionally update all feeds to show a cache error
-            const allFeedsErrorState: FeedHealth = {};
-            feeds.forEach(feed => {
-                allFeedsErrorState[feed.id] = { status: 'error', detail: `Could not load news-cache.json. Error: ${message}` };
-            });
-            setFeedHealth(allFeedsErrorState);
-            setIsCheckingAll(false);
-            return;
-        }
+            const [healthRes, cacheRes] = await Promise.all([
+                fetch(`/feed-health-status.json?t=${Date.now()}`),
+                fetch(`/news-cache.json?t=${Date.now()}`)
+            ]);
 
-        // Sequentially check feeds to avoid rate limiting or browser connection limits.
-        for (const feed of feeds) {
-            await checkFeedHealth(feed, sourcesInCache);
+            if (!healthRes.ok) throw new Error(`Could not fetch feed-health-status.json: ${healthRes.statusText}`);
+            if (!cacheRes.ok) throw new Error(`Could not fetch news-cache.json: ${cacheRes.statusText}`);
+
+            const backendHealth: BackendHealthStatus = await healthRes.json();
+            const liveArticles: Article[] = await cacheRes.json();
+            const sourcesInCache = new Set(liveArticles.map(a => a.source));
+
+            const newHealthState: FeedHealth = {};
+            feeds.forEach(feed => {
+                const backendStatus = backendHealth[feed.id];
+                if (!backendStatus) {
+                    newHealthState[feed.id] = { status: 'error', detail: 'Feed was not processed by the last backend run. Check GitHub Action logs for script errors.' };
+                } else if (backendStatus.status === 'error') {
+                    newHealthState[feed.id] = { status: 'error', detail: `Backend Error: ${backendStatus.message}` };
+                } else if (backendStatus.status === 'success' || backendStatus.status === 'warning') {
+                    if (sourcesInCache.has(feed.name)) {
+                        newHealthState[feed.id] = { status: 'ok', detail: 'Feed is live. The last backend fetch was successful.' };
+                    } else {
+                        newHealthState[feed.id] = { status: 'warning', detail: 'Backend fetch successful, but no recent articles were found for the frontend cache. The feed might be empty or outdated.' };
+                    }
+                }
+            });
+            setFeedHealth(newHealthState);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "An unknown error occurred";
+            console.error("Error refreshing health status:", error);
+            const errorState: FeedHealth = {};
+            feeds.forEach(feed => {
+                errorState[feed.id] = { status: 'error', detail: `Failed to fetch status files: ${message}` };
+            });
+            setFeedHealth(errorState);
+        } finally {
+            setIsCheckingAll(false);
         }
-        setIsCheckingAll(false);
-    }, [feeds, checkFeedHealth]);
+    }, [feeds]);
+
+    useEffect(() => {
+        if(feeds.length > 0) {
+            refreshHealthStatus();
+        }
+    }, [feeds.length]);
 
 
     return (
         <div className="min-h-screen bg-slate-100 dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 animate-fade-in">
             <header className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-lg sticky top-0 z-20 border-b border-slate-200 dark:border-zinc-800">
                 <div className="container mx-auto px-4 md:px-6 py-3 flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-indigo-500 dark:text-indigo-400">Admin Panel</h1>
+                    <div className="flex items-center gap-4">
+                        <h1 className="text-2xl font-bold text-indigo-500 dark:text-indigo-400">Admin Panel</h1>
+                    </div>
                     <a href="/" className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 border-transparent text-slate-600 dark:text-zinc-300 hover:bg-slate-300 dark:hover:bg-zinc-600">
                         <ArrowLeftIcon className="w-5 h-5"/> <span>Back to App</span>
                     </a>
                 </div>
             </header>
             <main className="container mx-auto p-4 md:p-6">
-                <MissingFeedsWarning missingFeeds={missingFeeds} />
+
+                {failingFeeds.length > 0 && (
+                    <div className={`bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 text-red-800 dark:text-red-200 p-4 rounded-lg mb-6 animate-fade-in ${isCheckingAll ? 'animate-pulse' : ''}`}>
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0 mt-0.5">
+                                <WarningIcon className="w-6 h-6 text-red-500" />
+                            </div>
+                            <div className="ml-3 flex-1">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-lg font-medium">
+                                        {failingFeeds.length} Feed{failingFeeds.length > 1 ? 's' : ''} Failed in Backend
+                                    </h3>
+                                    <button onClick={() => setIsErrorsExpanded(!isErrorsExpanded)} className="p-2 -m-2 rounded-full hover:bg-red-200 dark:hover:bg-red-800/50" aria-expanded={isErrorsExpanded}>
+                                        {isErrorsExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                                {isErrorsExpanded && (
+                                    <div className="mt-2 text-sm">
+                                        <p>The following feeds failed to be processed during the last automated backend run (GitHub Action). The details show the actual error message from the server.</p>
+                                        <ul className="list-none mt-3 space-y-2 text-xs">
+                                            {failingFeeds.map(feed => (
+                                                <li key={feed.id} className="font-mono p-2 bg-slate-50 dark:bg-zinc-800/30 rounded">
+                                                    <p className="font-sans font-semibold text-base mr-2">{feed.name}</p>
+                                                    <p className="text-xs text-slate-500 dark:text-zinc-400 truncate mt-1" title={feed.url}>{feed.url}</p>
+                                                    <p className="mt-1 text-red-700 dark:text-red-300 font-sans">{feedHealth[feed.id]?.detail}</p>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {warningFeeds.length > 0 && (
+                    <div className={`bg-amber-100 dark:bg-amber-900/30 border-l-4 border-amber-500 text-amber-800 dark:text-amber-200 p-4 rounded-lg mb-6 animate-fade-in ${isCheckingAll ? 'animate-pulse' : ''}`}>
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0 mt-0.5">
+                                <WarningIcon className="w-6 h-6 text-amber-500" />
+                            </div>
+                            <div className="ml-3 flex-1">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-lg font-medium">
+                                        {warningFeeds.length} Feed{warningFeeds.length > 1 ? 's' : ''} with Warnings
+                                    </h3>
+                                    <button onClick={() => setIsWarningsExpanded(!isWarningsExpanded)} className="p-2 -m-2 rounded-full hover:bg-amber-200 dark:hover:bg-amber-800/50" aria-expanded={isWarningsExpanded}>
+                                        {isWarningsExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                                {isWarningsExpanded && (
+                                    <div className="mt-2 text-sm">
+                                        <p>The following feeds were fetched successfully by the backend, but no recent articles appear on the live site. This could mean the feed is empty, outdated, or its articles were filtered out before caching.</p>
+                                        <ul className="list-none mt-3 space-y-2 text-xs">
+                                            {warningFeeds.map(feed => (
+                                                <li key={feed.id} className="font-mono p-2 bg-slate-50 dark:bg-zinc-800/30 rounded">
+                                                    <p className="font-sans font-semibold text-base mr-2">{feed.name}</p>
+                                                    <p className="text-xs text-slate-500 dark:text-zinc-400 truncate mt-1" title={feed.url}>{feed.url}</p>
+                                                    <p className="mt-1 text-amber-700 dark:text-amber-300 font-sans">{feedHealth[feed.id]?.detail}</p>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <nav className="mb-6 border-b border-slate-200 dark:border-zinc-700" role="tablist" aria-label="Admin Sections">
                     <div className="flex items-center space-x-2">
-                        <TabButton
-                            isActive={activeTab === 'management'}
-                            onClick={() => setActiveTab('management')}
-                            icon={<NewspaperIcon className="w-5 h-5" />}
-                            label="Feed Management"
-                        />
-                        <TabButton
-                            isActive={activeTab === 'health'}
-                            onClick={() => setActiveTab('health')}
-                            icon={<HeartbeatIcon className="w-5 h-5" />}
-                            label="Health Center"
-                        />
-                        <TabButton
-                            isActive={activeTab === 'legend'}
-                            onClick={() => setActiveTab('legend')}
-                            icon={<QuestionMarkCircleIcon className="w-5 h-5" />}
-                            label="Health Legend"
-                        />
+                        <TabButton isActive={activeTab === 'management'} onClick={() => setActiveTab('management')} icon={<NewspaperIcon className="w-5 h-5" />} label="Feed Management" />
+                        <TabButton isActive={activeTab === 'health'} onClick={() => setActiveTab('health')} icon={<HeartbeatIcon className="w-5 h-5" />} label="Health Center" />
+                        <TabButton isActive={activeTab === 'legend'} onClick={() => setActiveTab('legend')} icon={<QuestionMarkCircleIcon className="w-5 h-5" />} label="Health Legend" />
                     </div>
                 </nav>
 
@@ -253,15 +244,14 @@ export const AdminPanel: React.FC = () => {
                         onAddNew={handleAddNew}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
-                        onCheckHealth={handleCheckSingleFeed}
+                        onCheckHealth={refreshHealthStatus}
                     />
                 </div>
                 <div role="tabpanel" hidden={activeTab !== 'health'}>
                     <HealthCenterTab
                         feeds={feeds}
                         feedHealth={feedHealth}
-                        onCheckHealth={handleCheckSingleFeed}
-                        onCheckAll={checkAllFeeds}
+                        onCheckAll={refreshHealthStatus}
                         isCheckingAll={isCheckingAll}
                     />
                 </div>

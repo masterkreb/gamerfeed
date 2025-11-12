@@ -9,7 +9,7 @@ export interface HealthState {
 
 function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(xmlString, "application/xml");
+    const doc = parser.parseFromString(xmlString, "text/xml");
 
     const errorNode = doc.querySelector("parsererror");
     if (errorNode) {
@@ -30,11 +30,13 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
     const items: any[] = [];
     const itemNodes = doc.querySelectorAll(isAtom ? "entry" : "item");
 
-    itemNodes.forEach(node => {
+    itemNodes.forEach(item => {
+        const node = item as Element;
+
         let link: string | null = '';
         if (isAtom) {
-            const linkNode = Array.from(node.querySelectorAll('link')).find(l => l.getAttribute('rel') === 'alternate') || node.querySelector('link');
-            link = linkNode?.getAttribute('href');
+            const linkNode = Array.from(node.querySelectorAll('link')).find(l => (l as Element).getAttribute('rel') === 'alternate') || node.querySelector('link');
+            link = (linkNode as Element)?.getAttribute('href');
         } else {
             link = getQueryText(node, 'link');
         }
@@ -48,8 +50,8 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
 
         const description = getHtmlContent(node, 'description') || getHtmlContent(node, 'summary');
         const contentEncoded = getHtmlContent(node, 'content\\:encoded') || getHtmlContent(node, 'content');
-        const mediaThumbnail = node.querySelector('media\\:thumbnail, thumbnail[url]');
-        const enclosure = node.querySelector('enclosure[url]');
+        const mediaThumbnail = node.querySelector('media\\:thumbnail, thumbnail[url]') as Element;
+        const enclosure = node.querySelector('enclosure[url]') as Element;
 
         items.push({
             title: title,
@@ -58,8 +60,8 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
             guid: getQueryText(node, 'guid') || getQueryText(node, 'id') || link,
             description: description,
             content: contentEncoded || description,
-            'media:thumbnail': { url: mediaThumbnail?.getAttribute('url') },
-            enclosure: { link: enclosure?.getAttribute('url'), type: enclosure?.getAttribute('type') },
+            'media:thumbnail': mediaThumbnail ? { url: mediaThumbnail.getAttribute('url') } : null,
+            enclosure: enclosure ? { link: enclosure.getAttribute('url'), type: enclosure.getAttribute('type') } : null,
         });
     });
 
@@ -70,7 +72,7 @@ function parseRssXml(xmlString: string, feedUrl: string): { items: any[] } {
 function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; needsScraping: boolean } {
     let imageUrl: string | undefined;
 
-    if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) {
+    if (item.enclosure && item.enclosure.link && item.enclosure.type?.startsWith('image')) {
         imageUrl = item.enclosure.link;
     }
     else if (item.thumbnail && typeof item.thumbnail === 'string') {
