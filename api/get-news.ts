@@ -565,16 +565,8 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
 
     if (imageUrl) {
         try {
-            let processedUrl = new URL(imageUrl, item.link).href;
-            const urlObject = new URL(processedUrl);
-
-            if (urlObject.hostname.includes('cgames.de') || feed.name.includes('GameStar') || feed.name.includes('GamePro')) {
-                processedUrl = processedUrl.replace(/\/(\d{2,4})\//, '/800/');
-            } else if (feed.name.includes('GamesWirtschaft')) {
-                processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)$)/i, '');
-            } else if (urlObject.hostname.includes('nintendolife.com')) {
-                processedUrl = processedUrl.replace('small.jpg', 'large.jpg');
-            }
+            // Use the URL directly from the feed without modifications.
+            const processedUrl = new URL(imageUrl, item.link).href;
             return { imageUrl: processedUrl, needsScraping: false };
         } catch (e) {
             console.warn('Error processing image URL:', e);

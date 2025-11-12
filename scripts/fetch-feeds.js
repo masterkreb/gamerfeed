@@ -789,28 +789,8 @@ function parseRssXml(xmlString, feed) {
         let finalImageUrl = null;
         if (imageUrl) {
             try {
-                let processedUrl = new URL(imageUrl, link).href;
-                const urlObject = new URL(processedUrl);
-
-                if (urlObject.hostname.includes('giantbomb.com')) {
-                    processedUrl = processedUrl.replace(/\/[^\/]+_(\d+)\.(jpg|jpeg|png)/, '/original.$2');
-                }
-                else if (feed.name.includes('GamesWirtschaft') || urlObject.hostname.includes('gameswirtschaft.de')) {
-                    processedUrl = processedUrl.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|gif|webp)($|\?))/i, '');
-                }
-                else if (urlObject.hostname.includes('heise.de')) {
-                    processedUrl = processedUrl.replace(/\/geometry\/\d+\//, '/geometry/800/');
-                }
-                else if (urlObject.hostname.includes('pcgames.de')) {
-                    // This rule is placed before the 'cgames.de' rule to prevent conflicts.
-                }
-                else if (urlObject.hostname.includes('cgames.de')) {
-                    processedUrl = processedUrl.replace(/\/\d{2,4}\//, '/800/');
-                }
-                else if (urlObject.hostname.includes('4players.de')) {
-                    processedUrl = processedUrl.replace(/\/\d+\//, '/800/');
-                }
-
+                // Use the URL directly from the feed without modifications.
+                const processedUrl = new URL(imageUrl, link).href;
                 finalImageUrl = processedUrl;
             } catch (e) {
                 finalImageUrl = imageUrl;
