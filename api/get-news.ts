@@ -90,40 +90,60 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
     } else {
         const content = item.content || item.description || '';
         if (content) {
-            const imgTagMatches = content.matchAll(/<img[^>]*>/gi);
-            let bestImg: string | null = null;
-            let youtubeFallback: string | null = null;
-
-            for (const tagMatch of imgTagMatches) {
-                const imgTag = tagMatch[0];
-                const dataSrcMatch = imgTag.match(/data-src=["']([^"']+)["']/i);
-                const srcMatch = imgTag.match(/src=["']([^"']+)["']/i);
-                const src = dataSrcMatch ? dataSrcMatch[1] : (srcMatch ? srcMatch[1] : null);
-
-                if (!src || src.startsWith('data:') || src.includes('placeholder.svg') || src.includes('cpx.golem.de') || src.includes('feedburner.com') || src.includes('gravatar.com')) {
-                    continue;
-                }
-
-                const widthMatch = imgTag.match(/width=["']?1["']?/i);
-                const heightMatch = imgTag.match(/height=["']?1["']?/i);
-                if (widthMatch || heightMatch) {
-                    continue; // Skip 1-pixel trackers
-                }
-
-                const isYouTube = src.includes('ytimg.com');
-
-                if (!isYouTube) {
-                    bestImg = src;
-                    break;
-                } else if (!youtubeFallback) {
-                    youtubeFallback = src;
-                }
+            // 1. Prioritize YouTube iframe embeds to get high-quality thumbnails
+            const youtubeIframeMatch = content.match(/<iframe[^>]+src=["']https?:\/\/(?:www\.)?youtube\.com\/embed\/([\w-]{11})[^"']*["']/i);
+            if (youtubeIframeMatch && youtubeIframeMatch[1]) {
+                imageUrl = `https://img.ytimg.com/vi/${youtubeIframeMatch[1]}/maxresdefault.jpg`;
             }
 
-            if (bestImg) {
-                imageUrl = bestImg;
-            } else if (youtubeFallback) {
-                imageUrl = youtubeFallback;
+            // 2. If no iframe, fall back to searching for <img> tags
+            if (!imageUrl) {
+                const imgTagMatches = content.matchAll(/<img[^>]*>/gi);
+                let bestImg: string | null = null;
+                let youtubeFallback: string | null = null;
+
+                for (const tagMatch of imgTagMatches) {
+                    const imgTag = tagMatch[0];
+                    const dataSrcMatch = imgTag.match(/data-src=["']([^"']+)["']/i);
+                    const srcMatch = imgTag.match(/src=["']([^"']+)["']/i);
+                    const src = dataSrcMatch ? dataSrcMatch[1] : (srcMatch ? srcMatch[1] : null);
+
+                    const isFlickrImage = src?.includes('live.staticflickr.com');
+
+                    if (
+                        !src ||
+                        src.startsWith('data:') ||
+                        src.includes('placeholder.svg') ||
+                        src.includes('cpx.golem.de') ||
+                        src.includes('feedburner.com') ||
+                        src.includes('gravatar.com') ||
+                        (feed.name === 'PlayStation.Blog' && isFlickrImage)
+                    ) {
+                        continue;
+                    }
+
+                    const widthMatch = imgTag.match(/width=["']?1["']?/i);
+                    const heightMatch = imgTag.match(/height=["']?1["']?/i);
+                    if (widthMatch || heightMatch) {
+                        continue; // Skip 1-pixel trackers
+                    }
+
+                    const isYouTube = src.includes('ytimg.com');
+
+                    if (!isYouTube) {
+                        bestImg = src;
+                        break;
+                    } else if (!youtubeFallback) {
+                        // Also try to get a higher quality version from img tags
+                        youtubeFallback = src.replace('/default.jpg', '/maxresdefault.jpg').replace('/sddefault.jpg', '/maxresdefault.jpg').replace('/hqdefault.jpg', '/maxresdefault.jpg');
+                    }
+                }
+
+                if (bestImg) {
+                    imageUrl = bestImg;
+                } else if (youtubeFallback) {
+                    imageUrl = youtubeFallback;
+                }
             }
         }
     }

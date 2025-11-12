@@ -217,49 +217,58 @@ function parseRssXml(xmlString, feed) {
             }
 
             if (contentText) {
-                try {
-                    const contentDoc = new DOMParser().parseFromString(contentText, 'text/html');
-                    const images = Array.from(contentDoc.querySelectorAll('img'));
-                    let bestImg = null;
-                    let youtubeFallback = null;
+                // 5a. Prioritize YouTube iframe embeds
+                const youtubeIframeMatch = contentText.match(/<iframe[^>]+src=["']https?:\/\/(?:www\.)?youtube\.com\/embed\/([\w-]{11})[^"']*["']/i);
+                if (youtubeIframeMatch && youtubeIframeMatch[1]) {
+                    imageUrl = `https://img.ytimg.com/vi/${youtubeIframeMatch[1]}/maxresdefault.jpg`;
+                } else {
+                    // 5b. Fallback to parsing content for <img> tags
+                    try {
+                        const contentDoc = new DOMParser().parseFromString(contentText, 'text/html');
+                        const images = Array.from(contentDoc.querySelectorAll('img'));
+                        let bestImg = null;
+                        let youtubeFallback = null;
 
-                    for (const img of images) {
-                        const src = img.getAttribute('data-src') || img.src;
+                        for (const img of images) {
+                            const src = img.getAttribute('data-src') || img.src;
+                            const isFlickrImage = src?.includes('live.staticflickr.com');
 
-                        if (
-                            !src ||
-                            src.startsWith('data:') ||
-                            src.includes('placeholder.svg') ||
-                            src.includes('cpx.golem.de') ||
-                            src.includes('feedburner.com') ||
-                            src.includes('feedsportal.com') ||
-                            src.includes('gravatar.com')
-                        ) {
-                            continue;
+                            if (
+                                !src ||
+                                src.startsWith('data:') ||
+                                src.includes('placeholder.svg') ||
+                                src.includes('cpx.golem.de') ||
+                                src.includes('feedburner.com') ||
+                                src.includes('feedsportal.com') ||
+                                src.includes('gravatar.com') ||
+                                (feed.name === 'PlayStation.Blog' && isFlickrImage)
+                            ) {
+                                continue;
+                            }
+
+                            const width = img.getAttribute('width');
+                            const height = img.getAttribute('height');
+                            if (width === '1' || height === '1') {
+                                continue; // Skip 1-pixel trackers
+                            }
+
+                            const isYouTube = src.includes('ytimg.com');
+
+                            if (!isYouTube) {
+                                bestImg = src;
+                                break; // Found a good non-youtube image
+                            } else if (!youtubeFallback) {
+                                youtubeFallback = src.replace('/default.jpg', '/maxresdefault.jpg').replace('/sddefault.jpg', '/maxresdefault.jpg').replace('/hqdefault.jpg', '/maxresdefault.jpg');
+                            }
                         }
 
-                        const width = img.getAttribute('width');
-                        const height = img.getAttribute('height');
-                        if (width === '1' || height === '1') {
-                            continue; // Skip 1-pixel trackers
+                        if (bestImg) {
+                            imageUrl = bestImg;
+                        } else if (youtubeFallback) {
+                            imageUrl = youtubeFallback;
                         }
-
-                        const isYouTube = src.includes('ytimg.com');
-
-                        if (!isYouTube) {
-                            bestImg = src;
-                            break; // Found a good non-youtube image
-                        } else if (!youtubeFallback) {
-                            youtubeFallback = src; // Found a YouTube image, save as fallback
-                        }
-                    }
-
-                    if (bestImg) {
-                        imageUrl = bestImg;
-                    } else if (youtubeFallback) {
-                        imageUrl = youtubeFallback;
-                    }
-                } catch(e) { /* ignore HTML parsing errors inside XML content */ }
+                    } catch(e) { /* ignore HTML parsing errors inside XML content */ }
+                }
             }
         }
 
