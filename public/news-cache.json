@@ -1,5 +1,15 @@
 [
   {
+    "id": "https://playfront.de/?p=1147003",
+    "title": "Fünf Jahre PS5: Wie Sony die Konsole weitergedacht hat",
+    "source": "PlayFront",
+    "publicationDate": "2025-11-12T18:43:07.000Z",
+    "summary": "Fünf Jahre PS5: Von SSD-Speed bis VR2 – wie Sony Konsole, Community und Spielkultur weiterentwickelt hat. Zahlen, Fakten, Ausblick.",
+    "link": "https://playfront.de/fuenf-jahre-ps5-wie-sony-die-konsole-weitergedacht-hat/",
+    "imageUrl": "https://cdn.playfront.de/uploads/2025/09/ps5-new-digital-edition.webp",
+    "language": "de"
+  },
+  {
     "id": "https://playfront.de/?p=1146991",
     "title": "DAMON and BABY: Neues Action-Adventure mit Twin-Stick-Feuerkraft angekündigt",
     "source": "PlayFront",
@@ -7,6 +17,16 @@
     "summary": "Arc System Works enthüllt DAMON and BABY, ein actionreiches Adventure mit Twin-Stick-Shooting, Erkundung und Koop-Modus – erscheint Anfang 2026 auf...",
     "link": "https://playfront.de/damon-and-baby-neues-action-adventure-mit-twin-stick-feuerkraft-angekuendigt/",
     "imageUrl": "https://cdn.playfront.de/uploads/2025/11/damon-and-baby.webp",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/Linux-Konsole-Valve-kuendigt-neue-Steam-Machine-an-11076221.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Linux-Konsole: Valve kündigt neue Steam Machine an",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-12T18:34:00.000Z",
+    "summary": "Ein Jahrzehnt nach dem Scheitern der Steam Machines wagt Valve einen neuen Versuch: Die neue Steam-Machine ist ein Würfel mit SteamOS.",
+    "link": "https://www.heise.de/news/Linux-Konsole-Valve-kuendigt-neue-Steam-Machine-an-11076221.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/800/q80//imgs/18/4/9/7/6/4/2/6/Screenshot_2025-11-12_192955-dfaeb6f8c5d19b86.png",
     "language": "de"
   },
   {
@@ -18,6 +38,16 @@
     "link": "https://www.destructoid.com/valve-finally-learns-what-the-number-3-is-with-a-triplet-of-new-gaming-devices/?utm_source=rss&utm_medium=rss&utm_campaign=valve-finally-learns-what-the-number-3-is-with-a-triplet-of-new-gaming-devices",
     "imageUrl": "https://www.destructoid.com/wp-content/uploads/2025/03/Steam-logo.jpg",
     "language": "en"
+  },
+  {
+    "id": "https://mein-mmo.de/?p=1335567",
+    "title": "Eine Science-Fiction-Serie auf Amazon Prime ist mit 95 % bewertet und begeistert in 6 Staffeln mit wunderschönen Aufnahmen von Planeten",
+    "source": "Mein-MMO",
+    "publicationDate": "2025-11-12T18:30:32.000Z",
+    "summary": "Eine Serie auf Prime ist eine Empfehlung für Fans von SciFi-Geschichten. Sie zeigt gut, wie die Besiedelung des Weltraums ablaufen kann. Der Beitrag...",
+    "link": "https://mein-mmo.de/jeff-bezos-the-expanse/",
+    "imageUrl": "https://images.mein-mmo.de/medien/2025/11/The-Expanse-Amazon-Vorstellung-1140x445.jpg",
+    "language": "de"
   },
   {
     "id": "pqt4Sc7UipME2CbxihSWqG",
@@ -116,7 +146,7 @@
     "publicationDate": "2025-11-12T18:16:00.000Z",
     "summary": "For the Arc Raiders Turnabout quest, Celeste has asked you to visit the North Trench Tower in Spaceport and upload some blackmail files. It sounds...",
     "link": "https://www.gamespot.com/articles/arc-raiders-turnabout-quest-guide/1100-6536114/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/679/6794662/4600472-share_20251111_0525460.jpeg",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/679/6794662/4600472-share_20251111_0525460.jpeg",
     "language": "en"
   },
   {
@@ -128,6 +158,16 @@
     "link": "https://www.giga.de/games/animal-crossing-new-horizons-johannes-und-alle-nixen-rezepte-freischalten--01J5QQ6JGR51KMHZ61GYA7FXDN",
     "imageUrl": "https://static.giga.de/15/ca/f8/a21e92ab2c45c76e200d8a769a_cmUgMTkyMCADMWFhZWFjY2UwYTk=.png",
     "language": "de"
+  },
+  {
+    "id": "https://www.gematsu.com/?p=1006489",
+    "title": "Valve announces Steam Machine, Steam Frame, and Steam Controller",
+    "source": "Gematsu",
+    "publicationDate": "2025-11-12T18:15:15.000Z",
+    "summary": "Valve has announced three new additions to the Steam hardware family—Steam Machine, Steam Frame, and … Source",
+    "link": "https://www.gematsu.com/2025/11/valve-announces-steam-machine-steam-frame-and-steam-controller",
+    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/Steam-Hardware_11-12-25_Top.jpg",
+    "language": "en"
   },
   {
     "id": "https://www.pcgameshardware.de/Star-Citizen-Spiel-3481/News/Release-GTA-6-1486344/",
@@ -146,7 +186,7 @@
     "publicationDate": "2025-11-12T18:14:00.000Z",
     "summary": "Fortnite's Simpsons season, which took over Battle Royale last week with a new Springfield-themed island map, got a welcome injection of new...",
     "link": "https://www.gamespot.com/articles/fortnite-added-a-pile-of-absurd-new-simpsons-guns-this-week/1100-6536155/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1757/17577455/4601169-fortnitesipsonsseason.jpg",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1757/17577455/4601169-fortnitesipsonsseason.jpg",
     "language": "en"
   },
   {
@@ -166,7 +206,7 @@
     "publicationDate": "2025-11-12T18:13:00.000Z",
     "summary": "Though most quests in Arc Raiders send you off to collect a quest-specific item, Celeste has decided to complicate your journey just a bit. In...",
     "link": "https://www.gamespot.com/articles/arc-raiders-tribute-to-toledo-quest-guide/1100-6536117/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/679/6794662/4600501-share_20251111_0604590.jpeg",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/679/6794662/4600501-share_20251111_0604590.jpeg",
     "language": "en"
   },
   {
@@ -246,7 +286,7 @@
     "publicationDate": "2025-11-12T18:09:00.000Z",
     "summary": "If Lance has given you the Life of a Pharmacist quest in Arc Raiders, you've come to the right place. This quest requires you to head to the Arbusto...",
     "link": "https://www.gamespot.com/articles/arc-raiders-life-of-a-pharmacist-quest-guide/1100-6536116/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/679/6794662/4600480-share_20251111_0521151-copy.jpeg",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/679/6794662/4600480-share_20251111_0521151-copy.jpeg",
     "language": "en"
   },
   {
@@ -256,7 +296,7 @@
     "publicationDate": "2025-11-12T18:05:00.000Z",
     "summary": "Most Arc Raiders quests send you topside to investigate, gather resources, or obtain some type of intel. This trend continues with Reduced to Rubble,...",
     "link": "https://www.gamespot.com/articles/arc-raiders-reduced-to-rubble-quest-guide/1100-6536112/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/679/6794662/4600428-arcraiders_20251110225209-copy.jpg",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/679/6794662/4600428-arcraiders_20251110225209-copy.jpg",
     "language": "en"
   },
   {
@@ -476,7 +516,7 @@
     "publicationDate": "2025-11-12T18:00:00.000Z",
     "summary": "Valve has announced three new Steam hardware products, which will all be shipping out in early 2026. Next year will see the launch of a new Steam...",
     "link": "https://www.gamespot.com/articles/valve-reveals-new-hardware-lineup-a-controller-compact-gaming-pc-and-vr-ready-headset/1100-6536148/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1601/16018044/4601077-steam-hardware.jpg",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1601/16018044/4601077-steam-hardware.jpg",
     "language": "en"
   },
   {
@@ -486,7 +526,7 @@
     "publicationDate": "2025-11-12T17:58:00.000Z",
     "summary": "It's the fifth anniversary of the PS5 console, but right now, it's time to dig into the list of new games headed to the PlayStation Plus Game Catalog...",
     "link": "https://www.gamespot.com/gallery/playstation-plus-extra-premium-games-for-november-2025-include-chilling-horror-and-monster-trucks/2900-7252/",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1601/16018044/4601156-psplusnovember2025.jpg",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1601/16018044/4601156-psplusnovember2025.jpg",
     "language": "en"
   },
   {
@@ -496,7 +536,7 @@
     "publicationDate": "2025-11-12T17:52:00.000Z",
     "summary": "In the MCU, Brie Larson is best known for playing Carol Danvers/Captain Marvel. But next year, she's joining the Nintendo universe in The Super Mario...",
     "link": "https://www.gamespot.com/articles/brie-larson-once-took-drastic-action-when-told-she-took-super-mario-galaxy-too-seriously/1100-6536151/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1837/18375603/4601097-thesupermariogalaxymovieprincessrosalina.jpg",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1837/18375603/4601097-thesupermariogalaxymovieprincessrosalina.jpg",
     "language": "en"
   },
   {
@@ -566,7 +606,7 @@
     "publicationDate": "2025-11-12T17:46:00.000Z",
     "summary": "Battlefield Redsec launched recently, and among the complaints about the battle royale game was that it has no olos playlist. One may be coming,...",
     "link": "https://www.gamespot.com/articles/why-battlefield-redsec-doesnt-have-solos-and-if-it-ever-could/1100-6536149/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1179/11799911/4601096-screenshot2025-11-12at11.52.37%E2%80%AFam.png",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1179/11799911/4601096-screenshot2025-11-12at11.52.37%E2%80%AFam.png",
     "language": "en"
   },
   {
@@ -836,7 +876,7 @@
     "publicationDate": "2025-11-12T17:24:00.000Z",
     "summary": "One of the last quests in the first batch of Arc Raiders quests is called Armored Transports. This quest requires you to round up a key on Blue Gate...",
     "link": "https://www.gamespot.com/articles/arc-raiders-armored-transports-quest-guide/1100-6536108/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/679/6794662/4600147-share_20251110_0847290.jpeg",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/679/6794662/4600147-share_20251110_0847290.jpeg",
     "language": "en"
   },
   {
@@ -1056,7 +1096,7 @@
     "publicationDate": "2025-11-12T17:07:00.000Z",
     "summary": "Teenage Mutant Ninja Turtles Trilogy: Limited Edition (4K Blu-ray) $59.30 (was $100) | Releases December 16 Preorder at Amazon Teenage Mutant Ninja...",
     "link": "https://www.gamespot.com/articles/teenage-mutant-ninja-turtles-trilogy-limited-edition-4k-blu-ray-box-preorder-deal/1100-6533998/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1601/16018044/4550280-tmnt-main.jpg",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1601/16018044/4550280-tmnt-main.jpg",
     "language": "en"
   },
   {
@@ -1147,16 +1187,6 @@
     "summary": "Coffee Talk Tokyo wurde mit einem neuen Trailer für 5. März 2026 auf PC und Konsolen datiert.",
     "link": "https://www.xboxdynasty.de/news/coffee-talk-tokyo/kaffeeklatsch-fuer-maerz-2026-datiert/",
     "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2024/08/coffee-talk-tokyo.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://mein-mmo.de/?p=1335567",
-    "title": "Jeff Bezos möchte den Weltraum besiedeln, eine Serie auf Amazon Prime zeigt jedoch, dass das nur zu Problemen führt",
-    "source": "Mein-MMO",
-    "publicationDate": "2025-11-12T17:00:06.000Z",
-    "summary": "Eine Serie auf Prime ist eine Empfehlung für Fans von SciFi-Geschichten. Sie zeigt gut, wie die Besiedelung des Weltraums ablaufen kann. Der Beitrag...",
-    "link": "https://mein-mmo.de/jeff-bezos-the-expanse/",
-    "imageUrl": "https://images.mein-mmo.de/medien/2025/11/The-Expanse-Amazon-Vorstellung-1140x445.jpg",
     "language": "de"
   },
   {
@@ -1776,7 +1806,7 @@
     "publicationDate": "2025-11-12T16:23:00.000Z",
     "summary": "Former Sony executive Shuhei Yoshida has suggested that it was the original PlayStation that brought us From Software as a developer and Bloodborne...",
     "link": "https://www.gamespot.com/articles/thank-the-og-playstation-for-bringing-us-bloodborne/1100-6536153/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1578/15789366/4601161-bloodborneimage.jpg",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1578/15789366/4601161-bloodborneimage.jpg",
     "language": "en"
   },
   {
@@ -1876,7 +1906,7 @@
     "publicationDate": "2025-11-12T16:07:00.000Z",
     "summary": "Only a few weeks after the release of Pokemon Legends: Z-A, fans learned that the franchise's new cozy game, Pokemon Pokopia, is coming in early...",
     "link": "https://www.gamespot.com/articles/pokemon-pokopia-will-be-first-nintendo-published-title-to-get-game-key-card/1100-6536144/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1837/18375603/4601033-pokemonpokopia2.jpg",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1837/18375603/4601033-pokemonpokopia2.jpg",
     "language": "en"
   },
   {
@@ -1896,7 +1926,7 @@
     "publicationDate": "2025-11-12T16:03:00.000Z",
     "summary": "Activision has released more details on what its teams are doing to try to stop cheaters in Call of Duty: Black Ops 7 for its upcoming launch this...",
     "link": "https://www.gamespot.com/articles/call-of-duty-black-ops-7-how-activision-is-trying-to-stop-cheaters/1100-6536147/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/1179/11799911/4601078-screenshot2025-11-12at11.16.52%E2%80%AFam.png",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1179/11799911/4601078-screenshot2025-11-12at11.16.52%E2%80%AFam.png",
     "language": "en"
   },
   {
@@ -2206,7 +2236,7 @@
     "publicationDate": "2025-11-12T15:47:00.000Z",
     "summary": "Arc Raiders' first major update is upon us, and it's a doozy. Hot off the heels of a successful launch, developer Embark Studios is already...",
     "link": "https://www.gamespot.com/articles/everything-new-in-arc-raiders-north-line-update-full-details/1100-6536145/?ftag=CAD-01-10abi2f",
-    "imageUrl": "https://www.gamespot.com/a/uploads/original/679/6794662/4600514-screenshot2025-11-11013559.png",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/679/6794662/4600514-screenshot2025-11-11013559.png",
     "language": "en"
   },
   {
