@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Header } from './components/Header';
 import { FilterBar } from './components/FilterBar';
 import { ArticleCard } from './components/ArticleCard';
@@ -36,6 +37,8 @@ const SearchResultsHeader: React.FC<{
     onClear: () => void;
     isSearchingFavorites: boolean;
 }> = ({ searchQuery, resultsCount, onClear, isSearchingFavorites }) => {
+    const { t } = useTranslation();
+
     const themeClasses = isSearchingFavorites ? {
         bg: 'bg-amber-100 dark:bg-amber-900/30',
         border: 'border-amber-500',
@@ -52,9 +55,9 @@ const SearchResultsHeader: React.FC<{
         buttonHover: 'hover:text-indigo-600 dark:hover:text-indigo-100',
     };
 
-    const titleText = isSearchingFavorites ? "Searching in Favorites" : "Search Results";
-    const resultText = `Showing ${resultsCount} ${resultsCount === 1 ? 'article' : 'articles'} for: `;
-    const scopeText = isSearchingFavorites ? ' in your favorites' : '';
+    const titleText = isSearchingFavorites ? t('search.titleFavorites') : t('search.title');
+    const resultText = t('search.showing', { count: resultsCount });
+    const scopeText = isSearchingFavorites ? t('search.inFavorites') : '';
 
     return (
         <div
@@ -78,7 +81,7 @@ const SearchResultsHeader: React.FC<{
                 onClick={onClear}
                 className={`font-semibold underline text-sm p-2 -m-2 rounded-lg ${themeClasses.text} ${themeClasses.buttonHover} transition-colors sm:ml-auto`}
             >
-                Clear Search
+                {t('search.clearSearch')}
             </button>
         </div>
     );
@@ -86,6 +89,7 @@ const SearchResultsHeader: React.FC<{
 
 
 const AppContent: React.FC = () => {
+    const { t } = useTranslation();
     const [theme, setTheme] = useLocalStorage<Theme>('theme', 'dark');
     const [viewMode, setViewMode] = useLocalStorage<ViewMode>('viewMode', 'grid');
     const [favorites, setFavorites] = useLocalStorage<string[]>('favorites', []);
@@ -119,8 +123,7 @@ const AppContent: React.FC = () => {
         }
 
         try {
-            // ALWAYS load from static cache first (updated by GitHub Actions every 15 min)
-            const response = await fetch('/news-cache.json?' + Date.now()); // Cache bust
+            const response = await fetch('/news-cache.json?' + Date.now());
             if (!response.ok) {
                 throw new Error(`Failed to load news cache: ${response.status}`);
             }
@@ -132,7 +135,6 @@ const AppContent: React.FC = () => {
             console.error("Failed to fetch articles from cache:", error);
             const message = error instanceof Error ? error.message : "An unknown error occurred.";
 
-            // Fallback to API only if cache fails
             try {
                 console.log("Trying API fallback...");
                 const response = await fetch('/api/get-news');
@@ -154,14 +156,12 @@ const AppContent: React.FC = () => {
 
     useEffect(() => {
         loadNews();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Run only once on mount
+    }, []);
 
     const handleRefresh = useCallback(() => {
         loadNews(true);
     }, [loadNews]);
 
-    // Derive sources from loaded articles for settings/filters
     const allSources = useMemo(() => {
         const sourcesMap = new Map<string, { name: string; language: 'de' | 'en' }>();
         articles.forEach(article => {
@@ -173,7 +173,6 @@ const AppContent: React.FC = () => {
     }, [articles]);
 
     useEffect(() => {
-        // Cleanup timer on component unmount to prevent memory leaks.
         return () => {
             if (toastTimerRef.current) {
                 window.clearTimeout(toastTimerRef.current);
@@ -214,17 +213,17 @@ const AppContent: React.FC = () => {
         setMutedSources(prev => [...prev, source]);
 
         showToast(
-            `"${source}" has been muted. Manage in Settings (⚙️).`,
+            t('toast.sourceMuted', { source }),
             'info',
             [{
-                label: 'Undo',
+                label: t('toast.undo'),
                 onClick: () => {
                     setMutedSources(prev => prev.filter(s => s !== source));
                     setToast(null);
                 }
             }]
         );
-    }, [setMutedSources, showToast]);
+    }, [setMutedSources, showToast, t]);
 
     const handleToggleFavorite = useCallback((id: string) => {
         const isCurrentlyFavorite = favorites.includes(id);
@@ -236,16 +235,16 @@ const AppContent: React.FC = () => {
         if (!isCurrentlyFavorite) {
             const actions: ToastAction[] = [
                 {
-                    label: 'Undo',
+                    label: t('toast.undo'),
                     onClick: () => {
                         setFavorites(prev => prev.filter(favId => favId !== id));
                         setToast(null);
                     },
                 }
             ];
-            showToast('Article added to favorites.', 'success', actions);
+            showToast(t('toast.favoriteAdded'), 'success', actions);
         }
-    }, [favorites, setFavorites, showToast]);
+    }, [favorites, setFavorites, showToast, t]);
 
     const {
         timeFilter,
@@ -268,15 +267,13 @@ const AppContent: React.FC = () => {
     const normalizeString = (str: string): string => {
         return str
             .toLowerCase()
-            .normalize('NFD') // Decompose characters into base + accent
-            .replace(/[\u0300-\u036f]/g, ''); // Remove accent characters
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
     };
 
     const filteredArticles = useMemo(() => {
         let result = articles;
 
-        // When viewing favorites, muted sources should still be shown.
-        // The mute filter only applies to the general feed.
         if (!showFavoritesOnly) {
             result = result.filter(article => !mutedSources.includes(article.source));
         }
@@ -359,7 +356,6 @@ const AppContent: React.FC = () => {
         return allSources.filter(s => !mutedSources.includes(s.name));
     }, [allSources, mutedSources]);
 
-    // Infinite scroll observer
     const observer = useRef<IntersectionObserver | null>(null);
     const lastArticleElementRef = useCallback((node: HTMLElement) => {
         if (isBlockingLoading) return;
@@ -367,7 +363,6 @@ const AppContent: React.FC = () => {
 
         observer.current = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && articlesToShow.length < filteredArticles.length) {
-                // A small delay makes the loading feel more natural and prevents rapid-fire page loads.
                 setTimeout(() => {
                     setPage(p => p + 1);
                 }, 300);
@@ -401,67 +396,63 @@ const AppContent: React.FC = () => {
     const EmptyState = () => {
         const areFiltersActive = timeFilter !== 'all' || sourceFilter !== 'all' || languageFilter !== 'all';
 
-        // State 1: No articles found for a specific search query.
         if (searchQuery) {
             return (
                 <div className="col-span-full text-center text-slate-500 dark:text-zinc-400 py-16">
                     <SearchIcon className="w-16 h-16 mx-auto text-slate-400 dark:text-zinc-500 mb-4" />
-                    <h3 className="text-2xl font-semibold text-slate-700 dark:text-zinc-200">No results for "{searchQuery}"</h3>
-                    <p className="mt-2">Try checking your spelling or using different keywords.</p>
+                    <h3 className="text-2xl font-semibold text-slate-700 dark:text-zinc-200">{t('empty.noResults', { query: searchQuery })}</h3>
+                    <p className="mt-2">{t('empty.noResultsHint')}</p>
                     <button
                         onClick={() => setSearchQuery('')}
                         className="mt-6 inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-zinc-900 transition-all duration-200 hover:shadow-lg"
                     >
                         <ResetIcon className="w-5 h-5" />
-                        Clear Search
+                        {t('search.clearSearch')}
                     </button>
                 </div>
             );
         }
 
-        // State 2: Viewing the favorites section, but no favorites have been added yet.
         if (showFavoritesOnly && availableFavoritesCount === 0) {
             return (
                 <div className="col-span-full text-center text-slate-500 dark:text-zinc-400 py-16">
                     <BookmarkIcon className="w-16 h-16 mx-auto text-slate-400 dark:text-zinc-500 mb-4" />
-                    <h3 className="text-2xl font-semibold text-slate-700 dark:text-zinc-200">No Favorites Yet</h3>
-                    <p className="mt-2">Click the star icon <StarIcon className="w-4 h-4 inline-block text-yellow-500 fill-current"/> on an article to save it here.</p>
+                    <h3 className="text-2xl font-semibold text-slate-700 dark:text-zinc-200">{t('empty.noFavorites')}</h3>
+                    <p className="mt-2">{t('favorites.noneHint')} <StarIcon className="w-4 h-4 inline-block text-yellow-500 fill-current"/></p>
                     <button
                         onClick={() => setShowFavoritesOnly(false)}
                         className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-zinc-900 transition-all duration-200 hover:shadow-lg"
                     >
                         <ArrowLeftIcon className="w-5 h-5" />
-                        Browse All Articles
+                        {t('favorites.browseAll')}
                     </button>
                 </div>
             );
         }
 
-        // State 3: Filters are active (time, source, language, or just being in favorites view with items) but yield no results.
         if (areFiltersActive || showFavoritesOnly) {
-            const title = showFavoritesOnly ? "No Favorites Match Your Filters" : "No Articles Match Your Filters";
+            const title = showFavoritesOnly ? t('favorites.noMatch') : t('empty.noMatch');
             return (
                 <div className="col-span-full text-center text-slate-500 dark:text-zinc-400 py-16">
                     <FilterIcon className="w-16 h-16 mx-auto text-slate-400 dark:text-zinc-500 mb-4" />
                     <h3 className="text-2xl font-semibold text-slate-700 dark:text-zinc-200">{title}</h3>
-                    <p className="mt-2">Try adjusting your selection or reset all filters.</p>
+                    <p className="mt-2">{t('empty.noMatchHint')}</p>
                     <button
                         onClick={onResetFilters}
                         className="mt-6 inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-zinc-900 transition-all duration-200 hover:shadow-lg"
                     >
                         <ResetIcon className="w-5 h-5" />
-                        Reset Filters
+                        {t('filter.reset')}
                     </button>
                 </div>
             );
         }
 
-        // State 4: Generic fallback - no articles loaded at all.
         return (
             <div className="col-span-full text-center text-slate-500 dark:text-zinc-400 py-16">
                 <NewspaperIcon className="w-16 h-16 mx-auto text-slate-400 dark:text-zinc-500 mb-4" />
-                <h3 className="text-2xl font-semibold text-slate-700 dark:text-zinc-200">No Articles Found</h3>
-                <p className="mt-2">There are currently no articles to display. Please check back later.</p>
+                <h3 className="text-2xl font-semibold text-slate-700 dark:text-zinc-200">{t('empty.noArticles')}</h3>
+                <p className="mt-2">{t('empty.noArticlesHint')}</p>
             </div>
         );
     };
@@ -469,12 +460,11 @@ const AppContent: React.FC = () => {
 
     return (
         <div className="min-h-screen text-slate-800 dark:text-zinc-200 transition-colors duration-300 flex flex-col">
-            <a href="#main-content" className="skip-link">Skip to main content</a>
+            <a href="#main-content" className="skip-link">{t('a11y.skipToContent')}</a>
 
-            {/* Visually hidden container for screen reader announcements */}
             <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-                {isRefreshing && "Refreshing articles..."}
-                {isBlockingLoading && "Loading articles..."}
+                {isRefreshing && t('loading.refreshing')}
+                {isBlockingLoading && t('loading.articles')}
             </div>
 
             <Header
@@ -525,13 +515,13 @@ const AppContent: React.FC = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                             </svg>
                         </div>
-                        <h3 className="mt-4 text-2xl font-semibold text-red-600 dark:text-red-400">Could not load news</h3>
+                        <h3 className="mt-4 text-2xl font-semibold text-red-600 dark:text-red-400">{t('error.couldNotLoad')}</h3>
                         <p className="mt-2 text-slate-600 dark:text-zinc-400">{error}</p>
                         <button
                             onClick={() => loadNews(true)}
                             className="mt-6 inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-zinc-900 transition-all duration-200 hover:shadow-lg"
                         >
-                            Try Again
+                            {t('error.tryAgain')}
                         </button>
                     </div>
                 ) : (

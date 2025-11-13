@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, memo, forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Article, ViewMode } from '../types';
 import { StarIcon, MoreIcon, CopyIcon, BanIcon, ShareIcon, ArrowLeftIcon, TwitterIcon, FacebookIcon, RedditIcon, WhatsAppIcon, EmailIcon } from './Icons';
 
@@ -12,7 +13,7 @@ interface ArticleCardProps {
 }
 
 
-const formatPublicationDate = (date: string): string => {
+const formatPublicationDate = (date: string, t: any): string => {
     const articleDate = new Date(date);
     const now = new Date();
 
@@ -29,11 +30,11 @@ const formatPublicationDate = (date: string): string => {
     });
 
     if (articleDay.getTime() === today.getTime()) {
-        return `Today at ${timeString}`;
+        return t('time.today', { time: timeString });
     }
 
     if (articleDay.getTime() === yesterday.getTime()) {
-        return `Yesterday at ${timeString}`;
+        return t('time.yesterday', { time: timeString });
     }
 
     return articleDate.toLocaleDateString(navigator.language, {
@@ -63,6 +64,7 @@ interface MoreOptionsMenuProps {
 }
 
 const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, onMuteSource, isOpen, setIsOpen, buttonClassName }) => {
+    const { t } = useTranslation();
     const [menuView, setMenuView] = useState<'main' | 'share'>('main');
     const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle');
     const [startAnimation, setStartAnimation] = useState(false);
@@ -184,11 +186,11 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
     const encodedTitle = encodeURIComponent(title);
 
     const shareOptions = [
-        { name: 'X', icon: <TwitterIcon className="w-5 h-5"/>, url: `https://x.com/intent/post?url=${encodedLink}&text=${encodedTitle}` },
-        { name: 'Facebook', icon: <FacebookIcon className="w-5 h-5"/>, url: `https://www.facebook.com/sharer/sharer.php?u=${encodedLink}` },
-        { name: 'Reddit', icon: <RedditIcon className="w-5 h-5"/>, url: `https://www.reddit.com/submit?url=${encodedLink}&title=${encodedTitle}` },
-        { name: 'WhatsApp', icon: <WhatsAppIcon className="w-5 h-5"/>, url: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedLink}` },
-        { name: 'Email', icon: <EmailIcon className="w-5 h-5"/>, url: `mailto:?subject=${encodedTitle}&body=${encodedLink}` },
+        { name: t('share.x'), icon: <TwitterIcon className="w-5 h-5"/>, url: `https://x.com/intent/post?url=${encodedLink}&text=${encodedTitle}` },
+        { name: t('share.facebook'), icon: <FacebookIcon className="w-5 h-5"/>, url: `https://www.facebook.com/sharer/sharer.php?u=${encodedLink}` },
+        { name: t('share.reddit'), icon: <RedditIcon className="w-5 h-5"/>, url: `https://www.reddit.com/submit?url=${encodedLink}&title=${encodedTitle}` },
+        { name: t('share.whatsapp'), icon: <WhatsAppIcon className="w-5 h-5"/>, url: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedLink}` },
+        { name: t('share.email'), icon: <EmailIcon className="w-5 h-5"/>, url: `mailto:?subject=${encodedTitle}&body=${encodedLink}` },
     ];
 
 
@@ -216,7 +218,7 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
                         }
                     }}
                     className={`${buttonClassName || "p-2 rounded-full transition-colors duration-200 text-slate-400 bg-black/30 hover:text-white"} ${isOpen ? 'z-50' : ''}`}
-                    aria-label="More options"
+                    aria-label={t('article.moreOptions')}
                     aria-haspopup="true"
                     aria-expanded={isOpen}
                 >
@@ -250,7 +252,7 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
                         "
                     >
                         <div className="md:hidden text-center text-sm font-semibold text-slate-500 dark:text-zinc-400 border-b border-slate-200 dark:border-zinc-700 py-3">
-                            Article Options
+                            {t('article.articleOptions')}
                         </div>
 
                         <div className="relative overflow-hidden">
@@ -264,7 +266,7 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
                                             tabIndex={isOpen && menuView === 'main' ? 0 : -1}
                                             className="w-full flex items-center gap-3 text-left px-3 py-3 text-base md:text-sm text-slate-700 dark:text-zinc-300 hover:bg-slate-200 hover:text-slate-900 dark:hover:bg-zinc-600 dark:hover:text-white rounded-md transition-colors"
                                         >
-                                            <ShareIcon className="w-5 h-5 md:w-4 md:h-4" /> Share
+                                            <ShareIcon className="w-5 h-5 md:w-4 md:h-4" /> {t('article.share')}
                                         </button>
                                     </div>
                                     <div className="p-2 md:p-1">
@@ -274,7 +276,7 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
                                             tabIndex={isOpen && menuView === 'main' ? 0 : -1}
                                             className="w-full flex items-center gap-3 text-left px-3 py-3 text-base md:text-sm text-slate-700 dark:text-zinc-300 hover:bg-slate-200 hover:text-slate-900 dark:hover:bg-zinc-600 dark:hover:text-white rounded-md transition-colors disabled:opacity-75"
                                         >
-                                            <CopyIcon className="w-5 h-5 md:w-4 md:h-4" /> {copyStatus === 'copied' ? 'Copied!' : 'Copy Link'}
+                                            <CopyIcon className="w-5 h-5 md:w-4 md:h-4" /> {copyStatus === 'copied' ? t('article.copied') : t('article.copyLink')}
                                         </button>
                                     </div>
                                     <div className="p-2 md:p-1">
@@ -284,7 +286,7 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
                                             tabIndex={isOpen && menuView === 'main' ? 0 : -1}
                                             className="w-full flex items-center gap-3 text-left px-3 py-3 text-base md:text-sm text-slate-700 dark:text-zinc-300 hover:text-white hover:bg-red-500 dark:hover:text-white dark:hover:bg-red-600 rounded-md transition-colors"
                                         >
-                                            <BanIcon className="w-5 h-5 md:w-4 md:h-4" /> Mute {source}
+                                            <BanIcon className="w-5 h-5 md:w-4 md:h-4" /> {t('article.mute', { source })}
                                         </button>
                                     </div>
                                 </div>
@@ -300,7 +302,7 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
                                             tabIndex={isOpen && menuView === 'share' ? 0 : -1}
                                             className="w-full flex items-center gap-3 text-left px-3 py-3 text-base md:text-sm font-semibold text-slate-700 dark:text-zinc-300 hover:bg-slate-200 hover:text-slate-900 dark:hover:bg-zinc-600 dark:hover:text-white rounded-md transition-colors"
                                         >
-                                            <ArrowLeftIcon className="w-5 h-5 md:w-4 md:h-4" /> Back
+                                            <ArrowLeftIcon className="w-5 h-5 md:w-4 md:h-4" /> {t('article.back')}
                                         </button>
                                     </div>
                                     {shareOptions.map((opt, index) => (
@@ -329,6 +331,7 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
 
 
 const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ article, viewMode, isFavorite, onToggleFavorite, onMuteSource }, ref) => {
+    const { t } = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [allowCardOverflow, setAllowCardOverflow] = useState(false);
     const menuTimerRef = useRef<number | null>(null);
@@ -399,12 +402,12 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                     <h3 className="text-lg font-semibold mb-2 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">{article.title}</h3>
                     <p className="text-sm text-slate-600 dark:text-zinc-400 flex-grow line-clamp-3">{article.summary}</p>
                     <div className="mt-auto pt-4 flex justify-between items-center">
-                        <p className="text-sm text-slate-500 dark:text-zinc-400">{formatPublicationDate(article.publicationDate)}</p>
+                        <p className="text-sm text-slate-500 dark:text-zinc-400">{formatPublicationDate(article.publicationDate, t)}</p>
                         <div className="flex items-center gap-1">
                             <button
                                 onClick={(e) => { e.preventDefault(); onToggleFavorite(article.id); }}
                                 className={`p-3 rounded-full transition-all duration-200 ${isFavorite ? favoriteActiveClass : favoriteInactiveClass}`}
-                                aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                                aria-label={isFavorite ? t('article.removeFromFavorites') : t('article.addToFavorites')}
                             >
                                 <StarIcon className={`w-5 h-5 ${isAnimatingFavorite ? 'animate-pop-in' : ''}`} />
                             </button>
@@ -457,7 +460,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                             <button
                                 onClick={(e) => { e.preventDefault(); onToggleFavorite(article.id); }}
                                 className={`p-3 rounded-full transition-all duration-200 ${isFavorite ? favoriteActiveClass : favoriteInactiveClass}`}
-                                aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                                aria-label={isFavorite ? t('article.removeFromFavorites') : t('article.addToFavorites')}
                             >
                                 <StarIcon className={`w-5 h-5 ${isAnimatingFavorite ? 'animate-pop-in' : ''}`} />
                             </button>
@@ -480,7 +483,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                     </p>
                     <div className="mt-auto pt-2">
                         <span className="text-sm text-slate-500 dark:text-zinc-400 flex-shrink-0">
-                            {formatPublicationDate(article.publicationDate)}
+                            {formatPublicationDate(article.publicationDate, t)}
                         </span>
                     </div>
                 </div>
@@ -506,7 +509,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                         {article.title}
                     </h3>
                     <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400 mt-1">
-                        <span className="font-medium text-slate-700 dark:text-zinc-300 flex-shrink-0">{formatPublicationDate(article.publicationDate)}</span>
+                        <span className="font-medium text-slate-700 dark:text-zinc-300 flex-shrink-0">{formatPublicationDate(article.publicationDate, t)}</span>
                         <span className="text-slate-500 dark:text-zinc-400">·</span>
                         <span className="truncate">{article.source}</span>
                         <span className="text-slate-500 dark:text-zinc-400">·</span>
@@ -521,7 +524,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                             onToggleFavorite(article.id);
                         }}
                         className={`p-3 rounded-full transition-all duration-200 ${isFavorite ? favoriteActiveClass : favoriteInactiveClass}`}
-                        aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                        aria-label={isFavorite ? t('article.removeFromFavorites') : t('article.addToFavorites')}
                     >
                         <StarIcon className={`w-5 h-5 ${isAnimatingFavorite ? 'animate-pop-in' : ''}`} />
                     </button>
