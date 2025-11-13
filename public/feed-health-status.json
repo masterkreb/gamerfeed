@@ -28,8 +28,8 @@
     "message": "Successfully fetched and parsed 20 articles."
   },
   "mein-mmo": {
-    "status": "success",
-    "message": "Successfully fetched and parsed 10 articles."
+    "status": "error",
+    "message": "All fetch attempts failed. Last error: The operation was aborted due to timeout"
   },
   "pc-gamer": {
     "status": "success",
