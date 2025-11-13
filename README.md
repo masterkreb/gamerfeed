@@ -1,5 +1,3 @@
-<div align="center">
-</div>
 
 # GamerFeed - Ein Moderner Gaming-News-Aggregator
 
@@ -31,7 +29,7 @@ GamerFeed nutzt eine hybride Architektur, die auf Geschwindigkeit und Zuverläss
 
 1.  **Datenerfassung (Cron Job via GitHub Actions)**:
     - Alle 30 Minuten wird das Node.js-Skript `scripts/fetch-feeds.js` durch einen GitHub-Workflow ausgeführt.
-    - Das Skript holt die Liste der RSS-Feeds aus einer **Vercel Postgres**-Datenbank.
+    - Das Skript holt die Liste der RSS-Feeds aus einer **Vercel Postgres**-Datenbank (powered by Neon).
     - Es parst die XML-Feeds, extrahiert und bereinigt Artikeldaten, optimiert Bild-URLs und nutzt bei Bedarf einen Scraping-Fallback.
     - Die verarbeiteten Artikel werden in `public/news-cache.json` gespeichert.
     - Der Status jedes Feeds wird in `public/feed-health-status.json` protokolliert.
@@ -46,6 +44,16 @@ GamerFeed nutzt eine hybride Architektur, die auf Geschwindigkeit und Zuverläss
     - Das Admin-Panel (`/admin.html`) ist eine separate, passwortgeschützte React-Anwendung.
     - Der Schutz wird durch **Vercel Middleware** (`middleware.js`) realisiert, die eine HTTP Basic Authentication erzwingt, bevor die Seite geladen wird.
     - Das Panel kommuniziert mit einer API (`/api/feeds.ts`), die als Vercel Edge Function läuft, um Feed-Quellen in der Postgres-Datenbank zu erstellen, zu bearbeiten oder zu löschen (CRUD).
+
+### Warum diese Architektur?
+
+Die Wahl der Technologien und Dienste zielt darauf ab, eine hochperformante, wartungsarme und kostengünstige Anwendung zu schaffen, die idealerweise komplett im Rahmen von Free Tiers betrieben werden kann.
+
+-   **Vercel für das Frontend**: Vercel ist optimal für das Hosting von statischen React-Anwendungen (Vite). Es bietet ein globales CDN für blitzschnelle Ladezeiten, automatische Deployments aus Git und integrierte Edge Functions für die schlanke Admin-API – alles mit einem großzügigen kostenlosen Kontingent.
+
+-   **Neon (via Vercel Postgres) für die Datenbank**: Die Datenbankanforderungen sind minimal – sie speichert nur die Liste der Feed-Quellen. Vercel Postgres, das auf der serverless-Architektur von **Neon** basiert, ist hierfür perfekt. Es bietet eine kostenlose Stufe, die für diesen Anwendungsfall mehr als ausreicht, und skaliert bei Bedarf automatisch.
+
+-   **GitHub Actions für den Cron Job**: Warum nicht Vercel Cron Jobs? Vercels kostenloses Kontingent erlaubt nur eine Ausführung pro Tag. Für einen News-Aggregator, der aktuell bleiben soll, ist das zu selten. **GitHub Actions** bietet hier eine flexible und kostenlose Alternative, die es uns ermöglicht, den Feed-Update-Prozess zuverlässig alle 30 Minuten zu starten. Dieser Ansatz entkoppelt die zeitgesteuerte Datenerfassung vom Hosting-Provider und sorgt für eine robuste "serverless" Lösung.
 
 ---
 
@@ -75,7 +83,7 @@ Folge diesen Schritten, um das Projekt lokal auf deinem Rechner auszuführen.
     Erstelle eine Datei namens `.env` im Hauptverzeichnis des Projekts und füge die folgenden Variablen hinzu. Diese werden für das Admin-Panel und die Skripte benötigt.
 
     ```env
-    # Verbindung zur Vercel Postgres-Datenbank
+    # Verbindung zur Vercel Postgres-Datenbank (powered by Neon)
     POSTGRES_URL="postgres://..."
 
     # Anmeldedaten für das Admin-Panel (/admin.html)
