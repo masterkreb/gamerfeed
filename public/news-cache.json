@@ -1,5 +1,95 @@
 [
   {
+    "id": "https://www.heise.de/news/Donnerstag-Google-gegen-Phishing-Kartell-Pruefung-auf-DSA-Verstoesse-bei-X-11076395.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "Donnerstag: Google gegen Phishing-Kartell, Prüfung auf DSA-Verstöße bei X",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-13T05:15:00.000Z",
+    "summary": "Online-Betrug als Geschäftsmodell + Widerspruchsrecht bei Löschanträgen + EU-Parlamentarier gegen KI-Kündigungen + Steam Frame VR-Headset ohne PC +...",
+    "link": "https://www.heise.de/news/Donnerstag-Google-gegen-Phishing-Kartell-Pruefung-auf-DSA-Verstoesse-bei-X-11076395.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/5/1/6/thursday-b836aef2a22049ce.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.heise.de/news/heiseshow-GEMA-vs-ChatGPT-offenes-WLAN-Vodafone-die-Internetknoten-11075662.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "title": "#heiseshow: GEMA vs. ChatGPT, offenes WLAN, Vodafone & die Internetknoten",
+    "source": "Heise Online",
+    "publicationDate": "2025-11-13T05:14:00.000Z",
+    "summary": "In der #heiseshow: GEMA siegt gegen ChatGPT, Vorratsdatenspeicherung bedroht offenes WLAN und Vodafone verlässt öffentliche Internetknoten.",
+    "link": "https://www.heise.de/news/heiseshow-GEMA-vs-ChatGPT-offenes-WLAN-Vodafone-die-Internetknoten-11075662.html?wt_mc=rss.red.ho.ho.atom.beitrag.beitrag",
+    "imageUrl": "https://www.heise.de/scale/geometry/450/q80//imgs/18/4/9/7/6/1/3/6/hs_thumb_25kw46-73135ba509fba71d.jpeg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.xboxdynasty.de/?p=1201845",
+    "title": "Xbox Game Pass: Abo feiert starkes 2. Quartal mit über 40 neuen Spielen und Top-Wertungen",
+    "source": "XboxDynasty",
+    "publicationDate": "2025-11-13T05:00:14.000Z",
+    "summary": "Xbox Game Pass Q2 2025: Microsoft feiert starkes Quartal mit über 40 neuen Spielen und Top-Wertungen",
+    "link": "https://www.xboxdynasty.de/news/xbox-game-pass/abo-feiert-starkes-2-quartal-mit-ueber-40-neuen-spielen-und-top-wertungen/",
+    "imageUrl": "https://www.xboxdynasty.de/wp-content/uploads/2017/02/xbox-game-pass-207.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.pcgames.de/The-Witcher-Serie-267922/News/The-rats-film-staffel-4-bewertungen-netflix-staffel-5-1486373/",
+    "title": "The Witcher auf Netflix am absoluten Tiefpunkt: Bewertungen sorgen für Minus-Rekord",
+    "source": "PC Games",
+    "publicationDate": "2025-11-13T04:58:00.000Z",
+    "summary": "Die Fantasy-Serie The Witcher entwickelt sich immer mehr zum Desaster für Netflix.",
+    "link": "https://www.pcgames.de/The-Witcher-Serie-267922/News/The-rats-film-staffel-4-bewertungen-netflix-staffel-5-1486373/",
+    "imageUrl": "https://www.pcgames.de/screenshots/970x546/2025/02/The-Witcher-Staffel-3-Ausgabe-2-Henry-Cavill-Ciri-pc-games.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamezone.de/The-Witcher-Serie-267922/News/The-rats-film-staffel-4-bewertungen-netflix-staffel-5-1486373/",
+    "title": "The Witcher auf Netflix am absoluten Tiefpunkt: Bewertungen sorgen für Minus-Rekord",
+    "source": "GameZone",
+    "publicationDate": "2025-11-13T04:58:00.000Z",
+    "summary": "Die Fantasy-Serie The Witcher entwickelt sich immer mehr zum Desaster für Netflix.",
+    "link": "https://www.gamezone.de/The-Witcher-Serie-267922/News/The-rats-film-staffel-4-bewertungen-netflix-staffel-5-1486373/",
+    "imageUrl": "https://www.gamezone.de/screenshots/970x546/2025/02/The-Witcher-Staffel-3-Ausgabe-2-Henry-Cavill-Ciri-pc-games.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.videogameszone.de/The-Witcher-Serie-267922/News/The-rats-film-staffel-4-bewertungen-netflix-staffel-5-1486373/",
+    "title": "The Witcher auf Netflix am absoluten Tiefpunkt: Bewertungen sorgen für Minus-Rekord",
+    "source": "Video Games Zone",
+    "publicationDate": "2025-11-13T04:58:00.000Z",
+    "summary": "Die Fantasy-Serie The Witcher entwickelt sich immer mehr zum Desaster für Netflix.",
+    "link": "https://www.videogameszone.de/The-Witcher-Serie-267922/News/The-rats-film-staffel-4-bewertungen-netflix-staffel-5-1486373/",
+    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/02/The-Witcher-Staffel-3-Ausgabe-2-Henry-Cavill-Ciri-pc-games.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gematsu.com/?p=1006622",
+    "title": "Palworld Mobile closed alpha test set for December",
+    "source": "Gematsu",
+    "publicationDate": "2025-11-13T04:50:50.000Z",
+    "summary": "KRAFTON will host a closed alpha test for Palworld Mobile in December, the company announced. … Source",
+    "link": "https://www.gematsu.com/2025/11/palworld-mobile-closed-alpha-test-set-for-december",
+    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/Palworld-Mobile_2025_11-12-25_001.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.nintendolife.com/#article-193826",
+    "title": "ICYMI: The Super Mario Galaxy Movie Teases Rosalina And Bowser Jr. Scenes, Here's A First Look",
+    "source": "Nintendo Life",
+    "publicationDate": "2025-11-13T04:45:00.000Z",
+    "summary": "Voiced by Brie Larson and Benny Safdie.Nintendo and Illumination have aired the first official trailer for The Super Mario Galaxy Movie. That's not...",
+    "link": "https://www.nintendolife.com/news/2025/11/icymi-the-super-mario-galaxy-movie-teases-rosalina-and-bowser-jr-scenes-heres-a-first-look",
+    "imageUrl": "https://images.nintendolife.com/9a607876892ca/large.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.gamepro.de/artikel/one-piece-alte-deutsche-synchro,3442518.html",
+    "title": "News: Bald könnt ihr One Piece in der alten oder neuen deutschen Synchro anschauen – aber bei zwei unterschiedlichen Anbietern",
+    "source": "GamePro",
+    "publicationDate": "2025-11-13T04:35:00.000Z",
+    "summary": "Wenn euch die neue deutsche Synchro von One Piece nicht anspricht, dann könnt ihr ab heute die alte deutsche Vertonung der Anime-Serie anschauen.",
+    "link": "https://www.gamepro.de/artikel/one-piece-alte-deutsche-synchro,3442518.html",
+    "imageUrl": "https://images.cgames.de/images/gsgp/1200/one-piece-ruffy-denken-_6260389.jpg",
+    "language": "de"
+  },
+  {
     "id": "2900-4347",
     "title": "The Best Disney Games Of All Time",
     "source": "GameSpot",
@@ -2627,36 +2717,6 @@
     "summary": "Digimon Story: Time Stranger erhält seine erste große Erweiterung. Bandai Namco Entertainment hat die erste große Erweiterung für Digimon Story: Time...",
     "link": "https://www.eurogamer.de/digimon-story-time-stranger-veroffentlicht-einen-trailer-zur-angekundigten-erweiterung-alternate-dimension",
     "imageUrl": "https://assetsio.gnwcdn.com/Digimon-Story-Time-Stanger_News.jpg?width=690&amp;quality=85&amp;format=jpg&amp;auto=webp",
-    "language": "de"
-  },
-  {
-    "id": "https://www.pcgames.de/The-Witcher-Serie-267922/News/The-rats-film-staffel-4-bewertungen-netflix-staffel-5-1486373/",
-    "title": "The Witcher auf Netflix am absoluten Tiefpunkt: Bewertungen sorgen für Minus-Rekord",
-    "source": "PC Games",
-    "publicationDate": "2025-11-12T16:57:00.000Z",
-    "summary": "Die Fantasy-Serie The Witcher entwickelt sich immer mehr zum Desaster für Netflix.",
-    "link": "https://www.pcgames.de/The-Witcher-Serie-267922/News/The-rats-film-staffel-4-bewertungen-netflix-staffel-5-1486373/",
-    "imageUrl": "https://www.pcgames.de/screenshots/970x546/2025/10/henry-liam-the-witcher-pc-games.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.gamezone.de/The-Witcher-Serie-267922/News/The-rats-film-staffel-4-bewertungen-netflix-staffel-5-1486373/",
-    "title": "The Witcher auf Netflix am absoluten Tiefpunkt: Bewertungen sorgen für Minus-Rekord",
-    "source": "GameZone",
-    "publicationDate": "2025-11-12T16:57:00.000Z",
-    "summary": "Die Fantasy-Serie The Witcher entwickelt sich immer mehr zum Desaster für Netflix.",
-    "link": "https://www.gamezone.de/The-Witcher-Serie-267922/News/The-rats-film-staffel-4-bewertungen-netflix-staffel-5-1486373/",
-    "imageUrl": "https://www.gamezone.de/screenshots/970x546/2025/10/henry-liam-the-witcher-pc-games.jpg",
-    "language": "de"
-  },
-  {
-    "id": "https://www.videogameszone.de/The-Witcher-Serie-267922/News/The-rats-film-staffel-4-bewertungen-netflix-staffel-5-1486373/",
-    "title": "The Witcher auf Netflix am absoluten Tiefpunkt: Bewertungen sorgen für Minus-Rekord",
-    "source": "Video Games Zone",
-    "publicationDate": "2025-11-12T16:57:00.000Z",
-    "summary": "Die Fantasy-Serie The Witcher entwickelt sich immer mehr zum Desaster für Netflix.",
-    "link": "https://www.videogameszone.de/The-Witcher-Serie-267922/News/The-rats-film-staffel-4-bewertungen-netflix-staffel-5-1486373/",
-    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2025/10/henry-liam-the-witcher-pc-games.jpg",
     "language": "de"
   },
   {
