@@ -130,6 +130,7 @@ const resources = {
 
             // Accessibility
             "a11y.skipToContent": "Skip to main content",
+            "a11y.changeLanguage": "Change language, current: {{lang}}",
         }
     },
     de: {
@@ -260,6 +261,7 @@ const resources = {
 
             // Accessibility
             "a11y.skipToContent": "Zum Hauptinhalt springen",
+            "a11y.changeLanguage": "Sprache ändern, aktuell: {{lang}}",
         }
     }
 };

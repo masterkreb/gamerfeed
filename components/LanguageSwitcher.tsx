@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const LanguageSwitcher: React.FC = () => {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -11,7 +11,7 @@ export const LanguageSwitcher: React.FC = () => {
         { code: 'de', label: 'DE', flag: '🇩🇪', name: 'Deutsch' },
     ];
 
-    const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+    const currentLanguage = languages.find(lang => i18n.language.startsWith(lang.code)) || languages[0];
 
     const handleLanguageChange = (langCode: string) => {
         i18n.changeLanguage(langCode);
@@ -37,7 +37,7 @@ export const LanguageSwitcher: React.FC = () => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all font-medium text-sm"
-                aria-label="Change language"
+                aria-label={t('a11y.changeLanguage', { lang: currentLanguage.name })}
                 aria-haspopup="true"
                 aria-expanded={isOpen}
             >
@@ -53,7 +53,7 @@ export const LanguageSwitcher: React.FC = () => {
                                 key={lang.code}
                                 onClick={() => handleLanguageChange(lang.code)}
                                 className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium w-full text-left transition-colors ${
-                                    i18n.language === lang.code
+                                    i18n.language.startsWith(lang.code)
                                         ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400'
                                         : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-700'
                                 }`}
