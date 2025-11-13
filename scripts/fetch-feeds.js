@@ -802,6 +802,12 @@ function parseRssXml(xmlString, feed) {
             }
         }
 
+        // NEW: Validate image URL from primary sources before falling back to content parsing.
+        // This specifically targets feeds like PlayStationInfo that put emoji images in high-priority tags.
+        if (imageUrl && imageUrl.includes('s.w.org/images/core/emoji')) {
+            imageUrl = null; // Discard emoji URL. This will trigger the content-parsing fallback or scraper.
+        }
+
         // 5. Fallback to parsing content
         if (!imageUrl) {
             let contentText = '';

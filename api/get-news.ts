@@ -593,7 +593,15 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
         imageUrl = item['media:thumbnail'].url;
     } else if (item.thumbnail && typeof item.thumbnail === 'string') {
         imageUrl = item.thumbnail;
-    } else {
+    }
+
+    // NEW: Validate image URL from primary sources before falling back to content parsing.
+    // This specifically targets feeds like PlayStationInfo that put emoji images in high-priority tags.
+    if (imageUrl && imageUrl.includes('s.w.org/images/core/emoji')) {
+        imageUrl = undefined; // Discard emoji URL. This will trigger the content-parsing fallback or scraper.
+    }
+
+    if (!imageUrl) { // This was previously the 'else' block
         const content = item.content || item.description || '';
         if (content) {
             const imgTagMatches = content.matchAll(/<img[^>]*>/gi);
