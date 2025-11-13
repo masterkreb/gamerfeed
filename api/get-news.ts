@@ -525,7 +525,7 @@ function stripHtmlAndTruncate(html: string, length: number = 150): string {
     }
 }
 
-async function getOgImageFromUrl(url: string): Promise<string | null> {
+async function getOgImageFromUrl(url: string, sourceName: string): Promise<string | null> {
     const proxies = [
         `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
         `https://corsproxy.io/?${encodeURIComponent(url)}`,
@@ -547,13 +547,33 @@ async function getOgImageFromUrl(url: string): Promise<string | null> {
             const ogImageMatch = html.match(/<meta\s+(?:property|name)=["'](?:og:image|twitter:image)["']\s+content=["']([^"']+)["']/i) ||
                 html.match(/<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["'](?:og:image|twitter:image)["']/i);
 
-            if (ogImageMatch && ogImageMatch[1]) {
+            let ogImageUrl = ogImageMatch ? ogImageMatch[1] : null;
+
+            // Rule for PlayStationInfo: if og:image is a WP emoji, discard and look for alternatives.
+            if (sourceName === 'PlayStationInfo' && ogImageUrl && ogImageUrl.includes('s.w.org/images/core/emoji')) {
+                ogImageUrl = null;
+            }
+
+            if (ogImageUrl) {
                 try {
-                    return new URL(ogImageMatch[1], url).href;
+                    return new URL(ogImageUrl, url).href;
                 } catch {
-                    return ogImageMatch[1];
+                    return ogImageUrl;
                 }
             }
+
+            // Fallback: If no valid og:image, look for YouTube iframe in body
+            const youtubeIframeMatch = html.match(/<iframe[^>]+src=["']https?:\/\/(?:www\.)?youtube\.com\/embed\/([^"/?]+)/i);
+            if (youtubeIframeMatch && youtubeIframeMatch[1]) {
+                return `https://img.youtube.com/vi/${youtubeIframeMatch[1]}/hqdefault.jpg`;
+            }
+
+            // Fallback 2: look for youtube link in `<a>` tag
+            const youtubeLinkMatch = html.match(/<a[^>]+href=["']https?:\/\/(?:www\.)?youtube\.com\/watch\?v=([^"&]+)/i);
+            if (youtubeLinkMatch && youtubeLinkMatch[1]) {
+                return `https://img.youtube.com/vi/${youtubeLinkMatch[1]}/hqdefault.jpg`;
+            }
+
         } catch (e) {
             console.warn(`Error scraping OG Image for ${url}:`, e);
         }
@@ -909,20 +929,14 @@ async function runImageScraper(articles: Article[]): Promise<Article[]> {
         const batch = articlesToScrape.slice(i, i + BATCH_SIZE);
         await Promise.all(
             batch.map(async article => {
-                const scrapedUrl = await getOgImageFromUrl(article.link);
+                const scrapedUrl = await getOgImageFromUrl(article.link, article.source);
 
-                let finalScrapedUrl = scrapedUrl;
-                // Rule for PlayStationInfo: ignore WordPress emoji fallbacks
-                if (article.source === 'PlayStationInfo' && scrapedUrl && scrapedUrl.includes('s.w.org/images/core/emoji')) {
-                    finalScrapedUrl = null;
-                }
-
-                if (finalScrapedUrl) {
+                if (scrapedUrl) {
                     const existing = updatedArticlesMap.get(article.id);
                     if (existing) {
                         updatedArticlesMap.set(article.id, {
                             ...existing,
-                            imageUrl: finalScrapedUrl,
+                            imageUrl: scrapedUrl,
                             needsScraping: false
                         });
                     }

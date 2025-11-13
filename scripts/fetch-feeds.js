@@ -657,7 +657,7 @@ function stripHtmlAndTruncate(html, length = 150) {
 
 
 // === IMAGE SCRAPING ===
-async function getOgImageFromUrl(url) {
+async function getOgImageFromUrl(url, sourceName) {
     const proxies = [
         `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
         `https://corsproxy.io/?${encodeURIComponent(url)}`,
@@ -677,18 +677,47 @@ async function getOgImageFromUrl(url) {
                 doc.querySelector('meta[property="og:image:url"]') ||
                 doc.querySelector('meta[name="twitter:image"]');
 
-            if (ogImageMeta) {
-                const imageUrl = ogImageMeta.getAttribute('content');
-                if (imageUrl) {
-                    try {
-                        return new URL(imageUrl, url).href;
-                    } catch {
-                        return imageUrl;
+            let imageUrl = ogImageMeta ? ogImageMeta.getAttribute('content') : null;
+
+            // Rule for PlayStationInfo: if og:image is a WP emoji, discard and look for alternatives.
+            if (sourceName === 'PlayStationInfo' && imageUrl && imageUrl.includes('s.w.org/images/core/emoji')) {
+                imageUrl = null;
+            }
+
+            if (imageUrl) {
+                try {
+                    return new URL(imageUrl, url).href;
+                } catch {
+                    return imageUrl;
+                }
+            }
+
+            // Fallback: If no valid og:image, look for YouTube iframe in body
+            const youtubeIframe = doc.querySelector('iframe[src*="youtube.com/embed/"]');
+            if (youtubeIframe) {
+                const src = youtubeIframe.getAttribute('src');
+                if (src) {
+                    const videoIdMatch = src.match(/embed\/([^/?]+)/);
+                    if (videoIdMatch && videoIdMatch[1]) {
+                        return `https://img.youtube.com/vi/${videoIdMatch[1]}/hqdefault.jpg`;
+                    }
+                }
+            }
+
+            // Fallback 2: look for youtube link in `<a>` tag
+            const youtubeLink = doc.querySelector('a[href*="youtube.com/watch"]');
+            if (youtubeLink) {
+                const href = youtubeLink.getAttribute('href');
+                if (href) {
+                    const videoIdMatch = href.match(/[?&]v=([^&]+)/);
+                    if (videoIdMatch && videoIdMatch[1]) {
+                        return `https://img.youtube.com/vi/${videoIdMatch[1]}/hqdefault.jpg`;
                     }
                 }
             }
         } catch (e) {
             // Try next proxy
+            console.warn(`Scraping error for ${url} via proxy:`, e.message);
         }
     }
     return null;
@@ -1045,17 +1074,10 @@ async function fetchArticles() {
             for (const article of articlesNeedingScraping) {
                 try {
                     console.log(`   🖼️  Scraping: ${article.source} - ${article.title.substring(0, 40)}...`);
-                    const scrapedImage = await getOgImageFromUrl(article.link);
+                    const scrapedImage = await getOgImageFromUrl(article.link, article.source);
 
-                    let finalScrapedImage = scrapedImage;
-                    // Rule for PlayStationInfo: ignore WordPress emoji fallbacks
-                    if (article.source === 'PlayStationInfo' && scrapedImage && scrapedImage.includes('s.w.org/images/core/emoji')) {
-                        finalScrapedImage = null;
-                        console.log(`      ⚠️  Ignoring WP emoji fallback image for PlayStationInfo.`);
-                    }
-
-                    if (finalScrapedImage) {
-                        article.imageUrl = finalScrapedImage;
+                    if (scrapedImage) {
+                        article.imageUrl = scrapedImage;
                         article.needsScraping = false;
                         console.log(`      ✅ Found image`);
                     } else {
