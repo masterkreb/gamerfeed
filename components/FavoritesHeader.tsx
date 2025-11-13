@@ -23,7 +23,7 @@ export const FavoritesHeader: React.FC<FavoritesHeaderProps> = ({
     if (areFiltersActive) {
         const message = filteredFavoritesCount === 0
             ? t('favorites.noMatch')
-            : t('favorites.showingFiltered', { filtered: filteredFavoritesCount, total: totalFavorites });
+            : t('favorites.showingFiltered', { count: filteredFavoritesCount, filtered: filteredFavoritesCount, total: totalFavorites });
 
         content = (
             <p className="text-sm text-amber-700 dark:text-amber-300">
