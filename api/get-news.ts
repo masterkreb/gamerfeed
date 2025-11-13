@@ -112,18 +112,26 @@
 //
 //                 const isYouTube = src.includes('ytimg.com');
 //
-//                 if (!isYouTube) {
-//                     bestImg = src;
-//                     break;
-//                 } else if (!youtubeFallback) {
-//                     youtubeFallback = src;
+//                 if (isYouTube) {
+//                     if (!youtubeFallback) youtubeFallback = src;
+//                 } else {
+//                     if (!bestImg) bestImg = src;
 //                 }
 //             }
 //
-//             if (bestImg) {
-//                 imageUrl = bestImg;
-//             } else if (youtubeFallback) {
-//                 imageUrl = youtubeFallback;
+//             if (feed.name === 'PlayStation.Blog') {
+//                 // For PS Blog, only accept YouTube thumbnails from the feed content.
+//                 // If not found, let it fall back to scraping.
+//                 if (youtubeFallback) {
+//                     imageUrl = youtubeFallback;
+//                 }
+//             } else {
+//                 // For all other feeds, use the existing logic.
+//                 if (bestImg) {
+//                     imageUrl = bestImg;
+//                 } else if (youtubeFallback) {
+//                     imageUrl = youtubeFallback;
+//                 }
 //             }
 //         }
 //     }
@@ -475,6 +483,7 @@
 //     }
 // }
 
+
 export const config = {
     runtime: 'edge',
 };
@@ -597,8 +606,8 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
             }
 
             if (feed.name === 'PlayStation.Blog') {
-                // For PS Blog, only accept YouTube thumbnails from the feed content.
-                // If not found, let it fall back to scraping.
+                // For PS Blog, if we find a YT thumbnail, we take it.
+                // If not, we force scraping by not assigning any image, even if 'bestImg' exists.
                 if (youtubeFallback) {
                     imageUrl = youtubeFallback;
                 }
@@ -901,12 +910,19 @@ async function runImageScraper(articles: Article[]): Promise<Article[]> {
         await Promise.all(
             batch.map(async article => {
                 const scrapedUrl = await getOgImageFromUrl(article.link);
-                if (scrapedUrl) {
+
+                let finalScrapedUrl = scrapedUrl;
+                // Rule for PlayStationInfo: ignore WordPress emoji fallbacks
+                if (article.source === 'PlayStationInfo' && scrapedUrl && scrapedUrl.includes('s.w.org/images/core/emoji')) {
+                    finalScrapedUrl = null;
+                }
+
+                if (finalScrapedUrl) {
                     const existing = updatedArticlesMap.get(article.id);
                     if (existing) {
                         updatedArticlesMap.set(article.id, {
                             ...existing,
-                            imageUrl: scrapedUrl,
+                            imageUrl: finalScrapedUrl,
                             needsScraping: false
                         });
                     }

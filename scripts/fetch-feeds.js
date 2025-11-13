@@ -246,19 +246,28 @@
 //
 //                         const isYouTube = src.includes('ytimg.com');
 //
-//                         if (!isYouTube) {
-//                             bestImg = src;
-//                             break; // Found a good non-youtube image
-//                         } else if (!youtubeFallback) {
-//                             youtubeFallback = src; // Found a YouTube image, save as fallback
+//                         if (isYouTube) {
+//                             if (!youtubeFallback) youtubeFallback = src;
+//                         } else {
+//                             if (!bestImg) bestImg = src;
 //                         }
 //                     }
 //
-//                     if (bestImg) {
-//                         imageUrl = bestImg;
-//                     } else if (youtubeFallback) {
-//                         imageUrl = youtubeFallback;
+//                     if (feed.name === 'PlayStation.Blog') {
+//                         // For PS Blog, only accept YouTube thumbnails from the feed content.
+//                         // If not found, let it fall back to scraping.
+//                         if (youtubeFallback) {
+//                             imageUrl = youtubeFallback;
+//                         }
+//                     } else {
+//                         // For all other feeds, use the existing logic.
+//                         if (bestImg) {
+//                             imageUrl = bestImg;
+//                         } else if (youtubeFallback) {
+//                             imageUrl = youtubeFallback;
+//                         }
 //                     }
+//
 //                 } catch(e) { /* ignore HTML parsing errors inside XML content */ }
 //             }
 //         }
@@ -555,6 +564,7 @@
 //
 // fetchArticles();
 
+
 // scripts/fetch-feeds.js
 // Fetches RSS feeds and saves to public/news-cache.json
 // WITH image optimization and scraping support
@@ -811,8 +821,8 @@ function parseRssXml(xmlString, feed) {
                     }
 
                     if (feed.name === 'PlayStation.Blog') {
-                        // For PS Blog, only accept YouTube thumbnails from the feed content.
-                        // If not found, let it fall back to scraping.
+                        // For PS Blog, if we find a YT thumbnail, we take it.
+                        // If not, we force scraping by not assigning any image, even if 'bestImg' exists.
                         if (youtubeFallback) {
                             imageUrl = youtubeFallback;
                         }
@@ -1037,8 +1047,15 @@ async function fetchArticles() {
                     console.log(`   🖼️  Scraping: ${article.source} - ${article.title.substring(0, 40)}...`);
                     const scrapedImage = await getOgImageFromUrl(article.link);
 
-                    if (scrapedImage) {
-                        article.imageUrl = scrapedImage;
+                    let finalScrapedImage = scrapedImage;
+                    // Rule for PlayStationInfo: ignore WordPress emoji fallbacks
+                    if (article.source === 'PlayStationInfo' && scrapedImage && scrapedImage.includes('s.w.org/images/core/emoji')) {
+                        finalScrapedImage = null;
+                        console.log(`      ⚠️  Ignoring WP emoji fallback image for PlayStationInfo.`);
+                    }
+
+                    if (finalScrapedImage) {
+                        article.imageUrl = finalScrapedImage;
                         article.needsScraping = false;
                         console.log(`      ✅ Found image`);
                     } else {
