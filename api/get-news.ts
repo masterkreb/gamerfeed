@@ -596,13 +596,19 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
                 }
             }
 
-            // For PlayStation.Blog, prioritize YouTube images. Otherwise, prioritize other images.
-            if (feed.name === 'PlayStation.Blog' && youtubeFallback) {
-                imageUrl = youtubeFallback;
-            } else if (bestImg) {
-                imageUrl = bestImg;
-            } else if (youtubeFallback) {
-                imageUrl = youtubeFallback;
+            if (feed.name === 'PlayStation.Blog') {
+                // For PS Blog, only accept YouTube thumbnails from the feed content.
+                // If not found, let it fall back to scraping.
+                if (youtubeFallback) {
+                    imageUrl = youtubeFallback;
+                }
+            } else {
+                // For all other feeds, use the existing logic.
+                if (bestImg) {
+                    imageUrl = bestImg;
+                } else if (youtubeFallback) {
+                    imageUrl = youtubeFallback;
+                }
             }
         }
     }
