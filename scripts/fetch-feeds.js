@@ -825,6 +825,7 @@ function parseRssXml(xmlString, feed) {
                         if (
                             !src ||
                             src.startsWith('data:') ||
+                            src.includes('s.w.org/images/core/emoji') ||
                             src.includes('placeholder.svg') ||
                             src.includes('cpx.golem.de') ||
                             src.includes('feedburner.com') ||

@@ -606,7 +606,7 @@ function extractInitialData(item: any, feed: FeedSource): { imageUrl: string; ne
                 const srcMatch = imgTag.match(/src=["']([^"']+)["']/i);
                 const src = dataSrcMatch ? dataSrcMatch[1] : (srcMatch ? srcMatch[1] : null);
 
-                if (!src || src.startsWith('data:') || src.includes('placeholder.svg') || src.includes('cpx.golem.de') || src.includes('feedburner.com') || src.includes('gravatar.com')) {
+                if (!src || src.startsWith('data:') || src.includes('placeholder.svg') || src.includes('cpx.golem.de') || src.includes('feedburner.com') || src.includes('gravatar.com') || src.includes('s.w.org/images/core/emoji')) {
                     continue;
                 }
 
