@@ -1,5 +1,4 @@
 
-
 # GamerFeed - Ein Moderner Gaming-News-Aggregator
 
 GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachrichten aus der Welt der Videospiele von zahlreichen deutsch- und englischsprachigen Quellen bündelt. Die Anwendung ist als schnelle, responsive und hochgradig anpassbare Single-Page-Application (SPA) konzipiert.
@@ -8,7 +7,7 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
 
 - **Umfassende Nachrichten-Aggregation**: Sammelt Artikel aus einer Vielzahl von RSS-Feeds.
 - **Moderne Benutzeroberfläche**: Ein sauberes, responsives Design, gebaut mit React und Tailwind CSS.
-- **Mehrsprachigkeit**: Vollständig übersetzbar mit i18next, standardmäßig in Deutsch und Englisch verfügbar.
+- **Mehrsprachigkeit**: Vollständig übersetzbar mit i18next. Erkennt automatisch die Browsersprache des Nutzers (Deutsch/Englisch) und merkt sich die Auswahl.
 - **Anpassbare Ansicht**:
     - **Themes**: Wähle zwischen Light- und Dark-Mode.
     - **Layouts**: Grid-, Listen- oder Kompaktansicht für Artikel.
@@ -80,7 +79,7 @@ Folge diesen Schritten, um das Projekt lokal auf deinem Rechner auszuführen.
     ```bash
     npm install
     ```
-    Dieser Befehl installiert alle für das Projekt benötigten Pakete, die in der `package.json`-Datei aufgeführt sind. Dazu gehören React, Vite und auch die Pakete für die Mehrsprachigkeit wie `i18next` und `react-i18next`. Es sind keine weiteren Installationsbefehle nötig.
+    Dieser Befehl installiert alle für das Projekt benötigten Pakete, die in der `package.json`-Datei aufgeführt sind. Dazu gehören React, Vite und auch die Pakete für die Mehrsprachigkeit wie `i18next`, `react-i18next` und `i18next-browser-languagedetector`. Es sind keine weiteren Installationsbefehle nötig.
 
 3.  **Umgebungsvariablen einrichten**:
     Erstelle eine Datei namens `.env` im Hauptverzeichnis des Projekts und füge die folgenden Variablen hinzu. Diese werden für das Admin-Panel und die Skripte benötigt.
