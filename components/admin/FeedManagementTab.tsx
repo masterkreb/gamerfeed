@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { FeedSource } from '../../types';
 import type { FeedHealth } from './AdminPanel';
 import { HealthState } from './healthService';
@@ -72,6 +73,7 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                                                                         onDelete,
                                                                         onCheckHealth
                                                                     }) => {
+    const { t } = useTranslation();
     const [sortConfig, setSortConfig] = useState<{ key: SortableKey; direction: SortDirection } | null>({ key: 'name', direction: 'ascending' });
 
     const summary = useMemo(() => ({
@@ -119,15 +121,15 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
         <section className="bg-white dark:bg-zinc-800 rounded-lg shadow overflow-hidden">
             <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-slate-200 dark:border-zinc-700">
                 <div className="flex items-center gap-4">
-                    <h2 className="text-lg font-semibold">All Feed Sources</h2>
+                    <h2 className="text-lg font-semibold">{t('admin.management.title')}</h2>
                     <div className="hidden sm:flex items-center gap-4 text-sm text-slate-500 dark:text-zinc-400">
-                        <span>Total: <span className="font-bold text-slate-700 dark:text-zinc-200">{summary.total}</span></span>
-                        <span>Primary: <span className="font-bold text-indigo-500">{summary.primary}</span></span>
-                        <span>Secondary: <span className="font-bold">{summary.secondary}</span></span>
+                        <span>{t('admin.management.total')} <span className="font-bold text-slate-700 dark:text-zinc-200">{summary.total}</span></span>
+                        <span>{t('admin.management.primary')} <span className="font-bold text-indigo-500">{summary.primary}</span></span>
+                        <span>{t('admin.management.secondary')} <span className="font-bold">{summary.secondary}</span></span>
                     </div>
                 </div>
                 <button onClick={onAddNew} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700">
-                    <PlusIcon className="w-5 h-5" /><span>Add New Feed</span>
+                    <PlusIcon className="w-5 h-5" /><span>{t('admin.management.addNew')}</span>
                 </button>
             </div>
 
@@ -136,13 +138,13 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                 <table className="w-full text-sm text-left table-auto">
                     <thead className="bg-slate-50 dark:bg-zinc-700/50 text-xs uppercase text-slate-500 dark:text-zinc-400">
                     <tr>
-                        <SortableHeader label="Name" sortKey="name" sortConfig={sortConfig} requestSort={requestSort} className="w-1/4"/>
-                        <SortableHeader label="URL" sortKey="url" sortConfig={sortConfig} requestSort={requestSort} className="w-1/3"/>
-                        <SortableHeader label="Priority" sortKey="priority" sortConfig={sortConfig} requestSort={requestSort} className="w-32" />
-                        <SortableHeader label="Lang" sortKey="language" sortConfig={sortConfig} requestSort={requestSort} className="w-24" />
-                        <SortableHeader label="Interval" sortKey="update_interval" sortConfig={sortConfig} requestSort={requestSort} className="w-28" />
-                        <SortableHeader label="Health" sortKey="health" sortConfig={sortConfig} requestSort={requestSort} className="w-20 justify-center" />
-                        <th scope="col" className="p-4 text-right w-28">Actions</th>
+                        <SortableHeader label={t('admin.management.headerName')} sortKey="name" sortConfig={sortConfig} requestSort={requestSort} className="w-1/4"/>
+                        <SortableHeader label={t('admin.management.headerUrl')} sortKey="url" sortConfig={sortConfig} requestSort={requestSort} className="w-1/3"/>
+                        <SortableHeader label={t('admin.management.headerPriority')} sortKey="priority" sortConfig={sortConfig} requestSort={requestSort} className="w-32" />
+                        <SortableHeader label={t('admin.management.headerLang')} sortKey="language" sortConfig={sortConfig} requestSort={requestSort} className="w-24" />
+                        <SortableHeader label={t('admin.management.headerInterval')} sortKey="update_interval" sortConfig={sortConfig} requestSort={requestSort} className="w-28" />
+                        <SortableHeader label={t('admin.management.headerHealth')} sortKey="health" sortConfig={sortConfig} requestSort={requestSort} className="w-20 justify-center" />
+                        <th scope="col" className="p-4 text-right w-28">{t('admin.management.headerActions')}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -157,9 +159,9 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                                 <HealthStatusIcon state={feedHealth[feed.id]} />
                             </div></td>
                             <td className="p-4 text-right"><div className="flex justify-end items-center gap-1">
-                                <button onClick={onCheckHealth} className="p-2 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors" aria-label={`Check health for ${feed.name}`}><ResetIcon className="w-4 h-4"/></button>
-                                <button onClick={() => onEdit(feed)} className="p-2 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors" aria-label={`Edit ${feed.name}`}><PencilIcon className="w-5 h-5"/></button>
-                                <button onClick={() => onDelete(feed)} className="p-2 text-slate-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors" aria-label={`Delete ${feed.name}`}><TrashIcon className="w-5 h-5"/></button>
+                                <button onClick={onCheckHealth} className="p-2 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors" aria-label={t('admin.management.ariaCheckHealth', { name: feed.name })}><ResetIcon className="w-4 h-4"/></button>
+                                <button onClick={() => onEdit(feed)} className="p-2 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors" aria-label={t('admin.management.ariaEdit', { name: feed.name })}><PencilIcon className="w-5 h-5"/></button>
+                                <button onClick={() => onDelete(feed)} className="p-2 text-slate-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors" aria-label={t('admin.management.ariaDelete', { name: feed.name })}><TrashIcon className="w-5 h-5"/></button>
                             </div></td>
                         </tr>
                     ))}
@@ -181,14 +183,14 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                             <a href={feed.url} target="_blank" rel="noopener noreferrer" className="text-indigo-500 break-all">{feed.url}</a>
                         </div>
                         <div className="grid grid-cols-3 gap-3 text-center text-sm pt-2">
-                            <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">Priority</p><p className="font-bold capitalize">{feed.priority}</p></div>
-                            <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">Language</p><p className="font-bold uppercase">{feed.language}</p></div>
-                            <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">Interval</p><p className="font-bold">{feed.update_interval} min</p></div>
+                            <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">{t('admin.management.headerPriority')}</p><p className="font-bold capitalize">{feed.priority}</p></div>
+                            <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">{t('admin.management.headerLang')}</p><p className="font-bold uppercase">{feed.language}</p></div>
+                            <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">{t('admin.management.headerInterval')}</p><p className="font-bold">{feed.update_interval} min</p></div>
                         </div>
                         <div className="flex items-center justify-end gap-2 border-t border-slate-200 dark:border-zinc-700 pt-3 mt-3">
-                            <button onClick={onCheckHealth} className="p-2 text-slate-500 dark:text-zinc-400 rounded-md" aria-label={`Check health for ${feed.name}`}><ResetIcon className="w-5 h-5"/></button>
-                            <button onClick={() => onEdit(feed)} className="p-2 text-slate-500 dark:text-zinc-400 rounded-md" aria-label={`Edit ${feed.name}`}><PencilIcon className="w-5 h-5"/></button>
-                            <button onClick={() => onDelete(feed)} className="p-2 text-slate-500 dark:text-zinc-400 rounded-md" aria-label={`Delete ${feed.name}`}><TrashIcon className="w-5 h-5"/></button>
+                            <button onClick={onCheckHealth} className="p-2 text-slate-500 dark:text-zinc-400 rounded-md" aria-label={t('admin.management.ariaCheckHealth', { name: feed.name })}><ResetIcon className="w-5 h-5"/></button>
+                            <button onClick={() => onEdit(feed)} className="p-2 text-slate-500 dark:text-zinc-400 rounded-md" aria-label={t('admin.management.ariaEdit', { name: feed.name })}><PencilIcon className="w-5 h-5"/></button>
+                            <button onClick={() => onDelete(feed)} className="p-2 text-slate-500 dark:text-zinc-400 rounded-md" aria-label={t('admin.management.ariaDelete', { name: feed.name })}><TrashIcon className="w-5 h-5"/></button>
                         </div>
                     </div>
                 ))}

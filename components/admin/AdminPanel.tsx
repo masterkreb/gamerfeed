@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFeeds } from '../../hooks/useFeeds';
 import type { Article, FeedSource } from '../../types';
 import {
@@ -43,6 +44,7 @@ const TabButton: React.FC<{
 );
 
 export const AdminPanel: React.FC = () => {
+    const { t } = useTranslation();
     const { feeds, addFeed, updateFeed, deleteFeed } = useFeeds();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingFeed, setEditingFeed] = useState<FeedSource | null>(null);
@@ -126,7 +128,7 @@ export const AdminPanel: React.FC = () => {
                 if (!backendStatus) {
                     newHealthState[feed.id] = {
                         status: 'error',
-                        detail: 'Feed was not processed by the last backend run. Check GitHub Action logs for script errors.'
+                        detail: t('admin.health.detailNotProcessed')
                     };
                     return;
                 }
@@ -135,7 +137,7 @@ export const AdminPanel: React.FC = () => {
                 if (backendStatus.status === 'error') {
                     newHealthState[feed.id] = {
                         status: 'error',
-                        detail: `Backend Error: ${backendStatus.message}`
+                        detail: t('admin.health.detailBackendError', { message: backendStatus.message })
                     };
                     return;
                 }
@@ -161,12 +163,12 @@ export const AdminPanel: React.FC = () => {
                     if (isInCache) {
                         newHealthState[feed.id] = {
                             status: 'ok',
-                            detail: 'Feed is live. The last backend fetch was successful.'
+                            detail: t('admin.health.detailOk')
                         };
                     } else {
                         newHealthState[feed.id] = {
                             status: 'warning',
-                            detail: `Backend fetch successful, but no recent articles were found for the frontend cache. Feed name "${feed.name}" not found in cache sources. The feed might be empty or outdated.`
+                            detail: t('admin.health.detailWarningNotInCache', { feedName: feed.name })
                         };
                     }
                 }
@@ -183,14 +185,14 @@ export const AdminPanel: React.FC = () => {
             feeds.forEach(feed => {
                 errorState[feed.id] = {
                     status: 'error',
-                    detail: `Failed to fetch status files: ${message}`
+                    detail: t('admin.health.detailFetchError', { message })
                 };
             });
             setFeedHealth(errorState);
         } finally {
             setIsCheckingAll(false);
         }
-    }, [feeds]);
+    }, [feeds, t]);
 
     useEffect(() => {
         if(feeds.length > 0) {
@@ -204,10 +206,10 @@ export const AdminPanel: React.FC = () => {
             <header className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-lg sticky top-0 z-20 border-b border-slate-200 dark:border-zinc-800">
                 <div className="container mx-auto px-4 md:px-6 py-3 flex justify-between items-center">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-2xl font-bold text-indigo-500 dark:text-indigo-400">Admin Panel</h1>
+                        <h1 className="text-2xl font-bold text-indigo-500 dark:text-indigo-400">{t('admin.panelTitle')}</h1>
                     </div>
                     <a href="/" className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 border-transparent text-slate-600 dark:text-zinc-300 hover:bg-slate-300 dark:hover:bg-zinc-600">
-                        <ArrowLeftIcon className="w-5 h-5"/> <span>Back to App</span>
+                        <ArrowLeftIcon className="w-5 h-5"/> <span>{t('admin.backToApp')}</span>
                     </a>
                 </div>
             </header>
@@ -222,7 +224,7 @@ export const AdminPanel: React.FC = () => {
                             <div className="ml-3 flex-1">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-lg font-medium">
-                                        {failingFeeds.length} Feed{failingFeeds.length > 1 ? 's' : ''} Failed in Backend
+                                        {t('admin.failedFeedsTitle', { count: failingFeeds.length })}
                                     </h3>
                                     <button onClick={() => setIsErrorsExpanded(!isErrorsExpanded)} className="p-2 -m-2 rounded-full hover:bg-red-200 dark:hover:bg-red-800/50" aria-expanded={isErrorsExpanded}>
                                         {isErrorsExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
@@ -230,7 +232,7 @@ export const AdminPanel: React.FC = () => {
                                 </div>
                                 {isErrorsExpanded && (
                                     <div className="mt-2 text-sm">
-                                        <p>The following feeds failed to be processed during the last automated backend run (GitHub Action). The details show the actual error message from the server.</p>
+                                        <p>{t('admin.failedFeedsDesc')}</p>
                                         <ul className="list-none mt-3 space-y-2 text-xs">
                                             {failingFeeds.map(feed => (
                                                 <li key={feed.id} className="font-mono p-2 bg-slate-50 dark:bg-zinc-800/30 rounded">
@@ -256,7 +258,7 @@ export const AdminPanel: React.FC = () => {
                             <div className="ml-3 flex-1">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-lg font-medium">
-                                        {warningFeeds.length} Feed{warningFeeds.length > 1 ? 's' : ''} with Warnings
+                                        {t('admin.warningFeedsTitle', { count: warningFeeds.length })}
                                     </h3>
                                     <button onClick={() => setIsWarningsExpanded(!isWarningsExpanded)} className="p-2 -m-2 rounded-full hover:bg-amber-200 dark:hover:bg-amber-800/50" aria-expanded={isWarningsExpanded}>
                                         {isWarningsExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
@@ -264,7 +266,7 @@ export const AdminPanel: React.FC = () => {
                                 </div>
                                 {isWarningsExpanded && (
                                     <div className="mt-2 text-sm">
-                                        <p>The following feeds were fetched successfully by the backend, but no recent articles appear on the live site. This could mean the feed is empty, outdated, or its articles were filtered out before caching.</p>
+                                        <p>{t('admin.warningFeedsDesc')}</p>
                                         <ul className="list-none mt-3 space-y-2 text-xs">
                                             {warningFeeds.map(feed => (
                                                 <li key={feed.id} className="font-mono p-2 bg-slate-50 dark:bg-zinc-800/30 rounded">
@@ -283,9 +285,9 @@ export const AdminPanel: React.FC = () => {
 
                 <nav className="mb-6 border-b border-slate-200 dark:border-zinc-700" role="tablist" aria-label="Admin Sections">
                     <div className="flex items-center space-x-2">
-                        <TabButton isActive={activeTab === 'management'} onClick={() => setActiveTab('management')} icon={<NewspaperIcon className="w-5 h-5" />} label="Feed Management" />
-                        <TabButton isActive={activeTab === 'health'} onClick={() => setActiveTab('health')} icon={<HeartbeatIcon className="w-5 h-5" />} label="Health Center" />
-                        <TabButton isActive={activeTab === 'legend'} onClick={() => setActiveTab('legend')} icon={<QuestionMarkCircleIcon className="w-5 h-5" />} label="Health Legend" />
+                        <TabButton isActive={activeTab === 'management'} onClick={() => setActiveTab('management')} icon={<NewspaperIcon className="w-5 h-5" />} label={t('admin.tabManagement')} />
+                        <TabButton isActive={activeTab === 'health'} onClick={() => setActiveTab('health')} icon={<HeartbeatIcon className="w-5 h-5" />} label={t('admin.tabHealth')} />
+                        <TabButton isActive={activeTab === 'legend'} onClick={() => setActiveTab('legend')} icon={<QuestionMarkCircleIcon className="w-5 h-5" />} label={t('admin.tabLegend')} />
                     </div>
                 </nav>
 
@@ -324,11 +326,11 @@ export const AdminPanel: React.FC = () => {
             {feedToDelete && (<>
                 <div className="fixed inset-0 bg-black/60 z-40" onClick={() => setFeedToDelete(null)} aria-hidden="true" />
                 <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm bg-slate-100 dark:bg-zinc-900 rounded-2xl shadow-2xl p-6" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title">
-                    <h2 id="delete-dialog-title" className="text-lg font-bold">Delete Feed Source</h2>
-                    <p className="text-sm text-slate-600 dark:text-zinc-400 mt-2">Are you sure you want to delete "{feedToDelete.name}"? This cannot be undone.</p>
+                    <h2 id="delete-dialog-title" className="text-lg font-bold">{t('admin.deleteModalTitle')}</h2>
+                    <p className="text-sm text-slate-600 dark:text-zinc-400 mt-2">{t('admin.deleteModalConfirm', { name: feedToDelete.name })}</p>
                     <div className="mt-6 flex justify-end gap-3">
-                        <button onClick={() => setFeedToDelete(null)} className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 text-slate-800 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600">Cancel</button>
-                        <button onClick={confirmDelete} className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-red-600 text-white hover:bg-red-700">Delete</button>
+                        <button onClick={() => setFeedToDelete(null)} className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 text-slate-800 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600">{t('admin.cancel')}</button>
+                        <button onClick={confirmDelete} className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-red-600 text-white hover:bg-red-700">{t('admin.delete')}</button>
                     </div>
                 </div>
             </>)}

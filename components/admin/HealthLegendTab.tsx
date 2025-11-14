@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircleIcon, WarningIcon, XCircleIcon, QuestionMarkCircleIcon, LoadingSpinner } from '../Icons';
 
 const LegendItem: React.FC<{
@@ -30,66 +31,68 @@ const ErrorCodeItem: React.FC<{
 
 
 export const HealthLegendTab: React.FC = () => {
+    const { t } = useTranslation();
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <section className="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
-                <h3 className="text-xl font-bold mb-4">Backend Status Legend</h3>
+                <h3 className="text-xl font-bold mb-4">{t('admin.legend.title')}</h3>
                 <p className="text-sm text-slate-500 dark:text-zinc-400 mb-4">
-                    The health status is now based entirely on the result of the last automated backend script (GitHub Action). It reflects what is actually live on the site, not a live check from your browser.
+                    {t('admin.legend.description')}
                 </p>
                 <div className="space-y-4">
                     <LegendItem
                         icon={<CheckCircleIcon className="w-6 h-6 text-green-500" />}
-                        title="OK"
-                        description="The backend script successfully fetched the feed, AND its articles are present in the live `news-cache.json` file. The feed is working correctly."
+                        title={t('admin.legend.okTitle')}
+                        description={t('admin.legend.okDesc')}
                     />
                     <LegendItem
                         icon={<WarningIcon className="w-6 h-6 text-amber-500" />}
-                        title="Warning"
-                        description="The backend script successfully fetched the feed, but NO articles from it are in the live cache. This usually means the feed was valid but empty, or all its articles were too old to be included."
+                        title={t('admin.legend.warningTitle')}
+                        description={t('admin.legend.warningDesc')}
                     />
                     <LegendItem
                         icon={<XCircleIcon className="w-6 h-6 text-red-500" />}
-                        title="Error"
-                        description="A critical failure occurred during the backend process. This means the script could not fetch or parse the feed XML. The details column provides the specific error message from the server."
+                        title={t('admin.legend.errorTitle')}
+                        description={t('admin.legend.errorDesc')}
                     />
                     <LegendItem
                         icon={<LoadingSpinner className="w-5 h-5 text-indigo-500" />}
-                        title="Checking"
-                        description="The admin panel is currently fetching the latest status reports from the backend-generated files (`feed-health-status.json` and `news-cache.json`)."
+                        title={t('admin.legend.checkingTitle')}
+                        description={t('admin.legend.checkingDesc')}
                     />
                     <LegendItem
                         icon={<QuestionMarkCircleIcon className="w-6 h-6 text-slate-400" />}
-                        title="Unknown"
-                        description="The health status for this feed has not been checked yet, or the status report could not be loaded."
+                        title={t('admin.legend.unknownTitle')}
+                        description={t('admin.legend.unknownDesc')}
                     />
                 </div>
             </section>
             <section className="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
-                <h3 className="text-xl font-bold mb-4">Common Backend Error Explanations</h3>
+                <h3 className="text-xl font-bold mb-4">{t('admin.legend.errorsTitle')}</h3>
                 <p className="text-sm text-slate-500 dark:text-zinc-400 mb-4">
-                    When a feed check fails, it's often due to an issue with the feed provider's server. The backend script will report these issues. Here are some common ones you might see.
+                    {t('admin.legend.errorsDesc')}
                 </p>
                 <div className="space-y-4">
                     <ErrorCodeItem
                         code="Failed to parse XML"
-                        meaning="Invalid Feed Format"
-                        details="The backend was able to download the feed, but the content was not valid XML. This often indicates the feed URL is broken or pointing to a non-feed webpage."
+                        meaning={t('admin.legend.errorFormatMeaning')}
+                        details={t('admin.legend.errorFormatDesc')}
                     />
                     <ErrorCodeItem
                         code="Fetch failed"
-                        meaning="Unreachable URL"
-                        details="The backend server could not reach the feed's URL. This could be due to a server timeout, a DNS issue, or the feed's server actively blocking requests from the script's host."
+                        meaning={t('admin.legend.errorFetchMeaning')}
+                        details={t('admin.legend.errorFetchDesc')}
                     />
                     <ErrorCodeItem
                         code="Status 403 / 404 / 500"
-                        meaning="Server Errors"
-                        details="The feed's server responded with a standard HTTP error code. 403 means access is forbidden, 404 means the URL does not exist, and 500+ errors indicate a problem on the source's server."
+                        meaning={t('admin.legend.errorServerMeaning')}
+                        details={t('admin.legend.errorServerDesc')}
                     />
                     <ErrorCodeItem
                         code="Not processed"
-                        meaning="Script Failure"
-                        details="If a feed is marked as not processed, it means the entire backend script may have failed before it could even attempt to fetch this specific feed. Check the GitHub Action logs for fatal errors."
+                        meaning={t('admin.legend.errorScriptMeaning')}
+                        details={t('admin.legend.errorScriptDesc')}
                     />
                 </div>
             </section>

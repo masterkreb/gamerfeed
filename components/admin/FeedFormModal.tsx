@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FeedSource } from '../../types';
 import { CloseIcon } from '../Icons';
 
@@ -12,6 +13,7 @@ interface FeedFormModalProps {
 }
 
 export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, feed, feeds, addFeed, updateFeed }) => {
+    const { t } = useTranslation();
     const [name, setName] = useState('');
     const [url, setUrl] = useState('');
     const [language, setLanguage] = useState<'de' | 'en'>('en');
@@ -59,7 +61,7 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
         });
 
         if (isDuplicate) {
-            setUrlError('This feed URL already exists.');
+            setUrlError(t('admin.form.errorUrlExists'));
             return; // Block form submission
         }
         // --- End Validation ---
@@ -99,20 +101,20 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
                 <form id="feed-form" onSubmit={handleSubmit}>
                     <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-zinc-800 flex-shrink-0">
                         <h2 id="form-modal-title" className="text-lg font-semibold">
-                            {feed ? 'Edit Feed Source' : 'Add New Feed Source'}
+                            {feed ? t('admin.form.titleEdit') : t('admin.form.titleAdd')}
                         </h2>
                         <button
                             type="button"
                             onClick={onClose}
                             className="p-3 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
-                            aria-label="Close form"
+                            aria-label={t('admin.form.ariaClose')}
                         >
                             <CloseIcon className="w-6 h-6" />
                         </button>
                     </div>
                     <div className="p-6 flex-grow overflow-y-auto space-y-4">
                         <div>
-                            <label htmlFor="feed-name" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">Name</label>
+                            <label htmlFor="feed-name" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">{t('admin.form.labelName')}</label>
                             <input
                                 id="feed-name"
                                 type="text"
@@ -123,7 +125,7 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
                             />
                         </div>
                         <div>
-                            <label htmlFor="feed-url" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">URL</label>
+                            <label htmlFor="feed-url" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">{t('admin.form.labelUrl')}</label>
                             <input
                                 id="feed-url"
                                 type="url"
@@ -142,14 +144,14 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="feed-language" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">Language</label>
+                                <label htmlFor="feed-language" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">{t('admin.form.labelLang')}</label>
                                 <select id="feed-language" value={language} onChange={(e) => setLanguage(e.target.value as 'de' | 'en')} className="w-full h-11 px-3 py-2 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                                     <option value="en">English</option>
                                     <option value="de">German</option>
                                 </select>
                             </div>
                             <div>
-                                <label htmlFor="feed-priority" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">Priority</label>
+                                <label htmlFor="feed-priority" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">{t('admin.form.labelPriority')}</label>
                                 <select id="feed-priority" value={priority} onChange={(e) => setPriority(e.target.value as 'primary' | 'secondary')} className="w-full h-11 px-3 py-2 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition capitalize">
                                     <option value="primary">primary</option>
                                     <option value="secondary">secondary</option>
@@ -157,7 +159,7 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
                             </div>
                         </div>
                         <div>
-                            <label htmlFor="feed-interval" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">Update Interval (minutes)</label>
+                            <label htmlFor="feed-interval" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">{t('admin.form.labelInterval')}</label>
                             <input
                                 id="feed-interval"
                                 type="number"
@@ -176,7 +178,7 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
                                 onChange={(e) => setNeedsScraping(e.target.checked)}
                                 className="h-5 w-5 rounded border-slate-300 dark:border-zinc-600 text-indigo-600 focus:ring-indigo-500 bg-slate-100 dark:bg-zinc-700"
                             />
-                            <label htmlFor="needs-scraping" className="text-sm font-medium text-slate-700 dark:text-zinc-300">Image requires scraping fallback?</label>
+                            <label htmlFor="needs-scraping" className="text-sm font-medium text-slate-700 dark:text-zinc-300">{t('admin.form.labelScraping')}</label>
                         </div>
                     </div>
                     <div className="flex-shrink-0 p-4 border-t border-slate-200 dark:border-zinc-800 flex justify-end items-center bg-slate-100 dark:bg-zinc-900 rounded-b-2xl gap-3">
@@ -185,13 +187,13 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
                             onClick={onClose}
                             className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 text-slate-800 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600"
                         >
-                            Cancel
+                            {t('admin.cancel')}
                         </button>
                         <button
                             type="submit"
                             className="px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700"
                         >
-                            Save
+                            {t('admin.form.save')}
                         </button>
                     </div>
                 </form>
