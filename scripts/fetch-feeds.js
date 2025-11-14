@@ -1220,7 +1220,6 @@ import { sql } from '@vercel/postgres';
 import fs from 'fs';
 import path from 'path';
 import { DOMParser } from 'linkedom'; // Provides DOMParser in Node.js environment
-import { escape } from 'html-escaper';
 
 // === HELPER FUNCTIONS (DECODING, STRIPPING, ETC.) ===
 function decodeHtmlEntities(text) {
@@ -1257,6 +1256,17 @@ function stripHtmlAndTruncate(html, length = 150) {
     }
 }
 
+// Helper to robustly escape text for HTML insertion
+function escapeHtml(text) {
+    if (!text) return '';
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // === SEO GENERATION FUNCTIONS ===
 function generateStaticHtml(articles) {
     console.log('   - Generating static HTML for pre-rendering...');
@@ -1269,20 +1279,17 @@ function generateStaticHtml(articles) {
         <h2>Latest Articles</h2>`;
 
     for (const article of articlesToRender) {
-        const decodedTitle = decodeHtmlEntities(article.title || '');
-        // Use html-escaper to escape characters for safe HTML and attributes
-        const safeTitle = escape(decodedTitle); // safe for innerHTML
-        // For attributes (alt, href) escape too
-        const safeAltText = escape(decodedTitle);
-        const safeSummary = escape(decodeHtmlEntities(article.summary || ''));
-        const safeLink = escape(article.link || '');
+        // The parser produces raw strings, so we must escape them before injecting into HTML.
+        // This prevents characters like " or & from breaking the HTML structure.
+        const escapedTitle = escapeHtml(article.title);
+        const escapedSummary = escapeHtml(article.summary);
 
         html += `
         <article>
-            <h3><a href="${safeLink}">${safeTitle}</a></h3>
-            <p><strong>Source:</strong> ${escape(article.source || '')} | <strong>Published:</strong> ${new Date(article.publicationDate).toLocaleDateString()}</p>
-            <p>${safeSummary}</p>
-            ${article.imageUrl ? `<img src="${escape(article.imageUrl)}" alt="${safeAltText}">` : ''}
+            <h3><a href="${article.link}">${escapedTitle}</a></h3>
+            <p><strong>Source:</strong> ${article.source} | <strong>Published:</strong> ${new Date(article.publicationDate).toLocaleDateString()}</p>
+            <p>${escapedSummary}</p>
+            ${article.imageUrl ? `<img src="${article.imageUrl}" alt="${escapedTitle}">` : ''}
         </article>`;
     }
     html += `
@@ -1290,6 +1297,7 @@ function generateStaticHtml(articles) {
     </div>`;
     return html;
 }
+
 
 function generateSitemap(articles) {
     console.log('   - Generating sitemap.xml...');
@@ -1315,6 +1323,7 @@ function generateSitemap(articles) {
 
 // === IMAGE SCRAPING ===
 async function getOgImageFromUrl(url, sourceName) {
+    // ... (rest of the function is unchanged, keeping it for brevity)
     const proxies = [
         `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
         `https://corsproxy.io/?${encodeURIComponent(url)}`,
@@ -1378,6 +1387,7 @@ async function getOgImageFromUrl(url, sourceName) {
 
 // === PARSE RSS/ATOM FEED ===
 function parseRssXml(xmlString, feed) {
+    // ... (rest of the function is unchanged, keeping it for brevity)
     const parser = new DOMParser();
     const doc = parser.parseFromString(xmlString, "text/xml");
     const errorNode = doc.querySelector("parsererror");
@@ -1628,7 +1638,6 @@ async function fetchArticles() {
             let lastError = 'Unknown error';
             console.log(`📡 Fetching: ${feed.name}...`);
 
-            // Attempt 1: Direct fetch
             try {
                 const response = await fetch(feed.url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'application/rss+xml, application/xml, text/xml', 'Accept-Language': 'en-US,en;q=0.9,de-DE;q=0.8,de;q=0.7' }, signal: AbortSignal.timeout(8000) });
                 if (response.ok) {
@@ -1640,7 +1649,6 @@ async function fetchArticles() {
                 } else { lastError = `Direct fetch failed with status ${response.status}`; }
             } catch (e) { lastError = e instanceof Error ? e.message : String(e); }
 
-            // Attempt 2: Proxies (if direct fetch failed)
             if (!xmlString) {
                 console.log(`   ⚠️  Direct fetch failed for ${feed.name} (${lastError}). Trying proxies...`);
                 for (const proxyUrl of proxies(feed.url)) {
