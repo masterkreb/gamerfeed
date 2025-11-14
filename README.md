@@ -32,7 +32,7 @@ Dieses Projekt nutzt eine entkoppelte, "serverless" Architektur, die auf maximal
 ### Systemkomponenten
 
 1.  **Frontend (React & Vite)**: Eine statische Single-Page-Application, die beim Start die Artikel dynamisch von einem API-Endpunkt (`/api/get-news`) abruft. Alle Benutzereinstellungen werden im `localStorage` gespeichert.
-2.  **Datenbank (Vercel Postgres)**: Eine serverless Postgres-Datenbank, die ausschließlich die Liste der zu verarbeitenden RSS-Feed-Quellen speichert.
+2.  **Datenbank (Vercel Postgres)**: Eine serverless Postgres-Datenbank, die ausschliesslich die Liste der zu verarbeitenden RSS-Feed-Quellen speichert.
 3.  **Datencache (Vercel KV)**: Ein extrem schneller In-Memory-Datenspeicher, der die gecachten Artikel (`news_cache`) und den Systemstatus (`feed_health_status`) für den schnellen Abruf durch die API bereithält.
 4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 30 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung.
 5.  **API-Schicht (Vercel Edge Functions)**: Schlanke API-Endpunkte, die als Schnittstelle zwischen dem Frontend und dem Datencache (Vercel KV) dienen.
@@ -56,8 +56,9 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
     3.  Es ruft jeden Feed ab, verarbeitet die Artikel und generiert zwei Datensätze:
         *   Den `news-cache`: Eine bereinigte und sortierte Liste der Artikel.
         *   Den `feed-health-status`: Ein Protokoll über den Erfolg oder Misserfolg jedes Feed-Abrufs.
-    4.  Anschließend schreibt das Skript diese beiden Datensätze in den **Vercel KV Store**.
+    4.  Anschliessend schreibt das Skript diese beiden Datensätze in den **Vercel KV Store**.
 *   **WICHTIG:** Der Workflow committet **keine Dateien** mehr in das Git-Repository. Der Prozess ist vollständig vom Code der Webseite getrennt.
+*   **Robustheit:** Der Prozess ist robust gestaltet und bricht den Schreibvorgang ab, falls der existierende Cache im KV Store nicht gelesen werden kann oder korrupt ist. Dies verhindert zuverlässig den Verlust von bestehenden Artikeldaten durch fehlerhafte Abrufe.
 
 #### 2. Der Datenabruf (Frontend-Anwendung)
 
