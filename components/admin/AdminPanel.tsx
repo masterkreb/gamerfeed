@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFeeds } from '../../hooks/useFeeds';
-import type { Article, FeedSource } from '../../types';
+import type { Article, FeedSource, BackendHealthStatus } from '../../types';
 import {
     ArrowLeftIcon,
     NewspaperIcon,
@@ -20,7 +20,6 @@ import type { HealthState } from './healthService';
 // Types
 type AdminTab = 'management' | 'health' | 'legend';
 export type FeedHealth = Record<string, HealthState>;
-type BackendHealthStatus = Record<string, { status: 'success' | 'warning' | 'error'; message: string }>;
 
 const TabButton: React.FC<{
     isActive: boolean;
@@ -101,19 +100,16 @@ export const AdminPanel: React.FC = () => {
     const refreshHealthStatus = useCallback(async () => {
         setIsCheckingAll(true);
         try {
-            const [healthRes, cacheRes] = await Promise.all([
-                fetch(`/feed-health-status.json?t=${Date.now()}`),
-                fetch(`/news-cache.json?t=${Date.now()}`)
-            ]);
+            const response = await fetch(`/api/get-health-data?t=${Date.now()}`);
 
-            if (!healthRes.ok) throw new Error(`Could not fetch feed-health-status.json: ${healthRes.statusText}`);
-            if (!cacheRes.ok) throw new Error(`Could not fetch news-cache.json: ${cacheRes.statusText}`);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: `Could not fetch health data: ${response.statusText}` }));
+                throw new Error(errorData.error);
+            }
 
-            const backendHealth: BackendHealthStatus = await healthRes.json();
-            const liveArticles: Article[] = await cacheRes.json();
+            const { healthStatus: backendHealth, sourcesInCache: sourcesInCacheArray } = await response.json() as { healthStatus: BackendHealthStatus, sourcesInCache: string[]};
 
-            // Create a Set of all unique source names in the cache
-            const sourcesInCache = new Set(liveArticles.map(a => a.source));
+            const sourcesInCache = new Set(sourcesInCacheArray);
 
             // Debug logging to help identify naming mismatches
             console.log('🔍 Health Check Debug Info:');
@@ -148,7 +144,6 @@ export const AdminPanel: React.FC = () => {
                     let isInCache = sourcesInCache.has(feed.name);
 
                     // If no exact match, try fuzzy matching
-                    // (case-insensitive, ignoring extra spaces and dots)
                     if (!isInCache) {
                         const normalizedFeedName = feed.name.toLowerCase().replace(/[\s.]+/g, '');
                         isInCache = Array.from(sourcesInCache).some(source =>

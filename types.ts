@@ -28,3 +28,5 @@ export interface FeedSource {
     update_interval: number; // in minutes
     needsScraping?: boolean;
 }
+
+export type BackendHealthStatus = Record<string, { status: 'success' | 'warning' | 'error'; message: string }>;

@@ -123,31 +123,21 @@ const AppContent: React.FC = () => {
         }
 
         try {
-            const response = await fetch('/news-cache.json?' + Date.now());
+            // Primary data source is now the API endpoint which reads from Vercel KV
+            const response = await fetch('/api/get-news');
             if (!response.ok) {
-                throw new Error(`Failed to load news cache: ${response.status}`);
+                const errorData = await response.json().catch(() => null);
+                const errorMessage = errorData?.error || `Failed to load news from API: ${response.status}`;
+                throw new Error(errorMessage);
             }
             const fetchedArticles: Article[] = await response.json();
             setArticles(fetchedArticles);
-            console.log(`Loaded ${fetchedArticles.length} articles from cache`);
+            console.log(`Loaded ${fetchedArticles.length} articles from API`);
 
         } catch (error) {
-            console.error("Failed to fetch articles from cache:", error);
+            console.error("Failed to fetch articles from API:", error);
             const message = error instanceof Error ? error.message : "An unknown error occurred.";
-
-            try {
-                console.log("Trying API fallback...");
-                const response = await fetch('/api/get-news');
-                if (response.ok) {
-                    const fallbackArticles: Article[] = await response.json();
-                    setArticles(fallbackArticles);
-                } else {
-                    setError(message);
-                }
-            } catch (e) {
-                console.warn("API fallback also failed:", e);
-                setError(message);
-            }
+            setError(message);
         } finally {
             setIsBlockingLoading(false);
             setIsRefreshing(false);
@@ -156,7 +146,7 @@ const AppContent: React.FC = () => {
 
     useEffect(() => {
         loadNews();
-    }, []);
+    }, [loadNews]);
 
     const handleRefresh = useCallback(() => {
         loadNews(true);

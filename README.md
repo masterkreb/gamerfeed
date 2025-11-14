@@ -20,52 +20,80 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
     - Filtere nach spezifischer Quelle oder Sprache (DE/EN).
     - Volltextsuche in Titeln und Zusammenfassungen.
 - **Automatische Aktualisierung**: Ein GitHub-Action-Workflow aktualisiert den News-Cache alle 30 Minuten, sodass die angezeigten Nachrichten immer aktuell sind.
-- **Admin-Panel**: Ein passwortgeschütztes Admin-Panel zur einfachen Verwaltung der Feed-Quellen in der Datenbank.
+- **Admin-Panel**: Ein passwortgeschütztes Admin-Panel zur einfachen Verwaltung der Feed-Quellen und zur Überwachung ihres Status.
 
 ---
 
-## 🛠️ Architektur-Überblick
+## 🛠️ Architektur & Kernlogik
 
-GamerFeed nutzt eine hybride Architektur, die auf Geschwindigkeit und Zuverlässigkeit ausgelegt ist.
+Dieses Projekt nutzt eine entkoppelte, "serverless" Architektur, die auf maximale Skalierbarkeit, geringe Wartung und Kosteneffizienz ausgelegt ist. Es ist entscheidend, die Rollen der einzelnen Komponenten zu verstehen.
 
-1.  **Datenerfassung (Cron Job via GitHub Actions)**:
-    - Alle 30 Minuten wird das Node.js-Skript `scripts/fetch-feeds.js` durch einen GitHub-Workflow ausgeführt.
-    - Das Skript holt die Liste der RSS-Feeds aus einer **Vercel Postgres**-Datenbank (powered by Neon).
-    - Es parst die XML-Feeds, extrahiert und bereinigt Artikeldaten, optimiert Bild-URLs und nutzt bei Bedarf einen Scraping-Fallback.
-    - Die verarbeiteten Artikel werden in `public/news-cache.json` gespeichert.
-    - Der Status jedes Feeds wird in `public/feed-health-status.json` protokolliert.
-    - Wenn sich diese Dateien ändern, werden sie automatisch in das Git-Repository committet und gepusht.
+### Systemkomponenten
 
-2.  **Frontend-Anwendung (React)**:
-    - Die Hauptanwendung ist eine statische React-App.
-    - Beim Laden holt sie die Artikel direkt aus der statischen `news-cache.json`-Datei. Dies sorgt für extrem schnelle Ladezeiten und entlastet jegliche Server-Infrastruktur.
-    - Benutzereinstellungen wie Favoriten, Theme oder stummgeschaltete Quellen werden ausschließlich im `localStorage` des Browsers gespeichert, was die Privatsphäre wahrt.
+1.  **Frontend (React & Vite)**: Eine statische Single-Page-Application, die beim Start die Artikel dynamisch von einem API-Endpunkt (`/api/get-news`) abruft. Alle Benutzereinstellungen werden im `localStorage` gespeichert.
+2.  **Datenbank (Vercel Postgres)**: Eine serverless Postgres-Datenbank, die ausschließlich die Liste der zu verarbeitenden RSS-Feed-Quellen speichert.
+3.  **Datencache (Vercel KV)**: Ein extrem schneller In-Memory-Datenspeicher, der die gecachten Artikel (`news_cache`) und den Systemstatus (`feed_health_status`) für den schnellen Abruf durch die API bereithält.
+4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 30 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung.
+5.  **API-Schicht (Vercel Edge Functions)**: Schlanke API-Endpunkte, die als Schnittstelle zwischen dem Frontend und dem Datencache (Vercel KV) dienen.
+    *   `/api/get-news`: Liefert die gecachten Artikel an die Hauptanwendung.
+    *   `/api/feeds`: Dient dem Admin-Panel zur Verwaltung der Feed-Quellen in der Postgres-Datenbank.
+    *   `/api/get-health-data`: Liefert den Systemstatus an das Admin-Panel.
+6.  **Admin-Backend (Middleware)**: Eine Middleware (`middleware.js`) sichert das Admin-Panels über Basic Authentication ab.
 
-3.  **Admin-Panel (Vercel Edge)**:
-    - Das Admin-Panel (`/admin.html`) ist eine separate, passwortgeschützte React-Anwendung.
-    - Der Schutz wird durch **Vercel Middleware** (`middleware.js`) realisiert, die eine HTTP Basic Authentication erzwingt, bevor die Seite geladen wird.
-    - Das Panel kommuniziert mit einer API (`/api/feeds.ts`), die als Vercel Edge Function läuft, um Feed-Quellen in der Postgres-Datenbank zu erstellen, zu bearbeiten oder zu löschen (CRUD).
+---
 
-### Warum diese Architektur?
+### Entkoppelte Architektur: Wie Updates skalieren, ohne Deployments auszulösen
 
-Die Wahl der Technologien und Dienste zielt darauf ab, eine hochperformante, wartungsarme und kostengünstige Anwendung zu schaffen, die idealerweise komplett im Rahmen von Free Tiers betrieben werden kann.
+Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts-Updates und Website-Deployments**. Dies ermöglicht häufige Aktualisierungen, ohne die Limits von Hosting-Plattformen (z. B. 100 Deployments/Tag bei Vercel) zu überschreiten.
 
--   **Vercel für das Frontend**: Vercel ist optimal für das Hosting von statischen React-Anwendungen (Vite). Es bietet ein globales CDN für blitzschnelle Ladezeiten, automatische Deployments aus Git und integrierte Edge Functions für die schlanke Admin-API – alles mit einem großzügigen kostenlosen Kontingent.
+#### 1. Der Datensammler (GitHub Actions Cron Job)
 
--   **Neon (via Vercel Postgres) für die Datenbank**: Die Datenbankanforderungen sind minimal – sie speichert nur die Liste der Feed-Quellen. Vercel Postgres, das auf der serverless-Architektur von **Neon** basiert, ist hierfür perfekt. Es bietet eine kostenlose Stufe, die für diesen Anwendungsfall mehr als ausreicht, und skaliert bei Bedarf automatisch.
+*   **Aufgabe:** Alle 30 Minuten die neuesten Nachrichten sammeln und im zentralen Cache ablegen.
+*   **Ablauf:**
+    1.  Der GitHub-Workflow (`.github/workflows/update-feeds.yml`) startet das `fetch-feeds.js`-Skript.
+    2.  Das Skript holt die Feed-Liste aus der Postgres-Datenbank.
+    3.  Es ruft jeden Feed ab, verarbeitet die Artikel und generiert zwei Datensätze:
+        *   Den `news-cache`: Eine bereinigte und sortierte Liste der Artikel.
+        *   Den `feed-health-status`: Ein Protokoll über den Erfolg oder Misserfolg jedes Feed-Abrufs.
+    4.  Anschließend schreibt das Skript diese beiden Datensätze in den **Vercel KV Store**.
+*   **WICHTIG:** Der Workflow committet **keine Dateien** mehr in das Git-Repository. Der Prozess ist vollständig vom Code der Webseite getrennt.
 
--   **GitHub Actions für den Cron Job**: Warum nicht Vercel Cron Jobs? Vercels kostenloses Kontingent erlaubt nur eine Ausführung pro Tag. Für einen News-Aggregator, der aktuell bleiben soll, ist das zu selten. **GitHub Actions** bietet hier eine flexible und kostenlose Alternative, die es uns ermöglicht, den Feed-Update-Prozess zuverlässig alle 30 Minuten zu starten. Dieser Ansatz entkoppelt die zeitgesteuerte Datenerfassung vom Hosting-Provider und sorgt für eine robuste "serverless" Lösung.
+#### 2. Der Datenabruf (Frontend-Anwendung)
+
+*   **Aufgabe:** Dem Benutzer immer die aktuellsten, im Cache verfügbaren Nachrichten anzeigen.
+*   **Ablauf:**
+    1.  Wenn ein Benutzer die GamerFeed-Webseite lädt, startet die React-Anwendung.
+    2.  Die Anwendung sendet eine Anfrage an den API-Endpunkt `/api/get-news`.
+    3.  Die Vercel Edge Function, die diesen Endpunkt bedient, liest den `news-cache` blitzschnell aus dem Vercel KV Store.
+    4.  Die Artikel werden als JSON an das Frontend zurückgegeben und angezeigt.
+*   **Ergebnis:** Die angezeigten Daten sind immer so aktuell wie der letzte Lauf des "Datensammlers", ohne dass dafür ein neues Deployment der gesamten Seite notwendig war. Dies ist extrem effizient und skalierbar.
+
+---
+
+### Admin-Panel: Die Logik des "Health Check"
+
+Das "Health Center" im Admin-Panel ist ein intelligentes **Berichtssystem**, das den Zustand des letzten automatischen Backend-Laufs anzeigt. Es führt **keinen Live-Check** der Feeds aus Ihrem Browser durch.
+
+Es basiert auf dem Abgleich von zwei Datensätzen, die vom "Datensammler" im Vercel KV Store abgelegt und über die API (`/api/get-health-data`) bereitgestellt werden:
+
+1.  **`feed_health_status`**: Ein Protokoll. Hat das Skript den Feed erfolgreich abgerufen und geparst? (`status: "success"`) Oder gab es einen Fehler? (`status: "error"`).
+2.  **`news_cache`**: Die finale Liste aller Artikel, die tatsächlich auf der Live-Seite angezeigt werden.
+
+Die Statusanzeige wird wie folgt ermittelt:
+
+*   **Status: OK (Grün)**: Der Feed hat im `feed_health_status` den Status `success` **UND** es gibt Artikel von dieser Quelle im `news_cache`.
+*   **Status: Warnung (Gelb)**: Der Feed hat den Status `success`, **ABER** es gibt **keine** Artikel von dieser Quelle im `news_cache`. (Mögliche Gründe: Feed ist leer, Name stimmt nicht überein, etc.)
+*   **Status: Fehler (Rot)**: Der Feed hat im `feed_health_status` den Status `error`. (Mögliche Gründe: URL nicht erreichbar, XML-Fehler, etc.)
 
 ---
 
 ## 🚀 Lokale Installation und Ausführung
 
-Folge diesen Schritten, um das Projekt lokal auf deinem Rechner auszuführen.
-
 ### Voraussetzungen
 
 - [Node.js](https://nodejs.org/) (Version 20 oder höher)
 - [npm](https://www.npmjs.com/)
+- Ein Vercel-Konto mit verbundenem Vercel Postgres und Vercel KV Speicher.
 
 ### Installationsschritte
 
@@ -79,14 +107,19 @@ Folge diesen Schritten, um das Projekt lokal auf deinem Rechner auszuführen.
     ```bash
     npm install
     ```
-    Dieser Befehl installiert alle für das Projekt benötigten Pakete, die in der `package.json`-Datei aufgeführt sind. Dazu gehören React, Vite und auch die Pakete für die Mehrsprachigkeit wie `i18next`, `react-i18next` und `i18next-browser-languagedetector`. Es sind keine weiteren Installationsbefehle nötig.
 
 3.  **Umgebungsvariablen einrichten**:
-    Erstelle eine Datei namens `.env` im Hauptverzeichnis des Projekts und füge die folgenden Variablen hinzu. Diese werden für das Admin-Panel und die Skripte benötigt.
+    Erstelle eine Datei namens `.env` im Hauptverzeichnis des Projekts und füge die folgenden Variablen von deinem Vercel-Projekt hinzu.
 
     ```env
-    # Verbindung zur Vercel Postgres-Datenbank (powered by Neon)
+    # Verbindung zur Vercel Postgres-Datenbank
     POSTGRES_URL="postgres://..."
+
+    # Verbindungen zum Vercel KV Store
+    KV_URL="redis://..."
+    KV_REST_API_URL="https://..."
+    KV_REST_API_TOKEN="..."
+    KV_REST_API_READ_ONLY_TOKEN="..."
 
     # Anmeldedaten für das Admin-Panel (/admin.html)
     ADMIN_USERNAME="dein_admin_benutzername"
@@ -100,29 +133,25 @@ Folge diesen Schritten, um das Projekt lokal auf deinem Rechner auszuführen.
 
 5.  **Anwendung öffnen**:
     - Die Hauptanwendung ist unter `http://localhost:3000` erreichbar.
-    - Das Admin-Panel findest du unter `http://localhost:3000/admin.html`. Du wirst nach den in der `.env`-Datei festgelegten Anmeldedaten gefragt.
+    - Das Admin-Panel findest du unter `http://localhost:3000/admin.html`.
 
 ### Manuelles Aktualisieren des Caches
 
-Um den News-Cache lokal zu aktualisieren, führe das Fetch-Skript aus:
-
+Um den Vercel KV Cache lokal zu aktualisieren, führe das Fetch-Skript aus. Es liest automatisch die Variablen aus deiner `.env`-Datei.
 ```bash
 node scripts/fetch-feeds.js
 ```
-
-Dieses Skript benötigt eine gültige `POSTGRES_URL` in der `.env`-Datei.
 
 ---
 
 ## ☁️ Deployment auf Vercel
 
-Das Projekt ist für ein Deployment auf [Vercel](https://vercel.com/) vorkonfiguriert.
-
 1.  **Projekt importieren**: Importiere dein geklontes Git-Repository in Vercel.
-2.  **Umgebungsvariablen konfigurieren**: Füge im Vercel-Projekt-Dashboard die oben genannten Umgebungsvariablen (`POSTGRES_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`) hinzu.
-3.  **GitHub Actions einrichten**:
-    - Damit der automatische Workflow zur Cache-Aktualisierung funktioniert, musst du die `POSTGRES_URL` auch in deinem GitHub-Repository als "Secret" hinterlegen.
+2.  **Datenbanken verbinden**: Verknüpfe dein Vercel-Projekt mit einer Vercel Postgres-Datenbank und einem Vercel KV Store.
+3.  **Umgebungsvariablen konfigurieren**: Füge im Vercel-Projekt-Dashboard die oben genannten Umgebungsvariablen (`POSTGRES_URL`, `KV_*`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`) hinzu.
+4.  **GitHub Actions einrichten**:
+    - Damit der automatische Workflow funktioniert, musst du alle `POSTGRES_` und `KV_` Variablen auch in deinem GitHub-Repository als "Secrets" hinterlegen.
     - Gehe zu `Settings` > `Secrets and variables` > `Actions`.
-    - Erstelle ein neues "Repository secret" mit dem Namen `POSTGRES_URL` und füge den Verbindung-String deiner Datenbank ein.
+    - Erstelle für jede Variable ein "Repository secret" mit dem exakt gleichen Namen.
 
-Der Workflow (`.github/workflows/update-feeds.yml`) wird nun alle 30 Minuten automatisch ausgeführt und hält deine Live-Anwendung auf dem neuesten Stand.
+Der Workflow (`.github/workflows/update-feeds.yml`) wird nun alle 30 Minuten automatisch ausgeführt und hält deine Live-Daten aktuell.
