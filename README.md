@@ -116,10 +116,8 @@ Die Statusanzeige wird wie folgt ermittelt:
     POSTGRES_URL="postgres://..."
 
     # Verbindungen zum Vercel KV Store
-    KV_URL="redis://..."
     KV_REST_API_URL="https://..."
     KV_REST_API_TOKEN="..."
-    KV_REST_API_READ_ONLY_TOKEN="..."
 
     # Anmeldedaten für das Admin-Panel (/admin.html)
     ADMIN_USERNAME="dein_admin_benutzername"
@@ -149,9 +147,32 @@ node scripts/fetch-feeds.js
 1.  **Projekt importieren**: Importiere dein geklontes Git-Repository in Vercel.
 2.  **Datenbanken verbinden**: Verknüpfe dein Vercel-Projekt mit einer Vercel Postgres-Datenbank und einem Vercel KV Store.
 3.  **Umgebungsvariablen konfigurieren**: Füge im Vercel-Projekt-Dashboard die oben genannten Umgebungsvariablen (`POSTGRES_URL`, `KV_*`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`) hinzu.
-4.  **GitHub Actions einrichten**:
-    - Damit der automatische Workflow funktioniert, musst du alle `POSTGRES_` und `KV_` Variablen auch in deinem GitHub-Repository als "Secrets" hinterlegen.
-    - Gehe zu `Settings` > `Secrets and variables` > `Actions`.
-    - Erstelle für jede Variable ein "Repository secret" mit dem exakt gleichen Namen.
+
+### 4. GitHub Actions einrichten (KRITISCH!)
+
+Der automatische Abruf der Nachrichten (`fetch-feeds.js`) wird von GitHub Actions ausgeführt, nicht von Vercel. Daher muss GitHub Zugriff auf die Vercel-Datenbanken haben. Dies geschieht über "Secrets".
+
+**Ohne diesen Schritt wird die App keine Nachrichten anzeigen!**
+
+1.  Gehe zu deinem GitHub-Repository.
+2.  Klicke auf `Settings` > `Secrets and variables` > `Actions`.
+3.  Klicke auf `New repository secret`, um die folgenden Secrets **exakt wie benannt** zu erstellen. Die Werte kopierst du aus deinem Vercel-Projekt-Dashboard (`Settings` > `Environment Variables`).
+
+| Secret-Name in GitHub           | Wert aus Vercel-Projekt                         | Zweck                                           |
+| ------------------------------- | ----------------------------------------------- | ----------------------------------------------- |
+| `POSTGRES_URL`                  | Der Wert von `POSTGRES_URL`                     | Verbindung zur Feed-Liste in Postgres           |
+| `KV_REST_API_URL`               | Der Wert von `KV_REST_API_URL`                  | Verbindung zum News-Cache (KV Store)            |
+| `KV_REST_API_TOKEN`             | Der Wert von `KV_REST_API_TOKEN`                | Passwort für den News-Cache (KV Store)          |
 
 Der Workflow (`.github/workflows/update-feeds.yml`) wird nun alle 30 Minuten automatisch ausgeführt und hält deine Live-Daten aktuell.
+
+---
+
+## 🚨 Fehlerbehebung (Troubleshooting)
+
+### Fehler: `Missing required environment variables KV_REST_API_URL and KV_REST_API_TOKEN`
+
+Dieser Fehler tritt im GitHub Actions Log auf und ist der häufigste Konfigurationsfehler.
+
+*   **Ursache:** Das `fetch-feeds.js`-Skript, das von GitHub ausgeführt wird, hat keine Zugangsdaten, um sich mit deinem Vercel KV Store zu verbinden.
+*   **Lösung:** Befolge die Schritte unter **"GitHub Actions einrichten"** sorgfältig. Stelle sicher, dass du die Secrets `KV_REST_API_URL` und `KV_REST_API_TOKEN` in den GitHub-Einstellungen deines Repositories korrekt angelegt hast. Die Namen müssen exakt übereinstimmen.
