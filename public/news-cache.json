@@ -1,5 +1,115 @@
 [
   {
+    "id": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/Dieses-Addon-ist-ein-Must-Have-fuer-alle-Schurken-Fans-1486732/",
+    "title": "WoW: Dieses Addon ist ein Must-Have für alle Schurken-Fans",
+    "source": "Buffed",
+    "publicationDate": "2025-11-14T18:30:00.000Z",
+    "summary": "Wir stellen euch heute ein WoW-Addon vor, das im Repertoire keines Schurkens fehlen sollte.",
+    "link": "https://www.buffed.de/World-of-Warcraft-Spiel-42971/News/Dieses-Addon-ist-ein-Must-Have-fuer-alle-Schurken-Fans-1486732/",
+    "imageUrl": "https://www.buffed.de/screenshots/970x546/2017/02/heroes_valeera_wallpaper_01-buffed.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://news.xbox.com/en-us/?p=214181",
+    "title": "EA Play: Check Out November’s Offers and Rewards",
+    "source": "Xbox Wire",
+    "publicationDate": "2025-11-14T18:30:00.000Z",
+    "summary": "The post EA Play: Check Out November’s Offers and Rewards appeared first on Xbox Wire.",
+    "link": "https://news.xbox.com/en-us/2025/11/14/ea-play-november-2025/",
+    "imageUrl": "https://xboxwire.thesourcemediaassets.com/sites/2/2025/11/EAP_XboxWireHero_November_1920x1080-083aecd31dd7953b6d73-1024x576.jpg",
+    "language": "en"
+  },
+  {
+    "id": "nnBgWANXSepQ9Rs2o6NaKi",
+    "title": "Disney CEO says AI is an 'engagement engine' and Disney+ is soon gonna be crammed to bursting with it",
+    "source": "PC Gamer",
+    "publicationDate": "2025-11-14T18:29:41.000Z",
+    "summary": "And apparently Epic Games will be making games for it, too.",
+    "link": "https://www.pcgamer.com/software/ai/disney-ceo-says-ai-is-an-engagement-engine-and-disney-is-soon-gonna-be-crammed-to-bursting-with-it/",
+    "imageUrl": "https://cdn.mos.cms.futurecdn.net/WVwxULvoFb5RXQftvX8MsM-1280-80.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://kotaku.com/?p=2000644400",
+    "title": "Fans Think The Pokémon Animal Crossing Game May Be Set In A Post-Apocalypse",
+    "source": "Kotaku",
+    "publicationDate": "2025-11-14T18:27:12.000Z",
+    "summary": "Pokopia may seem cute and cozy, but it may actually be pretty dark The post Fans Think The Pokémon Animal Crossing Game May Be Set In A...",
+    "link": "https://kotaku.com/pokemon-pokopia-post-apocalypse-snorlax-pikachu-fuschia-2000644400",
+    "imageUrl": "https://kotaku.com/app/uploads/2025/11/40-1280x720.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://www.pcgames.de/One-Piece-Serie-204699/News/one-piece-staffel-2-wie-alt-schauspieler-1486738/",
+    "title": "Netflix-Serie One Piece hat dasselbe Problem wie Stranger Things: Was tun, wenn, Darstellende zu alt werden",
+    "source": "PC Games",
+    "publicationDate": "2025-11-14T18:27:00.000Z",
+    "summary": "Eine der besten Netflix-Serien wird in Zukunft ein echtes Problem bekommen.",
+    "link": "https://www.pcgames.de/One-Piece-Serie-204699/News/one-piece-staffel-2-wie-alt-schauspieler-1486738/",
+    "imageUrl": "https://www.pcgames.de/screenshots/970x546/2023/08/One_Piece_Netflix_Inaki_Godoy_Monkey_D_Ruffy-buffed.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamezone.de/One-Piece-Serie-204699/News/one-piece-staffel-2-wie-alt-schauspieler-1486738/",
+    "title": "Netflix-Serie One Piece hat dasselbe Problem wie Stranger Things: Was tun, wenn, Darstellende zu alt werden",
+    "source": "GameZone",
+    "publicationDate": "2025-11-14T18:27:00.000Z",
+    "summary": "Eine der besten Netflix-Serien wird in Zukunft ein echtes Problem bekommen.",
+    "link": "https://www.gamezone.de/One-Piece-Serie-204699/News/one-piece-staffel-2-wie-alt-schauspieler-1486738/",
+    "imageUrl": "https://www.gamezone.de/screenshots/970x546/2023/08/One_Piece_Netflix_Inaki_Godoy_Monkey_D_Ruffy-buffed.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.videogameszone.de/One-Piece-Serie-204699/News/one-piece-staffel-2-wie-alt-schauspieler-1486738/",
+    "title": "Netflix-Serie One Piece hat dasselbe Problem wie Stranger Things: Was tun, wenn, Darstellende zu alt werden",
+    "source": "Video Games Zone",
+    "publicationDate": "2025-11-14T18:27:00.000Z",
+    "summary": "Eine der besten Netflix-Serien wird in Zukunft ein echtes Problem bekommen.",
+    "link": "https://www.videogameszone.de/One-Piece-Serie-204699/News/one-piece-staffel-2-wie-alt-schauspieler-1486738/",
+    "imageUrl": "https://www.videogameszone.de/screenshots/970x546/2023/08/One_Piece_Netflix_Inaki_Godoy_Monkey_D_Ruffy-buffed.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://mein-mmo.de/?p=1336738",
+    "title": "Where Winds Meet: Live-Ticker zum Release – Alle wichtigen Infos zu Start und Server-Status",
+    "source": "Mein-MMO",
+    "publicationDate": "2025-11-14T18:25:22.000Z",
+    "summary": "MeinMMO begleitet den Release von Where Winds Meet im Live-Ticker und versorgt euch mit den letzten Updates kurz vor dem Start. Der Beitrag Where...",
+    "link": "https://mein-mmo.de/where-winds-meet-release-ticker/",
+    "imageUrl": "https://images.mein-mmo.de/medien/2025/11/Neues-Projekt-2025-11-14T120816.310-1140x445.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.pcgamesn.com/call-of-duty-black-ops-7/ai-assets-steam-disclosure",
+    "title": "Activision confirms Black Ops 7 uses gen-AI tools for assets, says they help \"empower\" its teams to \"create the best gaming experiences possible\"",
+    "source": "PCGamesN",
+    "publicationDate": "2025-11-14T18:24:03.000Z",
+    "summary": "Black Ops 7 continues Call of Duty's trend of using generative AI to help create in-game assets, according to its Steam page disclosure.",
+    "link": "https://www.pcgamesn.com/call-of-duty-black-ops-7/ai-assets-steam-disclosure",
+    "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/11/call-of-duty-black-ops-7-ai-assets-steam-disclosure.jpg",
+    "language": "en"
+  },
+  {
+    "id": "https://de.ign.com/ubisoft/149737/news/ubisoft-setzte-aktienhandel-aus-als-sicherheitsmassnahme",
+    "title": "Ubisoft setzte Aktienhandel aus – als Sicherheitsmaßnahme",
+    "source": "IGN",
+    "publicationDate": "2025-11-14T18:22:08.000Z",
+    "summary": "Nichts ist wahr, alles ist erlaubt Die Ubsioft-Aktie ist eingefroren und kann momentan nicht gehandelt werden, um „kurzfristige Kursschwankungen“ zu...",
+    "link": "https://de.ign.com/ubisoft/149737/news/ubisoft-setzte-aktienhandel-aus-als-sicherheitsmassnahme",
+    "imageUrl": "https://sm.ign.com/ign_de/screenshot/default/neues-projeksadasdasdasdt_wv9f.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gematsu.com/?p=1007127",
+    "title": "BROK: The Brawl Bar coming to PS5, PS4, Xbox One, and Switch on December 2",
+    "source": "Gematsu",
+    "publicationDate": "2025-11-14T18:20:25.000Z",
+    "summary": "COWCAT will release BROK: The Brawl Bar for PlayStation 5, PlayStation 4, Xbox One, and … Source",
+    "link": "https://www.gematsu.com/2025/11/brok-the-brawl-bar-coming-to-ps5-ps4-xbox-one-and-switch-on-december-2",
+    "imageUrl": "https://www.gematsu.com/wp-content/uploads/2025/11/BROK-Brawl-Bar-Consoles_11-14-25.jpg",
+    "language": "en"
+  },
+  {
     "id": "https://www.pcgamesn.com/steam-machine/dbrand-companion-cube-skin",
     "title": "If you don't buy this for your Steam Machine, Valve should probably cancel your pre-order",
     "source": "PCGamesN",
@@ -7,6 +117,16 @@
     "summary": "If you're set on getting a Steam Machine and want to show your true allegiance to the almighty Valve and its Gabe Cube, you surely need to grab one...",
     "link": "https://www.pcgamesn.com/steam-machine/dbrand-companion-cube-skin",
     "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/11/steam-machine-mystery-accessory.jpg",
+    "language": "en"
+  },
+  {
+    "id": "1100-6536230",
+    "title": "Fortnite Creative May Be Going Pay-To-Win Soon",
+    "source": "GameSpot",
+    "publicationDate": "2025-11-14T18:15:00.000Z",
+    "summary": "Epic Games is gearing up for its biggest shake-up to Fortnite Creative since the introduction of the Unreal Editor for Fortnite. Soon, Epic will...",
+    "link": "https://www.gamespot.com/articles/fortnite-creative-may-be-going-pay-to-win-soon/1100-6536230/?ftag=CAD-01-10abi2f",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1757/17577455/4602590-fortnitecreativemicrotransactions.jpg",
     "language": "en"
   },
   {
@@ -28,16 +148,6 @@
     "link": "https://www.pcgamesn.com/call-of-duty-black-ops-7/ai-assets-steam-disclosure",
     "imageUrl": "https://www.pcgamesn.com/wp-content/sites/pcgamesn/2025/11/call-of-duty-black-ops-7-ai-assets-steam-disclosure.jpg",
     "language": "en"
-  },
-  {
-    "id": "https://mein-mmo.de/?p=1336738",
-    "title": "Where Winds Meet: Live-Ticker zum Release – Alle wichtigen Infos zu Start und Server-Status",
-    "source": "Mein-MMO",
-    "publicationDate": "2025-11-14T18:08:06.000Z",
-    "summary": "MeinMMO begleitet den Release von Where Winds Meet im Live-Ticker und versorgt euch mit den letzten Updates kurz vor dem Start. Der Beitrag Where...",
-    "link": "https://mein-mmo.de/where-winds-meet-release-ticker/",
-    "imageUrl": "https://images.mein-mmo.de/medien/2025/11/Neues-Projekt-2025-11-14T120816.310-1140x445.jpg",
-    "language": "de"
   },
   {
     "id": "https://www.gematsu.com/?p=1007116",
@@ -98,6 +208,36 @@
     "link": "https://www.computerbase.de/news/storage/speicherpreise-im-check-ram-preise-nahezu-verdoppelt-auch-ssds-legen-langsam-zu.95056/",
     "imageUrl": "https://pics.computerbase.de/1/2/0/1/4/4-d526375cb21ee37b/article-640x360.05d304c2.jpg",
     "language": "de"
+  },
+  {
+    "id": "https://www.gamepro.de/artikel/steam-machine-vs-ps5-vergleich,3442960.html",
+    "title": "Special: Steam Machine vs. PS5: Die Valve-Konsole wird Sony in gleich mehreren Punkten übertreffen",
+    "source": "GamePro",
+    "publicationDate": "2025-11-14T18:00:00.000Z",
+    "summary": "Valve hat die Steam Machine angekündigt. Der PC-Konsolen-Mischling bringt wohl viel Leistung und wird sich mit der PS5 messen können.",
+    "link": "https://www.gamepro.de/artikel/steam-machine-vs-ps5-vergleich,3442960.html",
+    "imageUrl": "https://images.cgames.de/images/gsgp/1200/ps5-vs-steam-machine-final-gp_6386417.jpg",
+    "language": "de"
+  },
+  {
+    "id": "2300-6466521",
+    "title": "Kirby Air Riders - Everything To Know",
+    "source": "GameSpot",
+    "publicationDate": "2025-11-14T18:00:00.000Z",
+    "summary": "GameCube cult favourite racing game Kirby Air Ride is getting a Switch 2 sequel, here’s everything you need to know about Kirby Air Riders.",
+    "link": "https://www.gamespot.com/videos/kirby-air-riders-everything-to-know/2300-6466521/",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1862/18620770/4602294-kirby_air_riders_etk_siteonly.jpg",
+    "language": "en"
+  },
+  {
+    "id": "1100-6536229",
+    "title": "The Witcher 3 Almost Left Out This Important Romance Feature",
+    "source": "GameSpot",
+    "publicationDate": "2025-11-14T17:59:00.000Z",
+    "summary": "Anyone who plays through The Witcher 3: The Wild Hunt is invited to make a choice between the two great loves of Geralt of Rivia: Yennefer of...",
+    "link": "https://www.gamespot.com/articles/the-witcher-3-almost-left-out-this-important-romance-feature/1100-6536229/?ftag=CAD-01-10abi2f",
+    "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1837/18375603/4602583-thewitcher3triss.jpg",
+    "language": "en"
   },
   {
     "id": "https://www.pcgamesn.com/war-thunder/spearhead-update",
@@ -207,6 +347,16 @@
     "summary": "Mit Nordic Horizons steht die nächste Kartenerweiterung für den Euro Truck Simulator 2 in den Startlöchern. SCS stellt dabei die nördlichen Regionen...",
     "link": "https://www.pcgameshardware.de/Euro-Truck-Simulator-2-Spiel-22781/News/Map-Erweiterung-Nordic-Horizons-Release-1486683/",
     "imageUrl": "https://www.pcgameshardware.de/screenshots/970x546/2025/11/ETS-2-pcgh.jpg",
+    "language": "de"
+  },
+  {
+    "id": "https://www.gamepro.de/artikel/lego-oma-bonsai,3442968.html",
+    "title": "News: Oma liebt Bonsai - glaubt aber, dass sie einen echten umbringen würde: Also baut sich einfach einen aus LEGO und bewundert ihn jetzt",
+    "source": "GamePro",
+    "publicationDate": "2025-11-14T17:45:00.000Z",
+    "summary": "Eine ältere Dame liebt Bonsai, glaubt aber nicht, dass sie eine echte Pflanze am Leben halten könnte. Die Lösung? LEGO (natürlich)!",
+    "link": "https://www.gamepro.de/artikel/lego-oma-bonsai,3442968.html",
+    "imageUrl": "https://images.cgames.de/images/gsgp/1200/lego-oma-bonsai_6386458.jpg",
     "language": "de"
   },
   {
@@ -390,6 +540,16 @@
     "language": "de"
   },
   {
+    "id": "https://www.gamepro.de/artikel/pokemon-pokopia-game-share,3442970.html",
+    "title": "News: Pokémon Pokopia erscheint eigentlich nur für Switch 2, mit einem Trick könnt ihr aber auch auf der Switch 1 zocken - ihr braucht nur einen Freund dazu",
+    "source": "GamePro",
+    "publicationDate": "2025-11-14T17:30:00.000Z",
+    "summary": "Pokopia erscheint nur für die Switch 2, aber zumindest im Koop geht die originale Konsole trotzdem nicht ganz leer aus.",
+    "link": "https://www.gamepro.de/artikel/pokemon-pokopia-game-share,3442970.html",
+    "imageUrl": "https://images.cgames.de/images/gsgp/1200/pok%C3%A9mon-pokopia_6374949.jpg",
+    "language": "de"
+  },
+  {
     "id": "https://www.rockpapershotgun.com/with-gta-6-still-miles-away-gta-onlines-obscenely-rich-will-soon-be-able-to-splurge-their-cash-mountains-on-mansions",
     "title": "With GTA 6 still miles away, GTA Online's obscenely rich will soon be able to splurge their cash mountains on mansions",
     "source": "Rock Paper Shotgun",
@@ -528,6 +688,16 @@
     "link": "https://www.gamespot.com/articles/sims-like-paralives-release-delayed-at-last-minute-to-2026/1100-6536228/?ftag=CAD-01-10abi2f",
     "imageUrl": "https://www.gamespot.com/a/uploads/screen_medium/1578/15789366/4602579-paralivesimage.jpg",
     "language": "en"
+  },
+  {
+    "id": "https://www.gamepro.de/artikel/battlefield-6-sniper-jet,3443018.html",
+    "title": "News: Battlefield 6-Sniper knallt mit Kunstschuss aus 888 Metern Jet vom Himmel und Fans feiern es: \"Jetzt solltest du dir einen Lottoschein holen\"",
+    "source": "GamePro",
+    "publicationDate": "2025-11-14T17:10:00.000Z",
+    "summary": "Ein glücklicher Battlefield 6-Spieler zeigt uns einen Sniper-Schuss, den man wohl nur einmal im Leben so hinlegt.",
+    "link": "https://www.gamepro.de/artikel/battlefield-6-sniper-jet,3443018.html",
+    "imageUrl": "https://images.cgames.de/images/gsgp/1200/battlefield-6_6382173.jpg",
+    "language": "de"
   },
   {
     "id": "i6998RnhYZZkErfBewsJwd",
