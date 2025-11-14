@@ -127,10 +127,6 @@
     "status": "success",
     "message": "Successfully fetched and parsed 12 articles."
   },
-  "playstation-blog": {
-    "status": "success",
-    "message": "Successfully fetched and parsed 10 articles."
-  },
   "computerbase": {
     "status": "success",
     "message": "Successfully fetched and parsed 50 articles."
@@ -141,7 +137,7 @@
   },
   "heise-online": {
     "status": "success",
-    "message": "Successfully fetched and parsed 155 articles."
+    "message": "Successfully fetched and parsed 150 articles."
   },
   "pixelcritics": {
     "status": "success",
@@ -160,6 +156,10 @@
     "message": "Successfully fetched and parsed 40 articles."
   },
   "playstationblog-de-1763131245208": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 10 articles."
+  },
+  "playstation-blog": {
     "status": "success",
     "message": "Successfully fetched and parsed 10 articles."
   }
