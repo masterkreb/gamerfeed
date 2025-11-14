@@ -328,12 +328,27 @@ async function main() {
         let oldArticles = [];
         try {
             const cachedData = await kv.get('news_cache');
-            if (cachedData) {
+
+            // If cache exists and is a valid array, use it.
+            if (cachedData && Array.isArray(cachedData)) {
                 oldArticles = cachedData;
                 console.log(`\n📦 Loaded ${oldArticles.length} articles from existing KV cache.`);
+
+                // If cache is empty (null or undefined), it's safe to start fresh.
+            } else if (!cachedData) {
+                console.log(`ℹ️  No existing cache found in KV. Starting fresh.`);
+
+                // If cache exists but is NOT a valid array (corrupted), abort to prevent data loss.
+            } else {
+                throw new Error(`Existing cache data from KV is corrupted (not an array). Aborting to prevent data loss.`);
             }
         } catch (e) {
-            console.warn(`⚠️  Could not read or parse existing KV cache. Starting fresh. Error: ${e.message}`);
+            // A failure to read the cache or finding a corrupted cache is a critical error.
+            // Abort the script to prevent overwriting the existing cache with incomplete data.
+            console.error(`\n❌ CRITICAL: Failed to process Vercel KV cache. Aborting script to prevent data loss.`);
+            console.error(`   Error details: ${e.message}`);
+            // Re-throw the error to ensure the GitHub Action fails and we get notified.
+            throw e;
         }
 
         const { rows: feeds } = await sql`SELECT * FROM feeds;`;
