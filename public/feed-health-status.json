@@ -141,7 +141,7 @@
   },
   "heise-online": {
     "status": "success",
-    "message": "Successfully fetched and parsed 159 articles."
+    "message": "Successfully fetched and parsed 155 articles."
   },
   "pixelcritics": {
     "status": "success",
@@ -158,5 +158,9 @@
   "golem": {
     "status": "success",
     "message": "Successfully fetched and parsed 40 articles."
+  },
+  "playstationblog-de-1763131245208": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 10 articles."
   }
 }
