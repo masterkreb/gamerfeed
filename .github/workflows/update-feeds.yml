@@ -28,8 +28,15 @@ jobs:
 
       - name: Fetch and cache feeds to Vercel KV
         env:
-          # These secrets must be configured in your GitHub repository settings
+          # IMPORTANT: These secrets MUST be configured in your GitHub repository settings.
+          # Go to Settings > Secrets and variables > Actions > New repository secret.
+          # DO NOT STORE these values in any file in your project.
+          # The values come from your Vercel project's environment variables.
+
+          # For Vercel Postgres (where the feed list is stored)
           POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+
+          # For Vercel KV (where the news articles are cached)
           KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
           KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
         run: node scripts/fetch-feeds.js

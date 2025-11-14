@@ -152,11 +152,16 @@ node scripts/fetch-feeds.js
 
 Der automatische Abruf der Nachrichten (`fetch-feeds.js`) wird von GitHub Actions ausgeführt, nicht von Vercel. Daher muss GitHub Zugriff auf die Vercel-Datenbanken haben. Dies geschieht über "Secrets".
 
-**Ohne diesen Schritt wird die App keine Nachrichten anzeigen!**
+**🚨 WICHTIG: Ohne diesen Schritt wird die App keine neuen Nachrichten laden und der automatische Prozess wird fehlschlagen!** Der Fehler `Missing required environment variables` in deinen Action-Logs ist ein direktes Symptom für fehlende Secrets.
+
+Diese Schlüssel werden **NICHT** in eine Datei im Projekt geschrieben. Sie werden sicher in den GitHub-Einstellungen deines Repositories gespeichert.
+
+#### Schritt-für-Schritt-Anleitung:
 
 1.  Gehe zu deinem GitHub-Repository.
-2.  Klicke auf `Settings` > `Secrets and variables` > `Actions`.
-3.  Klicke auf `New repository secret`, um die folgenden Secrets **exakt wie benannt** zu erstellen. Die Werte kopierst du aus deinem Vercel-Projekt-Dashboard (`Settings` > `Environment Variables`).
+2.  Klicke auf `Settings` (Einstellungen) > `Secrets and variables` (Geheimnisse und Variablen) > `Actions`.
+3.  Klicke auf den Button `New repository secret`, um die folgenden drei Secrets **exakt wie benannt** zu erstellen.
+4.  Die Werte für die Secrets findest du in deinem Vercel-Projekt-Dashboard unter `Settings` > `Environment Variables`. Kopiere sie von dort.
 
 | Secret-Name in GitHub           | Wert aus Vercel-Projekt                         | Zweck                                           |
 | ------------------------------- | ----------------------------------------------- | ----------------------------------------------- |
