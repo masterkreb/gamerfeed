@@ -14,3 +14,8 @@ root.render(
         <App />
     </React.StrictMode>
 );
+
+// Hilfsfunktion zum Escapen von Anführungszeichen in HTML-Attributen
+const escapeHtmlAttr = (str: string): string => {
+    return str.replace(/"/g, '&quot;');
+};
