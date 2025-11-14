@@ -1,10 +1,135 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8" />-->
+<!--    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0" />-->
+<!--    <title>GamerFeed - Gaming News</title>-->
+<!--    <script src="https://cdn.tailwindcss.com"></script>-->
+<!--    <script>-->
+<!--        tailwind.config = {-->
+<!--            darkMode: 'class',-->
+<!--        }-->
+<!--    </script>-->
+<!--    <style>-->
+<!--        @keyframes fadeIn {-->
+<!--            from { opacity: 0; transform: translateY(8px); }-->
+<!--            to { opacity: 1; transform: translateY(0); }-->
+<!--        }-->
+<!--        .animate-fade-in {-->
+<!--            animation: fadeIn 0.4s ease-out;-->
+<!--        }-->
+<!--        @keyframes toastIn {-->
+<!--            from { opacity: 0; transform: translateX(-50%) scale(0.95); }-->
+<!--            to { opacity: 1; transform: translateX(-50%) scale(1); }-->
+<!--        }-->
+<!--        .animate-toast-in {-->
+<!--            animation: toastIn 0.4s cubic-bezier(0.21, 1.02, 0.73, 1);-->
+<!--        }-->
+<!--        @keyframes toastOut {-->
+<!--            from { opacity: 1; transform: translateX(-50%) scale(1); }-->
+<!--            to { opacity: 0; transform: translateX(-50%) scale(0.95); }-->
+<!--        }-->
+<!--        .animate-toast-out {-->
+<!--            animation: toastOut 0.5s ease-in-out;-->
+<!--        }-->
+<!--        @keyframes popIn {-->
+<!--            0% { transform: scale(0.8); opacity: 0.8; }-->
+<!--            50% { transform: scale(1.2); opacity: 1; }-->
+<!--            100% { transform: scale(1); opacity: 1; }-->
+<!--        }-->
+<!--        .animate-pop-in {-->
+<!--            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);-->
+<!--        }-->
+<!--        /* Added for animation stability */-->
+<!--        .backface-hidden {-->
+<!--            backface-visibility: hidden;-->
+<!--        }-->
+<!--        /* Added for Accessibility: Skip to Content Link */-->
+<!--        .skip-link {-->
+<!--            position: absolute;-->
+<!--            width: 1px;-->
+<!--            height: 1px;-->
+<!--            padding: 0;-->
+<!--            margin: -1px;-->
+<!--            overflow: hidden;-->
+<!--            clip: rect(0, 0, 0, 0);-->
+<!--            white-space: nowrap;-->
+<!--            border-width: 0;-->
+<!--        }-->
+<!--        .skip-link:focus {-->
+<!--            position: fixed;-->
+<!--            z-index: 100;-->
+<!--            top: 1rem;-->
+<!--            left: 1rem;-->
+<!--            width: auto;-->
+<!--            height: auto;-->
+<!--            padding: 0.75rem 1.25rem;-->
+<!--            margin: 0;-->
+<!--            overflow: visible;-->
+<!--            clip: auto;-->
+<!--            white-space: normal;-->
+<!--            background-color: white;-->
+<!--            color: #1e293b; /* slate-800 */-->
+<!--            border: 2px solid #1e293b;-->
+<!--            border-radius: 0.5rem;-->
+<!--            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);-->
+<!--            text-decoration: none;-->
+<!--            font-weight: 600;-->
+<!--        }-->
+<!--        .dark .skip-link:focus {-->
+<!--            background-color: #18181b; /* zinc-900 */-->
+<!--            color: white;-->
+<!--            border-color: #71717a; /* zinc-500 */-->
+<!--        }-->
+<!--        .body-no-scroll {-->
+<!--            overflow: hidden;-->
+<!--            padding-right: var(&#45;&#45;scrollbar-width, 0px);-->
+<!--        }-->
+<!--    </style>-->
+<!--    <script type="importmap">-->
+<!--        {-->
+<!--          "imports": {-->
+<!--            "react": "https://aistudiocdn.com/react@^19.2.0",-->
+<!--            "react/": "https://aistudiocdn.com/react@^19.2.0/",-->
+<!--            "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"-->
+<!--          }-->
+<!--        }-->
+<!--    </script>-->
+<!--</head>-->
+<!--<body class="bg-slate-100 dark:bg-zinc-900">-->
+<!--<div id="root"></div>-->
+<!--<script type="module" src="/index.tsx"></script>-->
+<!--</body>-->
+<!--</html>-->
+
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GamerFeed - Gaming News</title>
+
+    <!-- SEO Meta Tags -->
+    <title>GamerFeed - Your Daily Gaming News Aggregator</title>
+    <meta name="description" content="GamerFeed sammelt die neuesten Gaming-Nachrichten aus den besten deutschen und englischen Quellen. Bleibe auf dem Laufenden mit News zu PC, PlayStation, Xbox und Nintendo." />
+    <meta name="keywords" content="gaming news, spiele nachrichten, videogames, pc gaming, playstation, xbox, nintendo, gamerfeed" />
+    <link rel="canonical" href="https://gamerfeed.vercel.app/" />
+
+    <!-- Open Graph Meta Tags (for Facebook, WhatsApp, etc.) -->
+    <meta property="og:title" content="GamerFeed - Your Daily Gaming News Aggregator" />
+    <meta property="og:description" content="Alle wichtigen Gaming-News auf einen Blick. Schnell, modern und personalisierbar." />
+    <meta property="og:image" content="https://gamerfeed.vercel.app/social-preview.png" />
+    <meta property="og:url" content="https://gamerfeed.vercel.app/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="GamerFeed - Your Daily Gaming News Aggregator" />
+    <meta name="twitter:description" content="Alle wichtigen Gaming-News auf einen Blick. Schnell, modern und personalisierbar." />
+    <meta name="twitter:image" content="https://gamerfeed.vercel.app/social-preview.png" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -86,6 +211,10 @@
             overflow: hidden;
             padding-right: var(--scrollbar-width, 0px);
         }
+        /* Hide pre-rendered content for users with JavaScript */
+        #pre-rendered-content {
+            display: none;
+        }
     </style>
     <script type="importmap">
         {
@@ -99,6 +228,15 @@
 </head>
 <body class="bg-slate-100 dark:bg-zinc-900">
 <div id="root"></div>
+
+<!-- PRE-RENDERED-CONTENT -->
+<div id="pre-rendered-content" aria-hidden="true" style="display: none;">
+    <h1>GamerFeed - Your Daily Gaming News</h1>
+    <p>Die neuesten Nachrichten aus der Welt der Videospiele. Besuche unsere Seite für die interaktive Version mit Filter- und Speicherfunktionen.</p>
+</div>
+<!-- END-PRE-RENDERED-CONTENT -->
+
+
 <script type="module" src="/index.tsx"></script>
 </body>
 </html>
