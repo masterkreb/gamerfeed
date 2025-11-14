@@ -56,8 +56,8 @@
     "message": "Successfully fetched and parsed 30 articles."
   },
   "gamersglobal": {
-    "status": "error",
-    "message": "All fetch attempts failed. Last error: Proxy api.allorigins.win failed with status 408"
+    "status": "success",
+    "message": "Successfully fetched and parsed 60 articles."
   },
   "gamesradar+": {
     "status": "success",
