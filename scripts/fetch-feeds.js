@@ -662,7 +662,7 @@ function generateStaticHtml(articles) {
 
     for (const article of articlesToRender) {
         const decodedTitle = decodeHtmlEntities(article.title);
-        // FIX: Escape double quotes inside the alt attribute to prevent breaking the HTML structure.
+        // FIX: Correctly escape double quotes inside the alt attribute with the proper HTML entity to prevent breaking the HTML structure.
         const escapedAltText = decodedTitle.replaceAll('"', '&quot;');
 
         html += `
