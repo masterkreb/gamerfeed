@@ -649,6 +649,17 @@ function stripHtmlAndTruncate(html, length = 150) {
     }
 }
 
+// Helper to robustly escape text for HTML insertion
+function escapeHtml(text) {
+    if (!text) return '';
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // === SEO GENERATION FUNCTIONS ===
 function generateStaticHtml(articles) {
     console.log('   - Generating static HTML for pre-rendering...');
@@ -661,16 +672,17 @@ function generateStaticHtml(articles) {
         <h2>Latest Articles</h2>`;
 
     for (const article of articlesToRender) {
-        const decodedTitle = decodeHtmlEntities(article.title);
-        // FIX: Correctly escape double quotes inside the alt attribute with the proper HTML entity to prevent breaking the HTML structure.
-        const escapedAltText = decodedTitle.replaceAll('"', '&quot;');
+        // The parser produces raw strings, so we must escape them before injecting into HTML.
+        // This prevents characters like " or & from breaking the HTML structure.
+        const escapedTitle = escapeHtml(article.title);
+        const escapedSummary = escapeHtml(article.summary);
 
         html += `
         <article>
-            <h3><a href="${article.link}">${decodedTitle}</a></h3>
+            <h3><a href="${article.link}">${escapedTitle}</a></h3>
             <p><strong>Source:</strong> ${article.source} | <strong>Published:</strong> ${new Date(article.publicationDate).toLocaleDateString()}</p>
-            <p>${decodeHtmlEntities(article.summary)}</p>
-            ${article.imageUrl ? `<img src="${article.imageUrl}" alt="${escapedAltText}">` : ''}
+            <p>${escapedSummary}</p>
+            ${article.imageUrl ? `<img src="${article.imageUrl}" alt="${escapedTitle}">` : ''}
         </article>`;
     }
     html += `
@@ -678,6 +690,7 @@ function generateStaticHtml(articles) {
     </div>`;
     return html;
 }
+
 
 function generateSitemap(articles) {
     console.log('   - Generating sitemap.xml...');
