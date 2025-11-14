@@ -661,12 +661,16 @@ function generateStaticHtml(articles) {
         <h2>Latest Articles</h2>`;
 
     for (const article of articlesToRender) {
+        const decodedTitle = decodeHtmlEntities(article.title);
+        // FIX: Escape double quotes inside the alt attribute to prevent breaking the HTML structure.
+        const escapedAltText = decodedTitle.replaceAll('"', '&quot;');
+
         html += `
         <article>
-            <h3><a href="${article.link}">${decodeHtmlEntities(article.title)}</a></h3>
+            <h3><a href="${article.link}">${decodedTitle}</a></h3>
             <p><strong>Source:</strong> ${article.source} | <strong>Published:</strong> ${new Date(article.publicationDate).toLocaleDateString()}</p>
             <p>${decodeHtmlEntities(article.summary)}</p>
-            ${article.imageUrl ? `<img src="${article.imageUrl}" alt="${decodeHtmlEntities(article.title)}">` : ''}
+            ${article.imageUrl ? `<img src="${article.imageUrl}" alt="${escapedAltText}">` : ''}
         </article>`;
     }
     html += `
