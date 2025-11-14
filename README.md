@@ -1,4 +1,5 @@
 
+
 # GamerFeed - Ein Moderner Gaming-News-Aggregator
 
 GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachrichten aus der Welt der Videospiele von zahlreichen deutsch- und englischsprachigen Quellen bündelt. Die Anwendung ist als schnelle, responsive und hochgradig anpassbare Single-Page-Application (SPA) konzipiert.
@@ -168,6 +169,8 @@ Diese Schlüssel werden **NICHT** in eine Datei im Projekt geschrieben. Sie werd
 | `POSTGRES_URL`                  | Der Wert von `POSTGRES_URL`                     | Verbindung zur Feed-Liste in Postgres           |
 | `KV_REST_API_URL`               | Der Wert von `KV_REST_API_URL`                  | Verbindung zum News-Cache (KV Store)            |
 | `KV_REST_API_TOKEN`             | Der Wert von `KV_REST_API_TOKEN`                | Passwort für den News-Cache (KV Store)          |
+
+**Hinweis:** Andere von Vercel bereitgestellte Variablen wie `VERCEL_URL` werden für diesen Workflow nicht benötigt. Es werden nur die drei oben genannten Secrets verwendet.
 
 Der Workflow (`.github/workflows/update-feeds.yml`) wird nun alle 30 Minuten automatisch ausgeführt und hält deine Live-Daten aktuell.
 
