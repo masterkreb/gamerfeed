@@ -109,30 +109,82 @@ export const AdminPanel: React.FC = () => {
 
             const backendHealth: BackendHealthStatus = await healthRes.json();
             const liveArticles: Article[] = await cacheRes.json();
+
+            // Create a Set of all unique source names in the cache
             const sourcesInCache = new Set(liveArticles.map(a => a.source));
+
+            // Debug logging to help identify naming mismatches
+            console.log('🔍 Health Check Debug Info:');
+            console.log('  Sources in cache:', Array.from(sourcesInCache));
+            console.log('  Feeds being checked:', feeds.map(f => ({ id: f.id, name: f.name })));
 
             const newHealthState: FeedHealth = {};
             feeds.forEach(feed => {
                 const backendStatus = backendHealth[feed.id];
+
+                // Case 1: Feed not in backend health status
                 if (!backendStatus) {
-                    newHealthState[feed.id] = { status: 'error', detail: 'Feed was not processed by the last backend run. Check GitHub Action logs for script errors.' };
-                } else if (backendStatus.status === 'error') {
-                    newHealthState[feed.id] = { status: 'error', detail: `Backend Error: ${backendStatus.message}` };
-                } else if (backendStatus.status === 'success' || backendStatus.status === 'warning') {
-                    if (sourcesInCache.has(feed.name)) {
-                        newHealthState[feed.id] = { status: 'ok', detail: 'Feed is live. The last backend fetch was successful.' };
+                    newHealthState[feed.id] = {
+                        status: 'error',
+                        detail: 'Feed was not processed by the last backend run. Check GitHub Action logs for script errors.'
+                    };
+                    return;
+                }
+
+                // Case 2: Backend reported an error
+                if (backendStatus.status === 'error') {
+                    newHealthState[feed.id] = {
+                        status: 'error',
+                        detail: `Backend Error: ${backendStatus.message}`
+                    };
+                    return;
+                }
+
+                // Case 3: Backend was successful or has warning
+                if (backendStatus.status === 'success' || backendStatus.status === 'warning') {
+                    // First try exact match
+                    let isInCache = sourcesInCache.has(feed.name);
+
+                    // If no exact match, try fuzzy matching
+                    // (case-insensitive, ignoring extra spaces and dots)
+                    if (!isInCache) {
+                        const normalizedFeedName = feed.name.toLowerCase().replace(/[\s.]+/g, '');
+                        isInCache = Array.from(sourcesInCache).some(source =>
+                            source.toLowerCase().replace(/[\s.]+/g, '') === normalizedFeedName
+                        );
+
+                        if (isInCache) {
+                            console.warn(`⚠️ Feed "${feed.name}" found in cache with fuzzy matching. Consider updating the database name to match exactly.`);
+                        }
+                    }
+
+                    if (isInCache) {
+                        newHealthState[feed.id] = {
+                            status: 'ok',
+                            detail: 'Feed is live. The last backend fetch was successful.'
+                        };
                     } else {
-                        newHealthState[feed.id] = { status: 'warning', detail: 'Backend fetch successful, but no recent articles were found for the frontend cache. The feed might be empty or outdated.' };
+                        newHealthState[feed.id] = {
+                            status: 'warning',
+                            detail: `Backend fetch successful, but no recent articles were found for the frontend cache. Feed name "${feed.name}" not found in cache sources. The feed might be empty or outdated.`
+                        };
                     }
                 }
             });
+
             setFeedHealth(newHealthState);
+            console.log('✅ Health check completed successfully');
+
         } catch (error) {
             const message = error instanceof Error ? error.message : "An unknown error occurred";
-            console.error("Error refreshing health status:", error);
+            console.error("❌ Error refreshing health status:", error);
+
             const errorState: FeedHealth = {};
             feeds.forEach(feed => {
-                errorState[feed.id] = { status: 'error', detail: `Failed to fetch status files: ${message}` };
+                errorState[feed.id] = {
+                    status: 'error',
+                    detail: `Failed to fetch status files: ${message}`
+                };
             });
             setFeedHealth(errorState);
         } finally {
