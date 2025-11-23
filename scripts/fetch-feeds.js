@@ -320,7 +320,16 @@ function parseRssXml(xmlString, feed) {
 
 
 // === TREND GENERATION WITH GROQ ===
-async function generateTrendsWithGroq(articles, period) {
+
+// Helper: Get date key in YYYY-MM-DD format
+function getDateKey(daysAgo = 0) {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() - daysAgo);
+    return d.toISOString().substring(0, 10);
+}
+
+// Generate daily trends using AI (sends all titles to Groq)
+async function generateDailyTrendsWithGroq(articles) {
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
     if (!GROQ_API_KEY) {
         console.log('   ⚠️  GROQ_API_KEY not found. Skipping trend generation.');
@@ -328,46 +337,34 @@ async function generateTrendsWithGroq(articles, period) {
     }
 
     const now = new Date();
-    let filteredArticles;
-    let periodText;
-    let focusText;
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const filteredArticles = articles.filter(a => new Date(a.publicationDate) >= oneDayAgo);
 
-    if (period === 'daily') {
-        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        filteredArticles = articles.filter(a => new Date(a.publicationDate) >= oneDayAgo);
-        periodText = 'der letzten 24 Stunden';
-        focusText = 'Fokus auf aktuelle Hypes und Breaking News.';
-    } else {
-        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        filteredArticles = articles.filter(a => new Date(a.publicationDate) >= oneWeekAgo);
-        periodText = 'der letzten Woche';
-        focusText = 'Fokus auf die wichtigsten Themen, die die ganze Woche relevant waren.';
-    }
+    console.log(`   📊 Analyzing ${filteredArticles.length} articles for daily trends...`);
 
-    const titles = filteredArticles.map(a => a.title).slice(0, period === 'daily' ? 50 : 100);
-    if (titles.length === 0) {
-        console.log(`   ⚠️  No articles found for ${period} trends.`);
+    if (filteredArticles.length === 0) {
+        console.log('   ⚠️  No articles found for daily trends.');
         return [];
     }
 
+    // Send ALL daily titles to AI (usually ~136, fits in 8k context)
+    const titles = filteredArticles.map(a => a.title);
     const titlesText = titles.map((t, i) => `${i + 1}. ${t}`).join('\n');
 
-    const prompt = `Analysiere diese ${titles.length} Gaming-News-Titel ${periodText} und finde die 5 wichtigsten Themen/Trends.
-
-${focusText}
+    const prompt = `Analysiere diese ${titles.length} Gaming-News-Titel der letzten 24 Stunden und finde die 5 wichtigsten Themen/Trends.
 
 Regeln:
 - Suche nach SPEZIFISCHEN Themen (Spielenamen, Events, Hardware)
-- Wenn "PlayStation/Xbox/Nintendo/Steam/PC" nur die Plattform ist (z.B. "Spiel X auf PlayStation") → ignorieren
-- Wenn es ÜBER die Plattform selbst geht (z.B. "PS6 angekündigt") → ist ein Trend
+- **Wenn eine Plattform (PlayStation, Xbox, PC, Nintendo, Steam etc.) nur als Ort der Veröffentlichung für ein Spiel genannt wird (z.B. "Spiel X auf PlayStation") → IGNORIEREN.**
+- **Wenn es um Hardware, Service-Änderungen oder große Neuigkeiten ZUR Plattform selbst geht (z.B. "PS5 Pro vorgestellt", "Xbox Game Pass Preiserhöhung") → IST EIN TREND.**
 - Zähle wie oft jedes Thema ungefähr vorkommt
 - Schreibe eine KURZE Zusammenfassung (max 10 Wörter) was die News zu diesem Thema berichten
-- Antworte NUR im JSON-Format, keine Erklärungen
+- Fokus auf aktuelle Hypes und Breaking News
 
 Titel:
 ${titlesText}
 
-Antworte exakt in diesem JSON-Format:
+Antworte NUR im JSON-Format, keine Erklärungen:
 [
   {"topic": "GTA 6", "summary": "Release-Termin bekannt, neue Gameplay-Details enthüllt", "articleCount": 5},
   {"topic": "Steam Sale", "summary": "Herbst-Sale mit großen Rabatten gestartet", "articleCount": 3}
@@ -419,6 +416,105 @@ Antworte exakt in diesem JSON-Format:
     }
 }
 
+// Generate weekly trends by aggregating 7 days of archived daily trends
+async function generateWeeklyTrendsFromArchive() {
+    console.log('   🔄 Generating weekly trends from 7-day archive...');
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+    if (!GROQ_API_KEY) {
+        console.log('   ⚠️  GROQ_API_KEY not found. Skipping weekly trend aggregation.');
+        return null;
+    }
+
+    // 1. Load 7 days of archived daily trends
+    const archiveData = [];
+    for (let i = 0; i < 7; i++) {
+        const dateKey = getDateKey(i);
+        const cachedDay = await kv.get(`daily_trends_archive:${dateKey}`);
+
+        if (cachedDay && cachedDay.trends && cachedDay.trends.length > 0) {
+            archiveData.push(...cachedDay.trends.map(t => ({
+                ...t,
+                date: dateKey
+            })));
+        }
+    }
+
+    if (archiveData.length < 5) {
+        console.log(`   ⚠️  Not enough archive data found (${archiveData.length} entries). Need at least 5 days.`);
+        return null;
+    }
+
+    console.log(`   📦 Loaded ${archiveData.length} trend entries from archive.`);
+
+    // 2. Create prompt for Groq to aggregate
+    const archiveText = archiveData.map(t =>
+        `[${t.date}]: ${t.topic} (${t.articleCount} Artikel) - "${t.summary}"`
+    ).join('\n');
+
+    const prompt = `Analysiere diese täglichen Gaming-News-Trends der letzten 7 Tage.
+
+Aufgabe:
+1. **Aggregiere** die Daten: Führe alle Counts für das gleiche Thema zusammen
+2. Wähle die **TOP 5** Themen mit dem höchsten Gesamt-Count
+3. Schreibe für jedes Thema eine **Wochen-Zusammenfassung** (max 15 Wörter)
+4. Gib den finalen Gesamt-Count zurück
+
+Tägliche Trends:
+${archiveText}
+
+Antworte NUR im JSON-Format:
+[
+  {"topic": "GTA 6", "summary": "Die Veröffentlichung nähert sich, Spekulationen um den nächsten Trailer.", "articleCount": 33},
+  {"topic": "PS5 Pro", "summary": "Offizielle Ankündigung und erste technische Details zum neuen Modell.", "articleCount": 15}
+]`;
+
+    try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${GROQ_API_KEY}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: 'llama-3.1-8b-instant',
+                messages: [
+                    { role: 'system', content: 'Du bist ein Gaming-News-Analyst. Aggregiere tägliche Trends zu einer Wochen-Zusammenfassung. Antworte nur mit validem JSON.' },
+                    { role: 'user', content: prompt }
+                ],
+                temperature: 0.3,
+                max_tokens: 1500,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`   ❌ Groq API error during Weekly Aggregation: ${response.status} - ${errorText}`);
+            return null;
+        }
+
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+
+        if (!content) {
+            console.error('   ❌ No content in Groq response for weekly trends');
+            return null;
+        }
+
+        let jsonString = content.trim();
+        if (jsonString.startsWith('```')) {
+            jsonString = jsonString.replace(/```json?\n?/g, '').replace(/```/g, '');
+        }
+
+        const trends = JSON.parse(jsonString);
+        return trends.slice(0, 5);
+
+    } catch (error) {
+        console.error(`   ❌ Error calling Groq API for Weekly Aggregation:`, error.message);
+        return null;
+    }
+}
+
 async function generateAndSaveTrends(articles) {
     console.log('\n🧠 Starting Groq AI Trend Analysis...');
 
@@ -429,15 +525,19 @@ async function generateAndSaveTrends(articles) {
     }
 
     const now = new Date();
+    const todayKey = getDateKey();
     const DAILY_CACHE_TTL = 2 * 60 * 60; // 2 hours
-    const WEEKLY_CACHE_TTL = 7 * 24 * 60 * 60; // 7 days
+    const WEEKLY_CACHE_TTL = 6 * 60 * 60; // 6 hours (regenerate more often from archive)
 
-    // --- DAILY TRENDS (check if cache expired) ---
+    // --- DAILY TRENDS ---
     let dailyTrends = [];
     let dailyUpdatedAt = '';
 
     try {
         const cachedDaily = await kv.get('daily_trends');
+        const cachedArchive = await kv.get(`daily_trends_archive:${todayKey}`);
+
+        let shouldRegenerate = true;
 
         if (cachedDaily && cachedDaily.updatedAt) {
             const cacheAge = (now.getTime() - new Date(cachedDaily.updatedAt).getTime()) / 1000;
@@ -445,68 +545,65 @@ async function generateAndSaveTrends(articles) {
                 console.log(`   📦 Daily trends cache still fresh (${Math.round(cacheAge / 60)} min old). Skipping.`);
                 dailyTrends = cachedDaily.trends;
                 dailyUpdatedAt = cachedDaily.updatedAt;
-            } else {
-                console.log('   🔄 Daily trends cache expired. Regenerating...');
-                dailyTrends = await generateTrendsWithGroq(articles, 'daily');
-                dailyUpdatedAt = now.toISOString();
-                if (dailyTrends) {
-                    await kv.set('daily_trends', { trends: dailyTrends, updatedAt: dailyUpdatedAt });
-                    console.log('   ✅ Daily trends saved to KV.');
-                }
-            }
-        } else {
-            console.log('   🆕 No daily trends cache found. Generating...');
-            dailyTrends = await generateTrendsWithGroq(articles, 'daily');
-            dailyUpdatedAt = now.toISOString();
-            if (dailyTrends) {
-                await kv.set('daily_trends', { trends: dailyTrends, updatedAt: dailyUpdatedAt });
-                console.log('   ✅ Daily trends saved to KV.');
+                shouldRegenerate = false;
             }
         }
+
+        if (shouldRegenerate) {
+            console.log('   🔄 Daily trends cache expired or missing. Regenerating...');
+            dailyTrends = await generateDailyTrendsWithGroq(articles);
+            dailyUpdatedAt = now.toISOString();
+
+            if (dailyTrends) {
+                // Save to LIVE cache
+                await kv.set('daily_trends', { trends: dailyTrends, updatedAt: dailyUpdatedAt });
+                console.log('   ✅ Daily trends saved to LIVE cache.');
+            }
+        }
+
+        // Archive today's trends (only once per day)
+        if (dailyTrends && dailyTrends.length > 0 && !cachedArchive) {
+            await kv.set(`daily_trends_archive:${todayKey}`, { trends: dailyTrends, updatedAt: dailyUpdatedAt });
+            console.log(`   📁 Daily trends archived: daily_trends_archive:${todayKey}`);
+        } else if (cachedArchive) {
+            console.log(`   📦 Archive for ${todayKey} already exists. Skipping archive.`);
+        }
+
     } catch (error) {
         console.error('   ❌ Error processing daily trends:', error.message);
     }
 
-    // --- WEEKLY TRENDS (only update on Sunday or if empty) ---
+    // --- WEEKLY TRENDS (from archive aggregation) ---
     let weeklyTrends = [];
     let weeklyUpdatedAt = '';
-    const isSunday = now.getUTCDay() === 0;
 
     try {
         const cachedWeekly = await kv.get('weekly_trends');
+        let shouldRegenerateWeekly = true;
 
         if (cachedWeekly && cachedWeekly.updatedAt) {
-            weeklyTrends = cachedWeekly.trends;
-            weeklyUpdatedAt = cachedWeekly.updatedAt;
-
-            if (isSunday) {
-                const cacheDate = new Date(cachedWeekly.updatedAt);
-                const todayStart = new Date(now);
-                todayStart.setUTCHours(0, 0, 0, 0);
-
-                if (cacheDate < todayStart) {
-                    console.log('   🔄 It\'s Sunday! Regenerating weekly trends...');
-                    weeklyTrends = await generateTrendsWithGroq(articles, 'weekly');
-                    weeklyUpdatedAt = now.toISOString();
-                    if (weeklyTrends) {
-                        await kv.set('weekly_trends', { trends: weeklyTrends, updatedAt: weeklyUpdatedAt });
-                        console.log('   ✅ Weekly trends saved to KV.');
-                    }
-                } else {
-                    console.log('   📦 Weekly trends already updated today. Skipping.');
-                }
-            } else {
-                console.log('   📦 Weekly trends cache exists (updates only on Sunday). Skipping.');
-            }
-        } else {
-            console.log('   🆕 No weekly trends cache found. Generating...');
-            weeklyTrends = await generateTrendsWithGroq(articles, 'weekly');
-            weeklyUpdatedAt = now.toISOString();
-            if (weeklyTrends) {
-                await kv.set('weekly_trends', { trends: weeklyTrends, updatedAt: weeklyUpdatedAt });
-                console.log('   ✅ Weekly trends saved to KV.');
+            const cacheAge = (now.getTime() - new Date(cachedWeekly.updatedAt).getTime()) / 1000;
+            if (cacheAge < WEEKLY_CACHE_TTL) {
+                console.log(`   📦 Weekly trends cache still fresh (${Math.round(cacheAge / 60)} min old). Skipping.`);
+                weeklyTrends = cachedWeekly.trends;
+                weeklyUpdatedAt = cachedWeekly.updatedAt;
+                shouldRegenerateWeekly = false;
             }
         }
+
+        if (shouldRegenerateWeekly) {
+            console.log('   🔄 Weekly trends cache expired or missing. Regenerating from archive...');
+            weeklyTrends = await generateWeeklyTrendsFromArchive();
+            weeklyUpdatedAt = now.toISOString();
+
+            if (weeklyTrends) {
+                await kv.set('weekly_trends', { trends: weeklyTrends, updatedAt: weeklyUpdatedAt });
+                console.log('   ✅ Weekly trends aggregated and saved to KV.');
+            } else {
+                console.log('   ⚠️  Weekly trends could not be generated. Keeping old cache if exists.');
+            }
+        }
+
     } catch (error) {
         console.error('   ❌ Error processing weekly trends:', error.message);
     }
