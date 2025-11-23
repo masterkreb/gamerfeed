@@ -319,6 +319,201 @@ function parseRssXml(xmlString, feed) {
 }
 
 
+// === TREND GENERATION WITH GROQ ===
+async function generateTrendsWithGroq(articles, period) {
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+    if (!GROQ_API_KEY) {
+        console.log('   ⚠️  GROQ_API_KEY not found. Skipping trend generation.');
+        return null;
+    }
+
+    const now = new Date();
+    let filteredArticles;
+    let periodText;
+    let focusText;
+
+    if (period === 'daily') {
+        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        filteredArticles = articles.filter(a => new Date(a.publicationDate) >= oneDayAgo);
+        periodText = 'der letzten 24 Stunden';
+        focusText = 'Fokus auf aktuelle Hypes und Breaking News.';
+    } else {
+        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        filteredArticles = articles.filter(a => new Date(a.publicationDate) >= oneWeekAgo);
+        periodText = 'der letzten Woche';
+        focusText = 'Fokus auf die wichtigsten Themen, die die ganze Woche relevant waren.';
+    }
+
+    const titles = filteredArticles.map(a => a.title).slice(0, period === 'daily' ? 50 : 100);
+    if (titles.length === 0) {
+        console.log(`   ⚠️  No articles found for ${period} trends.`);
+        return [];
+    }
+
+    const titlesText = titles.map((t, i) => `${i + 1}. ${t}`).join('\n');
+
+    const prompt = `Analysiere diese ${titles.length} Gaming-News-Titel ${periodText} und finde die 5 wichtigsten Themen/Trends.
+
+${focusText}
+
+Regeln:
+- Suche nach SPEZIFISCHEN Themen (Spielenamen, Events, Hardware)
+- Wenn "PlayStation/Xbox/Nintendo/Steam/PC" nur die Plattform ist (z.B. "Spiel X auf PlayStation") → ignorieren
+- Wenn es ÜBER die Plattform selbst geht (z.B. "PS6 angekündigt") → ist ein Trend
+- Zähle wie oft jedes Thema ungefähr vorkommt
+- Schreibe eine KURZE Zusammenfassung (max 10 Wörter) was die News zu diesem Thema berichten
+- Antworte NUR im JSON-Format, keine Erklärungen
+
+Titel:
+${titlesText}
+
+Antworte exakt in diesem JSON-Format:
+[
+  {"topic": "GTA 6", "summary": "Release-Termin bekannt, neue Gameplay-Details enthüllt", "articleCount": 5},
+  {"topic": "Steam Sale", "summary": "Herbst-Sale mit großen Rabatten gestartet", "articleCount": 3}
+]`;
+
+    try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${GROQ_API_KEY}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: 'llama-3.1-8b-instant',
+                messages: [
+                    { role: 'system', content: 'Du bist ein Gaming-News-Analyst. Antworte immer nur mit validem JSON, ohne Markdown-Formatierung oder Erklärungen.' },
+                    { role: 'user', content: prompt }
+                ],
+                temperature: 0.3,
+                max_tokens: 500,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`   ❌ Groq API error: ${response.status} - ${errorText}`);
+            return null;
+        }
+
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+
+        if (!content) {
+            console.error('   ❌ No content in Groq response');
+            return null;
+        }
+
+        let jsonString = content.trim();
+        if (jsonString.startsWith('```')) {
+            jsonString = jsonString.replace(/```json?\n?/g, '').replace(/```/g, '');
+        }
+
+        const trends = JSON.parse(jsonString);
+        return trends.slice(0, 5);
+
+    } catch (error) {
+        console.error(`   ❌ Error calling Groq API:`, error.message);
+        return null;
+    }
+}
+
+async function generateAndSaveTrends(articles) {
+    console.log('\n🧠 Starting Groq AI Trend Analysis...');
+
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+    if (!GROQ_API_KEY) {
+        console.log('   ⚠️  GROQ_API_KEY not configured. Skipping trend generation.');
+        return;
+    }
+
+    const now = new Date();
+    const DAILY_CACHE_TTL = 2 * 60 * 60; // 2 hours
+    const WEEKLY_CACHE_TTL = 7 * 24 * 60 * 60; // 7 days
+
+    // --- DAILY TRENDS (check if cache expired) ---
+    let dailyTrends = [];
+    let dailyUpdatedAt = '';
+
+    try {
+        const cachedDaily = await kv.get('daily_trends');
+
+        if (cachedDaily && cachedDaily.updatedAt) {
+            const cacheAge = (now.getTime() - new Date(cachedDaily.updatedAt).getTime()) / 1000;
+            if (cacheAge < DAILY_CACHE_TTL) {
+                console.log(`   📦 Daily trends cache still fresh (${Math.round(cacheAge / 60)} min old). Skipping.`);
+                dailyTrends = cachedDaily.trends;
+                dailyUpdatedAt = cachedDaily.updatedAt;
+            } else {
+                console.log('   🔄 Daily trends cache expired. Regenerating...');
+                dailyTrends = await generateTrendsWithGroq(articles, 'daily');
+                dailyUpdatedAt = now.toISOString();
+                if (dailyTrends) {
+                    await kv.set('daily_trends', { trends: dailyTrends, updatedAt: dailyUpdatedAt });
+                    console.log('   ✅ Daily trends saved to KV.');
+                }
+            }
+        } else {
+            console.log('   🆕 No daily trends cache found. Generating...');
+            dailyTrends = await generateTrendsWithGroq(articles, 'daily');
+            dailyUpdatedAt = now.toISOString();
+            if (dailyTrends) {
+                await kv.set('daily_trends', { trends: dailyTrends, updatedAt: dailyUpdatedAt });
+                console.log('   ✅ Daily trends saved to KV.');
+            }
+        }
+    } catch (error) {
+        console.error('   ❌ Error processing daily trends:', error.message);
+    }
+
+    // --- WEEKLY TRENDS (only update on Sunday or if empty) ---
+    let weeklyTrends = [];
+    let weeklyUpdatedAt = '';
+    const isSunday = now.getUTCDay() === 0;
+
+    try {
+        const cachedWeekly = await kv.get('weekly_trends');
+
+        if (cachedWeekly && cachedWeekly.updatedAt) {
+            weeklyTrends = cachedWeekly.trends;
+            weeklyUpdatedAt = cachedWeekly.updatedAt;
+
+            if (isSunday) {
+                const cacheDate = new Date(cachedWeekly.updatedAt);
+                const todayStart = new Date(now);
+                todayStart.setUTCHours(0, 0, 0, 0);
+
+                if (cacheDate < todayStart) {
+                    console.log('   🔄 It\'s Sunday! Regenerating weekly trends...');
+                    weeklyTrends = await generateTrendsWithGroq(articles, 'weekly');
+                    weeklyUpdatedAt = now.toISOString();
+                    if (weeklyTrends) {
+                        await kv.set('weekly_trends', { trends: weeklyTrends, updatedAt: weeklyUpdatedAt });
+                        console.log('   ✅ Weekly trends saved to KV.');
+                    }
+                } else {
+                    console.log('   📦 Weekly trends already updated today. Skipping.');
+                }
+            } else {
+                console.log('   📦 Weekly trends cache exists (updates only on Sunday). Skipping.');
+            }
+        } else {
+            console.log('   🆕 No weekly trends cache found. Generating...');
+            weeklyTrends = await generateTrendsWithGroq(articles, 'weekly');
+            weeklyUpdatedAt = now.toISOString();
+            if (weeklyTrends) {
+                await kv.set('weekly_trends', { trends: weeklyTrends, updatedAt: weeklyUpdatedAt });
+                console.log('   ✅ Weekly trends saved to KV.');
+            }
+        }
+    } catch (error) {
+        console.error('   ❌ Error processing weekly trends:', error.message);
+    }
+
+    console.log('   🧠 Trend analysis complete!\n');
+}
+
 // === MAIN SCRIPT LOGIC ===
 async function main() {
     const feedHealthStatus = {};
@@ -462,7 +657,10 @@ async function main() {
         console.log(`   ✅ Saved ${sortedArticles.length} articles to KV key 'news_cache'`);
 
         await kv.set('feed_health_status', feedHealthStatus);
-        console.log(`   📊 Saved health status for ${Object.keys(feedHealthStatus).length} feeds to KV key 'feed_health_status'\n`);
+        console.log(`   📊 Saved health status for ${Object.keys(feedHealthStatus).length} feeds to KV key 'feed_health_status'`);
+
+        // Generate trends with Groq AI (respects cache TTL)
+        await generateAndSaveTrends(sortedArticles);
 
     } catch (error) {
         console.error('\n❌ Fatal error in fetch script:', error);
