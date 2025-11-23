@@ -428,11 +428,13 @@ async function generateWeeklyTrendsFromArchive() {
 
     // 1. Load 7 days of archived daily trends
     const archiveData = [];
+    const datesFound = [];
     for (let i = 0; i < 7; i++) {
         const dateKey = getDateKey(i);
         const cachedDay = await kv.get(`daily_trends_archive:${dateKey}`);
 
         if (cachedDay && cachedDay.trends && cachedDay.trends.length > 0) {
+            datesFound.push(dateKey);
             archiveData.push(...cachedDay.trends.map(t => ({
                 ...t,
                 date: dateKey
@@ -445,7 +447,13 @@ async function generateWeeklyTrendsFromArchive() {
         return null;
     }
 
-    console.log(`   📦 Loaded ${archiveData.length} trend entries from archive.`);
+    console.log(`   📦 Loaded ${archiveData.length} trend entries from ${datesFound.length} days.`);
+
+    // Calculate date range
+    const dateRange = {
+        from: datesFound[datesFound.length - 1], // oldest
+        to: datesFound[0] // newest (today)
+    };
 
     // 2. Create prompt for Groq to aggregate
     const archiveText = archiveData.map(t =>
@@ -455,19 +463,23 @@ async function generateWeeklyTrendsFromArchive() {
     const prompt = `Analysiere diese täglichen Gaming-News-Trends der letzten 7 Tage.
 
 Aufgabe:
-1. **Aggregiere** die Daten: Führe alle Counts für das gleiche Thema zusammen
-2. Wähle die **TOP 5** Themen mit dem höchsten Gesamt-Count
-3. Schreibe für jedes Thema eine **Wochen-Zusammenfassung** (max 15 Wörter)
-4. Gib den finalen Gesamt-Count zurück
+1. **Schreibe eine Zusammenfassung** (2-3 Sätze) über die wichtigsten Geschehnisse und Hypes der Woche. Nenne dabei die Top-Themen.
+2. **Aggregiere** die Daten: Führe alle Counts für das gleiche Thema zusammen
+3. Wähle die **TOP 5** Themen mit dem höchsten Gesamt-Count
+4. Schreibe für jedes Thema eine **Wochen-Zusammenfassung** (max 15 Wörter)
+5. Gib den finalen Gesamt-Count zurück
 
 Tägliche Trends:
 ${archiveText}
 
 Antworte NUR im JSON-Format:
-[
-  {"topic": "GTA 6", "summary": "Die Veröffentlichung nähert sich, Spekulationen um den nächsten Trailer.", "articleCount": 33},
-  {"topic": "PS5 Pro", "summary": "Offizielle Ankündigung und erste technische Details zum neuen Modell.", "articleCount": 15}
-]`;
+{
+  "overallSummary": "Die Woche war dominiert von GTA 6 Trailer-Spekulationen und PlayStation-Hardware-News. Steam Sale sorgte für Schnäppchenjagd.",
+  "trends": [
+    {"topic": "GTA 6", "summary": "Die Veröffentlichung nähert sich, Spekulationen um den nächsten Trailer.", "articleCount": 33},
+    {"topic": "PS5 Pro", "summary": "Offizielle Ankündigung und erste technische Details zum neuen Modell.", "articleCount": 15}
+  ]
+}`;
 
     try {
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -483,7 +495,7 @@ Antworte NUR im JSON-Format:
                     { role: 'user', content: prompt }
                 ],
                 temperature: 0.3,
-                max_tokens: 1500,
+                max_tokens: 2000,
             }),
         });
 
@@ -506,8 +518,14 @@ Antworte NUR im JSON-Format:
             jsonString = jsonString.replace(/```json?\n?/g, '').replace(/```/g, '');
         }
 
-        const trends = JSON.parse(jsonString);
-        return trends.slice(0, 5);
+        const weeklyData = JSON.parse(jsonString);
+
+        // Return the full object with overallSummary, trends, and dateRange
+        return {
+            overallSummary: weeklyData.overallSummary || '',
+            trends: (weeklyData.trends || []).slice(0, 5),
+            dateRange
+        };
 
     } catch (error) {
         console.error(`   ❌ Error calling Groq API for Weekly Aggregation:`, error.message);
@@ -574,9 +592,6 @@ async function generateAndSaveTrends(articles) {
     }
 
     // --- WEEKLY TRENDS (from archive aggregation) ---
-    let weeklyTrends = [];
-    let weeklyUpdatedAt = '';
-
     try {
         const cachedWeekly = await kv.get('weekly_trends');
         let shouldRegenerateWeekly = true;
@@ -585,20 +600,22 @@ async function generateAndSaveTrends(articles) {
             const cacheAge = (now.getTime() - new Date(cachedWeekly.updatedAt).getTime()) / 1000;
             if (cacheAge < WEEKLY_CACHE_TTL) {
                 console.log(`   📦 Weekly trends cache still fresh (${Math.round(cacheAge / 60)} min old). Skipping.`);
-                weeklyTrends = cachedWeekly.trends;
-                weeklyUpdatedAt = cachedWeekly.updatedAt;
                 shouldRegenerateWeekly = false;
             }
         }
 
         if (shouldRegenerateWeekly) {
             console.log('   🔄 Weekly trends cache expired or missing. Regenerating from archive...');
-            weeklyTrends = await generateWeeklyTrendsFromArchive();
-            weeklyUpdatedAt = now.toISOString();
+            const weeklyData = await generateWeeklyTrendsFromArchive();
 
-            if (weeklyTrends) {
-                await kv.set('weekly_trends', { trends: weeklyTrends, updatedAt: weeklyUpdatedAt });
-                console.log('   ✅ Weekly trends aggregated and saved to KV.');
+            if (weeklyData && weeklyData.trends) {
+                await kv.set('weekly_trends', {
+                    trends: weeklyData.trends,
+                    overallSummary: weeklyData.overallSummary || '',
+                    dateRange: weeklyData.dateRange || null,
+                    updatedAt: now.toISOString()
+                });
+                console.log('   ✅ Weekly trends with summary aggregated and saved to KV.');
             } else {
                 console.log('   ⚠️  Weekly trends could not be generated. Keeping old cache if exists.');
             }
