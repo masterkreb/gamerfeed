@@ -135,28 +135,39 @@ const AppContent: React.FC = () => {
                 setArticles(fetchedArticles);
                 console.log(`Refreshed ${fetchedArticles.length} articles from API`);
             } else {
-                // Initial load: try preview first, fallback to full if preview not available
+                // Initial load: 3-stage progressive loading (16 → 64 → full)
                 const previewResponse = await fetch('/api/get-news-preview');
 
                 if (previewResponse.ok) {
-                    // Preview API available - use fast two-stage loading
+                    // Stage 1: Show first 16 articles immediately
                     const previewArticles: Article[] = await previewResponse.json();
                     setArticles(previewArticles);
                     setIsBlockingLoading(false);
-                    console.log(`Loaded ${previewArticles.length} preview articles`);
+                    console.log(`✅ Stage 1: Loaded ${previewArticles.length} preview articles`);
 
-                    // Fetch full list in background (non-blocking)
-                    fetch('/api/get-news')
+                    // Stage 2: Load 64 articles in background
+                    fetch('/api/get-news-medium')
+                        .then(response => {
+                            if (!response.ok) throw new Error('Failed to load medium articles');
+                            return response.json();
+                        })
+                        .then((mediumArticles: Article[]) => {
+                            setArticles(mediumArticles);
+                            console.log(`✅ Stage 2: Loaded ${mediumArticles.length} medium articles`);
+
+                            // Stage 3: Load all articles in background
+                            return fetch('/api/get-news');
+                        })
                         .then(response => {
                             if (!response.ok) throw new Error('Failed to load full articles');
                             return response.json();
                         })
                         .then((fullArticles: Article[]) => {
                             setArticles(fullArticles);
-                            console.log(`Loaded ${fullArticles.length} full articles in background`);
+                            console.log(`✅ Stage 3: Loaded ${fullArticles.length} full articles`);
                         })
                         .catch(err => {
-                            console.warn('Background fetch failed, keeping preview:', err);
+                            console.warn('Background loading failed:', err);
                         });
 
                     return; // Exit early since we already set isBlockingLoading to false

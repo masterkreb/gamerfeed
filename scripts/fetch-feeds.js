@@ -770,8 +770,17 @@ async function main() {
         const sortedArticles = articlesToKeep.sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
 
         console.log('\n💾 Saving data to Vercel KV...');
+
+        // Save full cache
         await kv.set('news_cache', sortedArticles);
         console.log(`   ✅ Saved ${sortedArticles.length} articles to KV key 'news_cache'`);
+
+        // Save progressive loading caches for faster page load
+        await kv.set('news_cache_16', sortedArticles.slice(0, 16));
+        console.log(`   ⚡ Saved 16 preview articles to KV key 'news_cache_16'`);
+
+        await kv.set('news_cache_64', sortedArticles.slice(0, 64));
+        console.log(`   ⚡ Saved 64 medium articles to KV key 'news_cache_64'`);
 
         await kv.set('feed_health_status', feedHealthStatus);
         console.log(`   📊 Saved health status for ${Object.keys(feedHealthStatus).length} feeds to KV key 'feed_health_status'`);

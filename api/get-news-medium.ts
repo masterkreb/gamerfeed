@@ -5,18 +5,18 @@ export const config = {
     runtime: 'edge',
 };
 
-const PREVIEW_COUNT = 16;
+const MEDIUM_COUNT = 64;
 
 export default async function handler(req: Request) {
     try {
-        // Load from dedicated preview cache (16 articles)
-        let articles = await kv.get<Article[]>('news_cache_16');
+        // Load from dedicated medium cache (64 articles)
+        let articles = await kv.get<Article[]>('news_cache_64');
 
-        // Fallback to full cache if preview doesn't exist yet
+        // Fallback to full cache if medium doesn't exist yet
         if (!articles) {
             const fullCache = await kv.get<Article[]>('news_cache');
             if (fullCache) {
-                articles = fullCache.slice(0, PREVIEW_COUNT);
+                articles = fullCache.slice(0, MEDIUM_COUNT);
             }
         }
 
@@ -39,7 +39,7 @@ export default async function handler(req: Request) {
         });
 
     } catch (error) {
-        console.error("API Error in /api/get-news-preview:", error);
+        console.error("API Error in /api/get-news-medium:", error);
         const message = error instanceof Error ? error.message : "An unknown server error occurred.";
         return new Response(JSON.stringify({ error: message }), {
             status: 500,
