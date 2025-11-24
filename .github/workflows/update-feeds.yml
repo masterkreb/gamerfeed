@@ -1,0 +1,45 @@
+name: Update RSS Feeds Cache
+
+on:
+  schedule:
+    # Run every 30 minutes
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+# No file write permissions needed anymore
+permissions:
+  contents: read
+
+jobs:
+  update-feeds:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch and cache feeds to Vercel KV
+        env:
+          # IMPORTANT: These secrets MUST be configured in your GitHub repository settings.
+          # Go to Settings > Secrets and variables > Actions > New repository secret.
+          # DO NOT STORE these values in any file in your project.
+          # The values come from your Vercel project's environment variables.
+
+          # For Vercel Postgres (where the feed list is stored)
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+
+          # For Vercel KV (where the news articles are cached)
+          KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
+          KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
+
+          # For Groq AI (trend generation)
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: node scripts/fetch-feeds.js

@@ -1,0 +1,166 @@
+{
+  "4p": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 25 articles."
+  },
+  "game-informer": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 50 articles."
+  },
+  "gamepro": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 30 articles."
+  },
+  "gamespot": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 15 articles."
+  },
+  "gamestar": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 30 articles."
+  },
+  "ign-de": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 40 articles."
+  },
+  "kotaku": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 20 articles."
+  },
+  "mein-mmo": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 10 articles."
+  },
+  "pc-gamer": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 50 articles."
+  },
+  "pc-games": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 20 articles."
+  },
+  "polygon": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 10 articles."
+  },
+  "xboxdynasty": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 10 articles."
+  },
+  "play3": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 25 articles."
+  },
+  "destructoid": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 30 articles."
+  },
+  "gamersglobal": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 60 articles."
+  },
+  "gamesradar+": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 50 articles."
+  },
+  "gameswelt": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 30 articles."
+  },
+  "gameswirtschaft": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 10 articles."
+  },
+  "gamezone": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 20 articles."
+  },
+  "giant-bomb": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 15 articles."
+  },
+  "giga-games": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 40 articles."
+  },
+  "jpgames": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 15 articles."
+  },
+  "pcgamesn": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 75 articles."
+  },
+  "rock-paper-shotgun": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 100 articles."
+  },
+  "buffed": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 20 articles."
+  },
+  "xbox-wire": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 10 articles."
+  },
+  "video-games-zone": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 20 articles."
+  },
+  "computer-bild": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 100 articles."
+  },
+  "eurogamer-de": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 100 articles."
+  },
+  "nintendo-life": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 25 articles."
+  },
+  "vg247": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 100 articles."
+  },
+  "playstationinfo": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 12 articles."
+  },
+  "computerbase": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 50 articles."
+  },
+  "pc-games-hardware": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 20 articles."
+  },
+  "heise-online": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 150 articles."
+  },
+  "pixelcritics": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 10 articles."
+  },
+  "gematsu": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 20 articles."
+  },
+  "playfront": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 10 articles."
+  },
+  "golem": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 40 articles."
+  },
+  "playstationblog-de-1763131245208": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 10 articles."
+  },
+  "playstation-blog": {
+    "status": "success",
+    "message": "Successfully fetched and parsed 10 articles."
+  }
+}
