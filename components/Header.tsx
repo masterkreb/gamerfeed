@@ -65,14 +65,14 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                     {/* Trends Link - Desktop only (Mobile version moved to right side) */}
                     <button
                         onClick={() => onViewChange(currentView === 'trends' ? 'news' : 'trends')}
-                        className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium transition-all ${
                             currentView === 'trends'
                                 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
                                 : 'text-slate-600 dark:text-zinc-400 hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
                         }`}
                         aria-label={t('header.trends')}
                     >
-                        <FireIcon className="w-4 h-4" />
+                        <FireIcon className="w-5 h-5" />
                         <span>{t('header.trends')}</span>
                     </button>
                 </div>
