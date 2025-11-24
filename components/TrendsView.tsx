@@ -64,70 +64,43 @@ const formatUpdatedAt = (dateString: string, t: any): string => {
 interface TrendCardProps {
     trend: TrendItem;
     rank: number;
-    maxArticleCount: number;
     onTrendClick: (topic: string) => void;
 }
 
-const TrendCard: React.FC<TrendCardProps> = ({ trend, rank, maxArticleCount, onTrendClick }) => {
+const TrendCard: React.FC<TrendCardProps> = ({ trend, rank, onTrendClick }) => {
     const { t } = useTranslation();
-    // Use logarithmic scale for better visual distribution
-    // This prevents huge differences (5 vs 33) from looking the same
-    const logScale = (value: number, max: number): number => {
-        if (value <= 0 || max <= 0) return 0;
-        // Logarithmic scale with base adjustment for visual appeal
-        const logValue = Math.log10(value + 1);
-        const logMax = Math.log10(max + 1);
-        return Math.max(15, (logValue / logMax) * 100); // Minimum 15% width
-    };
-    const progressPercent = logScale(trend.articleCount, maxArticleCount);
     
     return (
         <button
             onClick={() => onTrendClick(trend.topic)}
             className="w-full text-left bg-white dark:bg-zinc-800 rounded-xl p-5 border border-slate-200 dark:border-zinc-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 group"
         >
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3 flex-grow min-w-0">
-                    <span className={`text-xl flex-shrink-0 ${rank <= 3 ? '' : 'text-slate-500 dark:text-zinc-400 font-semibold'}`}>
-                        {getRankBadge(rank)}
-                    </span>
-                    <div className="flex-grow min-w-0">
-                        <h3 className="font-semibold text-lg text-slate-800 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
-                            {trend.topic}
-                        </h3>
-                        
-                        {/* Progress Bar */}
-                        <div className="mt-2 h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-                            <div 
-                                className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500"
-                                style={{ width: `${progressPercent}%` }}
-                            />
-                        </div>
-                        
-                        {/* Summary */}
-                        {trend.summary && (
-                            <p className="mt-3 text-sm text-slate-600 dark:text-zinc-400 line-clamp-2">
-                                {trend.summary}
-                            </p>
-                        )}
+            <div className="flex items-start gap-3">
+                <span className={`text-xl flex-shrink-0 ${rank <= 3 ? '' : 'text-slate-500 dark:text-zinc-400 font-semibold'}`}>
+                    {getRankBadge(rank)}
+                </span>
+                <div className="flex-grow min-w-0">
+                    <h3 className="font-semibold text-lg text-slate-800 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {trend.topic}
+                    </h3>
+                    
+                    {/* Summary */}
+                    {trend.summary && (
+                        <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400 line-clamp-2">
+                            {trend.summary}
+                        </p>
+                    )}
+                    
+                    {/* Read Articles Link */}
+                    <div className="mt-3">
+                        <span className="text-sm font-medium text-indigo-500 dark:text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 inline-flex items-center gap-1">
+                            {t('trends.readArticles')}
+                            <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </span>
                     </div>
                 </div>
-                
-                <div className="flex-shrink-0 text-right">
-                    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-zinc-300 bg-slate-100 dark:bg-zinc-700 px-2.5 py-1 rounded-full">
-                        📰 {trend.articleCount}
-                    </span>
-                </div>
-            </div>
-            
-            {/* Read Articles Link */}
-            <div className="mt-4 flex justify-end">
-                <span className="text-sm font-medium text-indigo-500 dark:text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 inline-flex items-center gap-1">
-                    {t('trends.readArticles')}
-                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                </span>
             </div>
         </button>
     );
@@ -151,7 +124,6 @@ const TrendSection: React.FC<TrendSectionProps> = ({
     accentColor 
 }) => {
     const { t } = useTranslation();
-    const maxArticleCount = trends.length > 0 ? Math.max(...trends.map(t => t.articleCount)) : 0;
     
     return (
         <section className="mb-10">
@@ -177,7 +149,6 @@ const TrendSection: React.FC<TrendSectionProps> = ({
                         key={trend.topic}
                         trend={trend}
                         rank={index + 1}
-                        maxArticleCount={maxArticleCount}
                         onTrendClick={onTrendClick}
                     />
                 ))}
@@ -328,7 +299,6 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onBackToNews, onTrendCli
                                         key={trend.topic}
                                         trend={trend}
                                         rank={index + 1}
-                                        maxArticleCount={Math.max(...trendsData.weekly.map(t => t.articleCount))}
                                         onTrendClick={handleTrendClick}
                                     />
                                 ))}
