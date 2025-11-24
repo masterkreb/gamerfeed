@@ -135,33 +135,44 @@ const AppContent: React.FC = () => {
                 setArticles(fetchedArticles);
                 console.log(`Refreshed ${fetchedArticles.length} articles from API`);
             } else {
-                // Initial load: fetch preview first for instant display, then full list in background
+                // Initial load: try preview first, fallback to full if preview not available
                 const previewResponse = await fetch('/api/get-news-preview');
-                if (!previewResponse.ok) {
-                    const errorData = await previewResponse.json().catch(() => null);
-                    const errorMessage = errorData?.error || `Failed to load preview: ${previewResponse.status}`;
-                    throw new Error(errorMessage);
+
+                if (previewResponse.ok) {
+                    // Preview API available - use fast two-stage loading
+                    const previewArticles: Article[] = await previewResponse.json();
+                    setArticles(previewArticles);
+                    setIsBlockingLoading(false);
+                    console.log(`Loaded ${previewArticles.length} preview articles`);
+
+                    // Fetch full list in background (non-blocking)
+                    fetch('/api/get-news')
+                        .then(response => {
+                            if (!response.ok) throw new Error('Failed to load full articles');
+                            return response.json();
+                        })
+                        .then((fullArticles: Article[]) => {
+                            setArticles(fullArticles);
+                            console.log(`Loaded ${fullArticles.length} full articles in background`);
+                        })
+                        .catch(err => {
+                            console.warn('Background fetch failed, keeping preview:', err);
+                        });
+
+                    return; // Exit early since we already set isBlockingLoading to false
+                } else {
+                    // Preview API not available (404) - fallback to full API
+                    console.log('Preview API not available, falling back to full API');
+                    const response = await fetch('/api/get-news');
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => null);
+                        const errorMessage = errorData?.error || `Failed to load news: ${response.status}`;
+                        throw new Error(errorMessage);
+                    }
+                    const fetchedArticles: Article[] = await response.json();
+                    setArticles(fetchedArticles);
+                    console.log(`Loaded ${fetchedArticles.length} articles (fallback)`);
                 }
-                const previewArticles: Article[] = await previewResponse.json();
-                setArticles(previewArticles);
-                setIsBlockingLoading(false);
-                console.log(`Loaded ${previewArticles.length} preview articles`);
-
-                // Fetch full list in background (non-blocking)
-                fetch('/api/get-news')
-                    .then(response => {
-                        if (!response.ok) throw new Error('Failed to load full articles');
-                        return response.json();
-                    })
-                    .then((fullArticles: Article[]) => {
-                        setArticles(fullArticles);
-                        console.log(`Loaded ${fullArticles.length} full articles in background`);
-                    })
-                    .catch(err => {
-                        console.warn('Background fetch failed, keeping preview:', err);
-                    });
-
-                return; // Exit early since we already set isBlockingLoading to false
             }
 
         } catch (error) {
