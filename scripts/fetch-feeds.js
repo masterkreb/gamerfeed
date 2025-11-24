@@ -328,7 +328,7 @@ function getDateKey(daysAgo = 0) {
     return d.toISOString().substring(0, 10);
 }
 
-// Generate daily trends using AI (sends all titles to Groq)
+// Generate daily trends using AI (sends titles to Groq)
 async function generateDailyTrendsWithGroq(articles) {
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
     if (!GROQ_API_KEY) {
@@ -340,15 +340,18 @@ async function generateDailyTrendsWithGroq(articles) {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const filteredArticles = articles.filter(a => new Date(a.publicationDate) >= oneDayAgo);
 
-    console.log(`   📊 Analyzing ${filteredArticles.length} articles for daily trends...`);
+    // WICHTIG: Limit auf 80 Titel, um das 6k Token Limit von Groq zu vermeiden
+    // 411 Artikel = ~11.000 Tokens → 80 Artikel = ~2.000 Tokens ✅
+    const MAX_TITLES = 80;
+    const titles = filteredArticles.map(a => a.title).slice(0, MAX_TITLES);
 
-    if (filteredArticles.length === 0) {
+    console.log(`   📊 Analyzing ${titles.length} of ${filteredArticles.length} articles for daily trends...`);
+
+    if (titles.length === 0) {
         console.log('   ⚠️  No articles found for daily trends.');
         return [];
     }
 
-    // Send ALL daily titles to AI (usually ~136, fits in 8k context)
-    const titles = filteredArticles.map(a => a.title);
     const titlesText = titles.map((t, i) => `${i + 1}. ${t}`).join('\n');
 
     const prompt = `Analysiere diese ${titles.length} Gaming-News-Titel der letzten 24 Stunden und finde die 5 wichtigsten Themen/Trends.
