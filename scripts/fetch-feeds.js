@@ -773,12 +773,6 @@ async function main() {
         await kv.set('news_cache', sortedArticles);
         console.log(`   ✅ Saved ${sortedArticles.length} articles to KV key 'news_cache'`);
 
-        // Save preview cache (first 12 articles) for faster initial page load
-        const PREVIEW_COUNT = 12;
-        const previewArticles = sortedArticles.slice(0, PREVIEW_COUNT);
-        await kv.set('news_cache_preview', previewArticles);
-        console.log(`   ⚡ Saved ${previewArticles.length} preview articles to KV key 'news_cache_preview'`);
-
         await kv.set('feed_health_status', feedHealthStatus);
         console.log(`   📊 Saved health status for ${Object.keys(feedHealthStatus).length} feeds to KV key 'feed_health_status'`);
 
