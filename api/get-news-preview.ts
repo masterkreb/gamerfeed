@@ -9,7 +9,16 @@ const PREVIEW_COUNT = 12;
 
 export default async function handler(req: Request) {
     try {
-        const articles = await kv.get<Article[]>('news_cache');
+        // Use dedicated preview cache (only 12 articles) for faster load
+        let articles = await kv.get<Article[]>('news_cache_preview');
+
+        // Fallback to full cache if preview doesn't exist yet (before first cron run)
+        if (!articles) {
+            const fullCache = await kv.get<Article[]>('news_cache');
+            if (fullCache) {
+                articles = fullCache.slice(0, PREVIEW_COUNT);
+            }
+        }
 
         if (!articles) {
             return new Response(JSON.stringify({ error: "Cache is empty or not available." }), {
@@ -21,10 +30,7 @@ export default async function handler(req: Request) {
             });
         }
 
-        // Return only the first 12 articles for instant display
-        const previewArticles = articles.slice(0, PREVIEW_COUNT);
-
-        return new Response(JSON.stringify(previewArticles), {
+        return new Response(JSON.stringify(articles), {
             status: 200,
             headers: {
                 'Content-Type': 'application/json',
