@@ -411,7 +411,10 @@ Antworte NUR im JSON-Format, keine Erklärungen:
         }
 
         const trends = JSON.parse(jsonString);
-        return trends.slice(0, 5);
+        // Sort by articleCount descending (highest first)
+        return trends
+            .slice(0, 5)
+            .sort((a, b) => b.articleCount - a.articleCount);
 
     } catch (error) {
         console.error(`   ❌ Error calling Groq API:`, error.message);

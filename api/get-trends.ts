@@ -10,9 +10,19 @@ interface TrendItem {
     articleCount: number;
 }
 
-interface CachedTrends {
+interface CachedDailyTrends {
     trends: TrendItem[];
     updatedAt: string;
+}
+
+interface CachedWeeklyTrends {
+    trends: TrendItem[];
+    updatedAt: string;
+    overallSummary?: string;
+    dateRange?: {
+        from: string;
+        to: string;
+    };
 }
 
 interface TrendsResponse {
@@ -20,6 +30,11 @@ interface TrendsResponse {
     weekly: TrendItem[];
     dailyUpdatedAt: string;
     weeklyUpdatedAt: string;
+    weeklySummary?: string;
+    weeklyDateRange?: {
+        from: string;
+        to: string;
+    };
 }
 
 // This endpoint reads pre-computed trends from KV cache.
@@ -30,15 +45,21 @@ export default async function handler(req: Request) {
     try {
         // Read both daily and weekly trends from KV
         const [dailyData, weeklyData] = await Promise.all([
-            kv.get<CachedTrends>('daily_trends'),
-            kv.get<CachedTrends>('weekly_trends'),
+            kv.get<CachedDailyTrends>('daily_trends'),
+            kv.get<CachedWeeklyTrends>('weekly_trends'),
         ]);
 
+        // Sort trends by articleCount descending (highest first)
+        const sortByArticleCount = (trends: TrendItem[]) => 
+            [...trends].sort((a, b) => b.articleCount - a.articleCount);
+
         const response: TrendsResponse = {
-            daily: dailyData?.trends || [],
-            weekly: weeklyData?.trends || [],
+            daily: sortByArticleCount(dailyData?.trends || []),
+            weekly: sortByArticleCount(weeklyData?.trends || []),
             dailyUpdatedAt: dailyData?.updatedAt || '',
             weeklyUpdatedAt: weeklyData?.updatedAt || '',
+            weeklySummary: weeklyData?.overallSummary || undefined,
+            weeklyDateRange: weeklyData?.dateRange || undefined,
         };
 
         // If no trends exist at all, return a helpful message

@@ -129,6 +129,24 @@ const resources = {
             "error.genericHintPersist": "If the problem persists, please check back later.",
             "error.refreshPage": "Refresh Page",
 
+            // Trends
+            "header.trends": "Trends",
+            "trends.pageTitle": "Trending Topics",
+            "trends.pageSubtitle": "Current gaming highlights",
+            "trends.backToNews": "Back to News",
+            "trends.todayTitle": "Today's Trends",
+            "trends.weeklyTitle": "This Week",
+            "trends.weeklySummaryTitle": "Weekly Recap",
+            "trends.readArticles": "Read Articles",
+            "trends.updatedJustNow": "Updated just now",
+            "trends.updatedMinutesAgo_one": "Updated {{count}} minute ago",
+            "trends.updatedMinutesAgo_other": "Updated {{count}} minutes ago",
+            "trends.updatedHoursAgo_one": "Updated {{count}} hour ago",
+            "trends.updatedHoursAgo_other": "Updated {{count}} hours ago",
+            "trends.errorLoading": "Could not load trends",
+            "trends.noTrends": "No Trends Available",
+            "trends.noTrendsHint": "Trends are being generated. Please check back in a few minutes.",
+
             // Accessibility
             "a11y.skipToContent": "Skip to main content",
             "a11y.changeLanguage": "Change language, current: {{lang}}",
@@ -350,6 +368,24 @@ const resources = {
             "error.genericHint": "Ein unerwarteter Fehler ist aufgetreten, der das Laden der Anwendung verhindert hat. Du kannst versuchen, die Seite zu aktualisieren, um das Problem zu beheben.",
             "error.genericHintPersist": "Wenn das Problem weiterhin besteht, schau bitte später noch einmal vorbei.",
             "error.refreshPage": "Seite aktualisieren",
+
+            // Trends
+            "header.trends": "Trends",
+            "trends.pageTitle": "Trending Topics",
+            "trends.pageSubtitle": "Aktuelle Gaming-Highlights",
+            "trends.backToNews": "Zurück zu den News",
+            "trends.todayTitle": "Heute im Trend",
+            "trends.weeklyTitle": "Diese Woche",
+            "trends.weeklySummaryTitle": "Wochenrückblick",
+            "trends.readArticles": "Artikel lesen",
+            "trends.updatedJustNow": "Gerade aktualisiert",
+            "trends.updatedMinutesAgo_one": "Vor {{count}} Minute aktualisiert",
+            "trends.updatedMinutesAgo_other": "Vor {{count}} Minuten aktualisiert",
+            "trends.updatedHoursAgo_one": "Vor {{count}} Stunde aktualisiert",
+            "trends.updatedHoursAgo_other": "Vor {{count}} Stunden aktualisiert",
+            "trends.errorLoading": "Trends konnten nicht geladen werden",
+            "trends.noTrends": "Keine Trends verfügbar",
+            "trends.noTrendsHint": "Trends werden gerade generiert. Bitte versuche es in wenigen Minuten erneut.",
 
             // Accessibility
             "a11y.skipToContent": "Zum Hauptinhalt springen",
