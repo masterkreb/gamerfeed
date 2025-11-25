@@ -310,7 +310,12 @@ const AppContent: React.FC = () => {
         return str
             .toLowerCase()
             .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
+            .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+            .replace(/[''`]/g, '') // Remove apostrophes and similar characters
+            .replace(/[-–—]/g, ' ') // Replace dashes with spaces
+            .replace(/[^\w\s]/g, '') // Remove other punctuation
+            .replace(/\s+/g, ' ') // Normalize whitespace
+            .trim();
     };
 
     const filteredArticles = useMemo(() => {
