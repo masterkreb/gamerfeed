@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Header } from './components/Header';
 import { FilterBar } from './components/FilterBar';
 import { ArticleCard } from './components/ArticleCard';
+import { TrendsView } from './components/TrendsView';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import type { Article, Theme, ViewMode } from './types';
+import type { Article, Theme, ViewMode, AppView } from './types';
 import { LoadingSpinner, SearchIcon, FilterIcon, ResetIcon, NewspaperIcon, BookmarkIcon, StarIcon, ArrowLeftIcon } from './components/Icons';
 import { FilterProvider, useFilter } from './contexts/FilterContext';
 import { Footer } from './components/Footer';
@@ -94,6 +95,7 @@ const AppContent: React.FC = () => {
     const [viewMode, setViewMode] = useLocalStorage<ViewMode>('viewMode', 'grid');
     const [favorites, setFavorites] = useLocalStorage<string[]>('favorites', []);
     const [mutedSources, setMutedSources] = useLocalStorage<string[]>('mutedSources', []);
+    const [currentView, setCurrentView] = useState<AppView>('news');
 
     const [articles, setArticles] = useState<Article[]>([]);
     const [isBlockingLoading, setIsBlockingLoading] = useState<boolean>(true);
@@ -302,8 +304,20 @@ const AppContent: React.FC = () => {
     const handleResetApp = useCallback(() => {
         onResetFilters();
         setShowFavoritesOnly(false);
+        setCurrentView('news');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [onResetFilters, setShowFavoritesOnly]);
+
+    const handleViewChange = useCallback((view: AppView) => {
+        setCurrentView(view);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
+    const handleTrendClick = useCallback((topic: string) => {
+        setSearchQuery(topic);
+        setCurrentView('news');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [setSearchQuery]);
 
 
     const normalizeString = (str: string): string => {
@@ -523,11 +537,20 @@ const AppContent: React.FC = () => {
                 onRefresh={handleRefresh}
                 onOpenSettings={() => setIsSettingsModalOpen(true)}
                 onLogoClick={handleResetApp}
+                currentView={currentView}
+                onViewChange={handleViewChange}
             />
             <main id="main-content" className="container mx-auto p-4 md:p-6 flex-grow">
-                <FilterBar
-                    sources={availableSources}
-                    favoritesCount={availableFavoritesCount}
+                {currentView === 'trends' ? (
+                    <TrendsView 
+                        onBackToNews={() => setCurrentView('news')}
+                        onTrendClick={handleTrendClick}
+                    />
+                ) : (
+                    <>
+                        <FilterBar
+                            sources={availableSources}
+                            favoritesCount={availableFavoritesCount}
                     allArticles={articles}
                     favoriteIds={favorites}
                     mutedSources={mutedSources}
@@ -600,6 +623,8 @@ const AppContent: React.FC = () => {
                             </div>
                         )}
                     </>
+                )}
+                </>
                 )}
             </main>
             <Footer />
