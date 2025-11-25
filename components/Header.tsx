@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
 
 
     return (
-        <header className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-lg sticky top-0 z-20 border-b border-slate-200 dark:border-zinc-800 overflow-hidden">
+        <header className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-lg sticky top-0 z-20 border-b border-slate-200 dark:border-zinc-800">
             <div className="container mx-auto px-2 sm:px-4 md:px-6 py-2 sm:py-3 flex justify-between items-center gap-1 sm:gap-2">
                 {/* Logo */}
                 <button
