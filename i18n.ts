@@ -8,6 +8,8 @@ const resources = {
             // Header
             "header.title": "GamerFeed",
             "header.refresh": "Refresh news",
+            "header.loadNewArticles_one": "Load {{count}} new article",
+            "header.loadNewArticles_other": "Load {{count}} new articles",
             "header.toggleTheme": "Toggle theme",
             "header.openSettings": "Open settings",
             "header.backToApp": "Back to App",
@@ -251,6 +253,8 @@ const resources = {
             // Header
             "header.title": "GamerFeed",
             "header.refresh": "News aktualisieren",
+            "header.loadNewArticles_one": "{{count}} neuen Artikel laden",
+            "header.loadNewArticles_other": "{{count}} neue Artikel laden",
             "header.toggleTheme": "Design wechseln",
             "header.openSettings": "Einstellungen öffnen",
             "header.backToApp": "Zurück zur App",

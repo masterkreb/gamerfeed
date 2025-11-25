@@ -213,6 +213,8 @@ const AppContent: React.FC = () => {
         // Clear pending articles when manually refreshing
         setNewArticlesCount(0);
         setPendingArticles([]);
+        // Reset tab title
+        document.title = 'GamerFeed';
     }, [loadNews]);
 
     // Check for new articles without updating the view
@@ -223,33 +225,41 @@ const AppContent: React.FC = () => {
             
             const fetchedArticles: Article[] = await response.json();
             
-            // Find articles that we don't have yet
+            // Find articles that we don't have yet (compare against original articles, not pending)
             const currentIds = new Set(articles.map(a => a.id));
             const newArticles = fetchedArticles.filter(a => !currentIds.has(a.id));
             
             if (newArticles.length > 0) {
-                setNewArticlesCount(newArticles.length);
+                // Accumulate: add new count to existing count
+                setNewArticlesCount(prev => {
+                    const totalNew = prev + newArticles.length;
+                    // Update tab title
+                    document.title = `(${totalNew}) GamerFeed`;
+                    return totalNew;
+                });
                 setPendingArticles(fetchedArticles);
-                console.log(`🆕 ${newArticles.length} neue Artikel verfügbar`);
+                console.log(`🆕 ${newArticles.length} neue Artikel gefunden (insgesamt: ${newArticlesCount + newArticles.length})`);
             }
             
             lastCheckRef.current = Date.now();
         } catch (error) {
             console.warn('Auto-update check failed:', error);
         }
-    }, [articles]);
+    }, [articles, newArticlesCount]);
 
-    // Load pending articles (when user clicks the toast)
+    // Load pending articles (when user clicks the toast or badge)
     const loadPendingArticles = useCallback(() => {
         if (pendingArticles.length > 0) {
             setArticles(pendingArticles);
             setNewArticlesCount(0);
             setPendingArticles([]);
+            // Reset tab title
+            document.title = 'GamerFeed';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }, [pendingArticles]);
 
-    // Auto-update polling (every 5 minutes)
+    // Auto-update polling (every 5 minutes) - runs even when tab is inactive
     useEffect(() => {
         // Don't start polling until initial load is complete
         if (isBlockingLoading || articles.length === 0) return;
@@ -266,24 +276,6 @@ const AppContent: React.FC = () => {
             }
         };
     }, [isBlockingLoading, articles.length, checkForNewArticles]);
-
-    // Visibility API: check when tab becomes visible again
-    useEffect(() => {
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                const timeSinceLastCheck = Date.now() - lastCheckRef.current;
-                const TWO_MINUTES = 2 * 60 * 1000;
-                
-                if (timeSinceLastCheck >= TWO_MINUTES && articles.length > 0) {
-                    console.log('Tab visible again, checking for new articles...');
-                    checkForNewArticles();
-                }
-            }
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-    }, [checkForNewArticles, articles.length]);
 
     const allSources = useMemo(() => {
         const sourcesMap = new Map<string, { name: string; language: 'de' | 'en' }>();
@@ -369,9 +361,9 @@ const AppContent: React.FC = () => {
         }
     }, [favorites, setFavorites, showToast, t]);
 
-    // Show toast when new articles are available
+    // Show toast when new articles are available (only when tab is active)
     useEffect(() => {
-        if (newArticlesCount > 0) {
+        if (newArticlesCount > 0 && document.visibilityState === 'visible') {
             showToast(
                 t('toast.newArticles', { count: newArticlesCount }),
                 'info',
@@ -632,6 +624,8 @@ const AppContent: React.FC = () => {
                 onLogoClick={handleResetApp}
                 currentView={currentView}
                 onViewChange={handleViewChange}
+                newArticlesCount={newArticlesCount}
+                onLoadNewArticles={loadPendingArticles}
             />
             <main id="main-content" className="container mx-auto p-4 md:p-6 flex-grow">
                 {currentView === 'trends' ? (

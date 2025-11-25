@@ -15,9 +15,11 @@ interface HeaderProps {
     onLogoClick: () => void;
     currentView: AppView;
     onViewChange: (view: AppView) => void;
+    newArticlesCount?: number;
+    onLoadNewArticles?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setViewMode, isRefreshing, onRefresh, onOpenSettings, onLogoClick, currentView, onViewChange }) => {
+export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setViewMode, isRefreshing, onRefresh, onOpenSettings, onLogoClick, currentView, onViewChange, newArticlesCount = 0, onLoadNewArticles }) => {
     const { t } = useTranslation();
     const [isViewMenuOpen, setIsViewMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -150,15 +152,26 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                         </div>
                     )}
 
-                    {/* Refresh Button */}
-                    <button
-                        onClick={onRefresh}
-                        disabled={isRefreshing}
-                        className="relative w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label={t('header.refresh')}
-                    >
-                        <ResetIcon className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${isRefreshing ? 'animate-spin' : ''}`} />
-                    </button>
+                    {/* Refresh Button with Badge */}
+                    <div className="relative">
+                        <button
+                            onClick={newArticlesCount > 0 ? onLoadNewArticles : onRefresh}
+                            disabled={isRefreshing}
+                            className={`relative w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                                newArticlesCount > 0 
+                                    ? 'bg-indigo-100 dark:bg-indigo-900/30 hover:bg-indigo-200 dark:hover:bg-indigo-900/50' 
+                                    : 'bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700'
+                            }`}
+                            aria-label={newArticlesCount > 0 ? t('header.loadNewArticles', { count: newArticlesCount }) : t('header.refresh')}
+                        >
+                            <ResetIcon className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${isRefreshing ? 'animate-spin' : ''}`} />
+                        </button>
+                        {newArticlesCount > 0 && (
+                            <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse">
+                                {newArticlesCount > 99 ? '99+' : newArticlesCount}
+                            </span>
+                        )}
+                    </div>
 
                     {/* Language Switcher */}
                     <LanguageSwitcher />
