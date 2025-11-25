@@ -49,39 +49,40 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
 
     return (
         <header className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-lg sticky top-0 z-20 border-b border-slate-200 dark:border-zinc-800">
-            <div className="container mx-auto px-4 md:px-6 py-3 flex justify-between items-center">
-                {/* Logo and Trends Link */}
-                <div className="flex items-center gap-2 sm:gap-4">
-                    <button
-                        onClick={onLogoClick}
-                        aria-label="Go to homepage and reset filters"
-                        className="transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-offset-4 focus:ring-offset-slate-100 dark:focus:ring-offset-zinc-900 focus:ring-indigo-500 rounded-lg"
-                    >
-                        <h1 className="text-2xl font-bold text-indigo-500 dark:text-indigo-400">
-                            {t('header.title')}
-                        </h1>
-                    </button>
+            <div className="container mx-auto px-4 md:px-6 py-3 flex justify-between items-center gap-2">
+                {/* Logo */}
+                <button
+                    onClick={onLogoClick}
+                    aria-label="Go to homepage and reset filters"
+                    className="flex-shrink-0 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-offset-4 focus:ring-offset-slate-100 dark:focus:ring-offset-zinc-900 focus:ring-indigo-500 rounded-lg"
+                >
+                    <h1 className="text-xl sm:text-2xl font-bold text-indigo-500 dark:text-indigo-400">
+                        {t('header.title')}
+                    </h1>
+                </button>
                     
-                    {/* Trends Link - Desktop only (Mobile version moved to right side) */}
-                    <button
-                        onClick={() => onViewChange(currentView === 'trends' ? 'news' : 'trends')}
-                        className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium transition-all ${
-                            currentView === 'trends'
-                                ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
-                                : 'text-slate-600 dark:text-zinc-400 hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
-                        }`}
-                        aria-label={t('header.trends')}
-                    >
-                        <FireIcon className="w-5 h-5" />
-                        <span>{t('header.trends')}</span>
-                    </button>
-                </div>
+                {/* Trends Link - Desktop only */}
+                <button
+                    onClick={() => onViewChange(currentView === 'trends' ? 'news' : 'trends')}
+                    className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium transition-all flex-shrink-0 ${
+                        currentView === 'trends'
+                            ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
+                            : 'text-slate-600 dark:text-zinc-400 hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                    }`}
+                    aria-label={t('header.trends')}
+                >
+                    <FireIcon className="w-5 h-5" />
+                    <span>{t('header.trends')}</span>
+                </button>
 
-                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4">
-                    {/* Trends Link - Mobile (moved here to avoid collision with refresh) */}
+                {/* Spacer to push controls to right */}
+                <div className="flex-grow" />
+
+                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 flex-shrink-0">
+                    {/* Trends Link - Mobile */}
                     <button
                         onClick={() => onViewChange(currentView === 'trends' ? 'news' : 'trends')}
-                        className={`sm:hidden w-11 h-11 flex items-center justify-center rounded-lg transition-all ${
+                        className={`sm:hidden w-10 h-10 flex items-center justify-center rounded-lg transition-all ${
                             currentView === 'trends'
                                 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
                                 : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
