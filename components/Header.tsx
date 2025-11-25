@@ -82,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                     {/* Trends Link - Mobile */}
                     <button
                         onClick={() => onViewChange(currentView === 'trends' ? 'news' : 'trends')}
-                        className={`sm:hidden w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
+                        className={`sm:hidden w-9 h-9 flex items-center justify-center rounded-lg transition-all ${
                             currentView === 'trends'
                                 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
                                 : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
@@ -117,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                         <div ref={menuRef} className="relative sm:hidden">
                             <button
                                 onClick={() => setIsViewMenuOpen(!isViewMenuOpen)}
-                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
+                                className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
                                 aria-label="Change view mode"
                                 aria-haspopup="true"
                                 aria-expanded={isViewMenuOpen}
@@ -154,30 +154,30 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                     <button
                         onClick={onRefresh}
                         disabled={isRefreshing}
-                        className="relative w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="relative w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label={t('header.refresh')}
                     >
                         <ResetIcon className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${isRefreshing ? 'animate-spin' : ''}`} />
                     </button>
 
-                    {/* Language Switcher - Hidden on small screens, visible from 480px+ */}
-                    <div className="hidden min-[480px]:block">
+                    {/* Language Switcher - Hidden on very small screens */}
+                    <div className="hidden xs:block">
                         <LanguageSwitcher />
                     </div>
 
                     {/* Theme Toggle */}
                     <button
                         onClick={toggleTheme}
-                        className="w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
+                        className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
                         aria-label={t('header.toggleTheme')}
                     >
                         {theme === 'light' ? <MoonIcon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" /> : <SunIcon className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />}
                     </button>
 
-                    {/* Settings Button - Hidden on very small screens, visible from 360px+ */}
+                    {/* Settings Button */}
                     <button
                         onClick={onOpenSettings}
-                        className="hidden min-[360px]:flex w-8 h-8 sm:w-11 sm:h-11 items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
+                        className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
                         aria-label={t('header.openSettings')}
                     >
                         <SettingsIcon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-zinc-300" />
