@@ -225,27 +225,32 @@ const AppContent: React.FC = () => {
             
             const fetchedArticles: Article[] = await response.json();
             
-            // Find articles that we don't have yet (compare against original articles, not pending)
-            const currentIds = new Set(articles.map(a => a.id));
-            const newArticles = fetchedArticles.filter(a => !currentIds.has(a.id));
+            // Get the newest article date from currently loaded articles
+            const newestLoadedDate = articles.length > 0 
+                ? Math.max(...articles.map(a => new Date(a.publicationDate).getTime()))
+                : 0;
             
-            if (newArticles.length > 0) {
-                // Accumulate: add new count to existing count
-                setNewArticlesCount(prev => {
-                    const totalNew = prev + newArticles.length;
-                    // Update tab title
-                    document.title = `(${totalNew}) GamerFeed`;
-                    return totalNew;
-                });
+            // Find articles that are NEWER than our newest loaded article
+            // This avoids counting older articles that just weren't loaded yet (progressive loading)
+            const trulyNewArticles = fetchedArticles.filter(a => {
+                const articleDate = new Date(a.publicationDate).getTime();
+                return articleDate > newestLoadedDate;
+            });
+            
+            if (trulyNewArticles.length > 0) {
+                // Set count directly (not accumulate) since we're comparing against dates
+                setNewArticlesCount(trulyNewArticles.length);
                 setPendingArticles(fetchedArticles);
-                console.log(`🆕 ${newArticles.length} neue Artikel gefunden (insgesamt: ${newArticlesCount + newArticles.length})`);
+                // Update tab title
+                document.title = `(${trulyNewArticles.length}) GamerFeed`;
+                console.log(`🆕 ${trulyNewArticles.length} neue Artikel verfügbar`);
             }
             
             lastCheckRef.current = Date.now();
         } catch (error) {
             console.warn('Auto-update check failed:', error);
         }
-    }, [articles, newArticlesCount]);
+    }, [articles]);
 
     // Load pending articles (when user clicks the toast or badge)
     const loadPendingArticles = useCallback(() => {
