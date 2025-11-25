@@ -86,7 +86,10 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
         return str
             .toLowerCase()
             .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^\w\s]/g, '') // Remove other punctuation
+            .replace(/\s+/g, ' ') // Normalize whitespace
+            .trim();
     };
 
     const liveFilteredCount = useMemo(() => {
