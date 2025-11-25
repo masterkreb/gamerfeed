@@ -3,9 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Header } from './components/Header';
 import { FilterBar } from './components/FilterBar';
 import { ArticleCard } from './components/ArticleCard';
-import { TrendsView } from './components/TrendsView';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import type { Article, Theme, ViewMode, AppView } from './types';
+import type { Article, Theme, ViewMode } from './types';
 import { LoadingSpinner, SearchIcon, FilterIcon, ResetIcon, NewspaperIcon, BookmarkIcon, StarIcon, ArrowLeftIcon } from './components/Icons';
 import { FilterProvider, useFilter } from './contexts/FilterContext';
 import { Footer } from './components/Footer';
@@ -95,7 +94,6 @@ const AppContent: React.FC = () => {
     const [viewMode, setViewMode] = useLocalStorage<ViewMode>('viewMode', 'grid');
     const [favorites, setFavorites] = useLocalStorage<string[]>('favorites', []);
     const [mutedSources, setMutedSources] = useLocalStorage<string[]>('mutedSources', []);
-    const [currentView, setCurrentView] = useState<AppView>('news');
 
     const [articles, setArticles] = useState<Article[]>([]);
     const [isBlockingLoading, setIsBlockingLoading] = useState<boolean>(true);
@@ -304,27 +302,20 @@ const AppContent: React.FC = () => {
     const handleResetApp = useCallback(() => {
         onResetFilters();
         setShowFavoritesOnly(false);
-        setCurrentView('news');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [onResetFilters, setShowFavoritesOnly]);
-
-    const handleViewChange = useCallback((view: AppView) => {
-        setCurrentView(view);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, []);
-
-    const handleTrendClick = useCallback((topic: string) => {
-        setSearchQuery(topic);
-        setCurrentView('news');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [setSearchQuery]);
 
 
     const normalizeString = (str: string): string => {
         return str
             .toLowerCase()
             .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
+            .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+            .replace(/[''`]/g, '') // Remove apostrophes and similar characters
+            .replace(/[-–—]/g, ' ') // Replace dashes with spaces
+            .replace(/[^\w\s]/g, '') // Remove other punctuation
+            .replace(/\s+/g, ' ') // Normalize whitespace
+            .trim();
     };
 
     const filteredArticles = useMemo(() => {
@@ -532,92 +523,81 @@ const AppContent: React.FC = () => {
                 onRefresh={handleRefresh}
                 onOpenSettings={() => setIsSettingsModalOpen(true)}
                 onLogoClick={handleResetApp}
-                currentView={currentView}
-                onViewChange={handleViewChange}
             />
             <main id="main-content" className="container mx-auto p-4 md:p-6 flex-grow">
-                {currentView === 'trends' ? (
-                    <TrendsView 
-                        onBackToNews={() => setCurrentView('news')}
-                        onTrendClick={handleTrendClick}
+                <FilterBar
+                    sources={availableSources}
+                    favoritesCount={availableFavoritesCount}
+                    allArticles={articles}
+                    favoriteIds={favorites}
+                    mutedSources={mutedSources}
+                />
+
+                {showFavoritesOnly && !searchQuery && (
+                    <FavoritesHeader
+                        totalFavorites={availableFavoritesCount}
+                        filteredFavoritesCount={filteredArticles.length}
+                        onResetFilters={onResetFilters}
+                        onExitFavorites={() => setShowFavoritesOnly(false)}
                     />
+                )}
+
+                {searchQuery && (
+                    <SearchResultsHeader
+                        searchQuery={searchQuery}
+                        resultsCount={filteredArticles.length}
+                        onClear={() => setSearchQuery('')}
+                        isSearchingFavorites={showFavoritesOnly}
+                    />
+                )}
+
+                {isBlockingLoading ? (
+                    <div className="flex justify-center items-center h-64">
+                        <LoadingSpinner />
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-16">
+                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/50">
+                            <svg className="h-6 w-6 text-red-600 dark:text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                        </div>
+                        <h3 className="mt-4 text-2xl font-semibold text-red-600 dark:text-red-400">{t('error.couldNotLoad')}</h3>
+                        <p className="mt-2 text-slate-600 dark:text-zinc-400">{error}</p>
+                        <button
+                            onClick={() => loadNews(true)}
+                            className="mt-6 inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-zinc-900 transition-all duration-200 hover:shadow-lg"
+                        >
+                            {t('error.tryAgain')}
+                        </button>
+                    </div>
                 ) : (
                     <>
-                        <FilterBar
-                            sources={availableSources}
-                            favoritesCount={availableFavoritesCount}
-                            allArticles={articles}
-                            favoriteIds={favorites}
-                            mutedSources={mutedSources}
-                        />
+                        <div key={filterKey} className={`mt-8 ${viewClasses[viewMode]} animate-fade-in`}>
+                            {articlesToShow.length > 0 ? (
+                                articlesToShow.map((article, index) => {
+                                    const isLastElement = articlesToShow.length === index + 1;
+                                    return (
+                                        <ArticleCard
+                                            ref={isLastElement ? lastArticleElementRef : null}
+                                            key={article.id}
+                                            article={article}
+                                            viewMode={viewMode}
+                                            isFavorite={favorites.includes(article.id)}
+                                            onToggleFavorite={handleToggleFavorite}
+                                            onMuteSource={handleMuteSource}
+                                        />
+                                    );
+                                })
+                            ) : (
+                                <EmptyState />
+                            )}
+                        </div>
 
-                        {showFavoritesOnly && !searchQuery && (
-                            <FavoritesHeader
-                                totalFavorites={availableFavoritesCount}
-                                filteredFavoritesCount={filteredArticles.length}
-                                onResetFilters={onResetFilters}
-                                onExitFavorites={() => setShowFavoritesOnly(false)}
-                            />
-                        )}
-
-                        {searchQuery && (
-                            <SearchResultsHeader
-                                searchQuery={searchQuery}
-                                resultsCount={filteredArticles.length}
-                                onClear={() => setSearchQuery('')}
-                                isSearchingFavorites={showFavoritesOnly}
-                            />
-                        )}
-
-                        {isBlockingLoading ? (
-                            <div className="flex justify-center items-center h-64">
-                                <LoadingSpinner />
+                        {articlesToShow.length > 0 && articlesToShow.length < filteredArticles.length && (
+                            <div className="flex justify-center items-center h-24 col-span-full">
+                                <LoadingSpinner className="w-8 h-8" />
                             </div>
-                        ) : error ? (
-                            <div className="text-center py-16">
-                                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/50">
-                                    <svg className="h-6 w-6 text-red-600 dark:text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                                    </svg>
-                                </div>
-                                <h3 className="mt-4 text-2xl font-semibold text-red-600 dark:text-red-400">{t('error.couldNotLoad')}</h3>
-                                <p className="mt-2 text-slate-600 dark:text-zinc-400">{error}</p>
-                                <button
-                                    onClick={() => loadNews(true)}
-                                    className="mt-6 inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-zinc-900 transition-all duration-200 hover:shadow-lg"
-                                >
-                                    {t('error.tryAgain')}
-                                </button>
-                            </div>
-                        ) : (
-                            <>
-                                <div key={filterKey} className={`mt-8 ${viewClasses[viewMode]} animate-fade-in`}>
-                                    {articlesToShow.length > 0 ? (
-                                        articlesToShow.map((article, index) => {
-                                            const isLastElement = articlesToShow.length === index + 1;
-                                            return (
-                                                <ArticleCard
-                                                    ref={isLastElement ? lastArticleElementRef : null}
-                                                    key={article.id}
-                                                    article={article}
-                                                    viewMode={viewMode}
-                                                    isFavorite={favorites.includes(article.id)}
-                                                    onToggleFavorite={handleToggleFavorite}
-                                                    onMuteSource={handleMuteSource}
-                                                />
-                                            );
-                                        })
-                                    ) : (
-                                        <EmptyState />
-                                    )}
-                                </div>
-
-                                {articlesToShow.length > 0 && articlesToShow.length < filteredArticles.length && (
-                                    <div className="flex justify-center items-center h-24 col-span-full">
-                                        <LoadingSpinner className="w-8 h-8" />
-                                    </div>
-                                )}
-                            </>
                         )}
                     </>
                 )}
