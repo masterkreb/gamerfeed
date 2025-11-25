@@ -160,10 +160,8 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                         <ResetIcon className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${isRefreshing ? 'animate-spin' : ''}`} />
                     </button>
 
-                    {/* Language Switcher - Hidden on very small screens */}
-                    <div className="hidden xs:block">
-                        <LanguageSwitcher />
-                    </div>
+                    {/* Language Switcher */}
+                    <LanguageSwitcher />
 
                     {/* Theme Toggle */}
                     <button
