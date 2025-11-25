@@ -48,15 +48,15 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
 
 
     return (
-        <header className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-lg sticky top-0 z-20 border-b border-slate-200 dark:border-zinc-800">
-            <div className="container mx-auto px-4 md:px-6 py-3 flex justify-between items-center gap-2">
+        <header className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-lg sticky top-0 z-20 border-b border-slate-200 dark:border-zinc-800 overflow-hidden">
+            <div className="container mx-auto px-2 sm:px-4 md:px-6 py-2 sm:py-3 flex justify-between items-center gap-1 sm:gap-2">
                 {/* Logo */}
                 <button
                     onClick={onLogoClick}
                     aria-label="Go to homepage and reset filters"
-                    className="flex-shrink-0 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-offset-4 focus:ring-offset-slate-100 dark:focus:ring-offset-zinc-900 focus:ring-indigo-500 rounded-lg"
+                    className="flex-shrink-0 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-zinc-900 focus:ring-indigo-500 rounded-lg"
                 >
-                    <h1 className="text-xl sm:text-2xl font-bold text-indigo-500 dark:text-indigo-400">
+                    <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-indigo-500 dark:text-indigo-400 whitespace-nowrap">
                         {t('header.title')}
                     </h1>
                 </button>
@@ -76,20 +76,20 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                 </button>
 
                 {/* Spacer to push controls to right */}
-                <div className="flex-grow" />
+                <div className="flex-grow min-w-0" />
 
-                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 flex-shrink-0">
+                <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0">
                     {/* Trends Link - Mobile */}
                     <button
                         onClick={() => onViewChange(currentView === 'trends' ? 'news' : 'trends')}
-                        className={`sm:hidden w-10 h-10 flex items-center justify-center rounded-lg transition-all ${
+                        className={`sm:hidden w-9 h-9 flex items-center justify-center rounded-lg transition-all ${
                             currentView === 'trends'
                                 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
                                 : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
                         }`}
                         aria-label={t('header.trends')}
                     >
-                        <FireIcon className="w-5 h-5" />
+                        <FireIcon className="w-4 h-4" />
                     </button>
 
                     {/* Desktop View Mode Switcher - only show on news view */}
@@ -117,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                         <div ref={menuRef} className="relative sm:hidden">
                             <button
                                 onClick={() => setIsViewMenuOpen(!isViewMenuOpen)}
-                                className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
+                                className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
                                 aria-label="Change view mode"
                                 aria-haspopup="true"
                                 aria-expanded={isViewMenuOpen}
@@ -154,31 +154,33 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                     <button
                         onClick={onRefresh}
                         disabled={isRefreshing}
-                        className="relative w-11 h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="relative w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label={t('header.refresh')}
                     >
-                        <ResetIcon className={`w-5 h-5 transition-transform ${isRefreshing ? 'animate-spin' : ''}`} />
+                        <ResetIcon className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${isRefreshing ? 'animate-spin' : ''}`} />
                     </button>
 
-                    {/* Language Switcher - NEU! */}
-                    <LanguageSwitcher />
+                    {/* Language Switcher - Hidden on very small screens */}
+                    <div className="hidden xs:block">
+                        <LanguageSwitcher />
+                    </div>
 
                     {/* Theme Toggle */}
                     <button
                         onClick={toggleTheme}
-                        className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
+                        className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
                         aria-label={t('header.toggleTheme')}
                     >
-                        {theme === 'light' ? <MoonIcon className="w-5 h-5 text-indigo-600" /> : <SunIcon className="w-5 h-5 text-yellow-400" />}
+                        {theme === 'light' ? <MoonIcon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" /> : <SunIcon className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />}
                     </button>
 
                     {/* Settings Button */}
                     <button
                         onClick={onOpenSettings}
-                        className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
+                        className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
                         aria-label={t('header.openSettings')}
                     >
-                        <SettingsIcon className="w-5 h-5 text-slate-600 dark:text-zinc-300" />
+                        <SettingsIcon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-zinc-300" />
                     </button>
                 </div>
             </div>
