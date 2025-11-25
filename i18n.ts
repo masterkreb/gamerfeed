@@ -114,6 +114,9 @@ const resources = {
             "toast.sourceMuted": "\"{{source}}\" has been muted. Manage in Settings (⚙️).",
             "toast.undo": "Undo",
             "toast.favoriteAdded": "Article added to favorites.",
+            "toast.newArticles_one": "🆕 {{count}} new article available",
+            "toast.newArticles_other": "🆕 {{count}} new articles available",
+            "toast.loadNewArticles": "Load",
 
             // Footer
             "footer.rights": "All rights reserved.",
@@ -354,6 +357,9 @@ const resources = {
             "toast.sourceMuted": "\"{{source}}\" wurde stummgeschaltet. Verwalten in den Einstellungen (⚙️).",
             "toast.undo": "Rückgängig",
             "toast.favoriteAdded": "Artikel zu Favoriten hinzugefügt.",
+            "toast.newArticles_one": "🆕 {{count}} neuer Artikel verfügbar",
+            "toast.newArticles_other": "🆕 {{count}} neue Artikel verfügbar",
+            "toast.loadNewArticles": "Laden",
 
             // Footer
             "footer.rights": "Alle Rechte vorbehalten.",

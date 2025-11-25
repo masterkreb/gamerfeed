@@ -107,6 +107,12 @@ const AppContent: React.FC = () => {
     const [toast, setToast] = useState<Toast | null>(null);
     const toastTimerRef = useRef<number | null>(null);
 
+    // Auto-update state
+    const [newArticlesCount, setNewArticlesCount] = useState(0);
+    const [pendingArticles, setPendingArticles] = useState<Article[]>([]);
+    const lastCheckRef = useRef<number>(Date.now());
+    const autoUpdateIntervalRef = useRef<number | null>(null);
+
     useEffect(() => {
         if (theme === 'dark') {
             document.documentElement.classList.add('dark');
@@ -204,7 +210,80 @@ const AppContent: React.FC = () => {
 
     const handleRefresh = useCallback(() => {
         loadNews(true);
+        // Clear pending articles when manually refreshing
+        setNewArticlesCount(0);
+        setPendingArticles([]);
     }, [loadNews]);
+
+    // Check for new articles without updating the view
+    const checkForNewArticles = useCallback(async () => {
+        try {
+            const response = await fetch('/api/get-news');
+            if (!response.ok) return;
+            
+            const fetchedArticles: Article[] = await response.json();
+            
+            // Find articles that we don't have yet
+            const currentIds = new Set(articles.map(a => a.id));
+            const newArticles = fetchedArticles.filter(a => !currentIds.has(a.id));
+            
+            if (newArticles.length > 0) {
+                setNewArticlesCount(newArticles.length);
+                setPendingArticles(fetchedArticles);
+                console.log(`🆕 ${newArticles.length} neue Artikel verfügbar`);
+            }
+            
+            lastCheckRef.current = Date.now();
+        } catch (error) {
+            console.warn('Auto-update check failed:', error);
+        }
+    }, [articles]);
+
+    // Load pending articles (when user clicks the toast)
+    const loadPendingArticles = useCallback(() => {
+        if (pendingArticles.length > 0) {
+            setArticles(pendingArticles);
+            setNewArticlesCount(0);
+            setPendingArticles([]);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [pendingArticles]);
+
+    // Auto-update polling (every 5 minutes)
+    useEffect(() => {
+        // Don't start polling until initial load is complete
+        if (isBlockingLoading || articles.length === 0) return;
+
+        const POLLING_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+        autoUpdateIntervalRef.current = window.setInterval(() => {
+            checkForNewArticles();
+        }, POLLING_INTERVAL);
+
+        return () => {
+            if (autoUpdateIntervalRef.current) {
+                window.clearInterval(autoUpdateIntervalRef.current);
+            }
+        };
+    }, [isBlockingLoading, articles.length, checkForNewArticles]);
+
+    // Visibility API: check when tab becomes visible again
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                const timeSinceLastCheck = Date.now() - lastCheckRef.current;
+                const TWO_MINUTES = 2 * 60 * 1000;
+                
+                if (timeSinceLastCheck >= TWO_MINUTES && articles.length > 0) {
+                    console.log('Tab visible again, checking for new articles...');
+                    checkForNewArticles();
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, [checkForNewArticles, articles.length]);
 
     const allSources = useMemo(() => {
         const sourcesMap = new Map<string, { name: string; language: 'de' | 'en' }>();
@@ -289,6 +368,20 @@ const AppContent: React.FC = () => {
             showToast(t('toast.favoriteAdded'), 'success', actions);
         }
     }, [favorites, setFavorites, showToast, t]);
+
+    // Show toast when new articles are available
+    useEffect(() => {
+        if (newArticlesCount > 0) {
+            showToast(
+                t('toast.newArticles', { count: newArticlesCount }),
+                'info',
+                [{
+                    label: t('toast.loadNewArticles'),
+                    onClick: loadPendingArticles
+                }]
+            );
+        }
+    }, [newArticlesCount, t, showToast, loadPendingArticles]);
 
     const {
         timeFilter,
