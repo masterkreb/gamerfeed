@@ -9,6 +9,17 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+/* Base Styles - Cursor pointer for interactive elements */
+button,
+[role="button"],
+a,
+select,
+input[type="checkbox"],
+input[type="radio"],
+label[for] {
+    cursor: pointer;
+}
+
 /* Custom Animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
