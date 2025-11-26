@@ -576,8 +576,4 @@ i18n
         }
     });
 
-
-// Ganz am Ende von i18n.ts:
-console.log('🌍 i18n initialized! Current language:', i18n.language);
-
 export default i18n;
