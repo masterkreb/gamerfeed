@@ -53,15 +53,19 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
         <header className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-lg sticky top-0 z-20 border-b border-slate-200 dark:border-zinc-800">
             <div className="container mx-auto px-2 sm:px-4 md:px-6 py-2 sm:py-3 flex justify-between items-center gap-1 sm:gap-2">
                 {/* Logo */}
-                <button
-                    onClick={onLogoClick}
+                <a
+                    href="/"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        onLogoClick();
+                    }}
                     aria-label="Go to homepage and reset filters"
-                    className="flex-shrink-0 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-zinc-900 focus:ring-indigo-500 rounded-lg"
+                    className="flex-shrink-0 transition-transform duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100 dark:focus-visible:ring-offset-zinc-900 focus-visible:ring-indigo-500 rounded-lg"
                 >
                     <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-indigo-500 dark:text-indigo-400 whitespace-nowrap">
                         {t('header.title')}
                     </h1>
-                </button>
+                </a>
                     
                 {/* Trends Link - Desktop only */}
                 <button

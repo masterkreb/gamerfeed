@@ -106,6 +106,10 @@ const AppContent: React.FC = () => {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [toast, setToast] = useState<Toast | null>(null);
     const toastTimerRef = useRef<number | null>(null);
+    
+    // Toast swipe state
+    const [toastSwipeOffset, setToastSwipeOffset] = useState(0);
+    const toastTouchStartRef = useRef<{ x: number; y: number } | null>(null);
 
     // Auto-update state
     const [newArticlesCount, setNewArticlesCount] = useState(0);
@@ -299,6 +303,50 @@ const AppContent: React.FC = () => {
             }
         };
     }, []);
+
+    // Dismiss toast immediately
+    const dismissToast = useCallback(() => {
+        if (toastTimerRef.current) {
+            window.clearTimeout(toastTimerRef.current);
+            toastTimerRef.current = null;
+        }
+        setToast(null);
+        setToastSwipeOffset(0);
+    }, []);
+
+    // Toast swipe handlers for mobile
+    const handleToastTouchStart = useCallback((e: React.TouchEvent) => {
+        toastTouchStartRef.current = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY
+        };
+    }, []);
+
+    const handleToastTouchMove = useCallback((e: React.TouchEvent) => {
+        if (!toastTouchStartRef.current) return;
+        const deltaX = e.touches[0].clientX - toastTouchStartRef.current.x;
+        const deltaY = e.touches[0].clientY - toastTouchStartRef.current.y;
+        
+        // Only track horizontal swipes (left) or upward swipes
+        if (deltaX < 0 || deltaY < 0) {
+            // Prioritize the larger movement
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                setToastSwipeOffset(deltaX);
+            } else {
+                setToastSwipeOffset(deltaY);
+            }
+        }
+    }, []);
+
+    const handleToastTouchEnd = useCallback(() => {
+        // If swiped more than 80px, dismiss
+        if (Math.abs(toastSwipeOffset) > 80) {
+            dismissToast();
+        } else {
+            setToastSwipeOffset(0);
+        }
+        toastTouchStartRef.current = null;
+    }, [toastSwipeOffset, dismissToast]);
 
     const showToast = useCallback((message: string, type: ToastType, actions: ToastAction[] = []) => {
         if (toastTimerRef.current) {
@@ -732,12 +780,19 @@ const AppContent: React.FC = () => {
                 <div
                     key={toast.id}
                     role="alert"
-                    className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 rounded-xl shadow-lg flex items-stretch w-11/12 max-w-2xl overflow-hidden transition-all duration-600 ease-in-out ${toastStyles[toast.type].bg} ${toastStyles[toast.type].text} ${
+                    onTouchStart={handleToastTouchStart}
+                    onTouchMove={handleToastTouchMove}
+                    onTouchEnd={handleToastTouchEnd}
+                    style={{
+                        transform: `translate(-50%, 0) ${toastSwipeOffset < 0 ? `translateX(${toastSwipeOffset}px)` : `translateY(${toastSwipeOffset}px)`}`,
+                        opacity: Math.max(0, 1 - Math.abs(toastSwipeOffset) / 120)
+                    }}
+                    className={`fixed top-6 left-1/2 z-50 rounded-xl shadow-lg flex items-stretch w-11/12 max-w-2xl overflow-hidden transition-opacity duration-300 ${toastStyles[toast.type].bg} ${toastStyles[toast.type].text} ${toastSwipeOffset === 0 ? 'transition-all duration-600 ease-in-out' : ''} ${
                         toast.isExiting
                             ? 'opacity-0 scale-95'
                             : toast.isEntering
                                 ? 'opacity-0 scale-95'
-                                : 'opacity-100 scale-100'
+                                : ''
                     }`}
                 >
                     <p className="py-4 px-6 flex-grow">{toast.message}</p>
