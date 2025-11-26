@@ -58,10 +58,22 @@ Der Cron-Job speichert drei optimierte Cache-Versionen in Vercel KV:
 
 Dieses Projekt nutzt eine entkoppelte, "serverless" Architektur, die auf maximale Skalierbarkeit, geringe Wartung und Kosteneffizienz ausgelegt ist. Es ist entscheidend, die Rollen der einzelnen Komponenten zu verstehen.
 
+### 💡 Free-Tier-Strategie
+
+Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent verschiedener Anbieter betrieben werden kann:
+
+| Dienst | Anbieter | Zweck |
+|--------|----------|-------|
+| Hosting & Edge Functions | Vercel (Free) | Frontend + API |
+| PostgreSQL Datenbank | Neon (Free) | Feed-Quellen speichern |
+| Redis Cache | Vercel KV (Free) | Artikel-Cache |
+| Cron Jobs | GitHub Actions (Free) | Automatische Updates |
+| KI-Analyse | Groq (Free) | Trend-Erkennung |
+
 ### Systemkomponenten
 
 1.  **Frontend (React & Vite)**: Eine statische Single-Page-Application, die beim Start die Artikel dynamisch von API-Endpunkten abruft. Nutzt Progressive Loading für sofortige Content-Anzeige. Alle Benutzereinstellungen werden im `localStorage` gespeichert.
-2.  **Datenbank (Vercel Postgres)**: Eine serverless Postgres-Datenbank, die ausschliesslich die Liste der zu verarbeitenden RSS-Feed-Quellen speichert.
+2.  **Datenbank (Neon PostgreSQL)**: Eine serverless Postgres-Datenbank, die ausschliesslich die Liste der zu verarbeitenden RSS-Feed-Quellen speichert. Alternativ kann auch Vercel Postgres verwendet werden.
 3.  **Datencache (Vercel KV)**: Ein extrem schneller In-Memory-Datenspeicher, der mehrere optimierte Caches bereithält:
     - `news_cache`: Alle Artikel (vollständig)
     - `news_cache_16`: Erste 16 Artikel (Preview)
@@ -245,7 +257,7 @@ Dieser Fehler tritt im GitHub Actions Log auf und ist der häufigste Konfigurati
 - **Build Tool**: Vite
 - **Internationalisierung**: i18next
 - **Backend**: Vercel Edge Functions
-- **Datenbank**: Vercel Postgres (SQL)
+- **Datenbank**: Neon PostgreSQL (oder Vercel Postgres)
 - **Cache**: Vercel KV (Redis)
 - **CI/CD**: GitHub Actions
 - **KI**: Groq API (llama-3.1-8b-instant)
