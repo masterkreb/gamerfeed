@@ -7,7 +7,7 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
 ## ✨ Hauptfunktionen
 
 - **Umfassende Nachrichten-Aggregation**: Sammelt Artikel aus einer Vielzahl von RSS-Feeds.
-- **Moderne Benutzeroberfläche**: Ein sauberes, responsives Design, gebaut mit React und Tailwind CSS.
+- **Moderne Benutzeroberfläche**: Ein sauberes, responsives Design, gebaut mit React und Tailwind CSS (lokal gebaut, keine CDN-Abhängigkeit).
 - **⚡ Blitzschnelles Progressive Loading**: 3-stufiges Laden der Artikel für sofortige Anzeige (16 → 64 → alle Artikel).
 - **🔄 Auto-Update mit Live-Benachrichtigungen**: 
     - Automatische Prüfung auf neue Artikel alle 5 Minuten
@@ -165,6 +165,11 @@ Die Statusanzeige wird wie folgt ermittelt:
     ```bash
     npm install
     ```
+    Dies installiert automatisch alle benötigten Pakete aus `package.json`, inklusive:
+    - React, Vite, TypeScript
+    - Tailwind CSS, PostCSS, Autoprefixer
+    - i18next für Mehrsprachigkeit
+    - und weitere Dev-Dependencies
 
 3.  **Umgebungsvariablen einrichten**:
     Erstelle eine Datei namens `.env` im Hauptverzeichnis des Projekts und füge die folgenden Variablen von deinem Vercel-Projekt hinzu.
@@ -193,6 +198,17 @@ Die Statusanzeige wird wie folgt ermittelt:
 5.  **Anwendung öffnen**:
     - Die Hauptanwendung ist unter `http://localhost:3000` erreichbar.
     - Das Admin-Panel findest du unter `http://localhost:3000/admin.html`.
+
+### Build für Production
+
+```bash
+npm run build
+```
+
+Dies erstellt einen optimierten Production-Build im `dist/`-Ordner:
+- **Tailwind CSS**: Nur genutzte Klassen werden inkludiert (~65KB statt ~300KB CDN)
+- **JavaScript**: Minifiziert und tree-shaked
+- **Keine externe Abhängigkeiten**: Alles wird lokal gebündelt
 
 ### Manuelles Aktualisieren des Caches
 
