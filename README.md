@@ -9,6 +9,11 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
 - **Umfassende Nachrichten-Aggregation**: Sammelt Artikel aus einer Vielzahl von RSS-Feeds.
 - **Moderne Benutzeroberfläche**: Ein sauberes, responsives Design, gebaut mit React und Tailwind CSS.
 - **⚡ Blitzschnelles Progressive Loading**: 3-stufiges Laden der Artikel für sofortige Anzeige (16 → 64 → alle Artikel).
+- **🔄 Auto-Update mit Live-Benachrichtigungen**: 
+    - Automatische Prüfung auf neue Artikel alle 5 Minuten
+    - Tab-Titel zeigt Anzahl neuer Artikel: `(5) GamerFeed`
+    - Badge am Refresh-Button mit Puls-Animation
+    - Toast-Benachrichtigung mit Swipe-to-Dismiss (links oder hoch wischen)
 - **Mehrsprachigkeit**: Vollständig übersetzbar mit i18next. Erkennt automatisch die Browsersprache des Nutzers (Deutsch/Englisch) und merkt sich die Auswahl.
 - **Anpassbare Ansicht**:
     - **Themes**: Wähle zwischen Light- und Dark-Mode.
@@ -21,8 +26,9 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
     - Filtere Artikel nach Zeitraum (Heute, Gestern, Letzte 7 Tage).
     - Filtere nach spezifischer Quelle oder Sprache (DE/EN).
     - Volltextsuche in Titeln und Zusammenfassungen.
-- **Automatische Aktualisierung**: Ein GitHub-Action-Workflow aktualisiert den News-Cache alle 30 Minuten, sodass die angezeigten Nachrichten immer aktuell sind.
-- **🤖 KI-gestützte Trend-Analyse**: Automatische Erkennung aktueller Gaming-Trends mit Groq AI (tägliche und wöchentliche Trends).
+- **Automatische Aktualisierung**: Ein GitHub-Action-Workflow aktualisiert den News-Cache alle 20 Minuten, sodass die angezeigten Nachrichten immer aktuell sind.
+- **🤖 KI-gestützte Trend-Analyse**: Automatische Erkennung aktueller Gaming-Trends mit Groq AI (tägliche und wöchentliche Trends). Intelligente Deduplizierung von Artikeln gleicher Verlagsgruppen für akkuratere Trend-Berechnung.
+- **♿ Barrierefreiheit**: Focus-Ring nur bei Tastatur-Navigation sichtbar (nicht bei Mausklicks).
 - **Admin-Panel**: Ein passwortgeschütztes Admin-Panel zur einfachen Verwaltung der Feed-Quellen und zur Überwachung ihres Status.
 
 ---
@@ -62,7 +68,7 @@ Dieses Projekt nutzt eine entkoppelte, "serverless" Architektur, die auf maximal
     - `news_cache_64`: Erste 64 Artikel (Medium)
     - `feed_health_status`: Systemstatus
     - `daily_trends` & `weekly_trends`: KI-generierte Trends
-4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 30 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung.
+4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 20 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung.
 5.  **API-Schicht (Vercel Edge Functions)**: Schlanke API-Endpunkte als Schnittstelle zwischen Frontend und Datencache:
     *   `/api/get-news-preview`: Liefert erste 16 Artikel für sofortiges Laden
     *   `/api/get-news-medium`: Liefert erste 64 Artikel für schnelles Nachladen
@@ -81,7 +87,7 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
 
 #### 1. Der Datensammler (GitHub Actions Cron Job)
 
-*   **Aufgabe:** Alle 30 Minuten die neuesten Nachrichten sammeln und im zentralen Cache ablegen.
+*   **Aufgabe:** Alle 20 Minuten die neuesten Nachrichten sammeln und im zentralen Cache ablegen.
 *   **Ablauf:**
     1.  Der GitHub-Workflow (`.github/workflows/update-feeds.yml`) startet das `fetch-feeds.js`-Skript.
     2.  Das Skript holt die Feed-Liste aus der Postgres-Datenbank.
@@ -213,7 +219,7 @@ Diese Schlüssel werden **NICHT** in eine Datei im Projekt geschrieben. Sie werd
 
 **Hinweis:** Andere von Vercel bereitgestellte Variablen wie `VERCEL_URL` werden für diesen Workflow nicht benötigt.
 
-Der Workflow (`.github/workflows/update-feeds.yml`) wird nun alle 30 Minuten automatisch ausgeführt und hält deine Live-Daten aktuell.
+Der Workflow (`.github/workflows/update-feeds.yml`) wird nun alle 20 Minuten automatisch ausgeführt und hält deine Live-Daten aktuell.
 
 ---
 
