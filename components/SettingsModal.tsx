@@ -93,6 +93,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                                             }) => {
     const { t } = useTranslation();
 
+    // ESC-Taste zum Schließen
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && isOpen) {
+                onClose();
+            }
+        };
+        
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
     const handleToggleSource = (sourceName: string) => {
         setMutedSources(prev =>
             prev.includes(sourceName) ? prev.filter(s => s !== sourceName) : [...prev, sourceName]
