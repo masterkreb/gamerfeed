@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import type { TrendItem, TrendsData } from '../types';
 import { LoadingSpinner, ArrowLeftIcon } from './Icons';
 
@@ -43,6 +44,21 @@ const getRankBadge = (rank: number): string => {
         case 3: return '🥉';
         default: return `${rank}.`;
     }
+};
+
+// Format date range like "19. Nov - 26. Nov" or "Nov 19 - 26"
+const formatDateRange = (from: string, to: string, locale: string): string => {
+    if (!from || !to) return '';
+    
+    // Dates come as "2025-11-19" format
+    const fromDate = new Date(from + 'T00:00:00');
+    const toDate = new Date(to + 'T00:00:00');
+    
+    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' };
+    const fromStr = fromDate.toLocaleDateString(locale, options);
+    const toStr = toDate.toLocaleDateString(locale, options);
+    
+    return `${fromStr} – ${toStr}`;
 };
 
 const formatUpdatedAt = (dateString: string, t: any): string => {
@@ -273,17 +289,28 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onBackToNews, onTrendCli
                     {/* Weekly Section */}
                     {trendsData.weekly.length > 0 && (
                         <section>
-                            <div className="flex items-center justify-between mb-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
                                         <CalendarIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                                     </div>
-                                    <h2 className="text-xl font-bold text-slate-800 dark:text-zinc-100">
-                                        {t('trends.weeklyTitle')}
-                                    </h2>
+                                    <div>
+                                        <h2 className="text-xl font-bold text-slate-800 dark:text-zinc-100">
+                                            {t('trends.weeklyTitle')}
+                                        </h2>
+                                        {trendsData.weeklyDateRange && (
+                                            <p className="text-sm text-slate-500 dark:text-zinc-400">
+                                                {formatDateRange(
+                                                    trendsData.weeklyDateRange.from,
+                                                    trendsData.weeklyDateRange.to,
+                                                    i18n.language.startsWith('de') ? 'de-DE' : 'en-US'
+                                                )}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                                 {trendsData.weeklyUpdatedAt && (
-                                    <span className="text-sm text-slate-500 dark:text-zinc-400">
+                                    <span className="text-sm text-slate-500 dark:text-zinc-400 sm:text-right">
                                         {formatUpdatedAt(trendsData.weeklyUpdatedAt, t)}
                                     </span>
                                 )}
