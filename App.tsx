@@ -109,6 +109,7 @@ const AppContent: React.FC = () => {
     
     // Toast swipe state
     const [toastSwipeOffset, setToastSwipeOffset] = useState(0);
+    const [toastSwipeDirection, setToastSwipeDirection] = useState<'x' | 'y'>('x');
     const toastTouchStartRef = useRef<{ x: number; y: number } | null>(null);
 
     // Auto-update state
@@ -312,6 +313,7 @@ const AppContent: React.FC = () => {
         }
         setToast(null);
         setToastSwipeOffset(0);
+        setToastSwipeDirection('x');
     }, []);
 
     // Toast swipe handlers for mobile
@@ -327,13 +329,19 @@ const AppContent: React.FC = () => {
         const deltaX = e.touches[0].clientX - toastTouchStartRef.current.x;
         const deltaY = e.touches[0].clientY - toastTouchStartRef.current.y;
         
-        // Only track horizontal swipes (left) or upward swipes
-        if (deltaX < 0 || deltaY < 0) {
-            // Prioritize the larger movement
-            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Allow swipe left (deltaX < 0) or swipe up (deltaY < 0)
+        // Use the direction with the larger movement
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            // Horizontal swipe - only allow left
+            if (deltaX < 0) {
                 setToastSwipeOffset(deltaX);
-            } else {
+                setToastSwipeDirection('x');
+            }
+        } else {
+            // Vertical swipe - only allow up
+            if (deltaY < 0) {
                 setToastSwipeOffset(deltaY);
+                setToastSwipeDirection('y');
             }
         }
     }, []);
@@ -344,6 +352,7 @@ const AppContent: React.FC = () => {
             dismissToast();
         } else {
             setToastSwipeOffset(0);
+            setToastSwipeDirection('x');
         }
         toastTouchStartRef.current = null;
     }, [toastSwipeOffset, dismissToast]);
@@ -784,7 +793,7 @@ const AppContent: React.FC = () => {
                     onTouchMove={handleToastTouchMove}
                     onTouchEnd={handleToastTouchEnd}
                     style={{
-                        transform: `translate(-50%, 0) ${toastSwipeOffset < 0 ? `translateX(${toastSwipeOffset}px)` : `translateY(${toastSwipeOffset}px)`}`,
+                        transform: `translate(-50%, 0) ${toastSwipeDirection === 'x' ? `translateX(${toastSwipeOffset}px)` : `translateY(${toastSwipeOffset}px)`}`,
                         opacity: Math.max(0, 1 - Math.abs(toastSwipeOffset) / 120)
                     }}
                     className={`fixed top-6 left-1/2 z-50 rounded-xl shadow-lg flex items-stretch w-11/12 max-w-2xl overflow-hidden transition-opacity duration-300 ${toastStyles[toast.type].bg} ${toastStyles[toast.type].text} ${toastSwipeOffset === 0 ? 'transition-all duration-600 ease-in-out' : ''} ${
