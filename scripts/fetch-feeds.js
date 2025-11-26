@@ -760,9 +760,14 @@ async function main() {
         const uniqueArticlesMap = new Map();
         [...oldArticles, ...newlyFetchedArticles].forEach(article => {
             if (article.id && article.title && article.publicationDate) {
-                const key = `${article.source}|${article.title}`;
+                // Use link (URL) as key to avoid duplicates when title changes
+                const key = article.link;
                 const existing = uniqueArticlesMap.get(key);
-                if (!existing || (article.imageUrl && !existing.imageUrl.includes('placehold'))) { uniqueArticlesMap.set(key, article); }
+                // Update if: no existing OR new has real image and old has placeholder
+                if (!existing || (article.imageUrl && !existing.imageUrl.includes('placehold'))) { 
+                    // Keep the newer version (updated title, etc.)
+                    uniqueArticlesMap.set(key, article); 
+                }
             }
         });
         const cutoffDate = new Date();
