@@ -244,8 +244,31 @@ const resources = {
                     "labelScraping": "Image requires scraping fallback?",
                     "errorUrlExists": "This feed URL already exists.",
                     "save": "Save"
+                },
+                "announcement": {
+                    "tabTitle": "Announcement",
+                    "title": "Site Announcement",
+                    "description": "Create a banner that appears at the top of the site for all users. Users can dismiss the banner, but it will reappear if you publish a new announcement.",
+                    "labelMessage": "Message",
+                    "placeholderMessage": "Enter announcement message...",
+                    "labelType": "Type",
+                    "labelActive": "Active",
+                    "preview": "Preview",
+                    "noPreview": "Enter a message to see preview",
+                    "save": "Save Announcement",
+                    "saving": "Saving...",
+                    "delete": "Delete",
+                    "deleting": "Deleting...",
+                    "noAnnouncement": "No announcement set",
+                    "typeInfo": "Info",
+                    "typeWarning": "Warning",
+                    "typeMaintenance": "Maintenance",
+                    "typeCelebration": "Celebration"
                 }
-            }
+            },
+
+            // Announcement Banner
+            "announcement.dismiss": "Dismiss announcement"
         }
     },
     de: {
@@ -489,8 +512,31 @@ const resources = {
                     "labelScraping": "Bild erfordert Scraping-Fallback?",
                     "errorUrlExists": "Diese Feed-URL existiert bereits.",
                     "save": "Speichern"
+                },
+                "announcement": {
+                    "tabTitle": "Ankündigung",
+                    "title": "Website-Ankündigung",
+                    "description": "Erstelle ein Banner, das oben auf der Seite für alle Benutzer angezeigt wird. Benutzer können das Banner schließen, aber es erscheint erneut, wenn du eine neue Ankündigung veröffentlichst.",
+                    "labelMessage": "Nachricht",
+                    "placeholderMessage": "Ankündigungstext eingeben...",
+                    "labelType": "Typ",
+                    "labelActive": "Aktiv",
+                    "preview": "Vorschau",
+                    "noPreview": "Nachricht eingeben für Vorschau",
+                    "save": "Ankündigung speichern",
+                    "saving": "Speichere...",
+                    "delete": "Löschen",
+                    "deleting": "Lösche...",
+                    "noAnnouncement": "Keine Ankündigung gesetzt",
+                    "typeInfo": "Info",
+                    "typeWarning": "Warnung",
+                    "typeMaintenance": "Wartung",
+                    "typeCelebration": "Feier"
                 }
-            }
+            },
+
+            // Announcement Banner
+            "announcement.dismiss": "Ankündigung schließen"
         }
     }
 };

@@ -5,13 +5,14 @@ import { FilterBar } from './components/FilterBar';
 import { ArticleCard } from './components/ArticleCard';
 import { TrendsView } from './components/TrendsView';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import type { Article, Theme, ViewMode, AppView } from './types';
+import type { Article, Theme, ViewMode, AppView, Announcement } from './types';
 import { LoadingSpinner, SearchIcon, FilterIcon, ResetIcon, NewspaperIcon, BookmarkIcon, StarIcon, ArrowLeftIcon } from './components/Icons';
 import { FilterProvider, useFilter } from './contexts/FilterContext';
 import { Footer } from './components/Footer';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
 import { FavoritesHeader } from './components/FavoritesHeader';
 import { SettingsModal } from './components/SettingsModal';
+import { AnnouncementBanner } from './components/AnnouncementBanner';
 import ErrorBoundary from './components/ErrorBoundary';
 
 const ARTICLES_PER_PAGE = 32;
@@ -119,6 +120,10 @@ const AppContent: React.FC = () => {
     const lastCheckRef = useRef<number>(Date.now());
     const autoUpdateIntervalRef = useRef<number | null>(null);
 
+    // Announcement state
+    const [announcement, setAnnouncement] = useState<Announcement | null>(null);
+    const [dismissedAnnouncementId, setDismissedAnnouncementId] = useLocalStorage<string | null>('dismissedAnnouncementId', null);
+
     useEffect(() => {
         if (theme === 'dark') {
             document.documentElement.classList.add('dark');
@@ -126,6 +131,36 @@ const AppContent: React.FC = () => {
             document.documentElement.classList.remove('dark');
         }
     }, [theme]);
+
+    // Fetch announcement on mount
+    useEffect(() => {
+        const fetchAnnouncement = async () => {
+            try {
+                const response = await fetch('/api/announcement');
+                if (response.ok) {
+                    const data: Announcement | null = await response.json();
+                    // Only set if it's a different announcement than the one dismissed
+                    if (data && data.id !== dismissedAnnouncementId) {
+                        setAnnouncement(data);
+                    } else if (data && data.id === dismissedAnnouncementId) {
+                        // User dismissed this announcement
+                        setAnnouncement(null);
+                    } else {
+                        setAnnouncement(null);
+                    }
+                }
+            } catch (error) {
+                console.warn('Failed to fetch announcement:', error);
+            }
+        };
+        fetchAnnouncement();
+    }, [dismissedAnnouncementId]);
+
+    // Handler to dismiss announcement
+    const handleDismissAnnouncement = useCallback((id: string) => {
+        setDismissedAnnouncementId(id);
+        setAnnouncement(null);
+    }, [setDismissedAnnouncementId]);
 
     const loadNews = useCallback(async (isManualRefresh = false) => {
         setError(null);
@@ -719,6 +754,12 @@ const AppContent: React.FC = () => {
                 newArticlesCount={newArticlesCount}
                 onLoadNewArticles={loadPendingArticles}
             />
+
+            <AnnouncementBanner 
+                announcement={announcement} 
+                onDismiss={handleDismissAnnouncement}
+            />
+
             <main id="main-content" className="container mx-auto p-4 md:p-6 flex-grow">
                 {currentView === 'trends' ? (
                     <TrendsView 

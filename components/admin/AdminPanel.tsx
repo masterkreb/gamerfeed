@@ -10,15 +10,17 @@ import {
     WarningIcon,
     ChevronDownIcon,
     ChevronUpIcon,
+    MegaphoneIcon,
 } from '../Icons';
 import { FeedFormModal } from './FeedFormModal';
 import { FeedManagementTab } from './FeedManagementTab';
 import { HealthCenterTab } from './HealthCenterTab';
 import { HealthLegendTab } from './HealthLegendTab';
+import { AnnouncementTab } from './AnnouncementTab';
 import type { HealthState } from './healthService';
 
 // Types
-type AdminTab = 'management' | 'health' | 'legend';
+type AdminTab = 'management' | 'health' | 'legend' | 'announcement';
 export type FeedHealth = Record<string, HealthState>;
 
 const TabButton: React.FC<{
@@ -279,9 +281,10 @@ export const AdminPanel: React.FC = () => {
                 )}
 
                 <nav className="mb-6 border-b border-slate-200 dark:border-zinc-700" role="tablist" aria-label="Admin Sections">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 overflow-x-auto">
                         <TabButton isActive={activeTab === 'management'} onClick={() => setActiveTab('management')} icon={<NewspaperIcon className="w-5 h-5" />} label={t('admin.tabManagement')} />
                         <TabButton isActive={activeTab === 'health'} onClick={() => setActiveTab('health')} icon={<HeartbeatIcon className="w-5 h-5" />} label={t('admin.tabHealth')} />
+                        <TabButton isActive={activeTab === 'announcement'} onClick={() => setActiveTab('announcement')} icon={<MegaphoneIcon className="w-5 h-5" />} label={t('admin.tabAnnouncement')} />
                         <TabButton isActive={activeTab === 'legend'} onClick={() => setActiveTab('legend')} icon={<QuestionMarkCircleIcon className="w-5 h-5" />} label={t('admin.tabLegend')} />
                     </div>
                 </nav>
@@ -303,6 +306,9 @@ export const AdminPanel: React.FC = () => {
                         onCheckAll={refreshHealthStatus}
                         isCheckingAll={isCheckingAll}
                     />
+                </div>
+                <div role="tabpanel" hidden={activeTab !== 'announcement'}>
+                    <AnnouncementTab />
                 </div>
                 <div role="tabpanel" hidden={activeTab !== 'legend'}>
                     <HealthLegendTab />

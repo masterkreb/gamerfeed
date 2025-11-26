@@ -48,4 +48,14 @@ export interface FeedSource {
     needsScraping?: boolean;
 }
 
+// Announcement types
+export type AnnouncementType = 'info' | 'warning' | 'maintenance' | 'celebration';
+
+export interface Announcement {
+    id: string;
+    message: string;
+    type: AnnouncementType;
+    isActive: boolean;
+    createdAt: string;
+}
 export type BackendHealthStatus = Record<string, { status: 'success' | 'warning' | 'error'; message: string }>;

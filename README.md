@@ -29,7 +29,8 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
 - **Automatische Aktualisierung**: Ein GitHub-Action-Workflow aktualisiert den News-Cache alle 20 Minuten, sodass die angezeigten Nachrichten immer aktuell sind.
 - **🤖 KI-gestützte Trend-Analyse**: Automatische Erkennung aktueller Gaming-Trends mit Groq AI (tägliche und wöchentliche Trends). Intelligente Deduplizierung von Artikeln gleicher Verlagsgruppen für akkuratere Trend-Berechnung.
 - **♿ Barrierefreiheit**: Focus-Ring nur bei Tastatur-Navigation sichtbar (nicht bei Mausklicks).
-- **Admin-Panel**: Ein passwortgeschütztes Admin-Panel zur einfachen Verwaltung der Feed-Quellen und zur Überwachung ihres Status.
+- **Admin-Panel**: Ein passwortgeschütztes Admin-Panel zur einfachen Verwaltung der Feed-Quellen, Überwachung ihres Status und Veröffentlichung von Ankündigungen.
+- **📢 Ankündigungs-Banner**: Admins können wichtige Nachrichten (Info, Warnung, Wartung, Feier) als Banner für alle Benutzer anzeigen. Benutzer können Banner schließen (wird im localStorage gespeichert).
 
 ---
 
@@ -87,6 +88,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     *   `/api/get-news`: Liefert alle gecachten Artikel
     *   `/api/feeds`: Dient dem Admin-Panel zur Verwaltung der Feed-Quellen
     *   `/api/get-health-data`: Liefert den Systemstatus an das Admin-Panel
+    *   `/api/announcement`: Verwaltung und Abruf von Ankündigungen
     *   `/api/trends`: Liefert KI-generierte Trends
 6.  **Admin-Backend (Middleware)**: Eine Middleware (`middleware.js`) sichert das Admin-Panels über Basic Authentication ab.
 7.  **KI-Integration (Groq API)**: Automatische Trend-Analyse mit Groq's llama-3.1-8b-instant Modell für Gaming-News.
