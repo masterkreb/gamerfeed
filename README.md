@@ -74,7 +74,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
 
 1.  **Frontend (React & Vite)**: Eine statische Single-Page-Application, die beim Start die Artikel dynamisch von API-Endpunkten abruft. Nutzt Progressive Loading für sofortige Content-Anzeige. Alle Benutzereinstellungen werden im `localStorage` gespeichert.
 2.  **Datenbank (Neon PostgreSQL)**: Eine serverless Postgres-Datenbank, die ausschliesslich die Liste der zu verarbeitenden RSS-Feed-Quellen speichert. Alternativ kann auch Vercel Postgres verwendet werden.
-3.  **Datencache (Vercel KV)**: Ein extrem schneller In-Memory-Datenspeicher, der mehrere optimierte Caches bereithält:
+3.  **Datencache (Vercel KV)**: Ein extrem schneller In-Memory-Datenspeicher, der mehrere optimierte Caches bereithält. **Artikel werden 120 Tage (4 Monate) gespeichert**, ältere werden automatisch entfernt.
     - `news_cache`: Alle Artikel (vollständig)
     - `news_cache_16`: Erste 16 Artikel (Preview)
     - `news_cache_64`: Erste 64 Artikel (Medium)

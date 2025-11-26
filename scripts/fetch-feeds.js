@@ -693,7 +693,7 @@ async function generateAndSaveTrends(articles) {
 // === MAIN SCRIPT LOGIC ===
 async function main() {
     const feedHealthStatus = {};
-    const ARTICLE_RETENTION_DAYS = 60;
+    const ARTICLE_RETENTION_DAYS = 120; // Artikel werden 120 Tage (4 Monate) gespeichert
 
     try {
         let oldArticles = [];
