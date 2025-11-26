@@ -108,9 +108,10 @@ const AppContent: React.FC = () => {
     const toastTimerRef = useRef<number | null>(null);
     
     // Toast swipe state
-    const [toastSwipeOffset, setToastSwipeOffset] = useState(0);
-    const [toastSwipeDirection, setToastSwipeDirection] = useState<'x' | 'y'>('x');
+    const [toastSwipeX, setToastSwipeX] = useState(0);
+    const [toastSwipeY, setToastSwipeY] = useState(0);
     const toastTouchStartRef = useRef<{ x: number; y: number } | null>(null);
+    const toastRef = useRef<HTMLDivElement>(null);
 
     // Auto-update state
     const [newArticlesCount, setNewArticlesCount] = useState(0);
@@ -312,50 +313,83 @@ const AppContent: React.FC = () => {
             toastTimerRef.current = null;
         }
         setToast(null);
-        setToastSwipeOffset(0);
-        setToastSwipeDirection('x');
+        setToastSwipeX(0);
+        setToastSwipeY(0);
     }, []);
 
-    // Toast swipe handlers for mobile
-    const handleToastTouchStart = useCallback((e: React.TouchEvent) => {
-        toastTouchStartRef.current = {
-            x: e.touches[0].clientX,
-            y: e.touches[0].clientY
+    // Toast swipe handlers for mobile - use native events to allow preventDefault
+    useEffect(() => {
+        const toastElement = toastRef.current;
+        if (!toastElement) return;
+
+        const handleTouchStart = (e: TouchEvent) => {
+            toastTouchStartRef.current = {
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY
+            };
         };
-    }, []);
 
-    const handleToastTouchMove = useCallback((e: React.TouchEvent) => {
-        if (!toastTouchStartRef.current) return;
-        const deltaX = e.touches[0].clientX - toastTouchStartRef.current.x;
-        const deltaY = e.touches[0].clientY - toastTouchStartRef.current.y;
-        
-        // Allow swipe left (deltaX < 0) or swipe up (deltaY < 0)
-        // Use the direction with the larger movement
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            // Horizontal swipe - only allow left
+        const handleTouchMove = (e: TouchEvent) => {
+            if (!toastTouchStartRef.current) return;
+            const deltaX = e.touches[0].clientX - toastTouchStartRef.current.x;
+            const deltaY = e.touches[0].clientY - toastTouchStartRef.current.y;
+            
+            // Only allow swipe left (deltaX < 0) or swipe up (deltaY < 0)
+            if (deltaX < 0 || deltaY < 0) {
+                // Prevent page scroll when swiping the toast
+                e.preventDefault();
+            }
             if (deltaX < 0) {
-                setToastSwipeOffset(deltaX);
-                setToastSwipeDirection('x');
+                setToastSwipeX(deltaX);
             }
-        } else {
-            // Vertical swipe - only allow up
             if (deltaY < 0) {
-                setToastSwipeOffset(deltaY);
-                setToastSwipeDirection('y');
+                setToastSwipeY(deltaY);
             }
-        }
-    }, []);
+        };
 
-    const handleToastTouchEnd = useCallback(() => {
-        // If swiped more than 80px, dismiss
-        if (Math.abs(toastSwipeOffset) > 80) {
-            dismissToast();
-        } else {
-            setToastSwipeOffset(0);
-            setToastSwipeDirection('x');
-        }
-        toastTouchStartRef.current = null;
-    }, [toastSwipeOffset, dismissToast]);
+        const handleTouchEnd = () => {
+            toastTouchStartRef.current = null;
+        };
+
+        // Register with { passive: false } to allow preventDefault
+        toastElement.addEventListener('touchstart', handleTouchStart, { passive: true });
+        toastElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+        toastElement.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+        return () => {
+            toastElement.removeEventListener('touchstart', handleTouchStart);
+            toastElement.removeEventListener('touchmove', handleTouchMove);
+            toastElement.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, [toast]); // Re-attach when toast changes
+
+    // Handle swipe end - check if should dismiss
+    useEffect(() => {
+        if (toastSwipeX === 0 && toastSwipeY === 0) return;
+        
+        const checkDismiss = () => {
+            if (Math.abs(toastSwipeX) > 80 || Math.abs(toastSwipeY) > 80) {
+                dismissToast();
+            }
+        };
+
+        // Check on touch end (when user lifts finger)
+        const handleGlobalTouchEnd = () => {
+            if (toastTouchStartRef.current === null) {
+                // Touch already ended, check if we should dismiss
+                if (Math.abs(toastSwipeX) > 80 || Math.abs(toastSwipeY) > 80) {
+                    dismissToast();
+                } else {
+                    setToastSwipeX(0);
+                    setToastSwipeY(0);
+                }
+            }
+        };
+
+        // Small delay to let touchend process first
+        const timeoutId = setTimeout(handleGlobalTouchEnd, 50);
+        return () => clearTimeout(timeoutId);
+    }, [toastSwipeX, toastSwipeY, dismissToast]);
 
     const showToast = useCallback((message: string, type: ToastType, actions: ToastAction[] = []) => {
         if (toastTimerRef.current) {
@@ -787,16 +821,15 @@ const AppContent: React.FC = () => {
             />
             {toast && (
                 <div
+                    ref={toastRef}
                     key={toast.id}
                     role="alert"
-                    onTouchStart={handleToastTouchStart}
-                    onTouchMove={handleToastTouchMove}
-                    onTouchEnd={handleToastTouchEnd}
                     style={{
-                        transform: `translate(-50%, 0) ${toastSwipeDirection === 'x' ? `translateX(${toastSwipeOffset}px)` : `translateY(${toastSwipeOffset}px)`}`,
-                        opacity: Math.max(0, 1 - Math.abs(toastSwipeOffset) / 120)
+                        transform: `translate(-50%, 0) translateX(${toastSwipeX}px) translateY(${toastSwipeY}px)`,
+                        opacity: Math.max(0, 1 - Math.max(Math.abs(toastSwipeX), Math.abs(toastSwipeY)) / 120),
+                        touchAction: 'none' // Prevent browser handling of touch gestures
                     }}
-                    className={`fixed top-6 left-1/2 z-50 rounded-xl shadow-lg flex items-stretch w-11/12 max-w-2xl overflow-hidden transition-opacity duration-300 ${toastStyles[toast.type].bg} ${toastStyles[toast.type].text} ${toastSwipeOffset === 0 ? 'transition-all duration-600 ease-in-out' : ''} ${
+                    className={`fixed top-6 left-1/2 z-50 rounded-xl shadow-lg flex items-stretch w-11/12 max-w-2xl overflow-hidden transition-opacity duration-300 ${toastStyles[toast.type].bg} ${toastStyles[toast.type].text} ${(toastSwipeX === 0 && toastSwipeY === 0) ? 'transition-all duration-600 ease-in-out' : ''} ${
                         toast.isExiting
                             ? 'opacity-0 scale-95'
                             : toast.isEntering
