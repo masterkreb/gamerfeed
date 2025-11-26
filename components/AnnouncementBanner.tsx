@@ -47,18 +47,18 @@ export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({ announce
     return (
         <div className={`${style.bg} ${style.border} border-b`}>
             <div className="container mx-auto px-2 sm:px-4 md:px-6 py-2.5 sm:py-3">
-                <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                        <span className="text-lg flex-shrink-0" role="img" aria-hidden="true">
+                <div className="flex items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                        <span className="text-lg flex-shrink-0 mt-0.5 sm:mt-0" role="img" aria-hidden="true">
                             {style.icon}
                         </span>
-                        <p className={`text-sm sm:text-base ${style.text} truncate sm:whitespace-normal`}>
+                        <p className={`text-sm sm:text-base ${style.text}`}>
                             {announcement.message}
                         </p>
                     </div>
                     <button
                         onClick={() => onDismiss(announcement.id)}
-                        className={`flex-shrink-0 p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors ${style.text}`}
+                        className={`flex-shrink-0 p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors ${style.text} mt-0.5 sm:mt-0`}
                         aria-label={t('announcement.dismiss')}
                     >
                         <XCircleIcon className="w-5 h-5" />
