@@ -107,9 +107,9 @@ const AppContent: React.FC = () => {
     const [toast, setToast] = useState<Toast | null>(null);
     const toastTimerRef = useRef<number | null>(null);
     
-    // Toast swipe state
-    const [toastSwipeX, setToastSwipeX] = useState(0);
-    const [toastSwipeY, setToastSwipeY] = useState(0);
+    // Toast swipe state - only one direction at a time
+    const [toastSwipeOffset, setToastSwipeOffset] = useState(0);
+    const [toastSwipeDirection, setToastSwipeDirection] = useState<'x' | 'y' | null>(null);
     const toastTouchStartRef = useRef<{ x: number; y: number } | null>(null);
     const toastRef = useRef<HTMLDivElement>(null);
 
@@ -313,8 +313,8 @@ const AppContent: React.FC = () => {
             toastTimerRef.current = null;
         }
         setToast(null);
-        setToastSwipeX(0);
-        setToastSwipeY(0);
+        setToastSwipeOffset(0);
+        setToastSwipeDirection(null);
     }, []);
 
     // Toast swipe handlers for mobile - use native events to allow preventDefault
@@ -322,11 +322,14 @@ const AppContent: React.FC = () => {
         const toastElement = toastRef.current;
         if (!toastElement) return;
 
+        let lockedDirection: 'x' | 'y' | null = null;
+
         const handleTouchStart = (e: TouchEvent) => {
             toastTouchStartRef.current = {
                 x: e.touches[0].clientX,
                 y: e.touches[0].clientY
             };
+            lockedDirection = null;
         };
 
         const handleTouchMove = (e: TouchEvent) => {
@@ -334,21 +337,42 @@ const AppContent: React.FC = () => {
             const deltaX = e.touches[0].clientX - toastTouchStartRef.current.x;
             const deltaY = e.touches[0].clientY - toastTouchStartRef.current.y;
             
-            // Only allow swipe left (deltaX < 0) or swipe up (deltaY < 0)
-            if (deltaX < 0 || deltaY < 0) {
-                // Prevent page scroll when swiping the toast
+            // Lock direction on first significant movement (10px threshold)
+            if (lockedDirection === null && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
+                lockedDirection = Math.abs(deltaX) > Math.abs(deltaY) ? 'x' : 'y';
+                setToastSwipeDirection(lockedDirection);
+            }
+            
+            if (lockedDirection === 'x' && deltaX < 0) {
+                // Swipe left only
                 e.preventDefault();
-            }
-            if (deltaX < 0) {
-                setToastSwipeX(deltaX);
-            }
-            if (deltaY < 0) {
-                setToastSwipeY(deltaY);
+                setToastSwipeOffset(deltaX);
+            } else if (lockedDirection === 'y' && deltaY < 0) {
+                // Swipe up only
+                e.preventDefault();
+                setToastSwipeOffset(deltaY);
             }
         };
 
         const handleTouchEnd = () => {
+            // Check if should dismiss - lower threshold for up (50px) vs left (80px)
+            const threshold = toastSwipeDirection === 'y' ? 50 : 80;
+            if (Math.abs(toastSwipeOffset) > threshold) {
+                // Dismiss with animation
+                if (toastTimerRef.current) {
+                    window.clearTimeout(toastTimerRef.current);
+                    toastTimerRef.current = null;
+                }
+                setToast(null);
+                setToastSwipeOffset(0);
+                setToastSwipeDirection(null);
+            } else {
+                // Snap back
+                setToastSwipeOffset(0);
+                setToastSwipeDirection(null);
+            }
             toastTouchStartRef.current = null;
+            lockedDirection = null;
         };
 
         // Register with { passive: false } to allow preventDefault
@@ -361,35 +385,7 @@ const AppContent: React.FC = () => {
             toastElement.removeEventListener('touchmove', handleTouchMove);
             toastElement.removeEventListener('touchend', handleTouchEnd);
         };
-    }, [toast]); // Re-attach when toast changes
-
-    // Handle swipe end - check if should dismiss
-    useEffect(() => {
-        if (toastSwipeX === 0 && toastSwipeY === 0) return;
-        
-        const checkDismiss = () => {
-            if (Math.abs(toastSwipeX) > 80 || Math.abs(toastSwipeY) > 80) {
-                dismissToast();
-            }
-        };
-
-        // Check on touch end (when user lifts finger)
-        const handleGlobalTouchEnd = () => {
-            if (toastTouchStartRef.current === null) {
-                // Touch already ended, check if we should dismiss
-                if (Math.abs(toastSwipeX) > 80 || Math.abs(toastSwipeY) > 80) {
-                    dismissToast();
-                } else {
-                    setToastSwipeX(0);
-                    setToastSwipeY(0);
-                }
-            }
-        };
-
-        // Small delay to let touchend process first
-        const timeoutId = setTimeout(handleGlobalTouchEnd, 50);
-        return () => clearTimeout(timeoutId);
-    }, [toastSwipeX, toastSwipeY, dismissToast]);
+    }, [toast, toastSwipeOffset, toastSwipeDirection]);
 
     const showToast = useCallback((message: string, type: ToastType, actions: ToastAction[] = []) => {
         if (toastTimerRef.current) {
@@ -825,11 +821,11 @@ const AppContent: React.FC = () => {
                     key={toast.id}
                     role="alert"
                     style={{
-                        transform: `translate(-50%, 0) translateX(${toastSwipeX}px) translateY(${toastSwipeY}px)`,
-                        opacity: Math.max(0, 1 - Math.max(Math.abs(toastSwipeX), Math.abs(toastSwipeY)) / 120),
+                        transform: `translate(-50%, 0) ${toastSwipeDirection === 'x' ? `translateX(${toastSwipeOffset}px)` : toastSwipeDirection === 'y' ? `translateY(${toastSwipeOffset}px)` : ''}`,
+                        opacity: Math.max(0, 1 - Math.abs(toastSwipeOffset) / 100),
                         touchAction: 'none' // Prevent browser handling of touch gestures
                     }}
-                    className={`fixed top-6 left-1/2 z-50 rounded-xl shadow-lg flex items-stretch w-11/12 max-w-2xl overflow-hidden transition-opacity duration-300 ${toastStyles[toast.type].bg} ${toastStyles[toast.type].text} ${(toastSwipeX === 0 && toastSwipeY === 0) ? 'transition-all duration-600 ease-in-out' : ''} ${
+                    className={`fixed top-6 left-1/2 z-50 rounded-xl shadow-lg flex items-stretch w-11/12 max-w-2xl overflow-hidden transition-opacity duration-300 ${toastStyles[toast.type].bg} ${toastStyles[toast.type].text} ${toastSwipeOffset === 0 ? 'transition-all duration-300 ease-out' : ''} ${
                         toast.isExiting
                             ? 'opacity-0 scale-95'
                             : toast.isEntering
