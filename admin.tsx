@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { AdminPanel } from './components/admin/AdminPanel';
 import './i18n'; // i18n Konfiguration laden
+import './src/index.css'; // Tailwind CSS
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
