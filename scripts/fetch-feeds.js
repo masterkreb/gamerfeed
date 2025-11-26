@@ -328,6 +328,31 @@ function getDateKey(daysAgo = 0) {
     return d.toISOString().substring(0, 10);
 }
 
+// Sources that belong to the same publisher group (likely share content)
+// Only count once per group for trend analysis to avoid inflation
+const SOURCE_GROUPS = [
+    ['PC Games', 'GameZone', 'Video Games Zone'], // Computec Media Group
+];
+
+// Get group ID for a source, or null if not in a group
+function getSourceGroup(sourceName) {
+    for (let i = 0; i < SOURCE_GROUPS.length; i++) {
+        if (SOURCE_GROUPS[i].some(s => sourceName.includes(s) || s.includes(sourceName))) {
+            return i;
+        }
+    }
+    return null;
+}
+
+// Normalize title for comparison (remove common variations)
+function normalizeTitle(title) {
+    return title
+        .toLowerCase()
+        .replace(/[^\w\s]/g, '') // Remove punctuation
+        .replace(/\s+/g, ' ')    // Normalize whitespace
+        .trim();
+}
+
 // Generate daily trends using AI (sends titles to Groq)
 async function generateDailyTrendsWithGroq(articles) {
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
@@ -340,12 +365,43 @@ async function generateDailyTrendsWithGroq(articles) {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const filteredArticles = articles.filter(a => new Date(a.publicationDate) >= oneDayAgo);
 
-    // WICHTIG: Limit auf 80 Titel, um das 6k Token Limit von Groq zu vermeiden
-    // 411 Artikel = ~11.000 Tokens → 80 Artikel = ~2.000 Tokens ✅
-    const MAX_TITLES = 80;
-    const titles = filteredArticles.map(a => a.title).slice(0, MAX_TITLES);
+    // Deduplicate articles from same publisher groups
+    // If multiple sources in the same group have similar titles, only count once
+    const seenTitles = new Map(); // normalizedTitle -> { groupId, article }
+    const deduplicatedArticles = [];
+    let duplicatesRemoved = 0;
 
-    console.log(`   📊 Analyzing ${titles.length} of ${filteredArticles.length} articles for daily trends...`);
+    for (const article of filteredArticles) {
+        const normalizedTitle = normalizeTitle(article.title);
+        const groupId = getSourceGroup(article.source);
+        
+        if (seenTitles.has(normalizedTitle)) {
+            const existing = seenTitles.get(normalizedTitle);
+            // If both are from grouped sources OR titles are identical, skip
+            if (existing.groupId !== null && groupId !== null) {
+                duplicatesRemoved++;
+                continue; // Skip - same content from same publisher group
+            }
+            // If exact same title from different publishers, also skip
+            if (existing.normalizedTitle === normalizedTitle) {
+                duplicatesRemoved++;
+                continue;
+            }
+        }
+        
+        seenTitles.set(normalizedTitle, { groupId, article, normalizedTitle });
+        deduplicatedArticles.push(article);
+    }
+
+    if (duplicatesRemoved > 0) {
+        console.log(`   🔄 Removed ${duplicatesRemoved} duplicate articles from same publisher groups for trend analysis`);
+    }
+
+    // WICHTIG: Limit auf 80 Titel, um das 6k Token Limit von Groq zu vermeiden
+    const MAX_TITLES = 80;
+    const titles = deduplicatedArticles.map(a => a.title).slice(0, MAX_TITLES);
+
+    console.log(`   📊 Analyzing ${titles.length} unique titles (from ${filteredArticles.length} articles) for daily trends...`);
 
     if (titles.length === 0) {
         console.log('   ⚠️  No articles found for daily trends.');
