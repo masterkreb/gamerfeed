@@ -816,23 +816,27 @@ const AppContent: React.FC = () => {
                 setMutedSources={setMutedSources}
             />
             {toast && (
-                <div
-                    ref={toastRef}
-                    key={toast.id}
-                    role="alert"
-                    style={{
-                        transform: `translate(-50%, 0) ${toastSwipeDirection === 'x' ? `translateX(${toastSwipeOffset}px)` : toastSwipeDirection === 'y' ? `translateY(${toastSwipeOffset}px)` : ''}`,
-                        opacity: Math.max(0, 1 - Math.abs(toastSwipeOffset) / 100),
-                        touchAction: 'none' // Prevent browser handling of touch gestures
-                    }}
-                    className={`fixed top-6 left-1/2 z-50 rounded-xl shadow-lg flex items-stretch w-11/12 max-w-2xl overflow-hidden transition-opacity duration-300 ${toastStyles[toast.type].bg} ${toastStyles[toast.type].text} ${toastSwipeOffset === 0 ? 'transition-all duration-300 ease-out' : ''} ${
-                        toast.isExiting
-                            ? 'opacity-0 scale-95'
-                            : toast.isEntering
-                                ? 'opacity-0 scale-95'
-                                : ''
-                    }`}
+                <div 
+                    className="fixed inset-x-0 top-0 z-50 overflow-hidden pointer-events-none"
+                    style={{ height: '120px' }} // Container to clip the toast
                 >
+                    <div
+                        ref={toastRef}
+                        key={toast.id}
+                        role="alert"
+                        style={{
+                            transform: `translateX(-50%) ${toastSwipeDirection === 'x' ? `translateX(${toastSwipeOffset}px)` : toastSwipeDirection === 'y' ? `translateY(${Math.max(toastSwipeOffset, -24)}px)` : ''}`,
+                            opacity: Math.max(0, 1 - Math.abs(toastSwipeOffset) / 100),
+                            touchAction: 'none' // Prevent browser handling of touch gestures
+                        }}
+                        className={`absolute top-6 left-1/2 rounded-xl shadow-lg flex items-stretch w-11/12 max-w-2xl overflow-hidden transition-opacity duration-300 pointer-events-auto ${toastStyles[toast.type].bg} ${toastStyles[toast.type].text} ${toastSwipeOffset === 0 ? 'transition-all duration-300 ease-out' : ''} ${
+                            toast.isExiting
+                                ? 'opacity-0 scale-95'
+                                : toast.isEntering
+                                    ? 'opacity-0 scale-95'
+                                    : ''
+                        }`}
+                    >
                     <p className="py-4 px-6 flex-grow">{toast.message}</p>
                     {toast.actions.length > 0 && (
                         <div className={`border-l ${toastStyles[toast.type].border} flex-shrink-0 flex items-stretch`}>
@@ -847,6 +851,7 @@ const AppContent: React.FC = () => {
                             ))}
                         </div>
                     )}
+                    </div>
                 </div>
             )}
         </div>
