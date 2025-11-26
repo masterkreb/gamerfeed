@@ -247,7 +247,7 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
                         className="
                             bg-white dark:bg-zinc-800 rounded-t-2xl
                             md:dark:bg-zinc-700 md:rounded-lg md:shadow-xl
-                            md:ring-1 md:ring-black md:ring-opacity-5
+                            md:ring-1 md:ring-black/5
                             pb-[env(safe-area-inset-bottom)] md:pb-0
                         "
                     >

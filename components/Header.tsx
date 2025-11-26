@@ -131,7 +131,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                                 {currentViewIcon}
                             </button>
                             {isViewMenuOpen && (
-                                <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-zinc-800 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 p-2 z-30">
+                                <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-zinc-800 rounded-lg shadow-lg ring-1 ring-black/5 p-2 z-30">
                                     <div className="flex flex-col gap-1">
                                         {viewOptions.map(option => (
                                             <button
