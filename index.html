@@ -6,23 +6,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- SEO Meta Tags -->
-    <title>GamerFeed - Your Daily Gaming News Aggregator</title>
-    <meta name="description" content="GamerFeed sammelt die neuesten Gaming-Nachrichten aus den besten deutschen und englischen Quellen. Bleibe auf dem Laufenden mit News zu PC, PlayStation, Xbox und Nintendo." />
-    <meta name="keywords" content="gaming news, spiele nachrichten, videogames, pc gaming, playstation, xbox, nintendo, gamerfeed" />
+    <title>GamerFeed - Gaming News aus allen Quellen</title>
+    <meta name="description" content="GamerFeed sammelt aktuelle Gaming-Nachrichten aus über 15 deutschen und englischen Quellen wie IGN, GameStar, PC Gamer und mehr. News zu PC, PlayStation, Xbox, Nintendo und Mobile Gaming – übersichtlich und kostenlos." />
+    <meta name="keywords" content="gaming news, spiele nachrichten, game news deutsch, videospiele news, pc gaming, playstation 5, ps5 news, xbox news, nintendo switch, ign deutsch, gamestar, pc gamer, gaming aggregator, spielenews" />
     <link rel="canonical" href="https://gamerfeed.vercel.app/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="GamerFeed" />
 
     <!-- Open Graph Meta Tags (for Facebook, WhatsApp, etc.) -->
-    <meta property="og:title" content="GamerFeed - Your Daily Gaming News Aggregator" />
-    <meta property="og:description" content="Alle wichtigen Gaming-News auf einen Blick. Schnell, modern und personalisierbar." />
+    <meta property="og:title" content="GamerFeed - Gaming News aus allen Quellen" />
+    <meta property="og:description" content="Aktuelle Gaming-News aus über 15 Quellen. IGN, GameStar, PC Gamer und mehr – alles auf einen Blick." />
     <meta property="og:image" content="https://gamerfeed.vercel.app/social-preview.png" />
     <meta property="og:url" content="https://gamerfeed.vercel.app/" />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:site_name" content="GamerFeed" />
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="GamerFeed - Your Daily Gaming News Aggregator" />
-    <meta name="twitter:description" content="Alle wichtigen Gaming-News auf einen Blick. Schnell, modern und personalisierbar." />
+    <meta name="twitter:title" content="GamerFeed - Gaming News aus allen Quellen" />
+    <meta name="twitter:description" content="Aktuelle Gaming-News aus über 15 Quellen. IGN, GameStar, PC Gamer und mehr." />
     <meta name="twitter:image" content="https://gamerfeed.vercel.app/social-preview.png" />
+
+    <!-- Structured Data (JSON-LD) for Rich Snippets -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "GamerFeed",
+        "alternateName": "GamerFeed Gaming News",
+        "url": "https://gamerfeed.vercel.app/",
+        "description": "Gaming News Aggregator mit Nachrichten aus über 15 deutschen und englischen Quellen",
+        "inLanguage": ["de", "en"],
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://gamerfeed.vercel.app/?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
 
     <script type="importmap">
         {
