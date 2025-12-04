@@ -204,7 +204,7 @@ npx tsc --noEmit
 - **Nov 2025:** Ankündigungs-Banner System
 - **Nov 2025:** Toast Swipe-to-Dismiss (links + hoch)
 - **Nov 2025:** Auto-Update mit Badge + Tab-Titel
-- **Nov 2025:** 120 Tage Artikel-Retention (vorher 60)
+- **Dez 2025:** Artikel-Retention auf 60 Tage reduziert + Max 10.000 Artikel (Vercel KV 10MB Limit)
 
 ---
 

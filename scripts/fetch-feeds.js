@@ -693,7 +693,8 @@ async function generateAndSaveTrends(articles) {
 // === MAIN SCRIPT LOGIC ===
 async function main() {
     const feedHealthStatus = {};
-    const ARTICLE_RETENTION_DAYS = 120; // Artikel werden 120 Tage (4 Monate) gespeichert
+    const ARTICLE_RETENTION_DAYS = 60; // Artikel werden 60 Tage gespeichert
+    const MAX_ARTICLES = 10000; // Maximale Anzahl Artikel (verhindert KV Limit-Überschreitung)
 
     try {
         let oldArticles = [];
@@ -831,7 +832,15 @@ async function main() {
         const articlesToKeep = Array.from(uniqueArticlesMap.values()).filter(article => new Date(article.publicationDate) >= cutoffDate);
         console.log(`   - Total unique articles: ${uniqueArticlesMap.size}`);
         console.log(`   - Articles after pruning (older than ${ARTICLE_RETENTION_DAYS} days): ${articlesToKeep.length}`);
-        const sortedArticles = articlesToKeep.sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
+        
+        // Sort by publication date (newest first)
+        let sortedArticles = articlesToKeep.sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
+        
+        // Limit to MAX_ARTICLES to prevent Vercel KV size limit (10 MB)
+        if (sortedArticles.length > MAX_ARTICLES) {
+            console.log(`   ⚠️  Limiting from ${sortedArticles.length} to ${MAX_ARTICLES} articles (KV size limit)`);
+            sortedArticles = sortedArticles.slice(0, MAX_ARTICLES);
+        }
 
         console.log('\n💾 Saving data to Vercel KV...');
 
