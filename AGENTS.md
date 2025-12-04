@@ -114,7 +114,7 @@
 
 ### Backend
 - ✅ Vercel KV Cache (news_cache, news_cache_16, news_cache_64)
-- ✅ 120 Tage Artikel-Retention
+- ✅ 60 Tage Artikel-Retention (max. 10.000 Artikel)
 - ✅ Feed Health Status Tracking
 - ✅ KI-Trend-Analyse (täglich + wöchentlich)
 - ✅ Deduplizierung nach Verlagsgruppen (SOURCE_GROUPS)
