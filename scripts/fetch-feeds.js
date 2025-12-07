@@ -517,29 +517,47 @@ async function generateWeeklyTrendsFromArchive() {
         to: datesFound[0] // newest (today)
     };
 
-    // 2. Create prompt for Groq to aggregate
-    const archiveText = archiveData.map(t =>
-        `[${t.date}]: ${t.topic} (${t.articleCount} Artikel) - "${t.summary}"`
+    // 2. Aggregate trends for CURRENT WEEK ONLY (not cumulative)
+    // Group by topic and sum articleCount only for this week's data
+    const aggregatedTrends = {};
+    archiveData.forEach(t => {
+        if (!aggregatedTrends[t.topic]) {
+            aggregatedTrends[t.topic] = { topic: t.topic, articleCount: 0, summaries: [] };
+        }
+        aggregatedTrends[t.topic].articleCount += t.articleCount;
+        if (t.summary && !aggregatedTrends[t.topic].summaries.includes(t.summary)) {
+            aggregatedTrends[t.topic].summaries.push(t.summary);
+        }
+    });
+
+    const weeklyTrendsData = Object.values(aggregatedTrends)
+        .sort((a, b) => b.articleCount - a.articleCount)
+        .slice(0, 10); // Top 10 for Groq aggregation
+
+    console.log(`   📊 Aggregated ${Object.keys(aggregatedTrends).length} unique topics for this week.`);
+
+    // 3. Create prompt for Groq to generate summary of THIS WEEK's trends
+    const trendsList = weeklyTrendsData.map((t, idx) => 
+        `${idx + 1}. ${t.topic} (${t.articleCount} Artikel diese Woche)`
     ).join('\n');
 
-    const prompt = `Analysiere diese täglichen Gaming-News-Trends der letzten 7 Tage.
+    const prompt = `Analysiere die Top-Trends dieser Gaming-Woche und schreibe eine prägnante Zusammenfassung.
+
+Top-Themen diese Woche:
+${trendsList}
 
 Aufgabe:
-1. **Schreibe eine Zusammenfassung** (2-3 Sätze) über die wichtigsten Geschehnisse und Hypes der Woche. Nenne dabei die Top-Themen.
-2. **Aggregiere** die Daten: Führe alle Counts für das gleiche Thema zusammen
-3. Wähle die **TOP 5** Themen mit dem höchsten Gesamt-Count
-4. Schreibe für jedes Thema eine **Wochen-Zusammenfassung** (max 15 Wörter)
-5. Gib den finalen Gesamt-Count zurück
-
-Tägliche Trends:
-${archiveText}
+1. Schreibe eine **Wochen-Zusammenfassung** (2-3 Sätze) über die wichtigsten Hypes und News DIESER WOCHE
+2. Fokussiere auf die TOP-Themen oben
+3. Beschreibe für jedes der TOP 5 Themen, WAS in dieser Woche passiert ist (max 15 Wörter pro Thema)
+4. Zähle NICHT kumulativ – nur DIESE WOCHE zählt!
 
 Antworte NUR im JSON-Format:
 {
-  "overallSummary": "Die Woche war dominiert von GTA 6 Trailer-Spekulationen und PlayStation-Hardware-News. Steam Sale sorgte für Schnäppchenjagd.",
+  "overallSummary": "Diese Woche war geprägt von X und Y. Besonders hervorzuheben ist Z.",
   "trends": [
-    {"topic": "GTA 6", "summary": "Die Veröffentlichung nähert sich, Spekulationen um den nächsten Trailer.", "articleCount": 33},
-    {"topic": "PS5 Pro", "summary": "Offizielle Ankündigung und erste technische Details zum neuen Modell.", "articleCount": 15}
+    {"topic": "GTA 6", "summary": "Neue Trailer-Details und Release-Spekulationen beherrschen die Woche.", "articleCount": 33},
+    {"topic": "PS5 Pro", "summary": "Hardware-Updates und technische Verbesserungen im Fokus.", "articleCount": 15}
   ]
 }`;
 
@@ -553,7 +571,7 @@ Antworte NUR im JSON-Format:
             body: JSON.stringify({
                 model: 'llama-3.1-8b-instant',
                 messages: [
-                    { role: 'system', content: 'Du bist ein Gaming-News-Analyst. Aggregiere tägliche Trends zu einer Wochen-Zusammenfassung. Antworte nur mit validem JSON.' },
+                    { role: 'system', content: 'Du bist ein Gaming-News-Analyst. Analysiere die Trends dieser Woche (NICHT kumulativ). Gib nur valides JSON zurück.' },
                     { role: 'user', content: prompt }
                 ],
                 temperature: 0.3,
@@ -607,7 +625,7 @@ async function generateAndSaveTrends(articles) {
     const now = new Date();
     const todayKey = getDateKey();
     const DAILY_CACHE_TTL = 2 * 60 * 60; // 2 hours
-    const WEEKLY_CACHE_TTL = 6 * 60 * 60; // 6 hours (regenerate more often from archive)
+    const WEEKLY_CACHE_TTL = 2 * 60 * 60; // 2 hours (häufigere Updates für aktuelle Woche)
 
     // --- DAILY TRENDS ---
     let dailyTrends = [];
