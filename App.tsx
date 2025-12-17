@@ -8,14 +8,38 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import type { Article, Theme, ViewMode, AppView, Announcement } from './types';
 import { LoadingSpinner, SearchIcon, FilterIcon, ResetIcon, NewspaperIcon, BookmarkIcon, StarIcon, ArrowLeftIcon } from './components/Icons';
 import { FilterProvider, useFilter } from './contexts/FilterContext';
-import { Footer } from './components/Footer';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
 import { FavoritesHeader } from './components/FavoritesHeader';
 import { SettingsModal } from './components/SettingsModal';
 import { AnnouncementBanner } from './components/AnnouncementBanner';
 import ErrorBoundary from './components/ErrorBoundary';
+import { useCookieConsent } from './components/CookieConsent';
 
 const ARTICLES_PER_PAGE = 32;
+
+// Google Analytics initialisieren (nur bei Consent)
+function initGoogleAnalytics() {
+    const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'; // TODO: Ersetze mit deiner GA4 Measurement ID
+    
+    if (typeof window === 'undefined' || (window as any).gtag) return;
+    
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+    document.head.appendChild(script);
+    
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    function gtag(...args: any[]) {
+        (window as any).dataLayer.push(args);
+    }
+    (window as any).gtag = gtag;
+    
+    gtag('js', new Date());
+    gtag('config', GA_MEASUREMENT_ID, {
+        'anonymize_ip': true,
+        'cookie_flags': 'SameSite=None;Secure'
+    });
+}
 
 type ToastType = 'info' | 'success';
 
@@ -123,6 +147,15 @@ const AppContent: React.FC = () => {
     // Announcement state
     const [announcement, setAnnouncement] = useState<Announcement | null>(null);
     const [dismissedAnnouncementId, setDismissedAnnouncementId] = useLocalStorage<string | null>('dismissedAnnouncementId', null);
+
+    // Cookie Consent Hook
+    useCookieConsent({
+        onConsent: (categories) => {
+            if (categories.includes('analytics')) {
+                initGoogleAnalytics();
+            }
+        }
+    });
 
     useEffect(() => {
         if (theme === 'dark') {
@@ -847,7 +880,6 @@ const AppContent: React.FC = () => {
                 </>
                 )}
             </main>
-            <Footer />
             <ScrollToTopButton />
             <SettingsModal
                 isOpen={isSettingsModalOpen}

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "vanilla-cookieconsent/dist/cookieconsent.css";
 
 @source "../index.html";
 @source "../admin.html";
