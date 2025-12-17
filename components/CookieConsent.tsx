@@ -105,6 +105,11 @@ export const useCookieConsent = ({ onConsent }: CookieConsentConfig) => {
                 }
             },
 
+            onFirstConsent: () => {
+                const acceptedCategories = CookieConsent.acceptedCategory('analytics') ? ['analytics'] : [];
+                onConsent(acceptedCategories);
+            },
+            
             onChange: ({ changedCategories }) => {
                 if (changedCategories.includes('analytics')) {
                     const acceptedCategories = CookieConsent.acceptedCategory('analytics') ? ['analytics'] : [];
