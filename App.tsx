@@ -34,7 +34,9 @@ function initGoogleAnalytics() {
     // Zuerst gtag Befehle queuen
     gtag('js', new Date());
     gtag('config', GA_MEASUREMENT_ID, {
-        'anonymize_ip': true
+        'anonymize_ip': true,
+        'cookie_domain': 'auto',
+        'cookie_flags': 'SameSite=Lax;Secure'
     });
     
     // Dann Script laden
@@ -42,8 +44,6 @@ function initGoogleAnalytics() {
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
     document.head.appendChild(script);
-    
-    console.log('✅ Google Analytics initialisiert:', GA_MEASUREMENT_ID);
 }
 
 type ToastType = 'info' | 'success';
