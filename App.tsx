@@ -19,7 +19,7 @@ const ARTICLES_PER_PAGE = 32;
 
 // Google Analytics initialisieren (nur bei Consent)
 function initGoogleAnalytics() {
-    const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'; // TODO: Ersetze mit deiner GA4 Measurement ID
+    const GA_MEASUREMENT_ID = 'G-V2KB8CTWRV';
     
     if (typeof window === 'undefined' || (window as any).gtag) return;
     
