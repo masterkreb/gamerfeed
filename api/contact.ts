@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 
 // Google reCAPTCHA v3 Verifikation
 async function verifyRecaptcha(token: string): Promise<{ success: boolean; score: number }> {
+    console.log('🔐 Verifiziere reCAPTCHA...');
     const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -10,6 +11,8 @@ async function verifyRecaptcha(token: string): Promise<{ success: boolean; score
     });
 
     const data = await response.json();
+    console.log('🔐 reCAPTCHA Ergebnis:', { success: data.success, score: data.score, errors: data['error-codes'] });
+    
     return {
         success: data.success === true,
         score: data.score || 0
@@ -35,6 +38,8 @@ async function sendEmail(data: { name: string; email: string; subject: string; m
 
     // Option 2: Gmail SMTP (mit Nodemailer)
     if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+        console.log('📧 Versuche Gmail SMTP zu verwenden...');
+        console.log('📧 Gmail User:', process.env.GMAIL_USER);
         try {
             // Gmail SMTP Transporter erstellen
             const transporter = nodemailer.createTransport({
@@ -69,8 +74,13 @@ async function sendEmail(data: { name: string; email: string; subject: string; m
             });
 
             console.log('✅ E-Mail erfolgreich gesendet via Gmail SMTP');
-            return true;
-        } catch (error) {
+            return true;);
+            console.error('Fehlerdetails:', error);
+            if (error instanceof Error) {
+                console.error('Error Message:', error.message);
+                console.error('Error Stack:', error.stack);
+            }
+            throw error; // Fehler nach oben werfen für besseres Debugging
             console.error('❌ Gmail SMTP Fehler:', error);
             return false;
         }
@@ -102,11 +112,8 @@ async function sendEmail(data: { name: string; email: string; subject: string; m
     }
 
     // Fallback: Nur in Vercel Logs speichern (für Testing)
-    console.log('📧 Kontaktformular erhalten:', data);
-    return true;
-}
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+    console.log('📬 Kontaktformular-Request erhalten');
+    
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -115,18 +122,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Validierung
     if (!name || !email || !subject || !message || !recaptchaToken) {
+        console.log('❌ Fehlende Felder:', { name: !!name, email: !!email, subject: !!subject, message: !!message, recaptchaToken: !!recaptchaToken });
         return res.status(400).json({ error: 'Missing required fields' });
     }
-
-    // reCAPTCHA v3 prüfen
-    const recaptchaResult = await verifyRecaptcha(recaptchaToken);
-    if (!recaptchaResult.success || recaptchaResult.score < 0.5) {
-        return res.status(403).json({ error: 'Invalid captcha or bot detected' });
+    
+    consconsole.log('❌ reCAPTCHA fehlgeschlagen. Success:', recaptchaResult.success, 'Score:', recaptchaResult.score);
+        return res.status(403).json({ error: 'Invalid captcha or bot detected', score: recaptchaResult.score });
     }
+    console.log('✅ reCAPTCHA erfolgreich. Score:', recaptchaResult.score);onsole.log('📧 Von:', name, '<' + email + '>');
+    console.log('📧 Betreff:', subject);onst { name, email, subject, message, recaptchaToken } = req.body;
 
-    // E-Mail senden
-    try {
+    // Validierung
+    if (!name || !email || !subject || !message || !recaptchaToken) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+ole.log('📤 Starte E-Mail Versand...');
         const success = await sendEmail({ name, email, subject, message });
+        
+        if (success) {
+            console.log('✅ Kontaktformular erfolgreich abgeschlossen');
+            return res.status(200).json({ success: true });
+        } else {
+            console.log('❌ E-Mail Versand fehlgeschlagen');
+            return res.status(500).json({ error: 'Failed to send email' });
+        }
+    } catch (error) {
+        console.error('❌ Kritischer Fehler im Kontaktformular:');
+        console.error(error);
+        if (error instanceof Error) {
+            console.error('Message:', error.message);
+            console.error('Stack:', error.stack);
+        }
+        return res.status(500).json({ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknownt, message });
         
         if (success) {
             return res.status(200).json({ success: true });
