@@ -21,24 +21,29 @@ const ARTICLES_PER_PAGE = 32;
 function initGoogleAnalytics() {
     const GA_MEASUREMENT_ID = 'G-V2KB8CTWRV';
     
-    if (typeof window === 'undefined' || (window as any).gtag) return;
+    if (typeof window === 'undefined' || (window as any).gaInitialized) return;
+    (window as any).gaInitialized = true;
     
+    // DataLayer zuerst initialisieren
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    function gtag(...args: any[]) {
+        (window as any).dataLayer.push(arguments);
+    }
+    (window as any).gtag = gtag;
+    
+    // Zuerst gtag Befehle queuen
+    gtag('js', new Date());
+    gtag('config', GA_MEASUREMENT_ID, {
+        'anonymize_ip': true
+    });
+    
+    // Dann Script laden
     const script = document.createElement('script');
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
     document.head.appendChild(script);
     
-    (window as any).dataLayer = (window as any).dataLayer || [];
-    function gtag(...args: any[]) {
-        (window as any).dataLayer.push(args);
-    }
-    (window as any).gtag = gtag;
-    
-    gtag('js', new Date());
-    gtag('config', GA_MEASUREMENT_ID, {
-        'anonymize_ip': true,
-        'cookie_flags': 'SameSite=None;Secure'
-    });
+    console.log('✅ Google Analytics initialisiert:', GA_MEASUREMENT_ID);
 }
 
 type ToastType = 'info' | 'success';
