@@ -172,6 +172,7 @@ const resources = {
             "contact.success": "✅ Message sent successfully! We'll get back to you soon.",
             "contact.error": "❌ Failed to send message. Please try again or contact us via email.",
             "contact.openForm": "Contact Form",
+            "contact.recaptchaBadge": "This form is protected by reCAPTCHA against spam.",
 
             // Cookie Banner
             "cookie.banner.title": "🍪 We use cookies",
@@ -524,6 +525,7 @@ const resources = {
             "contact.success": "✅ Nachricht erfolgreich gesendet! Wir melden uns bald bei dir.",
             "contact.error": "❌ Nachricht konnte nicht gesendet werden. Bitte versuche es erneut oder kontaktiere uns per E-Mail.",
             "contact.openForm": "Kontaktformular",
+            "contact.recaptchaBadge": "Dieses Formular ist durch reCAPTCHA vor Spam geschützt.",
 
             // Cookie Banner
             "cookie.banner.title": "🍪 Wir verwenden Cookies",

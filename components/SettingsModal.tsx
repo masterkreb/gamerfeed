@@ -468,10 +468,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                                 {/* reCAPTCHA v3 Badge (unsichtbar) */}
                                 <div className="text-xs text-slate-500 dark:text-zinc-500 text-center">
-                                    This site is protected by reCAPTCHA and the Google{' '}
-                                    <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-700 dark:hover:text-zinc-400">Privacy Policy</a> and{' '}
-                                    <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-700 dark:hover:text-zinc-400">Terms of Service</a> apply.
-                                </div>
+                                        {t('contact.recaptchaBadge')}
+                                     </div>
 
                                 {contactStatus === 'success' && (
                                     <div className="p-4 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-lg text-sm">
