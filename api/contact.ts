@@ -1,5 +1,23 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import nodemailer from 'nodemailer';
+
+interface ContactRequestBody {
+    name?: string;
+    email?: string;
+    subject?: string;
+    message?: string;
+    recaptchaToken?: string;
+}
+
+interface ApiRequest {
+    method?: string;
+    body?: ContactRequestBody;
+}
+
+interface ApiResponse {
+    status: (code: number) => {
+        json: (body: unknown) => void;
+    };
+}
 
 // Google reCAPTCHA v3 Verifikation
 async function verifyRecaptcha(token: string): Promise<{ success: boolean; score: number }> {
@@ -74,14 +92,14 @@ async function sendEmail(data: { name: string; email: string; subject: string; m
     return true;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
     console.log('📬 Kontaktformular-Request erhalten');
     
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { name, email, subject, message, recaptchaToken } = req.body;
+    const { name, email, subject, message, recaptchaToken } = req.body ?? {};
 
     // Validierung
     if (!name || !email || !subject || !message || !recaptchaToken) {

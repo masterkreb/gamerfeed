@@ -5,7 +5,7 @@ import { FilterBar } from './components/FilterBar';
 import { ArticleCard } from './components/ArticleCard';
 import { TrendsView } from './components/TrendsView';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import type { Article, Theme, ViewMode, AppView, Announcement } from './types';
+import type { Article, Theme, ViewMode, AppView, Announcement, CachedNews } from './types';
 import { LoadingSpinner, SearchIcon, FilterIcon, ResetIcon, NewspaperIcon, BookmarkIcon, StarIcon, ArrowLeftIcon } from './components/Icons';
 import { FilterProvider, useFilter } from './contexts/FilterContext';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
@@ -17,6 +17,7 @@ import { useCookieConsent } from './components/CookieConsent';
 
 const ARTICLES_PER_PAGE = 32;
 const INITIAL_ARTICLE_CACHE_COUNT = 32;
+const ARTICLE_CACHE_TTL_MS = 30 * 60 * 1000;
 
 // Google Analytics initialisieren (nur bei Consent)
 function initGoogleAnalytics() {
@@ -129,7 +130,7 @@ const AppContent: React.FC = () => {
     const [currentView, setCurrentView] = useState<AppView>('news');
 
     const [articles, setArticles] = useState<Article[]>([]);
-    const [cachedArticles, setCachedArticles] = useLocalStorage<Article[]>('cachedArticles', []);
+    const [cachedNews, setCachedNews] = useLocalStorage<CachedNews>('cachedNews', { articles: [], timestamp: 0 });
     const [isBlockingLoading, setIsBlockingLoading] = useState<boolean>(true);
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -154,11 +155,19 @@ const AppContent: React.FC = () => {
     // Announcement state
     const [announcement, setAnnouncement] = useState<Announcement | null>(null);
     const [dismissedAnnouncementId, setDismissedAnnouncementId] = useLocalStorage<string | null>('dismissedAnnouncementId', null);
-    const cachedArticlesRef = useRef<Article[]>(cachedArticles);
+    const cachedArticlesRef = useRef<Article[]>([]);
+
+    const validCachedArticles = useMemo(() => {
+        const isFresh = Date.now() - cachedNews.timestamp < ARTICLE_CACHE_TTL_MS;
+        return isFresh ? cachedNews.articles : [];
+    }, [cachedNews]);
 
     const persistCachedArticles = useCallback((nextArticles: Article[]) => {
-        setCachedArticles(nextArticles.slice(0, INITIAL_ARTICLE_CACHE_COUNT));
-    }, [setCachedArticles]);
+        setCachedNews({
+            articles: nextArticles.slice(0, INITIAL_ARTICLE_CACHE_COUNT),
+            timestamp: Date.now(),
+        });
+    }, [setCachedNews]);
 
     // Cookie Consent Hook
     useCookieConsent({
@@ -178,15 +187,15 @@ const AppContent: React.FC = () => {
     }, [theme]);
 
     useEffect(() => {
-        if (articles.length === 0 && cachedArticles.length > 0) {
-            setArticles(cachedArticles);
+        if (articles.length === 0 && validCachedArticles.length > 0) {
+            setArticles(validCachedArticles);
             setIsBlockingLoading(false);
         }
-    }, [articles.length, cachedArticles]);
+    }, [articles.length, validCachedArticles]);
 
     useEffect(() => {
-        cachedArticlesRef.current = cachedArticles;
-    }, [cachedArticles]);
+        cachedArticlesRef.current = validCachedArticles;
+    }, [validCachedArticles]);
 
     // Fetch announcement on mount
     useEffect(() => {
