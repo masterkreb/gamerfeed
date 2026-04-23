@@ -16,6 +16,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { useCookieConsent } from './components/CookieConsent';
 
 const ARTICLES_PER_PAGE = 32;
+const INITIAL_ARTICLE_CACHE_COUNT = 32;
 
 // Google Analytics initialisieren (nur bei Consent)
 function initGoogleAnalytics() {
@@ -128,6 +129,7 @@ const AppContent: React.FC = () => {
     const [currentView, setCurrentView] = useState<AppView>('news');
 
     const [articles, setArticles] = useState<Article[]>([]);
+    const [cachedArticles, setCachedArticles] = useLocalStorage<Article[]>('cachedArticles', []);
     const [isBlockingLoading, setIsBlockingLoading] = useState<boolean>(true);
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -152,6 +154,11 @@ const AppContent: React.FC = () => {
     // Announcement state
     const [announcement, setAnnouncement] = useState<Announcement | null>(null);
     const [dismissedAnnouncementId, setDismissedAnnouncementId] = useLocalStorage<string | null>('dismissedAnnouncementId', null);
+    const cachedArticlesRef = useRef<Article[]>(cachedArticles);
+
+    const persistCachedArticles = useCallback((nextArticles: Article[]) => {
+        setCachedArticles(nextArticles.slice(0, INITIAL_ARTICLE_CACHE_COUNT));
+    }, [setCachedArticles]);
 
     // Cookie Consent Hook
     useCookieConsent({
@@ -169,6 +176,17 @@ const AppContent: React.FC = () => {
             document.documentElement.classList.remove('dark');
         }
     }, [theme]);
+
+    useEffect(() => {
+        if (articles.length === 0 && cachedArticles.length > 0) {
+            setArticles(cachedArticles);
+            setIsBlockingLoading(false);
+        }
+    }, [articles.length, cachedArticles]);
+
+    useEffect(() => {
+        cachedArticlesRef.current = cachedArticles;
+    }, [cachedArticles]);
 
     // Fetch announcement on mount
     useEffect(() => {
@@ -202,10 +220,11 @@ const AppContent: React.FC = () => {
 
     const loadNews = useCallback(async (isManualRefresh = false) => {
         setError(null);
+        const hasCachedArticles = cachedArticlesRef.current.length > 0;
 
-        if (!isManualRefresh) {
+        if (!isManualRefresh && !hasCachedArticles) {
             setIsBlockingLoading(true);
-        } else {
+        } else if (isManualRefresh) {
             setIsRefreshing(true);
         }
 
@@ -220,6 +239,7 @@ const AppContent: React.FC = () => {
                 }
                 const fetchedArticles: Article[] = await response.json();
                 setArticles(fetchedArticles);
+                persistCachedArticles(fetchedArticles);
                 console.log(`Refreshed ${fetchedArticles.length} articles from API`);
             } else {
                 // Initial load: 3-stage progressive loading (16 → 64 → full)
@@ -229,6 +249,7 @@ const AppContent: React.FC = () => {
                     // Stage 1: Show first 16 articles immediately
                     const previewArticles: Article[] = await previewResponse.json();
                     setArticles(previewArticles);
+                    persistCachedArticles(previewArticles);
                     setIsBlockingLoading(false);
                     console.log(`✅ Stage 1: Loaded ${previewArticles.length} preview articles`);
 
@@ -240,6 +261,7 @@ const AppContent: React.FC = () => {
                         })
                         .then((mediumArticles: Article[]) => {
                             setArticles(mediumArticles);
+                            persistCachedArticles(mediumArticles);
                             console.log(`✅ Stage 2: Loaded ${mediumArticles.length} medium articles`);
 
                             // Stage 3: Load all articles in background
@@ -251,6 +273,7 @@ const AppContent: React.FC = () => {
                         })
                         .then((fullArticles: Article[]) => {
                             setArticles(fullArticles);
+                            persistCachedArticles(fullArticles);
                             console.log(`✅ Stage 3: Loaded ${fullArticles.length} full articles`);
                         })
                         .catch(err => {
@@ -269,6 +292,7 @@ const AppContent: React.FC = () => {
                     }
                     const fetchedArticles: Article[] = await response.json();
                     setArticles(fetchedArticles);
+                    persistCachedArticles(fetchedArticles);
                     console.log(`Loaded ${fetchedArticles.length} articles (fallback)`);
                 }
             }
@@ -281,7 +305,7 @@ const AppContent: React.FC = () => {
             setIsBlockingLoading(false);
             setIsRefreshing(false);
         }
-    }, []);
+    }, [persistCachedArticles]);
 
     useEffect(() => {
         loadNews();
@@ -335,13 +359,14 @@ const AppContent: React.FC = () => {
     const loadPendingArticles = useCallback(() => {
         if (pendingArticles.length > 0) {
             setArticles(pendingArticles);
+            persistCachedArticles(pendingArticles);
             setNewArticlesCount(0);
             setPendingArticles([]);
             // Reset tab title
             document.title = 'GamerFeed';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-    }, [pendingArticles]);
+    }, [pendingArticles, persistCachedArticles]);
 
     // Auto-update polling (every 5 minutes) - runs even when tab is inactive
     useEffect(() => {
