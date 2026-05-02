@@ -3,6 +3,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/gaming-news",
+      "destination": "/api/gaming-news"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     }
