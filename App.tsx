@@ -123,7 +123,7 @@ const SearchResultsHeader: React.FC<{
 
 const AppContent: React.FC = () => {
     const { t } = useTranslation();
-    const [theme, setTheme] = useLocalStorage<Theme>('theme', 'dark');
+    const [theme, setTheme] = useLocalStorage<Theme>('theme', 'light');
     const [viewMode, setViewMode] = useLocalStorage<ViewMode>('viewMode', 'grid');
     const [favorites, setFavorites] = useLocalStorage<string[]>('favorites', []);
     const [mutedSources, setMutedSources] = useLocalStorage<string[]>('mutedSources', []);
