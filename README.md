@@ -148,7 +148,7 @@ Die Statusanzeige wird wie folgt ermittelt:
 
 ### Voraussetzungen
 
-- [Node.js](https://nodejs.org/) (Version 20 oder höher)
+- [Node.js](https://nodejs.org/) (Version 24 oder höher)
 - [npm](https://www.npmjs.com/)
 - Ein Vercel-Konto mit verbundenem Vercel Postgres und Vercel KV Speicher.
 - (Optional) Groq API Key für Trend-Analyse
