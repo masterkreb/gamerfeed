@@ -43,6 +43,10 @@ function stripHtmlAndTruncate(html, length = 150) {
 
 
 // === IMAGE SCRAPING ===
+function formatDuration(ms) {
+    return `${(ms / 1000).toFixed(1)}s`;
+}
+
 async function getOgImageFromUrl(url, sourceName) {
     const proxies = [
         `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
@@ -50,9 +54,15 @@ async function getOgImageFromUrl(url, sourceName) {
         `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     ];
 
+    const scrapeStart = Date.now();
     for (const proxyUrl of proxies) {
+        const proxyName = new URL(proxyUrl).hostname;
+        const proxyStart = Date.now();
         try {
+            console.log(`      -> Trying proxy: ${proxyName}`);
             const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(5000) });
+            const proxyDuration = Date.now() - proxyStart;
+            console.log(`         ${proxyName} responded with ${response.status} in ${formatDuration(proxyDuration)}`);
             if (!response.ok) continue;
 
             const html = await response.text();
@@ -71,6 +81,7 @@ async function getOgImageFromUrl(url, sourceName) {
             }
 
             if (imageUrl) {
+                console.log(`         ✅ Found meta image via ${proxyName} in ${formatDuration(Date.now() - scrapeStart)}`);
                 try {
                     return new URL(imageUrl, url).href;
                 } catch {
@@ -85,6 +96,7 @@ async function getOgImageFromUrl(url, sourceName) {
                 if (src) {
                     const videoIdMatch = src.match(/embed\/([^/?]+)/);
                     if (videoIdMatch && videoIdMatch[1]) {
+                        console.log(`         ✅ Found YouTube iframe image via ${proxyName} in ${formatDuration(Date.now() - scrapeStart)}`);
                         return `https://img.youtube.com/vi/${videoIdMatch[1]}/hqdefault.jpg`;
                     }
                 }
@@ -97,14 +109,17 @@ async function getOgImageFromUrl(url, sourceName) {
                 if (href) {
                     const videoIdMatch = href.match(/[?&]v=([^&]+)/);
                     if (videoIdMatch && videoIdMatch[1]) {
+                        console.log(`         ✅ Found YouTube link image via ${proxyName} in ${formatDuration(Date.now() - scrapeStart)}`);
                         return `https://img.youtube.com/vi/${videoIdMatch[1]}/hqdefault.jpg`;
                     }
                 }
             }
+            console.log(`         ⚠️  No image candidate via ${proxyName}`);
         } catch (e) {
-            console.warn(`Scraping error for ${url} via proxy:`, e.message);
+            console.warn(`         ❌ ${proxyName} failed after ${formatDuration(Date.now() - proxyStart)}: ${e.message}`);
         }
     }
+    console.log(`      -> No image found after ${formatDuration(Date.now() - scrapeStart)} across all proxies`);
     return null;
 }
 
@@ -811,18 +826,32 @@ async function main() {
         const articlesNeedingScraping = newlyFetchedArticles.filter(a => a.needsScraping);
         if (articlesNeedingScraping.length > 0) {
             console.log(`\n🔎 Scraping images for ${articlesNeedingScraping.length} articles...\n`);
+            const scrapeStats = { found: 0, missing: 0, failed: 0, totalMs: 0 };
             for (const article of articlesNeedingScraping) {
+                const articleScrapeStart = Date.now();
                 try {
                     console.log(`   🖼️  Scraping: ${article.source} - ${article.title.substring(0, 40)}...`);
                     const scrapedImage = await getOgImageFromUrl(article.link, article.source);
+                    const articleScrapeDuration = Date.now() - articleScrapeStart;
+                    scrapeStats.totalMs += articleScrapeDuration;
                     if (scrapedImage) {
                         article.imageUrl = scrapedImage;
                         article.needsScraping = false;
-                        console.log(`      ✅ Found image`);
-                    } else { console.log(`      ⚠️  No image found, using placeholder`); }
+                        scrapeStats.found++;
+                        console.log(`      ✅ Found image (${formatDuration(articleScrapeDuration)})`);
+                    } else {
+                        scrapeStats.missing++;
+                        console.log(`      ⚠️  No image found, using placeholder (${formatDuration(articleScrapeDuration)})`);
+                    }
                     await new Promise(r => setTimeout(r, 500));
-                } catch (error) { console.error(`      ❌ Scraping failed: ${error.message}`); }
+                } catch (error) {
+                    const articleScrapeDuration = Date.now() - articleScrapeStart;
+                    scrapeStats.totalMs += articleScrapeDuration;
+                    scrapeStats.failed++;
+                    console.error(`      ❌ Scraping failed after ${formatDuration(articleScrapeDuration)}: ${error.message}`);
+                }
             }
+            console.log(`\n🔎 Image scraping summary: ${scrapeStats.found} found, ${scrapeStats.missing} placeholders, ${scrapeStats.failed} failed in ${formatDuration(scrapeStats.totalMs)} active scraping time.\n`);
         }
 
         newlyFetchedArticles = newlyFetchedArticles.map(article => {
