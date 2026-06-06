@@ -746,7 +746,7 @@ async function main() {
     const feedHealthStatus = {};
     const ARTICLE_RETENTION_DAYS = 60; // Artikel werden 60 Tage gespeichert
     const MAX_ARTICLES = 10000; // Maximale Anzahl Artikel (verhindert KV Limit-Überschreitung)
-    const PLACEHOLDER_BACKFILL_LIMIT = 30;
+    const PLACEHOLDER_BACKFILL_LIMIT = 130;
     const PLACEHOLDER_BACKFILL_PER_SOURCE_LIMIT = 5;
 
     try {
