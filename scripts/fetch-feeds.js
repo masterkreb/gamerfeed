@@ -47,6 +47,10 @@ function formatDuration(ms) {
     return `${(ms / 1000).toFixed(1)}s`;
 }
 
+function hasPlaceholderImage(article) {
+    return article?.imageUrl?.includes('placehold.co');
+}
+
 async function getOgImageFromUrl(url, sourceName) {
     const browserLikeHeaders = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36',
@@ -742,6 +746,8 @@ async function main() {
     const feedHealthStatus = {};
     const ARTICLE_RETENTION_DAYS = 60; // Artikel werden 60 Tage gespeichert
     const MAX_ARTICLES = 10000; // Maximale Anzahl Artikel (verhindert KV Limit-Überschreitung)
+    const PLACEHOLDER_BACKFILL_LIMIT = 30;
+    const PLACEHOLDER_BACKFILL_PER_SOURCE_LIMIT = 5;
 
     try {
         let oldArticles = [];
@@ -874,6 +880,50 @@ async function main() {
             return article;
         });
 
+        const newlyFetchedLinks = new Set(newlyFetchedArticles.map(article => article.link).filter(Boolean));
+        const backfillSourceCounts = new Map();
+        const placeholderBackfillArticles = oldArticles
+            .filter(article => article?.link && hasPlaceholderImage(article) && !newlyFetchedLinks.has(article.link))
+            .filter(article => {
+                const source = article.source || 'Unknown';
+                const currentCount = backfillSourceCounts.get(source) || 0;
+                if (currentCount >= PLACEHOLDER_BACKFILL_PER_SOURCE_LIMIT) return false;
+                backfillSourceCounts.set(source, currentCount + 1);
+                return true;
+            })
+            .slice(0, PLACEHOLDER_BACKFILL_LIMIT);
+
+        if (placeholderBackfillArticles.length > 0) {
+            console.log(`\n🧩 Backfilling images for ${placeholderBackfillArticles.length} old placeholder articles...\n`);
+            const backfillStats = { found: 0, missing: 0, failed: 0, totalMs: 0 };
+            for (const article of placeholderBackfillArticles) {
+                const articleBackfillStart = Date.now();
+                try {
+                    console.log(`   🖼️  Backfill: ${article.source} - ${article.title.substring(0, 40)}...`);
+                    const scrapedImage = await getOgImageFromUrl(article.link, article.source);
+                    const articleBackfillDuration = Date.now() - articleBackfillStart;
+                    backfillStats.totalMs += articleBackfillDuration;
+                    if (scrapedImage) {
+                        article.imageUrl = scrapedImage;
+                        backfillStats.found++;
+                        console.log(`      ✅ Backfilled image (${formatDuration(articleBackfillDuration)})`);
+                    } else {
+                        backfillStats.missing++;
+                        console.log(`      ⚠️  Still no image found (${formatDuration(articleBackfillDuration)})`);
+                    }
+                    await new Promise(r => setTimeout(r, 500));
+                } catch (error) {
+                    const articleBackfillDuration = Date.now() - articleBackfillStart;
+                    backfillStats.totalMs += articleBackfillDuration;
+                    backfillStats.failed++;
+                    console.error(`      ❌ Backfill failed after ${formatDuration(articleBackfillDuration)}: ${error.message}`);
+                }
+            }
+            console.log(`\n🧩 Placeholder backfill summary: ${backfillStats.found} found, ${backfillStats.missing} still missing, ${backfillStats.failed} failed in ${formatDuration(backfillStats.totalMs)} active backfill time.\n`);
+        } else {
+            console.log(`\n🧩 No old placeholder articles need backfill.\n`);
+        }
+
         console.log('\n🔄 Merging, pruning, and sorting articles...');
         const uniqueArticlesMap = new Map();
         [...oldArticles, ...newlyFetchedArticles].forEach(article => {
@@ -881,8 +931,8 @@ async function main() {
                 // Use link (URL) as key to avoid duplicates when title changes
                 const key = article.link;
                 const existing = uniqueArticlesMap.get(key);
-                const existingHasPlaceholder = existing?.imageUrl?.includes('placehold.co');
-                const articleHasRealImage = article.imageUrl && !article.imageUrl.includes('placehold.co');
+                const existingHasPlaceholder = hasPlaceholderImage(existing);
+                const articleHasRealImage = article.imageUrl && !hasPlaceholderImage(article);
                 // Update if: no existing OR new has real image and old has placeholder
                 if (!existing || (articleHasRealImage && existingHasPlaceholder)) { 
                     // Keep the newer version (updated title, etc.)
