@@ -931,12 +931,17 @@ async function main() {
                 // Use link (URL) as key to avoid duplicates when title changes
                 const key = article.link;
                 const existing = uniqueArticlesMap.get(key);
-                const existingHasPlaceholder = hasPlaceholderImage(existing);
                 const articleHasRealImage = article.imageUrl && !hasPlaceholderImage(article);
-                // Update if: no existing OR new has real image and old has placeholder
-                if (!existing || (articleHasRealImage && existingHasPlaceholder)) { 
-                    // Keep the newer version (updated title, etc.)
+                const existingHasRealImage = existing?.imageUrl && !hasPlaceholderImage(existing);
+                if (!existing) {
                     uniqueArticlesMap.set(key, article); 
+                } else {
+                    // Keep updated article metadata, but do not replace a real image with a placeholder.
+                    uniqueArticlesMap.set(key, {
+                        ...existing,
+                        ...article,
+                        imageUrl: articleHasRealImage ? article.imageUrl : (existingHasRealImage ? existing.imageUrl : article.imageUrl),
+                    });
                 }
             }
         });
