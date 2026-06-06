@@ -32,7 +32,7 @@ export const INITIAL_FEEDS: FeedSource[] = [
     { id: 'gamezone', url: 'https://www.gamezone.de/feed.cfm?menu_alias=home/', name: 'GameZone', language: 'de', priority: 'secondary', update_interval: 60 },
     { id: 'giant-bomb', url: 'https://giantbomb.com/feeds/news', name: 'Giant Bomb', language: 'en', priority: 'secondary', update_interval: 60 },
     { id: 'giga-games', url: 'https://www.giga.de/games/feed/', name: 'GIGA Games', language: 'de', priority: 'secondary', update_interval: 60 },
-    { id: 'golem', url: 'https://rss.golem.de/rss.php?feed=ATOM1.0&tp=games', name: 'Golem', language: 'de', priority: 'secondary', update_interval: 60 },
+    { id: 'golem', url: 'https://rss.golem.de/rss.php?feed=RSS2.0&tp=games', name: 'Golem', language: 'de', priority: 'secondary', update_interval: 60 },
     { id: 'heise-online', url: 'https://www.heise.de/rss/heise-atom.xml', name: 'Heise Online', language: 'de', priority: 'secondary', update_interval: 60 },
     { id: 'jpgames', url: 'https://jpgames.de/feed/', name: 'JPGames', language: 'de', priority: 'secondary', update_interval: 60, needsScraping: true },
     { id: 'nintendo-life', url: 'https://www.nintendolife.com/feeds/latest', name: 'Nintendo Life', language: 'en', priority: 'secondary', update_interval: 60 },

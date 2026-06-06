@@ -51,6 +51,13 @@ function hasPlaceholderImage(article) {
     return article?.imageUrl?.includes('placehold.co');
 }
 
+function getFetchUrlForFeed(feed) {
+    if ((feed.id === 'golem' || feed.name === 'Golem') && feed.url.includes('rss.golem.de') && feed.url.includes('feed=ATOM1.0')) {
+        return feed.url.replace('feed=ATOM1.0', 'feed=RSS2.0');
+    }
+    return feed.url;
+}
+
 async function getOgImageFromUrl(url, sourceName) {
     const browserLikeHeaders = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36',
@@ -789,11 +796,15 @@ async function main() {
         for (const feed of feeds) {
             let xmlString = null;
             let lastError = 'Unknown error';
+            const feedUrl = getFetchUrlForFeed(feed);
             console.log(`📡 Fetching: ${feed.name}...`);
+            if (feedUrl !== feed.url) {
+                console.log(`   ℹ️  Using normalized feed URL for ${feed.name}: ${feedUrl}`);
+            }
 
             // Attempt 1: Direct fetch
             try {
-                const response = await fetch(feed.url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'application/rss+xml, application/xml, text/xml', 'Accept-Language': 'en-US,en;q=0.9,de-DE;q=0.8,de;q=0.7' }, signal: AbortSignal.timeout(8000) });
+                const response = await fetch(feedUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'application/rss+xml, application/xml, text/xml', 'Accept-Language': 'en-US,en;q=0.9,de-DE;q=0.8,de;q=0.7' }, signal: AbortSignal.timeout(8000) });
                 if (response.ok) {
                     const text = await response.text();
                     if (text && text.trim().startsWith('<')) {
@@ -806,7 +817,7 @@ async function main() {
             // Attempt 2: Proxies (if direct fetch failed)
             if (!xmlString) {
                 console.log(`   ⚠️  Direct fetch failed for ${feed.name} (${lastError}). Trying proxies...`);
-                for (const proxyUrl of proxies(feed.url)) {
+                for (const proxyUrl of proxies(feedUrl)) {
                     try {
                         const proxyName = new URL(proxyUrl).hostname;
                         console.log(`      -> Trying proxy: ${proxyName}`);
