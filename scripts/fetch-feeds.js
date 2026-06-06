@@ -48,21 +48,35 @@ function formatDuration(ms) {
 }
 
 async function getOgImageFromUrl(url, sourceName) {
-    const proxies = [
-        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-        `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    const browserLikeHeaders = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
+    };
+    const fetchAttempts = [
+        {
+            name: 'direct',
+            requestUrl: url,
+            options: { headers: browserLikeHeaders },
+        },
+        {
+            name: 'api.allorigins.win',
+            requestUrl: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+            options: {},
+        },
     ];
 
     const scrapeStart = Date.now();
-    for (const proxyUrl of proxies) {
-        const proxyName = new URL(proxyUrl).hostname;
-        const proxyStart = Date.now();
+    for (const attempt of fetchAttempts) {
+        const attemptStart = Date.now();
         try {
-            console.log(`      -> Trying proxy: ${proxyName}`);
-            const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(5000) });
-            const proxyDuration = Date.now() - proxyStart;
-            console.log(`         ${proxyName} responded with ${response.status} in ${formatDuration(proxyDuration)}`);
+            console.log(`      -> Trying image fetch: ${attempt.name}`);
+            const response = await fetch(attempt.requestUrl, {
+                ...attempt.options,
+                signal: AbortSignal.timeout(5000),
+            });
+            const attemptDuration = Date.now() - attemptStart;
+            console.log(`         ${attempt.name} responded with ${response.status} in ${formatDuration(attemptDuration)}`);
             if (!response.ok) continue;
 
             const html = await response.text();
@@ -81,7 +95,7 @@ async function getOgImageFromUrl(url, sourceName) {
             }
 
             if (imageUrl) {
-                console.log(`         ✅ Found meta image via ${proxyName} in ${formatDuration(Date.now() - scrapeStart)}`);
+                console.log(`         ✅ Found meta image via ${attempt.name} in ${formatDuration(Date.now() - scrapeStart)}`);
                 try {
                     return new URL(imageUrl, url).href;
                 } catch {
@@ -96,7 +110,7 @@ async function getOgImageFromUrl(url, sourceName) {
                 if (src) {
                     const videoIdMatch = src.match(/embed\/([^/?]+)/);
                     if (videoIdMatch && videoIdMatch[1]) {
-                        console.log(`         ✅ Found YouTube iframe image via ${proxyName} in ${formatDuration(Date.now() - scrapeStart)}`);
+                        console.log(`         ✅ Found YouTube iframe image via ${attempt.name} in ${formatDuration(Date.now() - scrapeStart)}`);
                         return `https://img.youtube.com/vi/${videoIdMatch[1]}/hqdefault.jpg`;
                     }
                 }
@@ -109,17 +123,17 @@ async function getOgImageFromUrl(url, sourceName) {
                 if (href) {
                     const videoIdMatch = href.match(/[?&]v=([^&]+)/);
                     if (videoIdMatch && videoIdMatch[1]) {
-                        console.log(`         ✅ Found YouTube link image via ${proxyName} in ${formatDuration(Date.now() - scrapeStart)}`);
+                        console.log(`         ✅ Found YouTube link image via ${attempt.name} in ${formatDuration(Date.now() - scrapeStart)}`);
                         return `https://img.youtube.com/vi/${videoIdMatch[1]}/hqdefault.jpg`;
                     }
                 }
             }
-            console.log(`         ⚠️  No image candidate via ${proxyName}`);
+            console.log(`         ⚠️  No image candidate via ${attempt.name}`);
         } catch (e) {
-            console.warn(`         ❌ ${proxyName} failed after ${formatDuration(Date.now() - proxyStart)}: ${e.message}`);
+            console.log(`         ❌ ${attempt.name} failed after ${formatDuration(Date.now() - attemptStart)}: ${e.message}`);
         }
     }
-    console.log(`      -> No image found after ${formatDuration(Date.now() - scrapeStart)} across all proxies`);
+    console.log(`      -> No image found after ${formatDuration(Date.now() - scrapeStart)} across all image fetch attempts`);
     return null;
 }
 
