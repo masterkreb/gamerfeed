@@ -881,8 +881,10 @@ async function main() {
                 // Use link (URL) as key to avoid duplicates when title changes
                 const key = article.link;
                 const existing = uniqueArticlesMap.get(key);
+                const existingHasPlaceholder = existing?.imageUrl?.includes('placehold.co');
+                const articleHasRealImage = article.imageUrl && !article.imageUrl.includes('placehold.co');
                 // Update if: no existing OR new has real image and old has placeholder
-                if (!existing || (article.imageUrl && !existing.imageUrl.includes('placehold'))) { 
+                if (!existing || (articleHasRealImage && existingHasPlaceholder)) { 
                     // Keep the newer version (updated title, etc.)
                     uniqueArticlesMap.set(key, article); 
                 }
