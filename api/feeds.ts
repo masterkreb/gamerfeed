@@ -1,6 +1,7 @@
 import { sql } from '@vercel/postgres';
 import type { FeedSource } from '../types';
 import { requireAdminAuth, requireAdminMutation } from '../server/admin-auth.js';
+import { mapFeedRow, mapFeedRows } from '../server/feed-mapper.js';
 
 export const config = {
     runtime: 'edge',
@@ -31,7 +32,7 @@ export default async function handler(req: Request) {
         // --- GET all feeds ---
         if (req.method === 'GET') {
             const { rows: feeds } = await sql`SELECT * FROM feeds ORDER BY name;`;
-            return new Response(JSON.stringify(feeds), {
+            return new Response(JSON.stringify(mapFeedRows(feeds)), {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -44,11 +45,11 @@ export default async function handler(req: Request) {
 
             const result = await sql`
                 INSERT INTO feeds (id, name, url, language, priority, needs_scraping, update_interval)
-                VALUES (${newId}, ${name}, ${url}, ${language}, ${priority}, ${needsScraping || false}, ${update_interval})
+                VALUES (${newId}, ${name}, ${url}, ${language}, ${priority}, ${needsScraping ?? false}, ${update_interval})
                 RETURNING *;
             `;
 
-            return new Response(JSON.stringify(result.rows[0]), {
+            return new Response(JSON.stringify(mapFeedRow(result.rows[0])), {
                 status: 201,
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -61,12 +62,24 @@ export default async function handler(req: Request) {
                  return new Response(JSON.stringify({ error: 'Feed ID is required for updates' }), { status: 400 });
              }
 
-             await sql`
+             const result = await sql`
                 UPDATE feeds
-                SET name = ${name}, url = ${url}, language = ${language}, priority = ${priority}, needs_scraping = ${needsScraping || false}, update_interval = ${update_interval}
-                WHERE id = ${id};
+                SET name = ${name}, url = ${url}, language = ${language}, priority = ${priority}, needs_scraping = ${needsScraping ?? false}, update_interval = ${update_interval}
+                WHERE id = ${id}
+                RETURNING *;
              `;
-             return new Response(null, { status: 204 }); // 204 No Content for successful update
+
+             if (!result.rows[0]) {
+                 return new Response(JSON.stringify({ error: 'Feed not found' }), {
+                     status: 404,
+                     headers: { 'Content-Type': 'application/json' },
+                 });
+             }
+
+             return new Response(JSON.stringify(mapFeedRow(result.rows[0])), {
+                 status: 200,
+                 headers: { 'Content-Type': 'application/json' },
+             });
         }
 
         // --- DELETE a feed ---

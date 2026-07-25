@@ -31,7 +31,7 @@ export const useFeeds = () => {
                 body: JSON.stringify(feed),
             });
             if (!response.ok) throw new Error('Failed to add feed');
-            const newFeed = await response.json();
+            const newFeed: FeedSource = await response.json();
             setFeeds(prev => [...prev, newFeed]);
         } catch (error) {
             console.error('Error adding feed:', error);
@@ -46,7 +46,8 @@ export const useFeeds = () => {
                 body: JSON.stringify(updatedFeed),
             });
             if (!response.ok) throw new Error('Failed to update feed');
-            setFeeds(prev => prev.map(f => f.id === updatedFeed.id ? updatedFeed : f));
+            const savedFeed: FeedSource = await response.json();
+            setFeeds(prev => prev.map(f => f.id === savedFeed.id ? savedFeed : f));
         } catch (error) {
             console.error('Error updating feed:', error);
         }
