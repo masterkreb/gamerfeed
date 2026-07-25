@@ -18,7 +18,6 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
     const [url, setUrl] = useState('');
     const [language, setLanguage] = useState<'de' | 'en'>('en');
     const [priority, setPriority] = useState<'primary' | 'secondary'>('secondary');
-    const [updateInterval, setUpdateInterval] = useState(60);
     const [needsScraping, setNeedsScraping] = useState(false);
     const [urlError, setUrlError] = useState<string | null>(null);
 
@@ -28,7 +27,6 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
             setUrl(feed.url);
             setLanguage(feed.language);
             setPriority(feed.priority);
-            setUpdateInterval(feed.update_interval);
             setNeedsScraping(!!feed.needsScraping);
         } else {
             // Reset form for "add new"
@@ -36,7 +34,6 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
             setUrl('');
             setLanguage('en');
             setPriority('secondary');
-            setUpdateInterval(60);
             setNeedsScraping(false);
         }
         // Reset error state whenever the modal is opened/closed or the feed changes
@@ -66,7 +63,7 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
         }
         // --- End Validation ---
 
-        const feedData = { name, url, language, priority, needsScraping, update_interval: Number(updateInterval) };
+        const feedData = { name, url, language, priority, needsScraping };
 
         if (feed) { // Editing existing feed
             updateFeed({ ...feedData, id: feed.id });
@@ -157,18 +154,6 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
                                     <option value="secondary">secondary</option>
                                 </select>
                             </div>
-                        </div>
-                        <div>
-                            <label htmlFor="feed-interval" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">{t('admin.form.labelInterval')}</label>
-                            <input
-                                id="feed-interval"
-                                type="number"
-                                value={updateInterval}
-                                onChange={(e) => setUpdateInterval(Number(e.target.value))}
-                                required
-                                min="1"
-                                className="w-full h-11 px-3 py-2 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                            />
                         </div>
                         <div className="flex items-center gap-3 pt-2">
                             <input

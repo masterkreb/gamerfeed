@@ -142,7 +142,6 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                         <SortableHeader label={t('admin.management.headerUrl')} sortKey="url" sortConfig={sortConfig} requestSort={requestSort} className="w-1/3"/>
                         <SortableHeader label={t('admin.management.headerPriority')} sortKey="priority" sortConfig={sortConfig} requestSort={requestSort} className="w-32" />
                         <SortableHeader label={t('admin.management.headerLang')} sortKey="language" sortConfig={sortConfig} requestSort={requestSort} className="w-24" />
-                        <SortableHeader label={t('admin.management.headerInterval')} sortKey="update_interval" sortConfig={sortConfig} requestSort={requestSort} className="w-28" />
                         <SortableHeader label={t('admin.management.headerHealth')} sortKey="health" sortConfig={sortConfig} requestSort={requestSort} className="w-20 justify-center" />
                         <th scope="col" className="p-4 text-right w-28">{t('admin.management.headerActions')}</th>
                     </tr>
@@ -154,7 +153,6 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                             <td className="p-4 text-slate-500 dark:text-zinc-400 truncate" title={feed.url}>{feed.url}</td>
                             <td className="p-4"><span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${feed.priority === 'primary' ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'bg-slate-100 dark:bg-zinc-700 text-slate-600 dark:text-zinc-300'}`}>{feed.priority}</span></td>
                             <td className="p-4 text-center"><span className="font-bold uppercase text-xs">{feed.language}</span></td>
-                            <td className="p-4 text-center">{feed.update_interval} min</td>
                             <td className="p-4"><div className="flex justify-center items-center">
                                 <HealthStatusIcon state={feedHealth[feed.id]} />
                             </div></td>
@@ -182,10 +180,9 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                         <div className="text-sm text-slate-500 dark:text-zinc-400">
                             <a href={feed.url} target="_blank" rel="noopener noreferrer" className="text-indigo-500 break-all">{feed.url}</a>
                         </div>
-                        <div className="grid grid-cols-3 gap-3 text-center text-sm pt-2">
+                        <div className="grid grid-cols-2 gap-3 text-center text-sm pt-2">
                             <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">{t('admin.management.headerPriority')}</p><p className="font-bold capitalize">{feed.priority}</p></div>
                             <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">{t('admin.management.headerLang')}</p><p className="font-bold uppercase">{feed.language}</p></div>
-                            <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">{t('admin.management.headerInterval')}</p><p className="font-bold">{feed.update_interval} min</p></div>
                         </div>
                         <div className="flex items-center justify-end gap-2 border-t border-slate-200 dark:border-zinc-700 pt-3 mt-3">
                             <button onClick={onCheckHealth} className="p-2 text-slate-500 dark:text-zinc-400 rounded-md" aria-label={t('admin.management.ariaCheckHealth', { name: feed.name })}><ResetIcon className="w-5 h-5"/></button>

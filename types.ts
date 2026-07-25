@@ -44,7 +44,6 @@ export interface FeedSource {
     name: string;
     language: 'de' | 'en';
     priority: 'primary' | 'secondary';
-    update_interval: number; // in minutes
     needsScraping?: boolean;
 }
 

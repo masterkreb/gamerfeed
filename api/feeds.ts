@@ -7,6 +7,10 @@ export const config = {
     runtime: 'edge',
 };
 
+// The scheduler is global. This value only keeps new rows compatible with the
+// existing database column; GitHub Actions fetches every feed every 20 minutes.
+const LEGACY_UPDATE_INTERVAL_MINUTES = 20;
+
 // A helper function to create a new, URL-safe feed ID from its name
 function createFeedId(name: string): string {
     const sanitizedName = name
@@ -40,12 +44,12 @@ export default async function handler(req: Request) {
 
         // --- POST (create) a new feed ---
         if (req.method === 'POST') {
-            const { name, url, language, priority, needsScraping, update_interval } = await req.json() as Omit<FeedSource, 'id'>;
+            const { name, url, language, priority, needsScraping } = await req.json() as Omit<FeedSource, 'id'>;
             const newId = createFeedId(name);
 
             const result = await sql`
                 INSERT INTO feeds (id, name, url, language, priority, needs_scraping, update_interval)
-                VALUES (${newId}, ${name}, ${url}, ${language}, ${priority}, ${needsScraping ?? false}, ${update_interval})
+                VALUES (${newId}, ${name}, ${url}, ${language}, ${priority}, ${needsScraping ?? false}, ${LEGACY_UPDATE_INTERVAL_MINUTES})
                 RETURNING *;
             `;
 
@@ -57,14 +61,14 @@ export default async function handler(req: Request) {
 
         // --- PUT (update) an existing feed ---
         if (req.method === 'PUT') {
-             const { id, name, url, language, priority, needsScraping, update_interval } = await req.json() as FeedSource;
+             const { id, name, url, language, priority, needsScraping } = await req.json() as FeedSource;
              if (!id) {
                  return new Response(JSON.stringify({ error: 'Feed ID is required for updates' }), { status: 400 });
              }
 
              const result = await sql`
                 UPDATE feeds
-                SET name = ${name}, url = ${url}, language = ${language}, priority = ${priority}, needs_scraping = ${needsScraping ?? false}, update_interval = ${update_interval}
+                SET name = ${name}, url = ${url}, language = ${language}, priority = ${priority}, needs_scraping = ${needsScraping ?? false}
                 WHERE id = ${id}
                 RETURNING *;
              `;

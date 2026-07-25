@@ -259,7 +259,6 @@ const resources = {
                     "headerUrl": "URL",
                     "headerPriority": "Priority",
                     "headerLang": "Lang",
-                    "headerInterval": "Interval",
                     "headerHealth": "Health",
                     "headerActions": "Actions",
                     "ariaCheckHealth": "Check health for {{name}}",
@@ -316,7 +315,6 @@ const resources = {
                     "labelUrl": "URL",
                     "labelLang": "Language",
                     "labelPriority": "Priority",
-                    "labelInterval": "Update Interval (minutes)",
                     "labelScraping": "Image requires scraping fallback?",
                     "errorUrlExists": "This feed URL already exists.",
                     "save": "Save"
@@ -612,7 +610,6 @@ const resources = {
                     "headerUrl": "URL",
                     "headerPriority": "Priorität",
                     "headerLang": "Spr.",
-                    "headerInterval": "Intervall",
                     "headerHealth": "Status",
                     "headerActions": "Aktionen",
                     "ariaCheckHealth": "Status für {{name}} prüfen",
@@ -669,7 +666,6 @@ const resources = {
                     "labelUrl": "URL",
                     "labelLang": "Sprache",
                     "labelPriority": "Priorität",
-                    "labelInterval": "Update-Intervall (Minuten)",
                     "labelScraping": "Bild erfordert Scraping-Fallback?",
                     "errorUrlExists": "Diese Feed-URL existiert bereits.",
                     "save": "Speichern"

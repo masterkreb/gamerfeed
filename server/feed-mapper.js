@@ -5,7 +5,6 @@ export function mapFeedRow(row) {
         name: row.name,
         language: row.language,
         priority: row.priority,
-        update_interval: row.update_interval,
         needsScraping: row.needs_scraping ?? false,
     };
 }

@@ -27,16 +27,16 @@ test('übersetzt eine Feed-Datenbankzeile in den Frontend-Vertrag', () => {
         name: 'Destructoid',
         language: 'en',
         priority: 'secondary',
-        update_interval: 60,
         needsScraping: true,
     });
 });
 
-test('behält false bei und entfernt den Datenbank-Feldnamen', () => {
+test('behält false bei und entfernt interne Datenbankfelder', () => {
     const mappedFeed = mapFeedRow(createDatabaseRow({ needs_scraping: false }));
 
     assert.equal(mappedFeed.needsScraping, false);
     assert.equal('needs_scraping' in mappedFeed, false);
+    assert.equal('update_interval' in mappedFeed, false);
 });
 
 test('verwendet false für null oder fehlendes needs_scraping', () => {

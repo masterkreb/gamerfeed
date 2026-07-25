@@ -101,7 +101,7 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
 
 #### 1. Der Datensammler (GitHub Actions Cron Job)
 
-*   **Aufgabe:** Alle 20 Minuten die neuesten Nachrichten sammeln und im zentralen Cache ablegen.
+*   **Aufgabe:** Alle 20 Minuten sämtliche Feed-Quellen abrufen und die neuesten Nachrichten im zentralen Cache ablegen.
 *   **Ablauf:**
     1.  Der GitHub-Workflow (`.github/workflows/update-feeds.yml`) startet das `fetch-feeds.js`-Skript.
     2.  Das Skript holt die Feed-Liste aus der Postgres-Datenbank.
