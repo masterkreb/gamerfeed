@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mapFeedRow, mapFeedRows } from '../../../server/feed-mapper.js';
+import {
+    mapNewFeedToDatabaseRow,
+    mapFeedRow,
+    mapFeedRows,
+    mapFeedUpdateToDatabaseRow,
+} from '../../../server/feed-mapper.js';
 
 function createDatabaseRow(overrides = {}) {
     return {
@@ -14,6 +19,61 @@ function createDatabaseRow(overrides = {}) {
         ...overrides,
     };
 }
+
+function createRequestPayload(overrides = {}) {
+    return {
+        id: 'destructoid',
+        url: 'https://www.destructoid.com/feed/',
+        name: 'Destructoid',
+        language: 'en',
+        priority: 'secondary',
+        needsScraping: true,
+        ...overrides,
+    };
+}
+
+test('bereitet neue Feeds ohne öffentliches Intervall für die bestehende Datenbankspalte vor', () => {
+    const payload = createRequestPayload();
+    delete payload.id;
+    delete payload.needsScraping;
+
+    assert.deepEqual(mapNewFeedToDatabaseRow(payload, 'destructoid-new'), {
+        id: 'destructoid-new',
+        name: 'Destructoid',
+        url: 'https://www.destructoid.com/feed/',
+        language: 'en',
+        priority: 'secondary',
+        needs_scraping: false,
+        update_interval: 20,
+    });
+});
+
+test('ignoriert alte oder manipulierte Intervallwerte aus Feed-Anfragen', () => {
+    const payload = Object.freeze(createRequestPayload({ update_interval: 999, updateInterval: 888 }));
+
+    const createRow = mapNewFeedToDatabaseRow(payload, 'destructoid-new');
+    const updateRow = mapFeedUpdateToDatabaseRow(payload);
+
+    assert.equal(createRow.update_interval, 20);
+    assert.equal('updateInterval' in createRow, false);
+    assert.equal('update_interval' in updateRow, false);
+    assert.equal('updateInterval' in updateRow, false);
+    assert.equal(payload.update_interval, 999);
+    assert.equal(payload.updateInterval, 888);
+});
+
+test('übernimmt beim Bearbeiten nur die erlaubten Feed-Felder inklusive ID', () => {
+    const payload = createRequestPayload({ internal_note: 'nicht übernehmen' });
+
+    assert.deepEqual(mapFeedUpdateToDatabaseRow(payload), {
+        id: 'destructoid',
+        name: 'Destructoid',
+        url: 'https://www.destructoid.com/feed/',
+        language: 'en',
+        priority: 'secondary',
+        needs_scraping: true,
+    });
+});
 
 test('übersetzt eine Feed-Datenbankzeile in den Frontend-Vertrag', () => {
     const row = createDatabaseRow({

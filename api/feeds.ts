@@ -1,15 +1,16 @@
 import { sql } from '@vercel/postgres';
 import type { FeedSource } from '../types';
 import { requireAdminAuth, requireAdminMutation } from '../server/admin-auth.js';
-import { mapFeedRow, mapFeedRows } from '../server/feed-mapper.js';
+import {
+    mapNewFeedToDatabaseRow,
+    mapFeedRow,
+    mapFeedRows,
+    mapFeedUpdateToDatabaseRow,
+} from '../server/feed-mapper.js';
 
 export const config = {
     runtime: 'edge',
 };
-
-// The scheduler is global. This value only keeps new rows compatible with the
-// existing database column; GitHub Actions fetches every feed every 20 minutes.
-const LEGACY_UPDATE_INTERVAL_MINUTES = 20;
 
 // A helper function to create a new, URL-safe feed ID from its name
 function createFeedId(name: string): string {
@@ -44,12 +45,13 @@ export default async function handler(req: Request) {
 
         // --- POST (create) a new feed ---
         if (req.method === 'POST') {
-            const { name, url, language, priority, needsScraping } = await req.json() as Omit<FeedSource, 'id'>;
-            const newId = createFeedId(name);
+            const payload = await req.json() as Omit<FeedSource, 'id'>;
+            const newId = createFeedId(payload.name);
+            const feedRow = mapNewFeedToDatabaseRow(payload, newId);
 
             const result = await sql`
                 INSERT INTO feeds (id, name, url, language, priority, needs_scraping, update_interval)
-                VALUES (${newId}, ${name}, ${url}, ${language}, ${priority}, ${needsScraping ?? false}, ${LEGACY_UPDATE_INTERVAL_MINUTES})
+                VALUES (${feedRow.id}, ${feedRow.name}, ${feedRow.url}, ${feedRow.language}, ${feedRow.priority}, ${feedRow.needs_scraping}, ${feedRow.update_interval})
                 RETURNING *;
             `;
 
@@ -61,15 +63,16 @@ export default async function handler(req: Request) {
 
         // --- PUT (update) an existing feed ---
         if (req.method === 'PUT') {
-             const { id, name, url, language, priority, needsScraping } = await req.json() as FeedSource;
-             if (!id) {
+             const payload = await req.json() as FeedSource;
+             const feedRow = mapFeedUpdateToDatabaseRow(payload);
+             if (!feedRow.id) {
                  return new Response(JSON.stringify({ error: 'Feed ID is required for updates' }), { status: 400 });
              }
 
              const result = await sql`
                 UPDATE feeds
-                SET name = ${name}, url = ${url}, language = ${language}, priority = ${priority}, needs_scraping = ${needsScraping ?? false}
-                WHERE id = ${id}
+                SET name = ${feedRow.name}, url = ${feedRow.url}, language = ${feedRow.language}, priority = ${feedRow.priority}, needs_scraping = ${feedRow.needs_scraping}
+                WHERE id = ${feedRow.id}
                 RETURNING *;
              `;
 
