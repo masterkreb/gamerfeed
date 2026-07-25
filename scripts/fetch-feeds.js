@@ -5,6 +5,16 @@ import { kv } from '@vercel/kv';
 import { sql } from '@vercel/postgres';
 import { DOMParser } from 'linkedom';
 import { escape } from 'html-escaper';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import {
+    chooseMergedImageUrl,
+    hasUsableStoredImage,
+    isKnownNonArticleImageUrl,
+    needsStoredImageRepair,
+    selectRssContentImageUrl,
+    shouldScrapeMissingImage,
+} from './feed-image-utils.js';
 
 // === HELPER FUNCTIONS (DECODING, STRIPPING, ETC.) ===
 function decodeHtmlEntities(text) {
@@ -47,8 +57,9 @@ function formatDuration(ms) {
     return `${(ms / 1000).toFixed(1)}s`;
 }
 
-function hasPlaceholderImage(article) {
-    return article?.imageUrl?.includes('placehold.co');
+function getPlaceholderImageUrl(sourceName) {
+    const label = String(sourceName || 'Unknown').substring(0, 30);
+    return `https://placehold.co/600x400/374151/d1d5db?text=${encodeURIComponent(label)}`;
 }
 
 function getFetchUrlForFeed(feed) {
@@ -58,7 +69,7 @@ function getFetchUrlForFeed(feed) {
     return feed.url;
 }
 
-async function getOgImageFromUrl(url, sourceName) {
+export async function getOgImageFromUrl(url, sourceName) {
     const browserLikeHeaders = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -93,16 +104,23 @@ async function getOgImageFromUrl(url, sourceName) {
             const html = await response.text();
             const doc = new DOMParser().parseFromString(html, 'text/html');
 
-            const ogImageMeta =
-                doc.querySelector('meta[property="og:image"]') ||
-                doc.querySelector('meta[property="og:image:url"]') ||
-                doc.querySelector('meta[name="twitter:image"]');
+            let imageUrl = null;
+            const imageMetaSelectors = [
+                'meta[property="og:image"]',
+                'meta[property="og:image:url"]',
+                'meta[name="twitter:image"]',
+            ];
 
-            let imageUrl = ogImageMeta ? ogImageMeta.getAttribute('content') : null;
-
-            // Rule for PlayStationInfo: if og:image is a WP emoji, discard and look for alternatives.
-            if (sourceName === 'PlayStationInfo' && imageUrl && imageUrl.includes('s.w.org/images/core/emoji')) {
-                imageUrl = null;
+            for (const selector of imageMetaSelectors) {
+                const imageMetas = doc.querySelectorAll(selector);
+                for (const imageMeta of imageMetas) {
+                    const candidate = imageMeta.getAttribute('content')?.trim();
+                    if (candidate && !isKnownNonArticleImageUrl(candidate, sourceName)) {
+                        imageUrl = candidate;
+                        break;
+                    }
+                }
+                if (imageUrl) break;
             }
 
             if (imageUrl) {
@@ -149,7 +167,7 @@ async function getOgImageFromUrl(url, sourceName) {
 }
 
 // === PARSE RSS/ATOM FEED ===
-function parseRssXml(xmlString, feed) {
+export function parseRssXml(xmlString, feed) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xmlString, "text/xml");
     const errorNode = doc.querySelector("parsererror");
@@ -184,13 +202,12 @@ function parseRssXml(xmlString, feed) {
 
         // --- More robust Image and Content Extraction ---
         let imageUrl = null;
-        const isEmojiUrl = (url) => url && url.includes('s.w.org/images/core/emoji');
 
         // 1. Enclosure
         const enclosure = node.querySelector('enclosure[type^="image"]');
         if (enclosure) {
             const enclosureUrl = enclosure.getAttribute('url');
-            if (enclosureUrl && !isEmojiUrl(enclosureUrl)) {
+            if (enclosureUrl && !isKnownNonArticleImageUrl(enclosureUrl, feed)) {
                 imageUrl = enclosureUrl;
             }
         }
@@ -205,7 +222,7 @@ function parseRssXml(xmlString, feed) {
                     const medium = child.getAttribute('medium');
                     if (medium === 'image' || (type && type.startsWith('image/'))) {
                         const url = child.getAttribute('url');
-                        if (url && !isEmojiUrl(url)) {
+                        if (url && !isKnownNonArticleImageUrl(url, feed)) {
                             imageUrl = url;
                             break; // Found it, stop searching
                         }
@@ -220,7 +237,7 @@ function parseRssXml(xmlString, feed) {
             const mediaThumbnail = node.getElementsByTagName('media:thumbnail')[0];
             if (mediaThumbnail) {
                 const thumbnailUrl = mediaThumbnail.getAttribute('url');
-                if (thumbnailUrl && !isEmojiUrl(thumbnailUrl)) {
+                if (thumbnailUrl && !isKnownNonArticleImageUrl(thumbnailUrl, feed)) {
                     imageUrl = thumbnailUrl;
                 }
             }
@@ -231,7 +248,7 @@ function parseRssXml(xmlString, feed) {
             const thumbnail = node.querySelector('thumbnail[url]');
             if (thumbnail) {
                 const thumbUrl = thumbnail.getAttribute('url');
-                if (thumbUrl && !isEmojiUrl(thumbUrl)) {
+                if (thumbUrl && !isKnownNonArticleImageUrl(thumbUrl, feed)) {
                     imageUrl = thumbUrl;
                 }
             }
@@ -255,20 +272,13 @@ function parseRssXml(xmlString, feed) {
                     let youtubeFallback = null;
 
                     for (const img of images) {
-                        const src = img.getAttribute('data-src') || img.src;
-
-                        if (
-                            !src ||
-                            src.startsWith('data:') ||
-                            src.includes('s.w.org/images/core/emoji') ||
-                            src.includes('placeholder.svg') ||
-                            src.includes('cpx.golem.de') ||
-                            src.includes('feedburner.com') ||
-                            src.includes('feedsportal.com') ||
-                            src.includes('gravatar.com')
-                        ) {
-                            continue;
-                        }
+                        const src = selectRssContentImageUrl([
+                            img.getAttribute('data-src'),
+                            img.getAttribute('data-lazy-src'),
+                            img.getAttribute('src'),
+                            img.src,
+                        ], feed);
+                        if (!src) continue;
 
                         const width = img.getAttribute('width');
                         const height = img.getAttribute('height');
@@ -297,7 +307,7 @@ function parseRssXml(xmlString, feed) {
         }
 
         let finalImageUrl = null;
-        if (imageUrl) {
+        if (imageUrl && !isKnownNonArticleImageUrl(imageUrl, feed)) {
             try {
                 // Start with a valid, absolute URL
                 let processedUrl = new URL(imageUrl, link).href;
@@ -350,7 +360,7 @@ function parseRssXml(xmlString, feed) {
             summary,
             link,
             imageUrl: finalImageUrl || null,
-            needsScraping: !finalImageUrl && feed.needs_scraping,
+            needsScraping: !finalImageUrl && shouldScrapeMissingImage(feed),
             language: feed.language
         });
     });
@@ -753,8 +763,8 @@ async function main() {
     const feedHealthStatus = {};
     const ARTICLE_RETENTION_DAYS = 60; // Artikel werden 60 Tage gespeichert
     const MAX_ARTICLES = 10000; // Maximale Anzahl Artikel (verhindert KV Limit-Überschreitung)
-    const PLACEHOLDER_BACKFILL_LIMIT = 30;
-    const PLACEHOLDER_BACKFILL_PER_SOURCE_LIMIT = 5;
+    const IMAGE_BACKFILL_LIMIT = 30;
+    const IMAGE_BACKFILL_PER_SOURCE_LIMIT = 5;
 
     try {
         let oldArticles = [];
@@ -763,8 +773,21 @@ async function main() {
 
             // If cache exists and is a valid array, use it.
             if (cachedData && Array.isArray(cachedData)) {
-                oldArticles = cachedData;
+                let sanitizedImageCount = 0;
+                oldArticles = cachedData.map(article => {
+                    if (isKnownNonArticleImageUrl(article?.imageUrl, article?.source)) {
+                        sanitizedImageCount++;
+                        return {
+                            ...article,
+                            imageUrl: getPlaceholderImageUrl(article.source),
+                        };
+                    }
+                    return article;
+                });
                 console.log(`\n📦 Loaded ${oldArticles.length} articles from existing KV cache.`);
+                if (sanitizedImageCount > 0) {
+                    console.log(`   🧹 Replaced ${sanitizedImageCount} cached UI icon image(s) with placeholders.`);
+                }
 
                 // If cache is empty (null or undefined), it's safe to start fresh.
             } else if (!cachedData) {
@@ -854,6 +877,34 @@ async function main() {
 
         console.log(`\n📰 Total new articles fetched: ${newlyFetchedArticles.length}`);
 
+        const cachedArticlesByIdentity = new Map();
+        oldArticles.forEach(article => {
+            if (article?.link) cachedArticlesByIdentity.set(`link:${article.link}`, article);
+            if (article?.id) {
+                const sourceKey = String(article.source || '').trim().toLowerCase();
+                cachedArticlesByIdentity.set(`id:${sourceKey}:${article.id}`, article);
+            }
+        });
+
+        let reusedCachedImageCount = 0;
+        newlyFetchedArticles.forEach(article => {
+            if (!article.needsScraping) return;
+
+            const sourceKey = String(article.source || '').trim().toLowerCase();
+            const cachedArticle =
+                cachedArticlesByIdentity.get(`link:${article.link}`)
+                || cachedArticlesByIdentity.get(`id:${sourceKey}:${article.id}`);
+
+            if (cachedArticle && hasUsableStoredImage(cachedArticle)) {
+                article.imageUrl = cachedArticle.imageUrl;
+                article.needsScraping = false;
+                reusedCachedImageCount++;
+            }
+        });
+        if (reusedCachedImageCount > 0) {
+            console.log(`\n♻️  Reused ${reusedCachedImageCount} valid cached image(s); skipped redundant page scraping.`);
+        }
+
         const articlesNeedingScraping = newlyFetchedArticles.filter(a => a.needsScraping);
         if (articlesNeedingScraping.length > 0) {
             console.log(`\n🔎 Scraping images for ${articlesNeedingScraping.length} articles...\n`);
@@ -886,28 +937,28 @@ async function main() {
         }
 
         newlyFetchedArticles = newlyFetchedArticles.map(article => {
-            if (!article.imageUrl) { article.imageUrl = `https://placehold.co/600x400/374151/d1d5db?text=${encodeURIComponent(article.source.substring(0, 30))}`; }
+            if (!article.imageUrl) article.imageUrl = getPlaceholderImageUrl(article.source);
             delete article.needsScraping;
             return article;
         });
 
         const newlyFetchedLinks = new Set(newlyFetchedArticles.map(article => article.link).filter(Boolean));
         const backfillSourceCounts = new Map();
-        const placeholderBackfillArticles = oldArticles
-            .filter(article => article?.link && hasPlaceholderImage(article) && !newlyFetchedLinks.has(article.link))
+        const imageBackfillArticles = oldArticles
+            .filter(article => article?.link && needsStoredImageRepair(article) && !newlyFetchedLinks.has(article.link))
             .filter(article => {
                 const source = article.source || 'Unknown';
                 const currentCount = backfillSourceCounts.get(source) || 0;
-                if (currentCount >= PLACEHOLDER_BACKFILL_PER_SOURCE_LIMIT) return false;
+                if (currentCount >= IMAGE_BACKFILL_PER_SOURCE_LIMIT) return false;
                 backfillSourceCounts.set(source, currentCount + 1);
                 return true;
             })
-            .slice(0, PLACEHOLDER_BACKFILL_LIMIT);
+            .slice(0, IMAGE_BACKFILL_LIMIT);
 
-        if (placeholderBackfillArticles.length > 0) {
-            console.log(`\n🧩 Backfilling images for ${placeholderBackfillArticles.length} old placeholder articles...\n`);
+        if (imageBackfillArticles.length > 0) {
+            console.log(`\n🧩 Backfilling images for ${imageBackfillArticles.length} old articles with missing or invalid images...\n`);
             const backfillStats = { found: 0, missing: 0, failed: 0, totalMs: 0 };
-            for (const article of placeholderBackfillArticles) {
+            for (const article of imageBackfillArticles) {
                 const articleBackfillStart = Date.now();
                 try {
                     console.log(`   🖼️  Backfill: ${article.source} - ${article.title.substring(0, 40)}...`);
@@ -930,9 +981,9 @@ async function main() {
                     console.error(`      ❌ Backfill failed after ${formatDuration(articleBackfillDuration)}: ${error.message}`);
                 }
             }
-            console.log(`\n🧩 Placeholder backfill summary: ${backfillStats.found} found, ${backfillStats.missing} still missing, ${backfillStats.failed} failed in ${formatDuration(backfillStats.totalMs)} active backfill time.\n`);
+            console.log(`\n🧩 Image backfill summary: ${backfillStats.found} found, ${backfillStats.missing} still missing, ${backfillStats.failed} failed in ${formatDuration(backfillStats.totalMs)} active backfill time.\n`);
         } else {
-            console.log(`\n🧩 No old placeholder articles need backfill.\n`);
+            console.log(`\n🧩 No old articles need image backfill.\n`);
         }
 
         console.log('\n🔄 Merging, pruning, and sorting articles...');
@@ -942,8 +993,6 @@ async function main() {
                 // Use link (URL) as key to avoid duplicates when title changes
                 const key = article.link;
                 const existing = uniqueArticlesMap.get(key);
-                const articleHasRealImage = article.imageUrl && !hasPlaceholderImage(article);
-                const existingHasRealImage = existing?.imageUrl && !hasPlaceholderImage(existing);
                 if (!existing) {
                     uniqueArticlesMap.set(key, article); 
                 } else {
@@ -951,7 +1000,7 @@ async function main() {
                     uniqueArticlesMap.set(key, {
                         ...existing,
                         ...article,
-                        imageUrl: articleHasRealImage ? article.imageUrl : (existingHasRealImage ? existing.imageUrl : article.imageUrl),
+                        imageUrl: chooseMergedImageUrl(existing, article),
                     });
                 }
             }
@@ -999,4 +1048,6 @@ async function main() {
     }
 }
 
-main();
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+    main();
+}

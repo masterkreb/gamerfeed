@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test feed image extraction
+        run: npm run test:feeds
+
       - name: Fetch and cache feeds to Vercel KV
         env:
           # IMPORTANT: These secrets MUST be configured in your GitHub repository settings.

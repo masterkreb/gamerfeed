@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "test:feeds": "node --test \"tests/feeds/**/*.test.js\"",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@vercel/kv": "^2.0.0",

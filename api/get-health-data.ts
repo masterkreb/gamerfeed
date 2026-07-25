@@ -1,11 +1,28 @@
 import { kv } from '@vercel/kv';
 import type { Article, BackendHealthStatus } from '../types';
+import { requireAdminAuth } from '../server/admin-auth.js';
 
 export const config = {
     runtime: 'edge',
 };
 
 export default async function handler(req: Request) {
+    const authResponse = requireAdminAuth(req);
+    if (authResponse) {
+        return authResponse;
+    }
+
+    if (req.method !== 'GET') {
+        return new Response(JSON.stringify({ error: `Method ${req.method} Not Allowed` }), {
+            status: 405,
+            headers: {
+                'Allow': 'GET',
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-store',
+            },
+        });
+    }
+
     try {
         const [healthStatus, articles] = await Promise.all([
             kv.get<BackendHealthStatus>('feed_health_status'),

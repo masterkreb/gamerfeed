@@ -90,7 +90,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     *   `/api/get-health-data`: Liefert den Systemstatus an das Admin-Panel
     *   `/api/announcement`: Verwaltung und Abruf von Ankündigungen
     *   `/api/trends`: Liefert KI-generierte Trends
-6.  **Admin-Backend (Middleware)**: Eine Middleware (`middleware.js`) sichert das Admin-Panels über Basic Authentication ab.
+6.  **Admin-Backend (mehrschichtiger Schutz)**: Die Middleware schützt die statische Admin-Seite. Die Admin-APIs prüfen Basic Authentication zusätzlich direkt im jeweiligen Handler und schützen schreibende Aufrufe per Same-Origin-Prüfung.
 7.  **KI-Integration (Groq API)**: Automatische Trend-Analyse mit Groq's llama-3.1-8b-instant Modell für Gaming-News.
 
 ---
@@ -185,7 +185,7 @@ Die Statusanzeige wird wie folgt ermittelt:
     # Groq API für Trend-Analyse (optional)
     GROQ_API_KEY="gsk_..."
 
-    # Anmeldedaten für das Admin-Panel (/admin.html)
+    # Zwingende Anmeldedaten für Admin-Seite und Admin-APIs
     ADMIN_USERNAME="dein_admin_benutzername"
     ADMIN_PASSWORD="dein_sicheres_passwort"
     ```
@@ -195,9 +195,14 @@ Die Statusanzeige wird wie folgt ermittelt:
     npm run dev
     ```
 
+    Für das vollständige Admin-Panel inklusive Middleware und API-Routen verwende:
+    ```bash
+    vercel dev
+    ```
+
 5.  **Anwendung öffnen**:
     - Die Hauptanwendung ist unter `http://localhost:3000` erreichbar.
-    - Das Admin-Panel findest du unter `http://localhost:3000/admin.html`.
+    - Das Admin-Panel findest du mit `vercel dev` unter `/admin.html`.
 
 ### Build für Production
 
@@ -209,6 +214,28 @@ Dies erstellt einen optimierten Production-Build im `dist/`-Ordner:
 - **Tailwind CSS**: Nur genutzte Klassen werden inkludiert (~65KB statt ~300KB CDN)
 - **JavaScript**: Minifiziert und tree-shaked
 - **Keine externe Abhängigkeiten**: Alles wird lokal gebündelt
+
+### Tests und Qualitätsprüfung
+
+Alle Tests liegen zentral unter `tests/` und sind dort nach Fachbereich sowie Testart gegliedert:
+
+```text
+tests/
+├── feeds/
+│   ├── unit/
+│   └── integration/
+└── server/
+    └── unit/
+```
+
+```bash
+npm test             # alle Tests
+npm run test:feeds   # nur Feed-Tests für den Cron-Job
+npm run typecheck    # TypeScript prüfen
+npm run build        # Produktions-Build prüfen
+```
+
+Der Workflow `.github/workflows/ci.yml` führt bei Pull Requests und Pushes auf `main` alle Tests, die TypeScript-Prüfung und den Produktions-Build aus. Der Feed-Cron nutzt zusätzlich die fokussierte Suite `test:feeds`. Die Tests sind kein separates Projekt und werden nicht in den Frontend-Build importiert.
 
 ### Manuelles Aktualisieren des Caches
 

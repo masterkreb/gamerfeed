@@ -1,5 +1,6 @@
 import { kv } from '@vercel/kv';
 import type { Announcement } from '../types';
+import { requireAdminAuth, requireAdminMutation } from '../server/admin-auth.js';
 
 export const config = {
     runtime: 'edge',
@@ -8,6 +9,15 @@ export const config = {
 const KV_KEY = 'site_announcement';
 
 export default async function handler(req: Request) {
+    if (req.method !== 'GET') {
+        const authResponse = ['POST', 'DELETE'].includes(req.method)
+            ? requireAdminMutation(req)
+            : requireAdminAuth(req);
+        if (authResponse) {
+            return authResponse;
+        }
+    }
+
     try {
         // GET - Fetch current announcement (public)
         if (req.method === 'GET') {
@@ -33,7 +43,7 @@ export default async function handler(req: Request) {
             });
         }
 
-        // POST - Create/Update announcement (protected by middleware)
+        // POST - Create/Update announcement (server-side protected)
         if (req.method === 'POST') {
             const body = await req.json();
             const { message, type, isActive } = body;
@@ -61,7 +71,7 @@ export default async function handler(req: Request) {
             });
         }
 
-        // DELETE - Remove announcement (protected by middleware)
+        // DELETE - Remove announcement (server-side protected)
         if (req.method === 'DELETE') {
             await kv.del(KV_KEY);
 

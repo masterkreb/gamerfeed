@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 import type { FeedSource } from '../types';
+import { requireAdminAuth, requireAdminMutation } from '../server/admin-auth.js';
 
 export const config = {
     runtime: 'edge',
@@ -19,6 +20,13 @@ function createFeedId(name: string): string {
 
 
 export default async function handler(req: Request) {
+    const authResponse = ['POST', 'PUT', 'DELETE'].includes(req.method)
+        ? requireAdminMutation(req)
+        : requireAdminAuth(req);
+    if (authResponse) {
+        return authResponse;
+    }
+
     try {
         // --- GET all feeds ---
         if (req.method === 'GET') {
