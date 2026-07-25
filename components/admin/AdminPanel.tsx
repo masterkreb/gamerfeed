@@ -17,7 +17,7 @@ import { FeedManagementTab } from './FeedManagementTab';
 import { HealthCenterTab } from './HealthCenterTab';
 import { HealthLegendTab } from './HealthLegendTab';
 import { AnnouncementTab } from './AnnouncementTab';
-import type { HealthState } from './healthService';
+import type { HealthState } from './healthTypes';
 
 // Types
 type AdminTab = 'management' | 'health' | 'legend' | 'announcement';

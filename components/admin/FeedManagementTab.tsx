@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FeedSource } from '../../types';
 import type { FeedHealth } from './AdminPanel';
-import { HealthState } from './healthService';
+import type { HealthState } from './healthTypes';
 import {
     PencilIcon, PlusIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon,
     CheckCircleIcon, XCircleIcon, QuestionMarkCircleIcon, LoadingSpinner, ResetIcon, WarningIcon

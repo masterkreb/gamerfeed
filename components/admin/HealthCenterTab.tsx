@@ -2,8 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FeedSource } from '../../types';
 import type { FeedHealth } from './AdminPanel';
-// FIX: Correctly import HealthState as a type. The original error "not a module" is resolved by adding content to healthService.ts.
-import type { HealthState } from './healthService';
+import type { HealthState } from './healthTypes';
 import {
     CheckCircleIcon, XCircleIcon, QuestionMarkCircleIcon, LoadingSpinner, WarningIcon, ChevronDownIcon, ChevronUpIcon
 } from '../Icons';
