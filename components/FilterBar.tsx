@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { TimeFilter } from '../types';
 import { StarIcon, SearchIcon, ResetIcon, FilterIcon, CloseIcon, BookmarkIcon, TrashIcon } from './Icons';
 import { useFilter } from '../contexts/FilterContext';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 
 interface FilterBarProps {
     sources: { name: string; language: 'de' | 'en' }[];
@@ -37,7 +38,46 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    const searchContainerRef = useRef<HTMLDivElement>(null);
+    const desktopSearchContainerRef = useRef<HTMLDivElement>(null);
+    const mobileSearchContainerRef = useRef<HTMLDivElement>(null);
+    const mobileFilterTriggerRef = useRef<HTMLButtonElement>(null);
+    const mobileFilterCloseRef = useRef<HTMLButtonElement>(null);
+
+    const closeMobileFilters = () => {
+        setIsModalOpen(false);
+        setIsDropdownOpen(false);
+    };
+
+    const mobileDialogRef = useDialogFocus<HTMLDivElement>({
+        isOpen: isModalOpen,
+        onClose: closeMobileFilters,
+        initialFocusRef: mobileFilterCloseRef,
+        fallbackFocusRef: mobileFilterTriggerRef,
+    });
+
+    useEffect(() => {
+        if (typeof window.matchMedia !== 'function') {
+            return;
+        }
+
+        const desktopViewport = window.matchMedia('(min-width: 64rem)');
+        const closeOnDesktop = (event: MediaQueryListEvent) => {
+            if (event.matches) {
+                setIsModalOpen(false);
+                setIsDropdownOpen(false);
+            }
+        };
+
+        if (desktopViewport.matches) {
+            setIsModalOpen(false);
+            setIsDropdownOpen(false);
+        }
+
+        desktopViewport.addEventListener('change', closeOnDesktop);
+        return () => {
+            desktopViewport.removeEventListener('change', closeOnDesktop);
+        };
+    }, []);
 
     // Sync local search when global query changes (e.g., from a reset)
     useEffect(() => {
@@ -107,7 +147,12 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+            const clickedInsideSearch = [
+                desktopSearchContainerRef.current,
+                mobileSearchContainerRef.current,
+            ].some(container => container?.contains(event.target as Node));
+
+            if (!clickedInsideSearch) {
                 setIsDropdownOpen(false);
             }
         };
@@ -115,7 +160,7 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [searchContainerRef]);
+    }, []);
 
     const handleLanguageFilterChange = (newLanguage: 'all' | 'de' | 'en') => {
         setLanguageFilter(newLanguage);
@@ -131,8 +176,15 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
         handleSearchChange({ target: { value: '' } } as React.ChangeEvent<HTMLInputElement>);
     }
 
-    const FilterControls = (
-        <div className="space-y-4">
+    const renderFilterControls = (
+        idPrefix: 'desktop' | 'mobile',
+        searchContainerRef: React.RefObject<HTMLDivElement | null>,
+    ) => {
+        const timeFilterId = `${idPrefix}-time-filter`;
+        const sourceFilterId = `${idPrefix}-source-filter`;
+
+        return (
+            <div className="space-y-4">
             <div className="flex items-center gap-2">
                 <div ref={searchContainerRef} className="relative flex-grow">
                     <input
@@ -202,8 +254,8 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 <div>
-                    <label htmlFor="time-filter" className="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1">{t('filter.time.label')}</label>
-                    <select id="time-filter" value={timeFilter} onChange={(e) => setTimeFilter(e.target.value as TimeFilter)} className={`${baseSelectClasses} ${timeFilter !== 'all' ? activeFilterClasses : ''}`}>
+                    <label htmlFor={timeFilterId} className="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1">{t('filter.time.label')}</label>
+                    <select id={timeFilterId} value={timeFilter} onChange={(e) => setTimeFilter(e.target.value as TimeFilter)} className={`${baseSelectClasses} ${timeFilter !== 'all' ? activeFilterClasses : ''}`}>
                         <option value="all">{t('filter.time.all')}</option>
                         <option value="today">{t('filter.time.today')}</option>
                         <option value="yesterday">{t('filter.time.yesterday')}</option>
@@ -238,9 +290,9 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
                 </div>
 
                 <div>
-                    <label htmlFor="source-filter" className="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1">{t('filter.source.label')}</label>
+                    <label htmlFor={sourceFilterId} className="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1">{t('filter.source.label')}</label>
                     <select
-                        id="source-filter"
+                        id={sourceFilterId}
                         value={sourceFilter}
                         onChange={handleSourceFilterChange}
                         className={`${baseSelectClasses} ${sourceFilter !== 'all' ? activeFilterClasses : ''} !normal-case`}
@@ -304,16 +356,21 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
                     </button>
                 </div>
             </div>
-        </div>
-    );
+            </div>
+        );
+    };
 
     return (
         <>
             {/* --- Mobile: Button to open modal --- */}
             <div className="lg:hidden">
                 <button
+                    ref={mobileFilterTriggerRef}
                     onClick={() => setIsModalOpen(true)}
                     className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-md font-semibold transition-all duration-200 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-700"
+                    aria-haspopup="dialog"
+                    aria-expanded={isModalOpen}
+                    aria-controls="mobile-filter-dialog"
                 >
                     <FilterIcon className="w-5 h-5" />
                     <span>{t('filter.filters')}</span>
@@ -327,7 +384,7 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
 
             {/* --- Desktop: Full filter bar --- */}
             <div className="hidden lg:block p-4 bg-white/50 dark:bg-zinc-800/50 rounded-xl border border-slate-200 dark:border-zinc-800">
-                {FilterControls}
+                {renderFilterControls('desktop', desktopSearchContainerRef)}
             </div>
 
             {/* --- Mobile: Modal --- */}
@@ -335,30 +392,36 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
                 className={`fixed inset-0 bg-black/60 z-30 transition-opacity lg:hidden ${
                     isModalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
-                onClick={() => setIsModalOpen(false)}
+                onClick={closeMobileFilters}
                 aria-hidden="true"
             />
             <div
+                ref={mobileDialogRef}
+                id="mobile-filter-dialog"
                 className={`fixed bottom-0 left-0 right-0 z-40 bg-slate-100 dark:bg-zinc-900 rounded-t-2xl shadow-2xl transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${
                     isModalOpen ? 'translate-y-0' : 'translate-y-full'
                 }`}
                 style={{ maxHeight: '85vh' }}
                 role="dialog"
-                aria-modal="true"
+                aria-modal={isModalOpen ? true : undefined}
+                aria-hidden={isModalOpen ? undefined : true}
                 aria-labelledby="filter-modal-title"
+                inert={!isModalOpen}
+                tabIndex={-1}
             >
                 <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-zinc-800 flex-shrink-0">
                     <h2 id="filter-modal-title" className="text-lg font-semibold">{t('filter.filters')}</h2>
                     <button
-                        onClick={() => setIsModalOpen(false)}
+                        ref={mobileFilterCloseRef}
+                        onClick={closeMobileFilters}
                         className="p-3 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
-                        aria-label="Close filters"
+                        aria-label={t('filter.close')}
                     >
                         <CloseIcon className="w-6 h-6" />
                     </button>
                 </div>
                 <div className="p-4 overflow-y-auto flex-grow">
-                    {FilterControls}
+                    {renderFilterControls('mobile', mobileSearchContainerRef)}
                 </div>
 
                 <div className="px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-slate-200 dark:border-zinc-800 bg-slate-100 dark:bg-zinc-900 flex-shrink-0">
@@ -393,7 +456,7 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
 
                     {/* Action Button */}
                     <button
-                        onClick={() => setIsModalOpen(false)}
+                        onClick={closeMobileFilters}
                         className={`w-full font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                             filteredArticlesCount === 0
                                 ? 'bg-slate-300 dark:bg-zinc-700 text-slate-500 dark:text-zinc-400 cursor-not-allowed'
