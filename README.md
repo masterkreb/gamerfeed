@@ -261,6 +261,9 @@ node scripts/fetch-feeds.js
 2.  **Datenbanken verbinden**: Verknüpfe dein Vercel-Projekt mit einer Vercel Postgres-Datenbank und einem Vercel KV Store.
 3.  **Umgebungsvariablen konfigurieren**: Füge im Vercel-Projekt-Dashboard die oben genannten Umgebungsvariablen hinzu. Für das Kontaktformular werden zusätzlich `RECAPTCHA_SECRET_KEY`, `GMAIL_USER` und `GMAIL_APP_PASSWORD` benötigt. Mit `RECAPTCHA_ALLOWED_HOSTNAMES` kann die reCAPTCHA-Antwort auf die produktiven Domains eingeschränkt werden.
 
+Für einen späteren Wechsel auf eine eigene Domain gibt es eine vollständige
+[Custom-Domain-Checkliste](docs/deployment/custom-domain.md).
+
 ### 4. GitHub Actions einrichten
 
 Der automatische Abruf der Nachrichten (`fetch-feeds.js`) wird von GitHub Actions ausgeführt, nicht von Vercel. Daher muss GitHub Zugriff auf die Vercel-Datenbanken haben. Dies geschieht über "Secrets".

@@ -65,3 +65,6 @@ Bei einem Fehler zuerst die Serverausgabe von `/api/contact` und anschließend d
 Die gleichen Variablen müssen unter **Project Settings → Environment Variables** für die gewünschten Umgebungen gesetzt werden. Danach ist ein neues Deployment erforderlich.
 
 GitHub Actions benötigt die Kontaktvariablen nicht: Das Formular läuft als Vercel Serverless Function. Die Secrets für den Feed-Workflow sind separat in der [README](README.md#4-github-actions-einrichten) beschrieben.
+
+Für den späteren Wechsel auf eine eigene Domain gilt die
+[Custom-Domain-Checkliste](docs/deployment/custom-domain.md).

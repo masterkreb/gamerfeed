@@ -217,3 +217,4 @@ npx tsc --noEmit
 4. **localStorage** wird für User-Settings verwendet
 5. **Vercel KV** für serverseitige Daten
 6. Bei Fragen zur Architektur: README.md lesen
+7. Bei einem Domainwechsel: `docs/deployment/custom-domain.md` vollständig abarbeiten
