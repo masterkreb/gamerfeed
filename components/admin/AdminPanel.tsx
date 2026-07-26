@@ -50,6 +50,8 @@ export const AdminPanel: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingFeed, setEditingFeed] = useState<FeedSource | null>(null);
     const [feedToDelete, setFeedToDelete] = useState<FeedSource | null>(null);
+    const [isDeletingFeed, setIsDeletingFeed] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
     const [feedHealth, setFeedHealth] = useState<FeedHealth>({});
     const [activeTab, setActiveTab] = useState<AdminTab>('management');
     const [isCheckingAll, setIsCheckingAll] = useState(false);
@@ -84,17 +86,38 @@ export const AdminPanel: React.FC = () => {
 
     const handleAddNew = () => { setEditingFeed(null); setIsModalOpen(true); };
     const handleEdit = (feed: FeedSource) => { setEditingFeed(feed); setIsModalOpen(true); };
-    const handleDelete = (feed: FeedSource) => { setFeedToDelete(feed); };
+    const handleDelete = (feed: FeedSource) => {
+        setDeleteError(null);
+        setFeedToDelete(feed);
+    };
 
-    const confirmDelete = () => {
-        if (feedToDelete) {
-            deleteFeed(feedToDelete.id);
-            setFeedHealth(prev => {
-                const newHealth = { ...prev };
-                delete newHealth[feedToDelete.id];
-                return newHealth;
-            });
+    const closeDeleteDialog = () => {
+        if (!isDeletingFeed) {
             setFeedToDelete(null);
+            setDeleteError(null);
+        }
+    };
+
+    const confirmDelete = async () => {
+        if (feedToDelete && !isDeletingFeed) {
+            const targetFeed = feedToDelete;
+            setIsDeletingFeed(true);
+            setDeleteError(null);
+
+            try {
+                await deleteFeed(targetFeed.id);
+                setFeedHealth(prev => {
+                    const newHealth = { ...prev };
+                    delete newHealth[targetFeed.id];
+                    return newHealth;
+                });
+                setFeedToDelete(null);
+            } catch (error) {
+                console.error('Error deleting feed:', error);
+                setDeleteError(t('admin.deleteError'));
+            } finally {
+                setIsDeletingFeed(false);
+            }
         }
     };
 
@@ -325,13 +348,23 @@ export const AdminPanel: React.FC = () => {
             />
 
             {feedToDelete && (<>
-                <div className="fixed inset-0 bg-black/60 z-40" onClick={() => setFeedToDelete(null)} aria-hidden="true" />
-                <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm bg-slate-100 dark:bg-zinc-900 rounded-2xl shadow-2xl p-6" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title">
+                <div className="fixed inset-0 bg-black/60 z-40" onClick={closeDeleteDialog} aria-hidden="true" />
+                <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm bg-slate-100 dark:bg-zinc-900 rounded-2xl shadow-2xl p-6" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title" aria-busy={isDeletingFeed}>
                     <h2 id="delete-dialog-title" className="text-lg font-bold">{t('admin.deleteModalTitle')}</h2>
                     <p className="text-sm text-slate-600 dark:text-zinc-400 mt-2">{t('admin.deleteModalConfirm', { name: feedToDelete.name })}</p>
+                    {deleteError && (
+                        <div
+                            role="alert"
+                            className="mt-4 p-3 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-sm"
+                        >
+                            {deleteError}
+                        </div>
+                    )}
                     <div className="mt-6 flex justify-end gap-3">
-                        <button onClick={() => setFeedToDelete(null)} className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 text-slate-800 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600">{t('admin.cancel')}</button>
-                        <button onClick={confirmDelete} className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-red-600 text-white hover:bg-red-700">{t('admin.delete')}</button>
+                        <button onClick={closeDeleteDialog} disabled={isDeletingFeed} className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 text-slate-800 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed">{t('admin.cancel')}</button>
+                        <button onClick={() => void confirmDelete()} disabled={isDeletingFeed} className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                            {isDeletingFeed ? t('admin.deleting') : t('admin.delete')}
+                        </button>
                     </div>
                 </div>
             </>)}

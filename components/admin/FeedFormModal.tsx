@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FeedSource } from '../../types';
+import type { FeedSource } from '../../types';
 import { CloseIcon } from '../Icons';
 
 interface FeedFormModalProps {
@@ -8,8 +8,8 @@ interface FeedFormModalProps {
     onClose: () => void;
     feed: FeedSource | null;
     feeds: FeedSource[];
-    addFeed: (feed: Omit<FeedSource, 'id'>) => void;
-    updateFeed: (feed: FeedSource) => void;
+    addFeed: (feed: Omit<FeedSource, 'id'>) => Promise<void>;
+    updateFeed: (feed: FeedSource) => Promise<void>;
 }
 
 export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, feed, feeds, addFeed, updateFeed }) => {
@@ -20,6 +20,8 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
     const [priority, setPriority] = useState<'primary' | 'secondary'>('secondary');
     const [needsScraping, setNeedsScraping] = useState(false);
     const [urlError, setUrlError] = useState<string | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (feed) {
@@ -38,14 +40,23 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
         }
         // Reset error state whenever the modal is opened/closed or the feed changes
         setUrlError(null);
+        setSubmitError(null);
     }, [feed, isOpen]);
 
     if (!isOpen) {
         return null;
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleClose = () => {
+        if (!isSaving) {
+            onClose();
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSaving) return;
+        setSubmitError(null);
 
         // --- Duplicate URL Validation ---
         const normalizeUrl = (u: string) => u.trim().toLowerCase().replace(/\/$/, '');
@@ -65,12 +76,20 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
 
         const feedData = { name, url, language, priority, needsScraping };
 
-        if (feed) { // Editing existing feed
-            updateFeed({ ...feedData, id: feed.id });
-        } else { // Adding new feed
-            addFeed(feedData);
+        setIsSaving(true);
+        try {
+            if (feed) {
+                await updateFeed({ ...feedData, id: feed.id });
+            } else {
+                await addFeed(feedData);
+            }
+            onClose();
+        } catch (error) {
+            console.error('Error saving feed:', error);
+            setSubmitError(t('admin.form.errorSaving'));
+        } finally {
+            setIsSaving(false);
         }
-        onClose();
     };
 
     const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,7 +104,7 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
         <>
             <div
                 className="fixed inset-0 bg-black/60 z-40 transition-opacity"
-                onClick={onClose}
+                onClick={handleClose}
                 aria-hidden="true"
             />
             <div
@@ -95,20 +114,22 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
                 aria-modal="true"
                 aria-labelledby="form-modal-title"
             >
-                <form id="feed-form" onSubmit={handleSubmit}>
+                <form id="feed-form" onSubmit={handleSubmit} aria-busy={isSaving}>
                     <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-zinc-800 flex-shrink-0">
                         <h2 id="form-modal-title" className="text-lg font-semibold">
                             {feed ? t('admin.form.titleEdit') : t('admin.form.titleAdd')}
                         </h2>
                         <button
                             type="button"
-                            onClick={onClose}
-                            className="p-3 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
+                            onClick={handleClose}
+                            disabled={isSaving}
+                            className="p-3 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label={t('admin.form.ariaClose')}
                         >
                             <CloseIcon className="w-6 h-6" />
                         </button>
                     </div>
+                    <fieldset disabled={isSaving} className="border-0 p-0 m-0 min-w-0">
                     <div className="p-6 flex-grow overflow-y-auto space-y-4">
                         <div>
                             <label htmlFor="feed-name" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">{t('admin.form.labelName')}</label>
@@ -165,22 +186,31 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
                             />
                             <label htmlFor="needs-scraping" className="text-sm font-medium text-slate-700 dark:text-zinc-300">{t('admin.form.labelScraping')}</label>
                         </div>
+                        {submitError && (
+                            <div
+                                role="alert"
+                                className="p-3 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-sm"
+                            >
+                                {submitError}
+                            </div>
+                        )}
                     </div>
                     <div className="flex-shrink-0 p-4 border-t border-slate-200 dark:border-zinc-800 flex justify-end items-center bg-slate-100 dark:bg-zinc-900 rounded-b-2xl gap-3">
                         <button
                             type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 text-slate-800 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600"
+                            onClick={handleClose}
+                            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 text-slate-800 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {t('admin.cancel')}
                         </button>
                         <button
                             type="submit"
-                            className="px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700"
+                            className="px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {t('admin.form.save')}
+                            {isSaving ? t('admin.form.saving') : t('admin.form.save')}
                         </button>
                     </div>
+                    </fieldset>
                 </form>
             </div>
         </>

@@ -1,70 +1,41 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { FeedSource } from '../types';
+import {
+    createFeed,
+    loadFeeds,
+    removeFeed,
+    saveFeed,
+} from '../services/feeds-api';
 
 export const useFeeds = () => {
     const [feeds, setFeeds] = useState<FeedSource[]>([]);
 
     const fetchFeeds = useCallback(async () => {
         try {
-            const response = await fetch('/api/feeds');
-            if (!response.ok) {
-                throw new Error(`Failed to fetch feeds: ${response.statusText}`);
-            }
-            const data: FeedSource[] = await response.json();
+            const data = await loadFeeds();
             setFeeds(data);
         } catch (error) {
-            console.error(error);
-            // In a real app, you might want to set an error state here
-            // to display a message to the user.
+            console.error('Error loading feeds:', error);
         }
     }, []);
 
     useEffect(() => {
-        fetchFeeds();
+        void fetchFeeds();
     }, [fetchFeeds]);
 
     const addFeed = useCallback(async (feed: Omit<FeedSource, 'id'>) => {
-        try {
-            const response = await fetch('/api/feeds', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(feed),
-            });
-            if (!response.ok) throw new Error('Failed to add feed');
-            const newFeed: FeedSource = await response.json();
-            setFeeds(prev => [...prev, newFeed]);
-        } catch (error) {
-            console.error('Error adding feed:', error);
-        }
+        const newFeed = await createFeed(feed);
+        setFeeds(prev => [...prev, newFeed]);
     }, []);
 
     const updateFeed = useCallback(async (updatedFeed: FeedSource) => {
-        try {
-            const response = await fetch(`/api/feeds`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedFeed),
-            });
-            if (!response.ok) throw new Error('Failed to update feed');
-            const savedFeed: FeedSource = await response.json();
-            setFeeds(prev => prev.map(f => f.id === savedFeed.id ? savedFeed : f));
-        } catch (error) {
-            console.error('Error updating feed:', error);
-        }
+        const savedFeed = await saveFeed(updatedFeed);
+        setFeeds(prev => prev.map(f => f.id === savedFeed.id ? savedFeed : f));
     }, []);
 
     const deleteFeed = useCallback(async (feedId: string) => {
-        try {
-            const response = await fetch(`/api/feeds`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: feedId }),
-            });
-            if (!response.ok) throw new Error('Failed to delete feed');
-            setFeeds(prev => prev.filter(f => f.id !== feedId));
-        } catch (error) {
-            console.error('Error deleting feed:', error);
-        }
+        await removeFeed(feedId);
+        setFeeds(prev => prev.filter(f => f.id !== feedId));
     }, []);
 
     return { feeds, addFeed, updateFeed, deleteFeed };

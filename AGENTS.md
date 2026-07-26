@@ -78,6 +78,9 @@
 │   ├── useFeeds.ts         # Feed-Daten fetchen
 │   └── useLocalStorage.ts  # localStorage Hook
 │
+├── services/
+│   └── feeds-api.ts        # HTTP-Zugriff für Feed-Verwaltung
+│
 ├── scripts/
 │   └── fetch-feeds.js      # Cron-Job Script (GitHub Actions)
 │

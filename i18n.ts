@@ -249,6 +249,8 @@ const resources = {
                 "deleteModalConfirm": "Are you sure you want to delete \"{{name}}\"? This cannot be undone.",
                 "cancel": "Cancel",
                 "delete": "Delete",
+                "deleting": "Deleting...",
+                "deleteError": "The feed source could not be deleted. Please try again.",
                 "management": {
                     "title": "All Feed Sources",
                     "total": "Total:",
@@ -317,6 +319,8 @@ const resources = {
                     "labelPriority": "Priority",
                     "labelScraping": "Image requires scraping fallback?",
                     "errorUrlExists": "This feed URL already exists.",
+                    "errorSaving": "The feed source could not be saved. Please try again.",
+                    "saving": "Saving...",
                     "save": "Save"
                 },
                 "announcement": {
@@ -600,6 +604,8 @@ const resources = {
                 "deleteModalConfirm": "Möchtest du \"{{name}}\" wirklich löschen? Dies kann nicht rückgängig gemacht werden.",
                 "cancel": "Abbrechen",
                 "delete": "Löschen",
+                "deleting": "Lösche...",
+                "deleteError": "Die Feed-Quelle konnte nicht gelöscht werden. Bitte versuche es erneut.",
                 "management": {
                     "title": "Alle Feed-Quellen",
                     "total": "Gesamt:",
@@ -668,6 +674,8 @@ const resources = {
                     "labelPriority": "Priorität",
                     "labelScraping": "Bild erfordert Scraping-Fallback?",
                     "errorUrlExists": "Diese Feed-URL existiert bereits.",
+                    "errorSaving": "Die Feed-Quelle konnte nicht gespeichert werden. Bitte versuche es erneut.",
+                    "saving": "Speichere...",
                     "save": "Speichern"
                 },
                 "announcement": {
