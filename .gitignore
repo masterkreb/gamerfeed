@@ -13,6 +13,11 @@ dist-ssr
 *.local
 .env 
 
+# Legacy cache artifacts (runtime data lives in Vercel KV)
+/news-cache.json
+/public/news-cache.json
+/public/feed-health-status.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
