@@ -65,7 +65,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
 
 | Dienst | Anbieter | Zweck |
 |--------|----------|-------|
-| Hosting & Edge Functions | Vercel (Free) | Frontend + API |
+| Hosting & Functions | Vercel (Free) | Frontend + API |
 | PostgreSQL Datenbank | Neon (Free) | Feed-Quellen speichern |
 | Redis Cache | Vercel KV (Free) | Artikel-Cache |
 | Cron Jobs | GitHub Actions (Free) | Automatische Updates |
@@ -82,7 +82,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     - `feed_health_status`: Systemstatus
     - `daily_trends` & `weekly_trends`: KI-generierte Trends
 4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 20 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung.
-5.  **API-Schicht (Vercel Edge Functions)**: Schlanke API-Endpunkte als Schnittstelle zwischen Frontend und Datencache:
+5.  **API-Schicht (Vercel Functions)**: Schlanke Edge Functions für Datenabrufe sowie eine Node.js Function für den SMTP-Versand:
     *   `/api/get-news-preview`: Liefert erste 16 Artikel für sofortiges Laden
     *   `/api/get-news-medium`: Liefert erste 64 Artikel für schnelles Nachladen
     *   `/api/get-news`: Liefert alle gecachten Artikel
@@ -90,6 +90,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     *   `/api/get-health-data`: Liefert den Systemstatus an das Admin-Panel
     *   `/api/announcement`: Verwaltung und Abruf von Ankündigungen
     *   `/api/get-trends`: Liefert KI-generierte Trends
+    *   `/api/contact`: Prüft Kontaktanfragen und versendet sie per Gmail SMTP
 6.  **Admin-Backend (mehrschichtiger Schutz)**: Die Middleware schützt die statische Admin-Seite. Die Admin-APIs prüfen Basic Authentication zusätzlich direkt im jeweiligen Handler und schützen schreibende Aufrufe per Same-Origin-Prüfung.
 7.  **KI-Integration (Groq API)**: Automatische Trend-Analyse mit Groq's llama-3.1-8b-instant Modell für Gaming-News.
 
@@ -148,7 +149,7 @@ Die Statusanzeige wird wie folgt ermittelt:
 
 ### Voraussetzungen
 
-- [Node.js](https://nodejs.org/) (Version 24 oder höher)
+- [Node.js](https://nodejs.org/) (Version 22.12 oder höher; CI verwendet Node 24)
 - [npm](https://www.npmjs.com/)
 - Ein Vercel-Konto mit verbundenem Vercel Postgres und Vercel KV Speicher.
 - (Optional) Groq API Key für Trend-Analyse
@@ -188,6 +189,14 @@ Die Statusanzeige wird wie folgt ermittelt:
     # Zwingende Anmeldedaten für Admin-Seite und Admin-APIs
     ADMIN_USERNAME="dein_admin_benutzername"
     ADMIN_PASSWORD="dein_sicheres_passwort"
+
+    # Kontaktformular: reCAPTCHA v3 und Gmail SMTP
+    RECAPTCHA_SECRET_KEY="dein_recaptcha_secret_key"
+    GMAIL_USER="deine-adresse@gmail.com"
+    GMAIL_APP_PASSWORD="dein_google_app_passwort"
+
+    # Optional; lokal inklusive localhost, in Produktion nur produktive Domains
+    RECAPTCHA_ALLOWED_HOSTNAMES="localhost,gamerfeed.vercel.app"
     ```
 
 4.  **Entwicklungsserver starten**:
@@ -250,7 +259,7 @@ node scripts/fetch-feeds.js
 
 1.  **Projekt importieren**: Importiere dein geklontes Git-Repository in Vercel.
 2.  **Datenbanken verbinden**: Verknüpfe dein Vercel-Projekt mit einer Vercel Postgres-Datenbank und einem Vercel KV Store.
-3.  **Umgebungsvariablen konfigurieren**: Füge im Vercel-Projekt-Dashboard die oben genannten Umgebungsvariablen (`POSTGRES_URL`, `KV_*`, `GROQ_API_KEY`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`) hinzu.
+3.  **Umgebungsvariablen konfigurieren**: Füge im Vercel-Projekt-Dashboard die oben genannten Umgebungsvariablen hinzu. Für das Kontaktformular werden zusätzlich `RECAPTCHA_SECRET_KEY`, `GMAIL_USER` und `GMAIL_APP_PASSWORD` benötigt. Mit `RECAPTCHA_ALLOWED_HOSTNAMES` kann die reCAPTCHA-Antwort auf die produktiven Domains eingeschränkt werden.
 
 ### 4. GitHub Actions einrichten
 
@@ -289,10 +298,10 @@ Dieser Fehler tritt im GitHub Actions Log auf und ist der häufigste Konfigurati
 *   **Ursache:** Das `fetch-feeds.js`-Skript, das von GitHub ausgeführt wird, hat keine Zugangsdaten, um sich mit deinem Vercel KV Store zu verbinden.
 *   **Lösung:** Befolge die Schritte unter **"GitHub Actions einrichten"** sorgfältig. Stelle sicher, dass du die Secrets `KV_REST_API_URL` und `KV_REST_API_TOKEN` in den GitHub-Einstellungen deines Repositories korrekt angelegt hast. Die Namen müssen exakt übereinstimmen.
 
-### Progressive Loading funktioniert nicht lokal
+### Lokale API-Aufrufe
 
-*   **Ursache:** Die API-Endpunkte (`/api/get-news-preview`, `/api/get-news-medium`) funktionieren nur auf Vercel oder mit `vercel dev`.
-*   **Lösung:** Für lokales Testen nutze `vercel dev` statt `npm run dev`, oder teste direkt auf der Vercel Preview/Production URL.
+*   `npm run dev` leitet `/api` über den Vite-Proxy an die produktive GamerFeed-API weiter. Progressive Loading funktioniert damit gegen die produktiven Daten.
+*   `vercel dev` führt die lokalen Serverless Functions aus und ist nötig, wenn Änderungen an API-Routen wie `/api/contact` lokal geprüft werden sollen.
 
 ---
 
@@ -301,7 +310,7 @@ Dieser Fehler tritt im GitHub Actions Log auf und ist der häufigste Konfigurati
 - **Frontend**: React 19, TypeScript (Strict Mode), Tailwind CSS
 - **Build Tool**: Vite 8 (Rolldown)
 - **Internationalisierung**: i18next
-- **Backend**: Vercel Edge Functions
+- **Backend**: Vercel Functions (Edge und Node.js)
 - **Datenbank**: Neon PostgreSQL (oder Vercel Postgres)
 - **Cache**: Vercel KV (Redis)
 - **CI/CD**: GitHub Actions

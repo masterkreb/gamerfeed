@@ -1,5 +1,9 @@
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+    CONTACT_FIELD_LIMITS,
+    CONTACT_RECAPTCHA_ACTION,
+} from '../shared/contact-contract.js';
 import { CloseIcon, ResetIcon } from './Icons';
 
 interface SettingsModalProps {
@@ -11,6 +15,107 @@ interface SettingsModalProps {
 }
 
 type TabType = 'sources' | 'legal' | 'about' | 'contact';
+
+interface RecaptchaClient {
+    ready: (callback: () => void) => void;
+    execute: (siteKey: string, options: { action: string }) => Promise<string>;
+}
+
+const RECAPTCHA_SITE_KEY = '6LeKjy4sAAAAAPqI5SG57GRV4ZxSswqEgCtdilWp';
+const RECAPTCHA_SCRIPT_ID = 'gamerfeed-recaptcha';
+const RECAPTCHA_LOAD_TIMEOUT_MS = 10_000;
+
+let recaptchaLoadPromise: Promise<RecaptchaClient> | null = null;
+
+function getRecaptchaClient() {
+    return (window as Window & { grecaptcha?: RecaptchaClient }).grecaptcha;
+}
+
+function loadRecaptcha(): Promise<RecaptchaClient> {
+    if (recaptchaLoadPromise) {
+        return recaptchaLoadPromise;
+    }
+
+    const loadPromise = new Promise<RecaptchaClient>((resolve, reject) => {
+        let script = document.querySelector<HTMLScriptElement>(
+            `#${RECAPTCHA_SCRIPT_ID}`,
+        );
+        let settled = false;
+
+        const cleanup = () => {
+            window.clearTimeout(timeoutId);
+            script?.removeEventListener('load', handleLoad);
+            script?.removeEventListener('error', handleError);
+        };
+
+        const fail = () => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+
+            if (!getRecaptchaClient()) {
+                script?.remove();
+            }
+
+            reject(new Error('reCAPTCHA konnte nicht geladen werden.'));
+        };
+
+        const waitUntilReady = () => {
+            const client = getRecaptchaClient();
+            if (!client) {
+                fail();
+                return;
+            }
+
+            client.ready(() => {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                resolve(client);
+            });
+        };
+
+        function handleLoad() {
+            waitUntilReady();
+        }
+
+        function handleError() {
+            fail();
+        }
+
+        const timeoutId = window.setTimeout(fail, RECAPTCHA_LOAD_TIMEOUT_MS);
+        const existingClient = getRecaptchaClient();
+
+        if (existingClient) {
+            waitUntilReady();
+            return;
+        }
+
+        if (!script) {
+            script = document.createElement('script');
+            script.id = RECAPTCHA_SCRIPT_ID;
+            script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
+            script.async = true;
+            script.defer = true;
+        }
+
+        script.addEventListener('load', handleLoad, { once: true });
+        script.addEventListener('error', handleError, { once: true });
+
+        if (!script.isConnected) {
+            document.body.appendChild(script);
+        }
+    });
+
+    recaptchaLoadPromise = loadPromise;
+    void loadPromise.catch(() => {
+        if (recaptchaLoadPromise === loadPromise) {
+            recaptchaLoadPromise = null;
+        }
+    });
+
+    return loadPromise;
+}
 
 const SourceCheckbox: React.FC<{
     sourceName: string;
@@ -110,46 +215,67 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const [activeTab, setActiveTab] = useState<TabType>('sources');
     const [contactFormData, setContactFormData] = useState({ name: '', email: '', subject: '', message: '' });
     const [contactStatus, setContactStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const contactStatusResetTimeoutRef = useRef<number | null>(null);
+
+    useEffect(() => () => {
+        if (contactStatusResetTimeoutRef.current !== null) {
+            window.clearTimeout(contactStatusResetTimeoutRef.current);
+        }
+    }, []);
 
     // reCAPTCHA v3 laden wenn Kontakt-Tab aktiv
     useEffect(() => {
-        if (activeTab === 'contact' && !document.querySelector('script[src*="recaptcha"]')) {
-            const script = document.createElement('script');
-            script.src = 'https://www.google.com/recaptcha/api.js?render=6LeKjy4sAAAAAPqI5SG57GRV4ZxSswqEgCtdilWp';
-            script.async = true;
-            script.defer = true;
-            document.body.appendChild(script);
+        if (activeTab === 'contact') {
+            void loadRecaptcha().catch(() => undefined);
         }
     }, [activeTab]);
 
     const handleContactSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (contactStatusResetTimeoutRef.current !== null) {
+            window.clearTimeout(contactStatusResetTimeoutRef.current);
+            contactStatusResetTimeoutRef.current = null;
+        }
+
         setContactStatus('loading');
 
         try {
-            // reCAPTCHA v3 Token holen
-            const grecaptcha = (window as any).grecaptcha;
-            if (!grecaptcha) {
+            const normalizedContact = {
+                name: contactFormData.name.trim(),
+                email: contactFormData.email.trim(),
+                subject: contactFormData.subject.trim(),
+                message: contactFormData.message.trim(),
+            };
+
+            if (Object.values(normalizedContact).some(value => value.length === 0)) {
                 setContactStatus('error');
                 return;
             }
 
-            const token = await grecaptcha.execute('6LeKjy4sAAAAAPqI5SG57GRV4ZxSswqEgCtdilWp', { action: 'contact_form' });
+            // reCAPTCHA v3 Token erst nach vollständig geladenem Client holen
+            const grecaptcha = await loadRecaptcha();
+            const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY, {
+                action: CONTACT_RECAPTCHA_ACTION,
+            });
 
             const response = await fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...contactFormData, recaptchaToken: token })
+                body: JSON.stringify({ ...normalizedContact, recaptchaToken: token })
             });
 
             if (response.ok) {
                 setContactStatus('success');
                 setContactFormData({ name: '', email: '', subject: '', message: '' });
-                setTimeout(() => setContactStatus('idle'), 3000);
+                contactStatusResetTimeoutRef.current = window.setTimeout(() => {
+                    setContactStatus('idle');
+                    contactStatusResetTimeoutRef.current = null;
+                }, 3000);
             } else {
                 setContactStatus('error');
             }
-        } catch (error) {
+        } catch {
             setContactStatus('error');
         }
     };
@@ -409,7 +535,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             <p className="text-sm text-slate-600 dark:text-zinc-400">
                                 {t('contact.openForm')}
                             </p>
-                            <form onSubmit={handleContactSubmit} className="space-y-4">
+                            <form onSubmit={handleContactSubmit}>
+                                <fieldset
+                                    disabled={contactStatus === 'loading'}
+                                    className="space-y-4 border-0 p-0 m-0 min-w-0"
+                                >
                                 <div>
                                     <label htmlFor="contact-name" className="block text-sm font-semibold mb-2 text-slate-700 dark:text-zinc-300">
                                         {t('contact.name')}
@@ -418,6 +548,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                         type="text"
                                         id="contact-name"
                                         required
+                                        maxLength={CONTACT_FIELD_LIMITS.name}
                                         value={contactFormData.name}
                                         onChange={(e) => setContactFormData({ ...contactFormData, name: e.target.value })}
                                         className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -432,6 +563,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                         type="email"
                                         id="contact-email"
                                         required
+                                        maxLength={CONTACT_FIELD_LIMITS.email}
                                         value={contactFormData.email}
                                         onChange={(e) => setContactFormData({ ...contactFormData, email: e.target.value })}
                                         className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -446,6 +578,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                         type="text"
                                         id="contact-subject"
                                         required
+                                        maxLength={CONTACT_FIELD_LIMITS.subject}
                                         value={contactFormData.subject}
                                         onChange={(e) => setContactFormData({ ...contactFormData, subject: e.target.value })}
                                         className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -460,6 +593,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                         id="contact-message"
                                         required
                                         rows={6}
+                                        maxLength={CONTACT_FIELD_LIMITS.message}
                                         value={contactFormData.message}
                                         onChange={(e) => setContactFormData({ ...contactFormData, message: e.target.value })}
                                         className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
@@ -490,6 +624,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 >
                                     <span>{contactStatus === 'loading' ? t('contact.sending') : t('contact.send')}</span>
                                 </button>
+                                </fieldset>
                             </form>
                         </div>
                     )}

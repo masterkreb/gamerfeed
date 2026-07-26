@@ -1,147 +1,219 @@
 import nodemailer from 'nodemailer';
-
-interface ContactRequestBody {
-    name?: string;
-    email?: string;
-    subject?: string;
-    message?: string;
-    recaptchaToken?: string;
-}
+import {
+    buildContactEmail,
+    isRecaptchaAccepted,
+    parseAllowedHostnames,
+    validateContactPayload,
+} from '../server/contact-utils.js';
 
 interface ApiRequest {
     method?: string;
-    body?: ContactRequestBody;
+    body?: unknown;
 }
 
 interface ApiResponse {
+    setHeader?: (name: string, value: string) => void;
     status: (code: number) => {
         json: (body: unknown) => void;
     };
 }
 
-// Google reCAPTCHA v3 Verifikation
-async function verifyRecaptcha(token: string): Promise<{ success: boolean; score: number }> {
-    console.log('🔐 Verifiziere reCAPTCHA...');
-    const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}`
-    });
+type ValidatedContact = NonNullable<ReturnType<typeof validateContactPayload>>;
 
-    const data = await response.json();
-    console.log('🔐 reCAPTCHA Ergebnis:', { success: data.success, score: data.score, errors: data['error-codes'] });
-    
-    return {
-        success: data.success === true,
-        score: data.score || 0
-    };
+const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
+const RECAPTCHA_TIMEOUT_MS = 5_000;
+
+let mailTransporter: ReturnType<typeof nodemailer.createTransport> | null = null;
+
+class RecaptchaUnavailableError extends Error {
+    constructor() {
+        super('reCAPTCHA verification unavailable');
+        this.name = 'RecaptchaUnavailableError';
+    }
 }
 
-// E-Mail senden via Gmail SMTP
-async function sendEmail(data: { name: string; email: string; subject: string; message: string }): Promise<boolean> {
-    // Gmail SMTP
-    if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
-        console.log('📧 Versuche Gmail SMTP zu verwenden...');
-        console.log('📧 Gmail User:', process.env.GMAIL_USER);
-        
-        try {
-            const transporter = nodemailer.createTransport({
-                host: 'smtp.gmail.com',
-                port: 587,
-                secure: false,
-                auth: {
-                    user: process.env.GMAIL_USER,
-                    pass: process.env.GMAIL_APP_PASSWORD
-                }
-            });
+function respond(res: ApiResponse, status: number, code?: string) {
+    res.setHeader?.('Cache-Control', 'no-store');
 
-            await transporter.sendMail({
-                from: `"GamerFeed Kontakt" <${process.env.GMAIL_USER}>`,
-                to: process.env.GMAIL_USER,
-                replyTo: data.email,
-                subject: `[GamerFeed Kontakt] ${data.subject}`,
-                html: `
-                    <h2>📧 Neue Kontaktanfrage von GamerFeed</h2>
-                    <p><strong>Von:</strong> ${data.name}</p>
-                    <p><strong>E-Mail:</strong> <a href="mailto:${data.email}">${data.email}</a></p>
-                    <p><strong>Betreff:</strong> ${data.subject}</p>
-                    <hr>
-                    <h3>Nachricht:</h3>
-                    <p style="white-space: pre-wrap;">${data.message}</p>
-                    <hr>
-                    <p style="color: #666; font-size: 12px;">
-                        Diese E-Mail wurde über das Kontaktformular auf gamerfeed.vercel.app gesendet.
-                    </p>
-                `
-            });
-
-            console.log('✅ E-Mail erfolgreich gesendet via Gmail SMTP');
-            return true;
-        } catch (error) {
-            console.error('❌ Gmail SMTP Fehler:', error);
-            if (error instanceof Error) {
-                console.error('Error Message:', error.message);
-            }
-            throw error;
-        }
+    if (status === 200) {
+        return res.status(status).json({ success: true });
     }
 
-    // Fallback: Nur loggen
-    console.log('⚠️ Keine E-Mail-Konfiguration gefunden! Logge Nachricht:');
-    console.log('📧 Kontaktformular erhalten:', data);
-    return true;
+    return res.status(status).json({
+        success: false,
+        error: { code },
+    });
+}
+
+function getConfiguredValue(value: string | undefined) {
+    const normalizedValue = value?.trim();
+    return normalizedValue ? normalizedValue : null;
+}
+
+function getAllowedRecaptchaHostnames(value: string | undefined) {
+    const configuredValue = getConfiguredValue(value);
+    if (!configuredValue) {
+        return [];
+    }
+
+    const allowedHostnames = parseAllowedHostnames(configuredValue);
+    return allowedHostnames.length > 0 ? allowedHostnames : null;
+}
+
+async function verifyRecaptcha(
+    token: string,
+    secret: string,
+    allowedHostnames: string[],
+): Promise<boolean> {
+    let response: Response;
+
+    try {
+        response = await fetch(RECAPTCHA_VERIFY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                secret,
+                response: token,
+            }),
+            signal: AbortSignal.timeout(RECAPTCHA_TIMEOUT_MS),
+        });
+    } catch {
+        throw new RecaptchaUnavailableError();
+    }
+
+    if (!response.ok) {
+        throw new RecaptchaUnavailableError();
+    }
+
+    let payload: unknown;
+    try {
+        payload = await response.json();
+    } catch {
+        throw new RecaptchaUnavailableError();
+    }
+
+    return isRecaptchaAccepted(payload, { allowedHostnames });
+}
+
+function getMailTransporter(smtpUser: string, smtpPassword: string) {
+    if (!mailTransporter) {
+        mailTransporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            requireTLS: true,
+            auth: {
+                user: smtpUser,
+                pass: smtpPassword,
+            },
+            connectionTimeout: 10_000,
+            greetingTimeout: 10_000,
+            socketTimeout: 20_000,
+            dnsTimeout: 5_000,
+            disableFileAccess: true,
+            disableUrlAccess: true,
+        });
+    }
+
+    return mailTransporter;
+}
+
+async function sendContactEmail(
+    contact: ValidatedContact,
+    smtpUser: string,
+    smtpPassword: string,
+) {
+    const email = buildContactEmail(contact);
+
+    await getMailTransporter(smtpUser, smtpPassword).sendMail({
+        from: {
+            name: 'GamerFeed Kontakt',
+            address: smtpUser,
+        },
+        to: smtpUser,
+        replyTo: contact.email,
+        subject: email.subject,
+        text: email.text,
+        html: email.html,
+        disableFileAccess: true,
+        disableUrlAccess: true,
+    });
+}
+
+function getSafeMailErrorCode(error: unknown) {
+    if (
+        typeof error === 'object'
+        && error !== null
+        && 'code' in error
+        && typeof error.code === 'string'
+    ) {
+        return error.code.slice(0, 40);
+    }
+
+    return 'unknown';
 }
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
-    console.log('📬 Kontaktformular-Request erhalten');
-    
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+        res.setHeader?.('Allow', 'POST');
+        return respond(res, 405, 'method_not_allowed');
     }
 
-    const { name, email, subject, message, recaptchaToken } = req.body ?? {};
+    const contact = validateContactPayload(req.body);
+    if (!contact) {
+        console.warn('contact.request_rejected', { reason: 'validation' });
+        return respond(res, 400, 'invalid_request');
+    }
 
-    // Validierung
-    if (!name || !email || !subject || !message || !recaptchaToken) {
-        console.log('❌ Fehlende Felder:', { 
-            name: !!name, 
-            email: !!email, 
-            subject: !!subject, 
-            message: !!message, 
-            recaptchaToken: !!recaptchaToken 
+    const recaptchaSecret = getConfiguredValue(process.env.RECAPTCHA_SECRET_KEY);
+    const smtpUser = getConfiguredValue(process.env.GMAIL_USER);
+    const smtpPassword = getConfiguredValue(process.env.GMAIL_APP_PASSWORD);
+
+    if (!recaptchaSecret || !smtpUser || !smtpPassword) {
+        console.error('contact.service_unavailable', { reason: 'configuration' });
+        return respond(res, 503, 'service_unavailable');
+    }
+
+    const allowedHostnames = getAllowedRecaptchaHostnames(
+        process.env.RECAPTCHA_ALLOWED_HOSTNAMES,
+    );
+    if (!allowedHostnames) {
+        console.error('contact.service_unavailable', {
+            reason: 'hostname_configuration',
         });
-        return res.status(400).json({ error: 'Missing required fields' });
+        return respond(res, 503, 'service_unavailable');
     }
-    
-    console.log('✅ Alle Felder vorhanden');
-    console.log('📧 Von:', name, '<' + email + '>');
-    console.log('📧 Betreff:', subject);
 
-    // reCAPTCHA v3 prüfen
-    const recaptchaResult = await verifyRecaptcha(recaptchaToken);
-    if (!recaptchaResult.success || recaptchaResult.score < 0.5) {
-        console.log('❌ reCAPTCHA fehlgeschlagen. Success:', recaptchaResult.success, 'Score:', recaptchaResult.score);
-        return res.status(403).json({ error: 'Invalid captcha or bot detected', score: recaptchaResult.score });
-    }
-    console.log('✅ reCAPTCHA erfolgreich. Score:', recaptchaResult.score);
-
-    // E-Mail senden
+    let captchaAccepted: boolean;
     try {
-        console.log('📤 Starte E-Mail Versand...');
-        const success = await sendEmail({ name, email, subject, message });
-        
-        if (success) {
-            console.log('✅ Kontaktformular erfolgreich abgeschlossen');
-            return res.status(200).json({ success: true });
-        } else {
-            console.log('❌ E-Mail Versand fehlgeschlagen');
-            return res.status(500).json({ error: 'Failed to send email' });
-        }
+        captchaAccepted = await verifyRecaptcha(
+            contact.recaptchaToken,
+            recaptchaSecret,
+            allowedHostnames,
+        );
     } catch (error) {
-        console.error('❌ Kritischer Fehler im Kontaktformular:', error);
-        return res.status(500).json({ 
-            error: 'Internal server error', 
-            details: error instanceof Error ? error.message : 'Unknown error' 
-        });
+        if (error instanceof RecaptchaUnavailableError) {
+            console.error('contact.service_unavailable', { reason: 'recaptcha' });
+            return respond(res, 503, 'service_unavailable');
+        }
+        console.error('contact.internal_error');
+        return respond(res, 500, 'internal_error');
     }
+
+    if (!captchaAccepted) {
+        console.warn('contact.request_rejected', { reason: 'captcha' });
+        return respond(res, 403, 'captcha_rejected');
+    }
+
+    try {
+        await sendContactEmail(contact, smtpUser, smtpPassword);
+    } catch (error) {
+        console.error('contact.delivery_failed', {
+            code: getSafeMailErrorCode(error),
+        });
+        return respond(res, 502, 'delivery_failed');
+    }
+
+    console.info('contact.delivered');
+    return respond(res, 200);
 }

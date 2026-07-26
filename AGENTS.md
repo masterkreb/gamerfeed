@@ -45,7 +45,8 @@
 │   ├── get-trends.ts       # KI-Trends abrufen
 │   ├── get-health-data.ts  # Feed-Status für Admin
 │   ├── feeds.ts            # CRUD für Feed-Quellen
-│   └── announcement.ts     # Ankündigungs-Banner CRUD
+│   ├── announcement.ts     # Ankündigungs-Banner CRUD
+│   └── contact.ts          # Kontaktformular (Node.js + Gmail SMTP)
 │
 ├── components/
 │   ├── Header.tsx          # Navigation, Theme, Refresh, Language
@@ -79,6 +80,10 @@
 │
 ├── scripts/
 │   └── fetch-feeds.js      # Cron-Job Script (GitHub Actions)
+│
+├── server/                 # Getestete Backend-Hilfslogik
+├── shared/                 # Gemeinsame Frontend-/Backend-Verträge
+├── tests/                  # Zentrale Tests nach Fachbereich und Testart
 │
 ├── src/
 │   └── index.css           # Tailwind Imports + Custom Styles
@@ -187,8 +192,8 @@ npx tsc --noEmit
 
 ## ⚠️ Bekannte Einschränkungen
 
-- Progressive Loading funktioniert nur auf Vercel (nicht lokal mit `npm run dev`)
-- Für lokales Testen: `vercel dev` nutzen
+- `npm run dev` nutzt für `/api` den Proxy zur produktiven GamerFeed-API
+- Für lokale Änderungen an Serverless Functions: `vercel dev` nutzen
 - GitHub Actions braucht Secrets: `POSTGRES_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`, `GROQ_API_KEY`
 
 ---
