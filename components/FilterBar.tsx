@@ -41,10 +41,6 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    // Animation States:
-    const prevCountRef = useRef(0);
-    const [isCountChanging, setIsCountChanging] = useState(false);
-
     const searchContainerRef = useRef<HTMLDivElement>(null);
 
     // Sync local search when global query changes (e.g., from a reset)
@@ -146,15 +142,6 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
         allArticles, showFavoritesOnly, sourceFilter, timeFilter, favoriteIds, languageFilter,
         searchQuery, mutedSources
     ]);
-
-    useEffect(() => {
-        if (prevCountRef.current !== liveFilteredCount) {
-            setIsCountChanging(true);
-            const timer = setTimeout(() => setIsCountChanging(false), 400);
-            prevCountRef.current = liveFilteredCount;
-            return () => clearTimeout(timer);
-        }
-    }, [liveFilteredCount]);
 
     const languageOptions: { id: 'all' | 'de' | 'en', label: string, count: number }[] = [
         { id: 'all', label: t('filter.language.all'), count: sources.length },

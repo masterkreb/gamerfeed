@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFeeds } from '../../hooks/useFeeds';
-import type { Article, FeedSource, BackendHealthStatus } from '../../types';
+import type { FeedSource, BackendHealthStatus } from '../../types';
 import {
     ArrowLeftIcon,
     NewspaperIcon,

@@ -36,7 +36,7 @@ function formatDateDE(date: Date): string {
     });
 }
 
-export default async function handler(req: Request) {
+export default async function handler(_req: Request) {
     try {
         const articles = await kv.get<Article[]>('news_cache');
 

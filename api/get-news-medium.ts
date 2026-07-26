@@ -7,7 +7,7 @@ export const config = {
 
 const MEDIUM_COUNT = 64;
 
-export default async function handler(req: Request) {
+export default async function handler(_req: Request) {
     try {
         // Load from dedicated medium cache (64 articles)
         let articles = await kv.get<Article[]>('news_cache_64');

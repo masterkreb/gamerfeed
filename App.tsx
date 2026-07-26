@@ -28,7 +28,7 @@ function initGoogleAnalytics() {
     
     // DataLayer zuerst initialisieren
     (window as any).dataLayer = (window as any).dataLayer || [];
-    function gtag(...args: any[]) {
+    function gtag(..._args: any[]) {
         (window as any).dataLayer.push(arguments);
     }
     (window as any).gtag = gtag;
@@ -411,17 +411,6 @@ const AppContent: React.FC = () => {
                 window.clearTimeout(toastTimerRef.current);
             }
         };
-    }, []);
-
-    // Dismiss toast immediately
-    const dismissToast = useCallback(() => {
-        if (toastTimerRef.current) {
-            window.clearTimeout(toastTimerRef.current);
-            toastTimerRef.current = null;
-        }
-        setToast(null);
-        setToastSwipeOffset(0);
-        setToastSwipeDirection(null);
     }, []);
 
     // Toast swipe handlers for mobile - use native events to allow preventDefault

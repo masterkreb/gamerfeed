@@ -5,7 +5,7 @@ export const config = {
     runtime: 'edge',
 };
 
-export default async function handler(req: Request) {
+export default async function handler(_req: Request) {
     try {
         const articles = await kv.get<Article[]>('news_cache');
 

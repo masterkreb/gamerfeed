@@ -7,7 +7,7 @@ export const config = {
 
 const PREVIEW_COUNT = 16;
 
-export default async function handler(req: Request) {
+export default async function handler(_req: Request) {
     try {
         // Load from dedicated preview cache (16 articles)
         let articles = await kv.get<Article[]>('news_cache_16');
