@@ -86,9 +86,8 @@
 ├── tests/                  # Zentrale Tests nach Fachbereich und Testart
 │
 ├── src/
-│   └── index.css           # Tailwind Imports + Custom Styles
+│   └── index.css           # Tailwind-v4-Konfiguration + Custom Styles
 │
-├── tailwind.config.js      # Tailwind Konfiguration
 ├── postcss.config.js       # PostCSS mit @tailwindcss/postcss
 └── vite.config.ts          # Vite Konfiguration
 ```
