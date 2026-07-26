@@ -63,9 +63,8 @@ Diese produktiven Stellen müssen geprüft werden:
 | `server/contact-utils.js` | Text im Fuss der Kontakt-E-Mail |
 | `README.md` und `QUICKSTART.md` | Beispiele und Betriebsdokumentation |
 
-Die gleichnamige Datei `robots.txt` im Projektstamm ist keine Vite-Public-Datei
-und sollte bei der nächsten Bereinigung entweder entfernt oder mit
-`public/robots.txt` konsolidiert werden.
+Nur `public/robots.txt` wird von Vite in den Produktions-Build kopiert. Änderungen
+an den Suchmaschinen-Regeln gehören deshalb ausschließlich in diese Datei.
 
 Treffer in Tests sind Testdaten und müssen nur angepasst werden, wenn die Tests
 ausdrücklich die neue Produktionsdomain abbilden sollen.
