@@ -11,6 +11,7 @@ import {
     ChevronDownIcon,
     ChevronUpIcon,
     MegaphoneIcon,
+    LoadingSpinner,
 } from '../Icons';
 import { FeedFormModal } from './FeedFormModal';
 import { FeedManagementTab } from './FeedManagementTab';
@@ -44,9 +45,56 @@ const TabButton: React.FC<{
     </button>
 );
 
+const FeedLoadState: React.FC<{
+    isLoading: boolean;
+    onRetry: () => Promise<void>;
+}> = ({ isLoading, onRetry }) => {
+    const { t } = useTranslation();
+
+    if (isLoading) {
+        return (
+            <section
+                role="status"
+                aria-live="polite"
+                className="bg-white dark:bg-zinc-800 rounded-lg shadow p-10 flex flex-col items-center justify-center text-center"
+            >
+                <LoadingSpinner className="w-8 h-8 text-indigo-500" />
+                <p className="mt-4 font-semibold">{t('admin.feedsLoading')}</p>
+            </section>
+        );
+    }
+
+    return (
+        <section
+            role="alert"
+            className="bg-white dark:bg-zinc-800 rounded-lg shadow p-8 flex flex-col items-center justify-center text-center"
+        >
+            <WarningIcon className="w-10 h-10 text-red-500" />
+            <h2 className="mt-4 text-lg font-semibold">{t('admin.feedsLoadErrorTitle')}</h2>
+            <p className="mt-2 max-w-xl text-sm text-slate-600 dark:text-zinc-400">
+                {t('admin.feedsLoadErrorDescription')}
+            </p>
+            <button
+                type="button"
+                onClick={() => void onRetry()}
+                className="mt-5 px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+            >
+                {t('admin.retry')}
+            </button>
+        </section>
+    );
+};
+
 export const AdminPanel: React.FC = () => {
     const { t } = useTranslation();
-    const { feeds, addFeed, updateFeed, deleteFeed } = useFeeds();
+    const {
+        feeds,
+        loadStatus,
+        reloadFeeds,
+        addFeed,
+        updateFeed,
+        deleteFeed,
+    } = useFeeds();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingFeed, setEditingFeed] = useState<FeedSource | null>(null);
     const [feedToDelete, setFeedToDelete] = useState<FeedSource | null>(null);
@@ -313,22 +361,36 @@ export const AdminPanel: React.FC = () => {
                 </nav>
 
                 <div role="tabpanel" hidden={activeTab !== 'management'}>
-                    <FeedManagementTab
-                        feeds={feeds}
-                        feedHealth={feedHealth}
-                        onAddNew={handleAddNew}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        onCheckHealth={refreshHealthStatus}
-                    />
+                    {loadStatus === 'ready' ? (
+                        <FeedManagementTab
+                            feeds={feeds}
+                            feedHealth={feedHealth}
+                            onAddNew={handleAddNew}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            onCheckHealth={refreshHealthStatus}
+                        />
+                    ) : (
+                        <FeedLoadState
+                            isLoading={loadStatus === 'loading'}
+                            onRetry={reloadFeeds}
+                        />
+                    )}
                 </div>
                 <div role="tabpanel" hidden={activeTab !== 'health'}>
-                    <HealthCenterTab
-                        feeds={feeds}
-                        feedHealth={feedHealth}
-                        onCheckAll={refreshHealthStatus}
-                        isCheckingAll={isCheckingAll}
-                    />
+                    {loadStatus === 'ready' ? (
+                        <HealthCenterTab
+                            feeds={feeds}
+                            feedHealth={feedHealth}
+                            onCheckAll={refreshHealthStatus}
+                            isCheckingAll={isCheckingAll}
+                        />
+                    ) : (
+                        <FeedLoadState
+                            isLoading={loadStatus === 'loading'}
+                            onRetry={reloadFeeds}
+                        />
+                    )}
                 </div>
                 <div role="tabpanel" hidden={activeTab !== 'announcement'}>
                     <AnnouncementTab />
