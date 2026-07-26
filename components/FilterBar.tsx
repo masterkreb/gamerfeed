@@ -1,15 +1,13 @@
 import React, { useState, useRef, useEffect, useMemo, useTransition } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Article, TimeFilter } from '../types';
+import type { TimeFilter } from '../types';
 import { StarIcon, SearchIcon, ResetIcon, FilterIcon, CloseIcon, BookmarkIcon, TrashIcon } from './Icons';
 import { useFilter } from '../contexts/FilterContext';
 
 interface FilterBarProps {
     sources: { name: string; language: 'de' | 'en' }[];
     favoritesCount: number;
-    allArticles: Article[];
-    favoriteIds: string[];
-    mutedSources: string[];
+    filteredArticlesCount: number;
 }
 
 const baseSelectClasses = "bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition w-full capitalize h-11";
@@ -20,9 +18,7 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
     const {
         sources,
         favoritesCount,
-        allArticles,
-        favoriteIds,
-        mutedSources
+        filteredArticlesCount,
     } = props;
 
     const {
@@ -77,71 +73,6 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
             setSourceFilter('all');
         }
     }, [languageFilter, sourceFilter, sourcesForLanguage, setSourceFilter]);
-
-    const normalizeString = (str: string): string => {
-        return str
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^\w\s]/g, '') // Remove other punctuation
-            .replace(/\s+/g, ' ') // Normalize whitespace
-            .trim();
-    };
-
-    const liveFilteredCount = useMemo(() => {
-        let result = allArticles;
-
-        if (!showFavoritesOnly) {
-            result = result.filter(article => !mutedSources.includes(article.source));
-        }
-
-        if (searchQuery) {
-            const normalizedQuery = normalizeString(searchQuery);
-            result = result.filter(article =>
-                normalizeString(article.title).includes(normalizedQuery) ||
-                normalizeString(article.summary).includes(normalizedQuery)
-            );
-        }
-
-        if (showFavoritesOnly) {
-            result = result.filter(article => favoriteIds.includes(article.id));
-        }
-
-        if (sourceFilter !== 'all') {
-            result = result.filter(article => article.source === sourceFilter);
-        }
-
-        if (languageFilter !== 'all') {
-            result = result.filter(article => article.language === languageFilter);
-        }
-
-        if (timeFilter !== 'all') {
-            const now = new Date();
-            const todayStart = new Date();
-            todayStart.setHours(0, 0, 0, 0);
-
-            if (timeFilter === 'today') {
-                result = result.filter(article => new Date(article.publicationDate) >= todayStart);
-            } else if (timeFilter === 'yesterday') {
-                const yesterdayStart = new Date(todayStart);
-                yesterdayStart.setDate(todayStart.getDate() - 1);
-
-                result = result.filter(article => {
-                    const articleDate = new Date(article.publicationDate);
-                    return articleDate >= yesterdayStart && articleDate < todayStart;
-                });
-            } else if (timeFilter === '7d') {
-                const hours = 7 * 24;
-                const cutoff = new Date(now.getTime() - hours * 60 * 60 * 1000);
-                result = result.filter(article => new Date(article.publicationDate) >= cutoff);
-            }
-        }
-
-        return result.length;
-    }, [
-        allArticles, showFavoritesOnly, sourceFilter, timeFilter, favoriteIds, languageFilter,
-        searchQuery, mutedSources
-    ]);
 
     const languageOptions: { id: 'all' | 'de' | 'en', label: string, count: number }[] = [
         { id: 'all', label: t('filter.language.all'), count: sources.length },
@@ -432,7 +363,7 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
 
                 <div className="px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-slate-200 dark:border-zinc-800 bg-slate-100 dark:bg-zinc-900 flex-shrink-0">
                     {/* Empty State Message */}
-                    {liveFilteredCount === 0 && (
+                    {filteredArticlesCount === 0 && (
                         <div className="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                             <div className="flex items-start gap-2">
                                 <svg
@@ -464,17 +395,17 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
                     <button
                         onClick={() => setIsModalOpen(false)}
                         className={`w-full font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                            liveFilteredCount === 0
+                            filteredArticlesCount === 0
                                 ? 'bg-slate-300 dark:bg-zinc-700 text-slate-500 dark:text-zinc-400 cursor-not-allowed'
                                 : 'bg-indigo-600 hover:bg-indigo-700 text-white hover:shadow-lg focus:ring-indigo-500 dark:focus:ring-offset-zinc-900'
                         }`}
-                        disabled={liveFilteredCount === 0}
+                        disabled={filteredArticlesCount === 0}
                     >
-                        {liveFilteredCount === 0 ? (
+                        {filteredArticlesCount === 0 ? (
                             t('filter.noArticles')
                         ) : (
                             <>
-                                {t('filter.apply', { count: liveFilteredCount })}
+                                {t('filter.apply', { count: filteredArticlesCount })}
                             </>
                         )}
                     </button>

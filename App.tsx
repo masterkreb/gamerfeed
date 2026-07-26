@@ -14,6 +14,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { AnnouncementBanner } from './components/AnnouncementBanner';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useCookieConsent } from './components/CookieConsent';
+import { filterArticles } from './shared/article-filters';
 
 const ARTICLES_PER_PAGE = 32;
 const INITIAL_ARTICLE_CACHE_COUNT = 32;
@@ -591,68 +592,16 @@ const AppContent: React.FC = () => {
     }, [setSearchQuery]);
 
 
-    const normalizeString = (str: string): string => {
-        return str
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-            .replace(/[''`]/g, '') // Remove apostrophes and similar characters
-            .replace(/[-–—]/g, ' ') // Replace dashes with spaces
-            .replace(/[^\w\s]/g, '') // Remove other punctuation
-            .replace(/\s+/g, ' ') // Normalize whitespace
-            .trim();
-    };
-
     const filteredArticles = useMemo(() => {
-        let result = articles;
-
-        if (!showFavoritesOnly) {
-            result = result.filter(article => !mutedSources.includes(article.source));
-        }
-
-        if (searchQuery) {
-            const normalizedQuery = normalizeString(searchQuery);
-            result = result.filter(article =>
-                normalizeString(article.title).includes(normalizedQuery) ||
-                normalizeString(article.summary).includes(normalizedQuery)
-            );
-        }
-
-        if (showFavoritesOnly) {
-            result = result.filter(article => favorites.includes(article.id));
-        }
-
-        if (sourceFilter !== 'all') {
-            result = result.filter(article => article.source === sourceFilter);
-        }
-
-        if (languageFilter !== 'all') {
-            result = result.filter(article => article.language === languageFilter);
-        }
-
-        if (timeFilter !== 'all') {
-            const now = new Date();
-            const todayStart = new Date();
-            todayStart.setHours(0, 0, 0, 0);
-
-            if (timeFilter === 'today') {
-                result = result.filter(article => new Date(article.publicationDate) >= todayStart);
-            } else if (timeFilter === 'yesterday') {
-                const yesterdayStart = new Date(todayStart);
-                yesterdayStart.setDate(todayStart.getDate() - 1);
-
-                result = result.filter(article => {
-                    const articleDate = new Date(article.publicationDate);
-                    return articleDate >= yesterdayStart && articleDate < todayStart;
-                });
-            } else if (timeFilter === '7d') {
-                const hours = 7 * 24;
-                const cutoff = new Date(now.getTime() - hours * 60 * 60 * 1000);
-                result = result.filter(article => new Date(article.publicationDate) >= cutoff);
-            }
-        }
-
-        return result;
+        return filterArticles(articles, {
+            searchQuery,
+            showFavoritesOnly,
+            sourceFilter,
+            languageFilter,
+            timeFilter,
+            favoriteIds: favorites,
+            mutedSources,
+        });
     }, [
         articles, showFavoritesOnly, sourceFilter, timeFilter, favorites, languageFilter,
         searchQuery, mutedSources
@@ -827,12 +776,10 @@ const AppContent: React.FC = () => {
                     />
                 ) : (
                     <>
-                        <FilterBar
-                            sources={availableSources}
-                            favoritesCount={availableFavoritesCount}
-                    allArticles={articles}
-                    favoriteIds={favorites}
-                    mutedSources={mutedSources}
+                <FilterBar
+                    sources={availableSources}
+                    favoritesCount={availableFavoritesCount}
+                    filteredArticlesCount={filteredArticles.length}
                 />
 
                 {showFavoritesOnly && !searchQuery && (
