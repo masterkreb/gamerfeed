@@ -68,7 +68,7 @@
 │       ├── HealthCenterTab.tsx
 │       ├── HealthLegendTab.tsx
 │       ├── AnnouncementTab.tsx
-│       └── healthService.ts
+│       └── healthTypes.ts
 │
 ├── contexts/
 │   └── FilterContext.tsx   # Filter-State (React Context)
@@ -76,10 +76,6 @@
 ├── hooks/
 │   ├── useFeeds.ts         # Feed-Daten fetchen
 │   └── useLocalStorage.ts  # localStorage Hook
-│
-├── services/
-│   ├── newsService.ts      # News-API Calls
-│   └── feeds.ts            # Feed-Service
 │
 ├── scripts/
 │   └── fetch-feeds.js      # Cron-Job Script (GitHub Actions)

@@ -89,7 +89,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     *   `/api/feeds`: Dient dem Admin-Panel zur Verwaltung der Feed-Quellen
     *   `/api/get-health-data`: Liefert den Systemstatus an das Admin-Panel
     *   `/api/announcement`: Verwaltung und Abruf von Ankündigungen
-    *   `/api/trends`: Liefert KI-generierte Trends
+    *   `/api/get-trends`: Liefert KI-generierte Trends
 6.  **Admin-Backend (mehrschichtiger Schutz)**: Die Middleware schützt die statische Admin-Seite. Die Admin-APIs prüfen Basic Authentication zusätzlich direkt im jeweiligen Handler und schützen schreibende Aufrufe per Same-Origin-Prüfung.
 7.  **KI-Integration (Groq API)**: Automatische Trend-Analyse mit Groq's llama-3.1-8b-instant Modell für Gaming-News.
 
