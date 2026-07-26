@@ -16,6 +16,8 @@ permissions:
 
 jobs:
   update-feeds:
+    # Never let code from another branch or tag write to the production cache.
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
 

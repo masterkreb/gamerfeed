@@ -11,7 +11,12 @@ node_modules
 dist
 dist-ssr
 *.local
-.env 
+
+# Environment secrets and local Vercel state
+.env
+.env.*
+!.env.example
+.vercel/
 
 # Legacy cache artifacts (runtime data lives in Vercel KV)
 /news-cache.json
