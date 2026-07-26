@@ -299,7 +299,7 @@ Dieser Fehler tritt im GitHub Actions Log auf und ist der häufigste Konfigurati
 ## 📊 Technologie-Stack
 
 - **Frontend**: React 19, TypeScript (Strict Mode), Tailwind CSS
-- **Build Tool**: Vite
+- **Build Tool**: Vite 8 (Rolldown)
 - **Internationalisierung**: i18next
 - **Backend**: Vercel Edge Functions
 - **Datenbank**: Neon PostgreSQL (oder Vercel Postgres)

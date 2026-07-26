@@ -17,7 +17,7 @@
 | Bereich | Technologie |
 |---------|-------------|
 | Frontend | React 19, TypeScript (Strict Mode), Tailwind CSS v4 |
-| Build | Vite |
+| Build | Vite 8 (Rolldown) |
 | Styling | Tailwind CSS v4 (lokal, NICHT CDN) mit `@tailwindcss/postcss` |
 | i18n | i18next (DE/EN) |
 | Backend | Vercel Serverless Functions |
