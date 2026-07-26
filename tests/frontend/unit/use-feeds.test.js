@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import React, { act } from 'react';
-import { parseHTML } from 'linkedom';
 import { createServer } from 'vite';
+import { createReactTestRoot } from '../helpers/react-test-root.js';
 
 const vite = await createServer({
     root: process.cwd(),
@@ -36,34 +36,7 @@ function jsonResponse(payload, status = 200) {
 }
 
 async function renderHook(fetcher) {
-    const { window } = parseHTML(
-        '<!doctype html><html><body><div id="root"></div></body></html>',
-    );
-    Object.defineProperty(window, 'location', {
-        configurable: true,
-        value: new URL('about:blank'),
-    });
-    const globalOverrides = {
-        document: window.document,
-        fetch: fetcher,
-        IS_REACT_ACT_ENVIRONMENT: true,
-        navigator: window.navigator,
-        window,
-    };
-    const previousDescriptors = new Map();
-
-    for (const [name, value] of Object.entries(globalOverrides)) {
-        previousDescriptors.set(name, Object.getOwnPropertyDescriptor(globalThis, name));
-        Object.defineProperty(globalThis, name, {
-            configurable: true,
-            value,
-            writable: true,
-        });
-    }
-
-    const { createRoot } = await import('react-dom/client');
-    const container = window.document.getElementById('root');
-    const root = createRoot(container);
+    const testRoot = await createReactTestRoot({ fetch: fetcher });
     let current;
 
     function Harness() {
@@ -75,26 +48,14 @@ async function renderHook(fetcher) {
         );
     }
 
-    await act(async () => {
-        root.render(React.createElement(Harness));
-    });
+    await testRoot.render(React.createElement(Harness));
 
     return {
         get current() {
             return current;
         },
         async cleanup() {
-            await act(async () => {
-                root.unmount();
-            });
-
-            for (const [name, descriptor] of previousDescriptors) {
-                if (descriptor) {
-                    Object.defineProperty(globalThis, name, descriptor);
-                } else {
-                    delete globalThis[name];
-                }
-            }
+            await testRoot.cleanup();
         },
     };
 }

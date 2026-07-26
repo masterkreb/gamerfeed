@@ -59,6 +59,7 @@ const SortableHeader: React.FC<{
 interface FeedManagementTabProps {
     feeds: FeedSource[];
     feedHealth: FeedHealth;
+    addButtonRef?: React.RefObject<HTMLButtonElement | null>;
     onAddNew: () => void;
     onEdit: (feed: FeedSource) => void;
     onDelete: (feed: FeedSource) => void;
@@ -68,6 +69,7 @@ interface FeedManagementTabProps {
 export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                                                                         feeds,
                                                                         feedHealth,
+                                                                        addButtonRef,
                                                                         onAddNew,
                                                                         onEdit,
                                                                         onDelete,
@@ -128,7 +130,7 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                         <span>{t('admin.management.secondary')} <span className="font-bold">{summary.secondary}</span></span>
                     </div>
                 </div>
-                <button onClick={onAddNew} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700">
+                <button ref={addButtonRef} onClick={onAddNew} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700">
                     <PlusIcon className="w-5 h-5" /><span>{t('admin.management.addNew')}</span>
                 </button>
             </div>

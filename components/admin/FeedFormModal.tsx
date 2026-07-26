@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FeedSource } from '../../types';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 import { CloseIcon } from '../Icons';
 
 interface FeedFormModalProps {
@@ -22,6 +23,7 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
     const [urlError, setUrlError] = useState<string | null>(null);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const nameInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (feed) {
@@ -43,15 +45,22 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
         setSubmitError(null);
     }, [feed, isOpen]);
 
-    if (!isOpen) {
-        return null;
-    }
-
     const handleClose = () => {
         if (!isSaving) {
             onClose();
         }
     };
+
+    const dialogRef = useDialogFocus<HTMLDivElement>({
+        isOpen,
+        onClose: handleClose,
+        canClose: !isSaving,
+        initialFocusRef: nameInputRef,
+    });
+
+    if (!isOpen) {
+        return null;
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -108,11 +117,13 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
                 aria-hidden="true"
             />
             <div
+                ref={dialogRef}
                 className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg bg-slate-100 dark:bg-zinc-900 rounded-2xl shadow-2xl flex flex-col"
                 style={{ maxHeight: '90vh' }}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="form-modal-title"
+                tabIndex={-1}
             >
                 <form id="feed-form" onSubmit={handleSubmit} aria-busy={isSaving}>
                     <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-zinc-800 flex-shrink-0">
@@ -134,6 +145,7 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
                         <div>
                             <label htmlFor="feed-name" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">{t('admin.form.labelName')}</label>
                             <input
+                                ref={nameInputRef}
                                 id="feed-name"
                                 type="text"
                                 value={name}

@@ -75,6 +75,7 @@
 │   └── FilterContext.tsx   # Filter-State (React Context)
 │
 ├── hooks/
+│   ├── useDialogFocus.ts   # Fokusfalle und Escape-Handling für Dialoge
 │   ├── useFeeds.ts         # Feed-Daten fetchen
 │   └── useLocalStorage.ts  # localStorage Hook
 │

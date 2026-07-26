@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFeeds } from '../../hooks/useFeeds';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 import type { FeedSource, BackendHealthStatus } from '../../types';
 import {
     ArrowLeftIcon,
@@ -100,6 +101,8 @@ export const AdminPanel: React.FC = () => {
     const [feedToDelete, setFeedToDelete] = useState<FeedSource | null>(null);
     const [isDeletingFeed, setIsDeletingFeed] = useState(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
+    const deleteCancelButtonRef = useRef<HTMLButtonElement>(null);
+    const addFeedButtonRef = useRef<HTMLButtonElement>(null);
     const [feedHealth, setFeedHealth] = useState<FeedHealth>({});
     const [activeTab, setActiveTab] = useState<AdminTab>('management');
     const [isCheckingAll, setIsCheckingAll] = useState(false);
@@ -145,6 +148,14 @@ export const AdminPanel: React.FC = () => {
             setDeleteError(null);
         }
     };
+
+    const deleteDialogRef = useDialogFocus<HTMLDivElement>({
+        isOpen: feedToDelete !== null,
+        onClose: closeDeleteDialog,
+        canClose: !isDeletingFeed,
+        initialFocusRef: deleteCancelButtonRef,
+        fallbackFocusRef: addFeedButtonRef,
+    });
 
     const confirmDelete = async () => {
         if (feedToDelete && !isDeletingFeed) {
@@ -365,6 +376,7 @@ export const AdminPanel: React.FC = () => {
                         <FeedManagementTab
                             feeds={feeds}
                             feedHealth={feedHealth}
+                            addButtonRef={addFeedButtonRef}
                             onAddNew={handleAddNew}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
@@ -411,11 +423,23 @@ export const AdminPanel: React.FC = () => {
 
             {feedToDelete && (<>
                 <div className="fixed inset-0 bg-black/60 z-40" onClick={closeDeleteDialog} aria-hidden="true" />
-                <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm bg-slate-100 dark:bg-zinc-900 rounded-2xl shadow-2xl p-6" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title" aria-busy={isDeletingFeed}>
+                <div
+                    ref={deleteDialogRef}
+                    className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm bg-slate-100 dark:bg-zinc-900 rounded-2xl shadow-2xl p-6"
+                    role="alertdialog"
+                    aria-modal="true"
+                    aria-labelledby="delete-dialog-title"
+                    aria-describedby={deleteError
+                        ? 'delete-dialog-description delete-dialog-error'
+                        : 'delete-dialog-description'}
+                    aria-busy={isDeletingFeed}
+                    tabIndex={-1}
+                >
                     <h2 id="delete-dialog-title" className="text-lg font-bold">{t('admin.deleteModalTitle')}</h2>
-                    <p className="text-sm text-slate-600 dark:text-zinc-400 mt-2">{t('admin.deleteModalConfirm', { name: feedToDelete.name })}</p>
+                    <p id="delete-dialog-description" className="text-sm text-slate-600 dark:text-zinc-400 mt-2">{t('admin.deleteModalConfirm', { name: feedToDelete.name })}</p>
                     {deleteError && (
                         <div
+                            id="delete-dialog-error"
                             role="alert"
                             className="mt-4 p-3 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-sm"
                         >
@@ -423,7 +447,7 @@ export const AdminPanel: React.FC = () => {
                         </div>
                     )}
                     <div className="mt-6 flex justify-end gap-3">
-                        <button onClick={closeDeleteDialog} disabled={isDeletingFeed} className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 text-slate-800 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed">{t('admin.cancel')}</button>
+                        <button ref={deleteCancelButtonRef} onClick={closeDeleteDialog} disabled={isDeletingFeed} className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-200 dark:bg-zinc-700 text-slate-800 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed">{t('admin.cancel')}</button>
                         <button onClick={() => void confirmDelete()} disabled={isDeletingFeed} className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
                             {isDeletingFeed ? t('admin.deleting') : t('admin.delete')}
                         </button>
