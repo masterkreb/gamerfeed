@@ -298,7 +298,7 @@ Dieser Fehler tritt im GitHub Actions Log auf und ist der häufigste Konfigurati
 
 ## 📊 Technologie-Stack
 
-- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **Frontend**: React 19, TypeScript (Strict Mode), Tailwind CSS
 - **Build Tool**: Vite
 - **Internationalisierung**: i18next
 - **Backend**: Vercel Edge Functions

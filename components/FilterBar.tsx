@@ -157,7 +157,7 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
         searchQuery.length > 0,
     ].filter(Boolean).length;
 
-    const isCurrentSearchSaved = inputValue && savedSearches.includes(inputValue);
+    const isCurrentSearchSaved = inputValue.length > 0 && savedSearches.includes(inputValue);
 
     const handleSaveSearch = () => {
         if (!inputValue || isCurrentSearchSaved) return;

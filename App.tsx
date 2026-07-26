@@ -149,7 +149,6 @@ const AppContent: React.FC = () => {
     // Auto-update state
     const [newArticlesCount, setNewArticlesCount] = useState(0);
     const [pendingArticles, setPendingArticles] = useState<Article[]>([]);
-    const lastCheckRef = useRef<number>(Date.now());
     const autoUpdateIntervalRef = useRef<number | null>(null);
 
     // Announcement state
@@ -358,7 +357,6 @@ const AppContent: React.FC = () => {
                 console.log(`🆕 ${trulyNewArticles.length} neue Artikel verfügbar`);
             }
             
-            lastCheckRef.current = Date.now();
         } catch (error) {
             console.warn('Auto-update check failed:', error);
         }
