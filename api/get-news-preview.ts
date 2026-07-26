@@ -1,5 +1,5 @@
 import { kv } from '@vercel/kv';
-import { createNewsCacheHandler } from '../server/news-cache-handler.ts';
+import { createNewsCacheHandler } from '../server/news-cache-handler.js';
 
 export const config = {
     runtime: 'edge',
