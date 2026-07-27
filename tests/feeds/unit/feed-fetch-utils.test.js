@@ -44,6 +44,9 @@ function fetchTestFeed(options = {}) {
         feedName: 'Example',
         feedUrl: FEED_URL,
         logger: null,
+        // Gestellter Resolver: die Outbound-Policy prüft jedes Ziel vor dem
+        // Abruf, die Testadressen existieren aber im DNS nicht.
+        lookup: async () => [{ address: '93.184.216.34', family: 4 }],
         retryDelayMs: 1,
         sleep: async () => {},
         ...options,
@@ -275,6 +278,40 @@ test('meldet leere erfolgreiche Antworten als ungültigen Feed', async () => {
     assert.match(result.directError, /not an RSS or Atom feed/);
     assert.match(result.proxyError, /not an RSS or Atom feed/);
     assert.doesNotMatch(result.lastError, /null/);
+});
+
+test('lehnt interne Feed-Ziele ab, ohne sie zu kontaktieren oder zu wiederholen', async () => {
+    for (const feedUrl of [
+        'http://169.254.169.254/latest/meta-data/',
+        'http://127.0.0.1/feed',
+        'file:///etc/passwd',
+        'https://nutzer:pw@example.com/feed',
+    ]) {
+        const fetcher = createFetchSequence(response(RSS_XML));
+        const result = await fetchTestFeed({
+            feedProxyUrl: 'https://proxy.example.com/feed-proxy.php',
+            feedUrl,
+            fetchImpl: fetcher.fetchImpl,
+        });
+
+        assert.equal(result.xmlString, null, `${feedUrl} wurde abgerufen`);
+        assert.equal(fetcher.calls.length, 0, `${feedUrl} hat das Netzwerk erreicht`);
+        assert.match(result.lastError, /nicht erlaubt|gesperrten Bereich|Nur http und https/);
+    }
+});
+
+test('nutzt bei einem abgelehnten Direktziel auch den Proxy nicht', async () => {
+    // Der Proxy würde das interne Ziel sonst stellvertretend abrufen.
+    const fetcher = createFetchSequence(response(RSS_XML), response(RSS_XML));
+    const result = await fetchTestFeed({
+        feedProxyUrl: 'https://proxy.example.com/feed-proxy.php',
+        feedUrl: 'http://10.0.0.5/feed',
+        fetchImpl: fetcher.fetchImpl,
+    });
+
+    assert.equal(result.xmlString, null);
+    assert.equal(result.usedProxy, false);
+    assert.equal(fetcher.calls.length, 0);
 });
 
 test('baut Proxy-URLs ohne fehlerhafte doppelte Fragezeichen', () => {

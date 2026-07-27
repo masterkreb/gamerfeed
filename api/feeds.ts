@@ -7,6 +7,7 @@ import {
     mapFeedRows,
     mapFeedUpdateToDatabaseRow,
 } from '../server/feed-mapper.js';
+import { validateFeedPayload } from '../server/feed-validation.js';
 
 export const config = {
     runtime: 'edge',
@@ -46,6 +47,15 @@ export default async function handler(req: Request) {
         // --- POST (create) a new feed ---
         if (req.method === 'POST') {
             const payload = await req.json() as Omit<FeedSource, 'id'>;
+
+            const { error: validationError } = validateFeedPayload(payload);
+            if (validationError) {
+                return new Response(JSON.stringify({ error: validationError }), {
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+
             const newId = createFeedId(payload.name);
             const feedRow = mapNewFeedToDatabaseRow(payload, newId);
 
@@ -67,6 +77,14 @@ export default async function handler(req: Request) {
              const feedRow = mapFeedUpdateToDatabaseRow(payload);
              if (!feedRow.id) {
                  return new Response(JSON.stringify({ error: 'Feed ID is required for updates' }), { status: 400 });
+             }
+
+             const { error: validationError } = validateFeedPayload(payload);
+             if (validationError) {
+                 return new Response(JSON.stringify({ error: validationError }), {
+                     status: 400,
+                     headers: { 'Content-Type': 'application/json' },
+                 });
              }
 
              const result = await sql`

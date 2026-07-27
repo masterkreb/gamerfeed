@@ -1,4 +1,9 @@
 import { DOMParser } from 'linkedom';
+import {
+    fetchWithOutboundPolicy,
+    OutboundPolicyError,
+    UrlPolicyError,
+} from './outbound-policy.js';
 
 export const BROWSER_LIKE_HEADERS = Object.freeze({
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
@@ -124,12 +129,19 @@ export function buildFeedProxyRequestUrl(feedProxyUrl, feedUrl) {
     return proxyRequestUrl.href;
 }
 
+// Eine Ablehnung durch die Outbound-Policy ist deterministisch: erneutes
+// Versuchen kann nichts ändern und würde die Diagnose nur verschleiern.
+function isPolicyRejection(error) {
+    return error instanceof OutboundPolicyError || error instanceof UrlPolicyError;
+}
+
 async function fetchTextWithRetry({
     attempts,
     feedName,
     fetchImpl,
     headers,
     logger,
+    lookup,
     maxBytes,
     requestLabel,
     requestUrl,
@@ -142,8 +154,10 @@ async function fetchTextWithRetry({
 
     for (let attempt = 1; attempt <= attempts; attempt++) {
         try {
-            const response = await fetchImpl(requestUrl, {
+            const response = await fetchWithOutboundPolicy(requestUrl, {
+                fetchImpl,
                 headers,
+                lookup,
                 signal: AbortSignal.timeout(timeoutMs),
             });
 
@@ -174,6 +188,9 @@ async function fetchTextWithRetry({
             }
         } catch (error) {
             lastError = getErrorMessage(error);
+            if (isPolicyRejection(error)) {
+                return { error: lastError, policyRejected: true, status: null, text: null };
+            }
             if (attempt < attempts) {
                 logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${lastError}). Retrying once...`);
                 await sleep(retryDelayMs);
@@ -193,6 +210,7 @@ export async function fetchFeedXml({
     feedUrl,
     fetchImpl = globalThis.fetch,
     logger = console,
+    lookup,
     maxResponseBytes = MAX_FEED_RESPONSE_BYTES,
     proxyAttempts = 2,
     proxyTimeoutMs = 20000,
@@ -205,6 +223,7 @@ export async function fetchFeedXml({
         fetchImpl,
         headers: BROWSER_LIKE_HEADERS,
         logger,
+        lookup,
         maxBytes: maxResponseBytes,
         requestLabel: 'Direct fetch',
         requestUrl: feedUrl,
@@ -228,7 +247,11 @@ export async function fetchFeedXml({
         ? `Direct fetch returned content that is not an RSS or Atom feed (status ${directResult.status})`
         : directResult.error;
 
-    if (!feedProxyUrl?.trim()) {
+    // Ein von der Outbound-Policy abgelehntes Ziel darf auch nicht
+    // stellvertretend über den Proxy abgerufen werden. Die exakte Allowlist des
+    // PHP-Proxys würde es zwar ebenfalls zurückweisen, aber die Entscheidung
+    // gehört auf diese Seite und darf nicht von der Gegenstelle abhängen.
+    if (!feedProxyUrl?.trim() || directResult.policyRejected) {
         return {
             directError,
             lastError: directError,
@@ -260,6 +283,7 @@ export async function fetchFeedXml({
         fetchImpl,
         headers: undefined,
         logger,
+        lookup,
         maxBytes: maxResponseBytes,
         requestLabel: 'Feed proxy',
         requestUrl: proxyRequestUrl,
