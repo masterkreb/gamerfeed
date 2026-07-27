@@ -17,6 +17,16 @@ interface SettingsModalProps {
 
 type TabType = 'sources' | 'legal' | 'about' | 'contact';
 
+const SETTINGS_TABS: { id: TabType; labelKey: string }[] = [
+    { id: 'sources', labelKey: 'settings.tabs.sources' },
+    { id: 'legal', labelKey: 'settings.tabs.legal' },
+    { id: 'about', labelKey: 'settings.tabs.about' },
+    { id: 'contact', labelKey: 'settings.tabs.contact' },
+];
+
+const getTabId = (tab: TabType) => `settings-tab-${tab}`;
+const getPanelId = (tab: TabType) => `settings-panel-${tab}`;
+
 interface RecaptchaClient {
     ready: (callback: () => void) => void;
     execute: (siteKey: string, options: { action: string }) => Promise<string>;
@@ -25,6 +35,9 @@ interface RecaptchaClient {
 const RECAPTCHA_SITE_KEY = '6LeKjy4sAAAAAPqI5SG57GRV4ZxSswqEgCtdilWp';
 const RECAPTCHA_SCRIPT_ID = 'gamerfeed-recaptcha';
 const RECAPTCHA_LOAD_TIMEOUT_MS = 10_000;
+// Ohne Zeitgrenze bliebe das Formular bei einer haengenden Anfrage dauerhaft im
+// Sendezustand und damit gesperrt.
+const CONTACT_REQUEST_TIMEOUT_MS = 20_000;
 
 let recaptchaLoadPromise: Promise<RecaptchaClient> | null = null;
 
@@ -219,24 +232,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         }
     }, [activeTab]);
 
-    // Beim Schließen wird der Dialog ausgehängt und der Formularinhalt verworfen.
-    // Waehrend des Versands bleibt er deshalb offen, bis eine Antwort da ist.
     const isSendingContact = contactStatus === 'loading';
 
-    const handleClose = () => {
-        if (!isSendingContact) {
-            onClose();
-        }
-    };
-
+    // Der Dialog bleibt jederzeit schliessbar. SettingsModal bleibt in App.tsx
+    // montiert und rendert bei isOpen=false nur null - der Formularzustand
+    // ueberlebt das Schliessen also. Ein Sperren waehrend des Versands wuerde den
+    // Benutzer bei einer haengenden Anfrage im Dialog festhalten.
     const dialogRef = useDialogFocus<HTMLDivElement>({
         isOpen,
-        onClose: handleClose,
-        canClose: !isSendingContact,
+        onClose,
     });
+
+    const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+    const handleTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+        const lastIndex = SETTINGS_TABS.length - 1;
+        let nextIndex: number | null = null;
+
+        if (event.key === 'ArrowRight') {
+            nextIndex = index === lastIndex ? 0 : index + 1;
+        } else if (event.key === 'ArrowLeft') {
+            nextIndex = index === 0 ? lastIndex : index - 1;
+        } else if (event.key === 'Home') {
+            nextIndex = 0;
+        } else if (event.key === 'End') {
+            nextIndex = lastIndex;
+        }
+
+        if (nextIndex === null) return;
+
+        event.preventDefault();
+        setActiveTab(SETTINGS_TABS[nextIndex].id);
+        tabRefs.current[nextIndex]?.focus();
+    };
 
     const handleContactSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Verhindert eine zweite Uebermittlung, falls das Formular waehrend eines
+        // laufenden Versands erneut abgeschickt wird.
+        if (isSendingContact) return;
 
         if (contactStatusResetTimeoutRef.current !== null) {
             window.clearTimeout(contactStatusResetTimeoutRef.current);
@@ -267,7 +302,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             const response = await fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...normalizedContact, recaptchaToken: token })
+                body: JSON.stringify({ ...normalizedContact, recaptchaToken: token }),
+                signal: AbortSignal.timeout(CONTACT_REQUEST_TIMEOUT_MS),
             });
 
             if (response.ok) {
@@ -319,7 +355,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <>
             <div
                 className="fixed inset-0 bg-black/60 z-40 transition-opacity"
-                onClick={handleClose}
+                onClick={onClose}
                 aria-hidden="true"
             />
             <div
@@ -334,7 +370,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-zinc-800 flex-shrink-0">
                     <h2 id="settings-modal-title" className="text-lg font-semibold">{t('settings.title')}</h2>
                     <button
-                        onClick={handleClose}
+                        onClick={onClose}
                         className="p-3 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
                         aria-label={t('settings.close')}
                     >
@@ -343,52 +379,43 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
                 
                 {/* Tab Navigation */}
-                <div className="flex border-b border-slate-200 dark:border-zinc-800 flex-shrink-0">
-                    <button
-                        onClick={() => setActiveTab('sources')}
-                        className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
-                            activeTab === 'sources'
-                                ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
-                                : 'text-slate-600 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
-                        }`}
-                    >
-                        {t('settings.tabs.sources')}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('legal')}
-                        className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
-                            activeTab === 'legal'
-                                ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
-                                : 'text-slate-600 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
-                        }`}
-                    >
-                        {t('settings.tabs.legal')}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('about')}
-                        className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
-                            activeTab === 'about'
-                                ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
-                                : 'text-slate-600 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
-                        }`}
-                    >
-                        {t('settings.tabs.about')}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('contact')}
-                        className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
-                            activeTab === 'contact'
-                                ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
-                                : 'text-slate-600 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
-                        }`}
-                    >
-                        {t('settings.tabs.contact')}
-                    </button>
+                <div
+                    role="tablist"
+                    aria-label={t('settings.title')}
+                    className="flex border-b border-slate-200 dark:border-zinc-800 flex-shrink-0"
+                >
+                    {SETTINGS_TABS.map((tab, index) => (
+                        <button
+                            key={tab.id}
+                            ref={element => { tabRefs.current[index] = element; }}
+                            type="button"
+                            role="tab"
+                            id={getTabId(tab.id)}
+                            aria-selected={activeTab === tab.id}
+                            aria-controls={getPanelId(tab.id)}
+                            // Roving tabIndex: nur der aktive Reiter liegt in der Tab-Reihenfolge,
+                            // zwischen den Reitern wird mit den Pfeiltasten gewechselt.
+                            tabIndex={activeTab === tab.id ? 0 : -1}
+                            onClick={() => setActiveTab(tab.id)}
+                            onKeyDown={event => handleTabKeyDown(event, index)}
+                            className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
+                                activeTab === tab.id
+                                    ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
+                                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
+                            }`}
+                        >
+                            {t(tab.labelKey)}
+                        </button>
+                    ))}
                 </div>
 
                 <div className="p-6 flex-grow overflow-y-auto">
-                    {activeTab === 'sources' && (
-                        <>
+                    <div
+                        role="tabpanel"
+                        id={getPanelId('sources')}
+                        aria-labelledby={getTabId('sources')}
+                        hidden={activeTab !== 'sources'}
+                    >
                             <div className="mb-2">
                                 <h3 className="font-semibold text-slate-800 dark:text-zinc-200">{t('settings.manage')}</h3>
                             </div>
@@ -421,11 +448,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                     <p className="text-sm text-center text-slate-500 dark:text-zinc-400 py-4">{t('settings.noSources')}</p>
                                 )}
                             </div>
-                        </>
-                    )}
+                    </div>
 
-                    {activeTab === 'legal' && (
-                        <div className="space-y-8 prose dark:prose-invert max-w-none prose-slate dark:prose-zinc">
+                    <div
+                        role="tabpanel"
+                        id={getPanelId('legal')}
+                        aria-labelledby={getTabId('legal')}
+                        hidden={activeTab !== 'legal'}
+                        className="space-y-8 prose dark:prose-invert max-w-none prose-slate dark:prose-zinc">
                             <section>
                                 <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-200 mb-3">
                                     {t('settings.legal.imprint.title')}
@@ -497,11 +527,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             <div className="mt-6 p-4 bg-slate-100 dark:bg-zinc-800 rounded-lg text-sm text-slate-700 dark:text-zinc-300">
                                 📧 {t('settings.legal.contactReference')}
                             </div>
-                        </div>
-                    )}
+                    </div>
 
-                    {activeTab === 'about' && (
-                        <div className="space-y-6 prose dark:prose-invert max-w-none prose-slate dark:prose-zinc">
+                    <div
+                        role="tabpanel"
+                        id={getPanelId('about')}
+                        aria-labelledby={getTabId('about')}
+                        hidden={activeTab !== 'about'}
+                        className="space-y-6 prose dark:prose-invert max-w-none prose-slate dark:prose-zinc">
                             <section>
                                 <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-200 mb-3">
                                     {t('settings.about.title')}
@@ -534,17 +567,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                     <p>{t('settings.about.tech.stack')}</p>
                                 </div>
                             </section>
-                        </div>
-                    )}
+                    </div>
 
-                    {activeTab === 'contact' && (
-                        <div className="space-y-4">
+                    <div
+                        role="tabpanel"
+                        id={getPanelId('contact')}
+                        aria-labelledby={getTabId('contact')}
+                        hidden={activeTab !== 'contact'}
+                        className="space-y-4"
+                    >
                             <p className="text-sm text-slate-600 dark:text-zinc-400">
                                 {t('contact.openForm')}
                             </p>
                             <form onSubmit={handleContactSubmit}>
                                 <fieldset
-                                    disabled={contactStatus === 'loading'}
+                                    disabled={isSendingContact}
                                     className="space-y-4 border-0 p-0 m-0 min-w-0"
                                 >
                                 <div>
@@ -626,15 +663,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                                 <button
                                     type="submit"
-                                    disabled={contactStatus === 'loading'}
+                                    disabled={isSendingContact}
                                     className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-bold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-zinc-900"
                                 >
-                                    <span>{contactStatus === 'loading' ? t('contact.sending') : t('contact.send')}</span>
+                                    <span>{isSendingContact ? t('contact.sending') : t('contact.send')}</span>
                                 </button>
                                 </fieldset>
                             </form>
-                        </div>
-                    )}
+                    </div>
                 </div>
                 <div className="flex-shrink-0 p-4 border-t border-slate-200 dark:border-zinc-800 flex justify-between items-center bg-slate-100 dark:bg-zinc-900 rounded-b-2xl">
                     {activeTab === 'sources' && (
@@ -650,7 +686,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     )}
                     {activeTab !== 'sources' && <div></div>}
                     <button
-                        onClick={handleClose}
+                        onClick={onClose}
                         className="px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-zinc-900"
                     >
                         {t('settings.done')}
