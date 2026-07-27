@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "test": "node --disable-warning=ExperimentalWarning --experimental-strip-types --test \"tests/**/*.test.js\"",
     "test:feeds": "node --test \"tests/feeds/**/*.test.js\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@vercel/kv": "^2.0.0",
@@ -28,6 +29,7 @@
     "vanilla-cookieconsent": "^3.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
     "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^24.13.3",
     "@types/nodemailer": "^8.0.1",
