@@ -10,6 +10,7 @@ import { CloseIcon, ResetIcon } from './Icons';
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onShowCookieSettings?: () => void;
     allSources: { name: string; language: 'de' | 'en' }[];
     mutedSources: string[];
     setMutedSources: React.Dispatch<React.SetStateAction<string[]>>;
@@ -228,6 +229,7 @@ const LanguageSourceGroup: React.FC<{
 export const SettingsModal: React.FC<SettingsModalProps> = ({
                                                                 isOpen,
                                                                 onClose,
+                                                                onShowCookieSettings,
                                                                 allSources,
                                                                 mutedSources,
                                                                 setMutedSources,
@@ -556,6 +558,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                     </div>
                                 </div>
                             </section>
+
+                            {onShowCookieSettings && (
+                                <div className="mt-6">
+                                    <button
+                                        type="button"
+                                        onClick={onShowCookieSettings}
+                                        className="px-4 py-2 rounded-lg text-sm font-semibold border-2 border-transparent bg-slate-200 dark:bg-zinc-700 text-slate-700 dark:text-zinc-200 hover:bg-slate-300 dark:hover:bg-zinc-600 transition-colors"
+                                    >
+                                        🍪 {t('cookie.banner.settings')}
+                                    </button>
+                                </div>
+                            )}
 
                             <div className="mt-6 p-4 bg-slate-100 dark:bg-zinc-800 rounded-lg text-sm text-slate-700 dark:text-zinc-300">
                                 📧 {t('settings.legal.contactReference')}
