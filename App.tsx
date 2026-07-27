@@ -14,40 +14,20 @@ import { SettingsModal } from './components/SettingsModal';
 import { AnnouncementBanner } from './components/AnnouncementBanner';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useCookieConsent } from './components/CookieConsent';
+import { createAnalyticsLifecycle } from './shared/analytics-lifecycle.js';
 import { filterArticles } from './shared/article-filters';
 
 const ARTICLES_PER_PAGE = 32;
 const INITIAL_ARTICLE_CACHE_COUNT = 32;
 const ARTICLE_CACHE_TTL_MS = 30 * 60 * 1000;
 
-// Google Analytics initialisieren (nur bei Consent)
-function initGoogleAnalytics() {
-    const GA_MEASUREMENT_ID = 'G-V2KB8CTWRV';
-    
-    if (typeof window === 'undefined' || (window as any).gaInitialized) return;
-    (window as any).gaInitialized = true;
-    
-    // DataLayer zuerst initialisieren
-    (window as any).dataLayer = (window as any).dataLayer || [];
-    function gtag(..._args: any[]) {
-        (window as any).dataLayer.push(arguments);
-    }
-    (window as any).gtag = gtag;
-    
-    // Zuerst gtag Befehle queuen
-    gtag('js', new Date());
-    gtag('config', GA_MEASUREMENT_ID, {
-        'anonymize_ip': true,
-        'cookie_domain': 'auto',
-        'cookie_flags': 'SameSite=Lax;Secure'
-    });
-    
-    // Dann Script laden
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-    document.head.appendChild(script);
-}
+// Analytics wird erst nach Zustimmung geladen und bei Widerruf wieder
+// stillgelegt. Der Lebenszyklus liegt in shared/analytics-lifecycle.js.
+const GA_MEASUREMENT_ID = 'G-V2KB8CTWRV';
+
+const analytics = typeof window === 'undefined'
+    ? null
+    : createAnalyticsLifecycle({ measurementId: GA_MEASUREMENT_ID });
 
 type ToastType = 'info' | 'success';
 
@@ -170,12 +150,15 @@ const AppContent: React.FC = () => {
     }, [setCachedNews]);
 
     // Cookie Consent Hook
-    useCookieConsent({
-        onConsent: (categories) => {
+    const { showPreferences } = useCookieConsent({
+        onConsent: useCallback((categories: string[]) => {
             if (categories.includes('analytics')) {
-                initGoogleAnalytics();
+                analytics?.grant();
+            } else {
+                // Widerruf: weitere Treffer stoppen und Cookies entfernen.
+                analytics?.deny();
             }
-        }
+        }, []),
     });
 
     useEffect(() => {
@@ -857,6 +840,7 @@ const AppContent: React.FC = () => {
             <SettingsModal
                 isOpen={isSettingsModalOpen}
                 onClose={() => setIsSettingsModalOpen(false)}
+                onShowCookieSettings={showPreferences}
                 allSources={allSources}
                 mutedSources={mutedSources}
                 setMutedSources={setMutedSources}
