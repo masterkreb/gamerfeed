@@ -17,7 +17,7 @@
 | Bereich | Technologie |
 |---------|-------------|
 | Frontend | React 19, TypeScript (Strict Mode), Tailwind CSS v4 |
-| Build | Vite 8.1.5 (Rolldown), `build.rolldownOptions` in `vite.config.ts` |
+| Build | Vite 8 (Rolldown), `build.rolldownOptions` in `vite.config.ts` |
 | Laufzeit | Node.js 24.x (bewusst fixiert, auch im Workflow) |
 | Styling | Tailwind CSS v4 (lokal, NICHT CDN) mit `@tailwindcss/postcss` |
 | i18n | i18next (DE/EN) |
@@ -285,8 +285,10 @@ npm run build
 node scripts/fetch-feeds.js
 ```
 
-Nach jedem Arbeitsblock mindestens `npm test`, `npm run typecheck`,
-`npm run build` und `git diff --check` ausführen.
+Nach Codeänderungen `npm test`, `npm run typecheck` und `git diff --check`
+ausführen; `npm run build` zusätzlich, sobald Frontend, Build-Konfiguration oder
+Abhängigkeiten betroffen sind. Für reine Dokumentationsänderungen genügt eine
+Sichtprüfung.
 
 ## 🧪 Tests und CI
 
@@ -300,12 +302,13 @@ tests/
 ```
 
 Grundlage sind `node:test`, `node:assert`, Linkedom und React über Vite SSR.
-Eine Browser-E2E-Suite gibt es bewusst nicht.
+Eine Browser-E2E-Suite gibt es derzeit nicht.
 
 `.github/workflows/ci.yml` läuft bei Push auf `main`, bei Pull Requests und
 manuell, in dieser Reihenfolge: `npm ci`, `php -l tools/feed-proxy.php`,
-`npm test`, `npm run typecheck`, `npm run build`. Die lokale Windows-Umgebung
-hat keine PHP-CLI; der Syntaxcheck läuft nur in CI.
+`npm test`, `npm run typecheck`, `npm run build`. Ist lokal keine PHP-CLI
+verfügbar, übernimmt CI den Syntaxcheck von `tools/feed-proxy.php` – PHP dafür
+nicht ungefragt installieren.
 
 **Bekannte Eigenheit des Frontend-Harness:** React ermittelt beim ersten Import
 von `react-dom` einmalig über `'oninput' in document`, ob native Input-Events

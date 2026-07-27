@@ -31,7 +31,7 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
 - **✉️ Kontaktformular**: In den Einstellungen integriert, versendet über Gmail SMTP und ist mit reCAPTCHA v3 gegen automatisierte Zusendungen abgesichert. Server- und clientseitige Prüfung von Pflichtfeldern, Feldlängen und E-Mail-Format.
 - **♿ Barrierefreiheit**:
     - Focus-Ring nur bei Tastatur-Navigation sichtbar (nicht bei Mausklicks).
-    - Alle Dialoge halten den Fokus fest, schließen mit Escape und geben den Fokus an den auslösenden Knopf zurück.
+    - Dialoge halten den Fokus fest und geben ihn beim Schließen an das auslösende Element zurück. Escape schließt sie; Admin-Dialoge blockieren das bewusst, solange gespeichert oder gelöscht wird.
     - Die Reiter der Einstellungen sind echte ARIA-Tabs mit Pfeiltasten-, Home- und End-Navigation.
     - Erfolgs- und Fehlermeldungen des Kontaktformulars werden Screenreadern angekündigt.
 - **Admin-Panel**: Ein passwortgeschütztes Admin-Panel zur einfachen Verwaltung der Feed-Quellen, Überwachung ihres Status und Veröffentlichung von Ankündigungen.
@@ -45,9 +45,12 @@ GamerFeed nutzt eine innovative 3-stufige Lade-Strategie, um eine sofortige Anze
 
 ### Wie es funktioniert:
 
-1. **Stage 1 (Sofort)**: Die ersten 16 Artikel werden geladen und sofort angezeigt (~5KB)
-2. **Stage 2 (0.3-0.5s)**: 64 Artikel werden nachgeladen (~20KB)
-3. **Stage 3 (1-2s)**: Alle verbleibenden Artikel werden im Hintergrund geladen (~100KB)
+1. **Stufe 1**: Die ersten 16 Artikel werden geladen und sofort angezeigt
+2. **Stufe 2**: 64 Artikel werden nachgeladen
+3. **Stufe 3**: Alle verbleibenden Artikel folgen im Hintergrund
+
+Die tatsächliche Größe und Dauer hängt von der Anzahl der Feeds, der Länge der
+Zusammenfassungen und der Netzverbindung ab.
 
 ### Technische Umsetzung:
 
@@ -229,7 +232,7 @@ npm run build
 ```
 
 Dies erstellt einen optimierten Production-Build im `dist/`-Ordner:
-- **Tailwind CSS**: Nur genutzte Klassen werden inkludiert (~65KB statt ~300KB CDN)
+- **Tailwind CSS**: Nur tatsächlich genutzte Klassen landen im Build
 - **JavaScript**: Minifiziert und tree-shaked
 - **Keine CDN-Abhängigkeiten für das App-Bundle**: Alle Bibliotheken werden lokal gebündelt. Zur Laufzeit werden weiterhin externe Dienste angesprochen: reCAPTCHA v3 lädt sein Skript von Google nach, dazu kommen die Backend-Dienste (Vercel KV, Neon PostgreSQL, Groq, Gmail SMTP).
 
