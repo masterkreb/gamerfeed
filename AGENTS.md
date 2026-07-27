@@ -245,6 +245,24 @@ E-Mail-Format, schützt vor Steuerzeichen und Header-Injection und schreibt kein
 Formulardaten oder Adressen in Logs. reCAPTCHA v3 wird gegen `success`, Score
 ≥ 0.5, die Action `contact_form` und optional erlaubte Hostnamen geprüft.
 
+## 🛡️ Outbound-Policy
+
+Serverseitige Abrufe laufen nicht mehr direkt über `fetch`. Adressen aus der
+Feed-Verwaltung und aus RSS-Inhalten werden vorher geprüft:
+
+- `shared/url-policy.js` – syntaktisch, ohne `node:`-Importe, deshalb auch in
+  der Edge-Runtime nutzbar (nur http/https, keine Zugangsdaten, Host vorhanden)
+- `scripts/outbound-policy.js` – Adressprüfung über `net.BlockList` sowie
+  Weiterleitungen mit erneuter Prüfung je Hop
+
+Eine abgelehnte Adresse erreicht das Netzwerk nicht und wird auch nicht über den
+PHP-Proxy abgerufen. Ablehnungen werden nicht wiederholt.
+
+**Bekannte Grenze:** DNS-Rebinding ist nicht ausgeschlossen, weil sich die
+Verbindung beim globalen `fetch` nicht an die geprüften Adressen binden lässt.
+Einzelheiten, gesperrte Bereiche und die Bestandsprüfung
+`node scripts/check-feed-urls.js` stehen in `docs/deployment/outbound-policy.md`.
+
 ## 🔌 Feed-Proxy
 
 Einzelne Quellen – aktuell GamePro – beantworten Anfragen aus dem
