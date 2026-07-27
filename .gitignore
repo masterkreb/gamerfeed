@@ -34,3 +34,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Playwright-Artefakte (nur bei Fehlern)
+/test-results/
+/playwright-report/
+/blob-report/
