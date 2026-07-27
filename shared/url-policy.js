@@ -78,3 +78,21 @@ export function toAllowedUrl(rawUrl, options) {
 export function isAllowedUrl(rawUrl, options) {
     return toAllowedUrl(rawUrl, options) !== null;
 }
+
+/**
+ * Normalisiert eine aus Feed-Inhalten stammende Artikel- oder Bild-URL.
+ *
+ * Dieselbe Funktion gilt fuer den Feed-Ingest, das OG-Scraping, die Links in
+ * der SPA und das statische HTML unter /gaming-news - damit die Regel an allen
+ * Ausgabestellen dieselbe ist und nicht doppelt gepflegt werden muss.
+ *
+ * Relative Angaben werden nur aufgeloest, wenn eine Basis uebergeben wird.
+ *
+ * @param {unknown} rawUrl
+ * @param {{ base?: string | URL }} [options]
+ * @returns {string | null} Absolute URL oder null, wenn sie abzulehnen ist.
+ */
+export function normalizeContentUrl(rawUrl, { base } = {}) {
+    const url = toAllowedUrl(rawUrl, { base });
+    return url === null ? null : url.href;
+}
