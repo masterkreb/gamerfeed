@@ -53,4 +53,8 @@ jobs:
 
           # For Groq AI (trend generation)
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+
+          # Endpoint of tools/feed-proxy.php on the external hosting.
+          # Used only when a direct feed fetch fails.
+          FEED_PROXY_URL: ${{ secrets.FEED_PROXY_URL }}
         run: node scripts/fetch-feeds.js

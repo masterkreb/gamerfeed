@@ -775,6 +775,9 @@ async function main() {
     const MAX_ARTICLES = 10000; // Maximale Anzahl Artikel (verhindert KV Limit-Überschreitung)
     const IMAGE_BACKFILL_LIMIT = 30;
     const IMAGE_BACKFILL_PER_SOURCE_LIMIT = 5;
+    // Endpunkt von tools/feed-proxy.php auf dem externen Hosting. Ohne dieses
+    // Secret laeuft der Abruf ohne Fallback, statt fehlzuschlagen.
+    const feedProxyUrl = process.env.FEED_PROXY_URL;
 
     try {
         let oldArticles = [];
@@ -843,6 +846,23 @@ async function main() {
                     } else { lastError = `Direct fetch returned empty or invalid content. Status: ${response.status}`; }
                 } else { lastError = `Direct fetch failed with status ${response.status}`; }
             } catch (e) { lastError = e instanceof Error ? e.message : String(e); }
+
+            // Fallback ueber den eigenen Proxy: manche Quellen (z.B. GamePro hinter
+            // Cloudflare) blocken die Rechenzentrums-IPs der Actions-Runner.
+            if (!xmlString && feedProxyUrl) {
+                console.log(`   ⚠️  Direct fetch failed for ${feed.name} (${lastError}). Trying feed proxy...`);
+                try {
+                    // Der Proxy laesst sich 15s Zeit, hier muss etwas mehr stehen.
+                    const response = await fetch(`${feedProxyUrl}?url=${encodeURIComponent(feedUrl)}`, { signal: AbortSignal.timeout(20000) });
+                    if (response.ok) {
+                        const text = await response.text();
+                        if (text && text.trim().startsWith('<')) {
+                            xmlString = text;
+                            console.log(`   ✅ Feed proxy fetch successful for ${feed.name}`);
+                        } else { lastError = `Feed proxy returned empty or invalid content. Status: ${response.status}`; }
+                    } else { lastError = `Feed proxy failed with status ${response.status}`; }
+                } catch (e) { lastError = e instanceof Error ? e.message : String(e); }
+            }
 
             if (xmlString) {
                 try {
