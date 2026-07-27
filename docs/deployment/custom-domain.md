@@ -77,6 +77,10 @@ ausdrücklich die neue Produktionsdomain abbilden sollen.
 - Rechtliche Texte und Kontaktangaben auf die neue Domain prüfen.
 - Falls weitere Dienste Domain-Allowlisten besitzen, dort beide Domains während
   der Übergangszeit freigeben.
+- Falls auch Hostname oder Pfad des externen Feed-Proxys wechseln, das GitHub
+  Actions Secret `FEED_PROXY_URL` aktualisieren und die
+  [Feed-Proxy-Betriebsanleitung](feed-proxy.md) abarbeiten. Die Variable gehört
+  nicht zu Vercel.
 
 ## 6. Deployment und Abnahme
 

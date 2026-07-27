@@ -81,7 +81,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     - `news_cache_64`: Erste 64 Artikel (Medium)
     - `feed_health_status`: Systemstatus
     - `daily_trends` & `weekly_trends`: KI-generierte Trends
-4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 20 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung.
+4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 20 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung. Falls eine freigegebene Quelle GitHub-Runner blockiert, kann der Workflow optional auf den extern betriebenen PHP-Fallback `tools/feed-proxy.php` zurückgreifen. Einrichtung und Grenzen stehen in der [Feed-Proxy-Betriebsanleitung](docs/deployment/feed-proxy.md).
 5.  **API-Schicht (Vercel Functions)**: Schlanke Edge Functions für Datenabrufe sowie eine Node.js Function für den SMTP-Versand:
     *   `/api/get-news-preview`: Liefert erste 16 Artikel für sofortiges Laden
     *   `/api/get-news-medium`: Liefert erste 64 Artikel für schnelles Nachladen
@@ -186,6 +186,10 @@ Die Statusanzeige wird wie folgt ermittelt:
     # Groq API für Trend-Analyse (optional)
     GROQ_API_KEY="gsk_..."
 
+    # Optionaler Feed-Fallback für einen manuellen lokalen Cache-Lauf.
+    # In Produktion ist dies ein GitHub Actions Secret, keine Vercel-Variable.
+    FEED_PROXY_URL="https://proxy.example/feed-proxy.php"
+
     # Zwingende Anmeldedaten für Admin-Seite und Admin-APIs
     ADMIN_USERNAME="dein_admin_benutzername"
     ADMIN_PASSWORD="dein_sicheres_passwort"
@@ -246,7 +250,11 @@ npm run typecheck    # TypeScript prüfen
 npm run build        # Produktions-Build prüfen
 ```
 
-Der Workflow `.github/workflows/ci.yml` führt bei Pull Requests und Pushes auf `main` alle Tests, die TypeScript-Prüfung und den Produktions-Build aus. Der Feed-Cron nutzt zusätzlich die fokussierte Suite `test:feeds`. Die Tests sind kein separates Projekt und werden nicht in den Frontend-Build importiert.
+Der Workflow `.github/workflows/ci.yml` führt bei Pull Requests und Pushes auf
+`main` den PHP-Syntaxcheck für den Feed-Proxy, alle Tests, die
+TypeScript-Prüfung und den Produktions-Build aus. Der Feed-Cron nutzt zusätzlich
+die fokussierte Suite `test:feeds`. Die Tests sind kein separates Projekt und
+werden nicht in den Frontend-Build importiert.
 
 ### Manuelles Aktualisieren des Caches
 
@@ -261,7 +269,7 @@ node scripts/fetch-feeds.js
 
 1.  **Projekt importieren**: Importiere dein geklontes Git-Repository in Vercel.
 2.  **Datenbanken verbinden**: Verknüpfe dein Vercel-Projekt mit einer Vercel Postgres-Datenbank und einem Vercel KV Store.
-3.  **Umgebungsvariablen konfigurieren**: Füge im Vercel-Projekt-Dashboard die oben genannten Umgebungsvariablen hinzu. Für das Kontaktformular werden zusätzlich `RECAPTCHA_SECRET_KEY`, `GMAIL_USER` und `GMAIL_APP_PASSWORD` benötigt. Mit `RECAPTCHA_ALLOWED_HOSTNAMES` kann die reCAPTCHA-Antwort auf die produktiven Domains eingeschränkt werden.
+3.  **Umgebungsvariablen konfigurieren**: Füge im Vercel-Projekt-Dashboard die von Frontend und API benötigten Variablen hinzu. Für das Kontaktformular werden zusätzlich `RECAPTCHA_SECRET_KEY`, `GMAIL_USER` und `GMAIL_APP_PASSWORD` benötigt. Mit `RECAPTCHA_ALLOWED_HOSTNAMES` kann die reCAPTCHA-Antwort auf die produktiven Domains eingeschränkt werden. `FEED_PROXY_URL` gehört ausschließlich zu GitHub Actions beziehungsweise zu einem manuellen lokalen Cache-Lauf, nicht zu Vercel.
 
 Für einen späteren Wechsel auf eine eigene Domain gibt es eine vollständige
 [Custom-Domain-Checkliste](docs/deployment/custom-domain.md).
@@ -279,16 +287,22 @@ Diese Schlüssel werden **NICHT** in eine Datei im Projekt geschrieben. Sie werd
 1.  Gehe zu deinem GitHub-Repository.
 2.  Klicke auf `Settings` (Einstellungen) > `Secrets and variables` (Geheimnisse und Variablen) > `Actions`.
 3.  Klicke auf den Button `New repository secret`, um die folgenden Secrets **exakt wie benannt** zu erstellen.
-4.  Die Werte für die Secrets findest du in deinem Vercel-Projekt-Dashboard unter `Settings` > `Environment Variables`. Kopiere sie von dort.
+4.  Die Datenbank- und KV-Werte findest du im Vercel-Projekt-Dashboard unter `Settings` > `Environment Variables`. Die Proxy-Adresse stammt vom externen PHP-Hosting.
 
-| Secret-Name in GitHub           | Wert aus Vercel-Projekt                         | Zweck                                           |
+| Secret-Name in GitHub           | Quelle/Wert                                     | Zweck                                           |
 | ------------------------------- | ----------------------------------------------- | ----------------------------------------------- |
-| `POSTGRES_URL`                  | Der Wert von `POSTGRES_URL`                     | Verbindung zur Feed-Liste in Postgres           |
-| `KV_REST_API_URL`               | Der Wert von `KV_REST_API_URL`                  | Verbindung zum News-Cache (KV Store)            |
-| `KV_REST_API_TOKEN`             | Der Wert von `KV_REST_API_TOKEN`                | Passwort für den News-Cache (KV Store)          |
+| `POSTGRES_URL`                  | Der Wert von `POSTGRES_URL` aus Vercel          | Verbindung zur Feed-Liste in Postgres           |
+| `KV_REST_API_URL`               | Der Wert von `KV_REST_API_URL` aus Vercel       | Verbindung zum News-Cache (KV Store)            |
+| `KV_REST_API_TOKEN`             | Der Wert von `KV_REST_API_TOKEN` aus Vercel     | Passwort für den News-Cache (KV Store)          |
 | `GROQ_API_KEY`                  | Dein Groq API Key                               | KI-Trend-Analyse (optional)                     |
+| `FEED_PROXY_URL`                | HTTPS-Adresse von `tools/feed-proxy.php`         | Optionaler Fallback für blockierte Feed-Quellen |
 
 **Hinweis:** Andere von Vercel bereitgestellte Variablen wie `VERCEL_URL` werden für diesen Workflow nicht benötigt.
+
+Der Proxy ist ein separat und manuell betriebener Produktionsbestandteil. Vor
+dem Setzen des Secrets die
+[Feed-Proxy-Betriebsanleitung](docs/deployment/feed-proxy.md) vollständig
+abarbeiten.
 
 Der Workflow (`.github/workflows/update-feeds.yml`) wird nun alle 20 Minuten automatisch ausgeführt und hält deine Live-Daten aktuell.
 

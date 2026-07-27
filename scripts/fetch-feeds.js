@@ -15,6 +15,11 @@ import {
     selectRssContentImageUrl,
     shouldScrapeMissingImage,
 } from './feed-image-utils.js';
+import {
+    BROWSER_LIKE_HEADERS,
+    fetchFeedXml,
+    isFeedXml,
+} from './feed-fetch-utils.js';
 
 // === HELPER FUNCTIONS (DECODING, STRIPPING, ETC.) ===
 function decodeHtmlEntities(text) {
@@ -68,26 +73,6 @@ function getFetchUrlForFeed(feed) {
     }
     return feed.url;
 }
-
-// Complete header set of a Chrome navigation request. Bot protection (e.g. Cloudflare
-// on gamepro.de) scores incomplete or inconsistent header sets as bot traffic, so the
-// User-Agent, the sec-ch-ua brands and the sec-fetch-* set must stay in sync when the
-// Chrome version here is refreshed.
-const BROWSER_LIKE_HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-    'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
-    // Deliberately without zstd: undici cannot decode it, Chrome offers it.
-    'Accept-Encoding': 'gzip, deflate, br',
-    'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'Sec-Fetch-Dest': 'document',
-    'Sec-Fetch-Mode': 'navigate',
-    'Sec-Fetch-Site': 'none',
-    'Sec-Fetch-User': '?1',
-    'Upgrade-Insecure-Requests': '1',
-};
 
 export async function getOgImageFromUrl(url, sourceName) {
     const fetchAttempts = [
@@ -177,7 +162,26 @@ export async function getOgImageFromUrl(url, sourceName) {
 }
 
 // === PARSE RSS/ATOM FEED ===
+function getElementLocalName(element) {
+    const qualifiedName = element?.localName || element?.nodeName || '';
+    return qualifiedName.toLowerCase().split(':').pop();
+}
+
+function getElementsByLocalName(root, localName) {
+    const normalizedName = localName.toLowerCase();
+    return Array.from(root.querySelectorAll('*'))
+        .filter(element => getElementLocalName(element) === normalizedName);
+}
+
+function getFirstElementByLocalName(root, localName) {
+    return getElementsByLocalName(root, localName)[0] || null;
+}
+
 export function parseRssXml(xmlString, feed) {
+    if (!isFeedXml(xmlString)) {
+        throw new Error(`Response is not a valid RSS or Atom feed: ${feed.url}`);
+    }
+
     const parser = new DOMParser();
     const doc = parser.parseFromString(xmlString, "text/xml");
     const errorNode = doc.querySelector("parsererror");
@@ -187,15 +191,19 @@ export function parseRssXml(xmlString, feed) {
     }
 
     const articles = [];
-    const isAtom = doc.documentElement.nodeName === 'feed';
-    const itemNodes = doc.querySelectorAll(isAtom ? "entry" : "item");
+    const isAtom = getElementLocalName(doc.documentElement) === 'feed';
+    const itemNodes = getElementsByLocalName(doc, isAtom ? 'entry' : 'item');
 
     itemNodes.forEach(node => {
-        const getText = (selector) => node.querySelector(selector)?.textContent?.trim() || '';
+        const getText = (localName) => (
+            getFirstElementByLocalName(node, localName)?.textContent?.trim() || ''
+        );
 
         let link = '';
         if (isAtom) {
-            const linkNode = Array.from(node.querySelectorAll('link')).find(l => l.getAttribute('rel') === 'alternate') || node.querySelector('link');
+            const linkNodes = getElementsByLocalName(node, 'link');
+            const linkNode = linkNodes.find(element => element.getAttribute('rel') === 'alternate')
+                || linkNodes[0];
             link = linkNode?.getAttribute('href') || '';
         } else {
             link = getText('link');
@@ -206,7 +214,9 @@ export function parseRssXml(xmlString, feed) {
 
         if (!title || !link || !pubDate) return;
 
-        const description = node.querySelector('description')?.textContent || node.querySelector('summary')?.textContent || '';
+        const description = getFirstElementByLocalName(node, 'description')?.textContent
+            || getFirstElementByLocalName(node, 'summary')?.textContent
+            || '';
         const summary = stripHtmlAndTruncate(description);
 
 
@@ -271,7 +281,7 @@ export function parseRssXml(xmlString, feed) {
             if (contentEncodedNode) {
                 contentText = contentEncodedNode.textContent || '';
             } else {
-                contentText = node.querySelector('content')?.textContent || description;
+                contentText = getFirstElementByLocalName(node, 'content')?.textContent || description;
             }
 
             if (contentText) {
@@ -363,7 +373,7 @@ export function parseRssXml(xmlString, feed) {
 
 
         articles.push({
-            id: getText('guid') || link,
+            id: getText('guid') || getText('id') || link,
             title,
             source: feed.name,
             publicationDate: new Date(pubDate).toISOString(),
@@ -832,64 +842,19 @@ async function main() {
         let newlyFetchedArticles = [];
 
         for (const feed of feeds) {
-            let xmlString = null;
-            let directError = 'Unknown error';
-            let proxyError = null;
             const feedUrl = getFetchUrlForFeed(feed);
             console.log(`📡 Fetching: ${feed.name}...`);
             if (feedUrl !== feed.url) {
                 console.log(`   ℹ️  Using normalized feed URL for ${feed.name}: ${feedUrl}`);
             }
 
-            // Netzwerkfehler und Timeouts werden einmal wiederholt, ein HTTP-Status
-            // dagegen nicht: ein 403 oder 404 faellt beim zweiten Mal genauso aus.
-            for (let attempt = 1; attempt <= 2; attempt++) {
-                try {
-                    const response = await fetch(feedUrl, { headers: BROWSER_LIKE_HEADERS, signal: AbortSignal.timeout(FEED_FETCH_TIMEOUT_MS) });
-                    if (!response.ok) {
-                        directError = `Direct fetch failed with status ${response.status}`;
-                        break;
-                    }
-                    const text = await response.text();
-                    if (text && text.trim().startsWith('<')) {
-                        xmlString = text;
-                        console.log(`   ✅ Direct fetch successful for ${feed.name}`);
-                    } else {
-                        directError = `Direct fetch returned empty or invalid content. Status: ${response.status}`;
-                    }
-                    break;
-                } catch (e) {
-                    directError = e instanceof Error ? e.message : String(e);
-                    if (attempt === 1) {
-                        console.log(`   ↻ Direct fetch failed for ${feed.name} (${directError}). Retrying once...`);
-                        await new Promise(r => setTimeout(r, 1000));
-                    }
-                }
-            }
-
-            // Fallback ueber den eigenen Proxy: manche Quellen (z.B. GamePro hinter
-            // Cloudflare) blocken die Rechenzentrums-IPs der Actions-Runner.
-            if (!xmlString && feedProxyUrl) {
-                console.log(`   ⚠️  Direct fetch failed for ${feed.name} (${directError}). Trying feed proxy...`);
-                try {
-                    // Der Proxy laesst sich 15s Zeit, hier muss etwas mehr stehen.
-                    const response = await fetch(`${feedProxyUrl}?url=${encodeURIComponent(feedUrl)}`, { signal: AbortSignal.timeout(FEED_PROXY_TIMEOUT_MS) });
-                    if (response.ok) {
-                        const text = await response.text();
-                        if (text && text.trim().startsWith('<')) {
-                            xmlString = text;
-                            console.log(`   ✅ Feed proxy fetch successful for ${feed.name}`);
-                        } else { proxyError = `feed proxy returned empty or invalid content (status ${response.status})`; }
-                    } else if (response.status === 403) {
-                        // Der Proxy laesst nur seine Allowlist durch - das ist kein
-                        // Hinweis auf eine Sperre bei der Quelle selbst.
-                        proxyError = 'feed proxy refused this URL (not in its allowlist)';
-                    } else { proxyError = `feed proxy failed with status ${response.status}`; }
-                } catch (e) { proxyError = e instanceof Error ? e.message : String(e); }
-            }
-
-            // Beide Fehler behalten: sonst verdeckt der Proxy-Fehler die eigentliche Ursache.
-            const lastError = proxyError ? `${directError} / ${proxyError}` : directError;
+            const { xmlString, lastError } = await fetchFeedXml({
+                directTimeoutMs: FEED_FETCH_TIMEOUT_MS,
+                feedName: feed.name,
+                feedProxyUrl,
+                feedUrl,
+                proxyTimeoutMs: FEED_PROXY_TIMEOUT_MS,
+            });
 
             if (xmlString) {
                 try {

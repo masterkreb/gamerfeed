@@ -94,3 +94,30 @@ test('OG-Scraper überspringt ein Icon-Metafeld und nutzt den nächsten gültige
 
     assert.equal(imageUrl, `https://www.destructoid.com${UPLOAD_IMAGE}`);
 });
+
+test('Parser verarbeitet auch präfixiertes Atom vollständig', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+        <atom:feed xmlns:atom="http://www.w3.org/2005/Atom">
+            <atom:title>Example</atom:title>
+            <atom:entry>
+                <atom:id>article-1</atom:id>
+                <atom:title>Prefixed Atom article</atom:title>
+                <atom:link rel="alternate" href="https://example.com/article-1" />
+                <atom:published>2026-07-27T10:00:00Z</atom:published>
+                <atom:summary>Summary</atom:summary>
+            </atom:entry>
+        </atom:feed>`;
+
+    const [article] = parseRssXml(xml, {
+        id: 'example',
+        name: 'Example',
+        language: 'en',
+        needs_scraping: false,
+        url: 'https://example.com/feed.xml',
+    });
+
+    assert.equal(article.id, 'article-1');
+    assert.equal(article.title, 'Prefixed Atom article');
+    assert.equal(article.link, 'https://example.com/article-1');
+    assert.equal(article.summary, 'Summary');
+});

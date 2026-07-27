@@ -24,6 +24,7 @@
 | Datenbank | Neon PostgreSQL (Feed-Quellen) |
 | Cache | Vercel KV (Artikel, Trends, Announcements) |
 | Cron | GitHub Actions (alle 20 Min) |
+| Feed-Fallback | Externes PHP/cURL-Hosting (optional) |
 | KI-API | Groq (llama-3.1-8b-instant) für Trends |
 
 ---
@@ -83,11 +84,14 @@
 │   └── feeds-api.ts        # HTTP-Zugriff für Feed-Verwaltung
 │
 ├── scripts/
-│   └── fetch-feeds.js      # Cron-Job Script (GitHub Actions)
+│   ├── fetch-feeds.js      # Cron-Job Script (GitHub Actions)
+│   └── feed-fetch-utils.js # Getesteter Feed-Abruf mit Retry/Proxy-Fallback
 │
 ├── server/                 # Getestete Backend-Hilfslogik
 ├── shared/                 # Gemeinsame Frontend-/Backend-Verträge
 ├── tests/                  # Zentrale Tests nach Fachbereich und Testart
+├── tools/
+│   └── feed-proxy.php      # Manuell deployter externer Feed-Fallback
 │
 ├── src/
 │   └── index.css           # Tailwind-v4-Konfiguration + Custom Styles
@@ -120,6 +124,7 @@
 - ✅ Vercel KV Cache (news_cache, news_cache_16, news_cache_64)
 - ✅ 60 Tage Artikel-Retention (max. 10.000 Artikel)
 - ✅ Feed Health Status Tracking
+- ✅ Validierter Feed-Abruf mit Retry und optionalem PHP-Proxy-Fallback
 - ✅ KI-Trend-Analyse (täglich + wöchentlich)
 - ✅ Deduplizierung nach Verlagsgruppen (SOURCE_GROUPS)
 
@@ -197,7 +202,8 @@ npx tsc --noEmit
 
 - `npm run dev` nutzt für `/api` den Proxy zur produktiven GamerFeed-API
 - Für lokale Änderungen an Serverless Functions: `vercel dev` nutzen
-- GitHub Actions braucht Secrets: `POSTGRES_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`, `GROQ_API_KEY`
+- GitHub Actions braucht Secrets: `POSTGRES_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`, `GROQ_API_KEY`; optional `FEED_PROXY_URL`
+- Der PHP-Feed-Proxy wird separat und manuell betrieben: `docs/deployment/feed-proxy.md`
 
 ---
 
