@@ -4,6 +4,7 @@ import {
     CONTACT_FIELD_LIMITS,
     CONTACT_RECAPTCHA_ACTION,
 } from '../shared/contact-contract.js';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 import { CloseIcon, ResetIcon } from './Icons';
 
 interface SettingsModalProps {
@@ -200,18 +201,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                                             }) => {
     const { t } = useTranslation();
 
-    // ESC-Taste zum Schließen
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && isOpen) {
-                onClose();
-            }
-        };
-        
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, onClose]);
-
     const [activeTab, setActiveTab] = useState<TabType>('sources');
     const [contactFormData, setContactFormData] = useState({ name: '', email: '', subject: '', message: '' });
     const [contactStatus, setContactStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -229,6 +218,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             void loadRecaptcha().catch(() => undefined);
         }
     }, [activeTab]);
+
+    // Beim Schließen wird der Dialog ausgehängt und der Formularinhalt verworfen.
+    // Waehrend des Versands bleibt er deshalb offen, bis eine Antwort da ist.
+    const isSendingContact = contactStatus === 'loading';
+
+    const handleClose = () => {
+        if (!isSendingContact) {
+            onClose();
+        }
+    };
+
+    const dialogRef = useDialogFocus<HTMLDivElement>({
+        isOpen,
+        onClose: handleClose,
+        canClose: !isSendingContact,
+    });
 
     const handleContactSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -314,10 +319,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <>
             <div
                 className="fixed inset-0 bg-black/60 z-40 transition-opacity"
-                onClick={onClose}
+                onClick={handleClose}
                 aria-hidden="true"
             />
             <div
+                ref={dialogRef}
+                tabIndex={-1}
                 className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg bg-slate-100 dark:bg-zinc-900 rounded-2xl shadow-2xl flex flex-col"
                 style={{ maxHeight: '90vh' }}
                 role="dialog"
@@ -327,7 +334,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-zinc-800 flex-shrink-0">
                     <h2 id="settings-modal-title" className="text-lg font-semibold">{t('settings.title')}</h2>
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="p-3 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
                         aria-label={t('settings.close')}
                     >
@@ -643,7 +650,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     )}
                     {activeTab !== 'sources' && <div></div>}
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-zinc-900"
                     >
                         {t('settings.done')}
