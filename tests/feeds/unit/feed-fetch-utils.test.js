@@ -147,6 +147,32 @@ test('wiederholt temporäre Serverfehler auch beim Proxy', async () => {
     assert.equal(fetcher.calls.length, 3);
 });
 
+test('wiederholt ein 415 des Proxy-Hostings, aber nicht beim Direktabruf', async () => {
+    // Der Edge vor dem PHP-Proxy weist sporadisch mit 415 ab; das Skript selbst
+    // erzeugt diesen Status nie.
+    const proxyFetcher = createFetchSequence(
+        response('blocked', 403),
+        response('<html><title>415 Unsupported Media Type</title></html>', 415),
+        response(RSS_XML),
+    );
+    const proxyResult = await fetchTestFeed({
+        feedProxyUrl: 'https://proxy.example.com/feed-proxy.php',
+        fetchImpl: proxyFetcher.fetchImpl,
+    });
+
+    assert.equal(proxyResult.xmlString, RSS_XML);
+    assert.equal(proxyResult.usedProxy, true);
+    assert.equal(proxyFetcher.calls.length, 3);
+
+    // Beim Direktabruf bleibt 415 eine endgueltige Absage der Quelle.
+    const directFetcher = createFetchSequence(response('nope', 415));
+    const directResult = await fetchTestFeed({ fetchImpl: directFetcher.fetchImpl });
+
+    assert.equal(directResult.xmlString, null);
+    assert.equal(directResult.lastError, 'Direct fetch failed with status 415');
+    assert.equal(directFetcher.calls.length, 1);
+});
+
 test('wiederholt permanente HTTP-Fehler nicht', async () => {
     let bodyCanceled = false;
     const notFoundResponse = {

@@ -20,14 +20,21 @@ export const MAX_FEED_RESPONSE_BYTES = 5 * 1024 * 1024;
 
 const RETRYABLE_HTTP_STATUSES = new Set([408, 425, 429]);
 
+// Der Hosting-Edge vor tools/feed-proxy.php weist Anfragen sporadisch mit 415 ab,
+// bevor PHP ueberhaupt laeuft (beobachtet: identische Anfrage 415, sechs Minuten
+// spaeter 200). Das Skript selbst erzeugt diesen Status nie - es antwortet mit
+// 405, 422, 413, 500, 502 oder dem Status der Quelle. Auf dem Proxy-Weg gilt 415
+// deshalb als voruebergehend, beim Direktabruf einer Quelle weiterhin nicht.
+const PROXY_RETRYABLE_HTTP_STATUSES = new Set([...RETRYABLE_HTTP_STATUSES, 415]);
+
 class ResponseTooLargeError extends Error {}
 
 function getErrorMessage(error) {
     return error instanceof Error ? error.message : String(error);
 }
 
-function isRetryableHttpStatus(status) {
-    return RETRYABLE_HTTP_STATUSES.has(status) || status >= 500;
+function isRetryableHttpStatus(status, retryableStatuses) {
+    return retryableStatuses.has(status) || status >= 500;
 }
 
 function getRetryDelayMs(response, fallbackDelayMs) {
@@ -126,6 +133,7 @@ async function fetchTextWithRetry({
     maxBytes,
     requestLabel,
     requestUrl,
+    retryableStatuses = RETRYABLE_HTTP_STATUSES,
     retryDelayMs,
     sleep,
     timeoutMs,
@@ -143,7 +151,7 @@ async function fetchTextWithRetry({
                 lastError = `${requestLabel} failed with status ${response.status}`;
                 const retryDelay = getRetryDelayMs(response, retryDelayMs);
                 await response.body?.cancel().catch(() => {});
-                if (attempt < attempts && isRetryableHttpStatus(response.status)) {
+                if (attempt < attempts && isRetryableHttpStatus(response.status, retryableStatuses)) {
                     logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${lastError}). Retrying once...`);
                     await sleep(retryDelay);
                     continue;
@@ -255,6 +263,7 @@ export async function fetchFeedXml({
         maxBytes: maxResponseBytes,
         requestLabel: 'Feed proxy',
         requestUrl: proxyRequestUrl,
+        retryableStatuses: PROXY_RETRYABLE_HTTP_STATUSES,
         retryDelayMs,
         sleep,
         timeoutMs: proxyTimeoutMs,
