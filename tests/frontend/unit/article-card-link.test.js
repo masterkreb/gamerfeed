@@ -81,3 +81,28 @@ test('macht unzulässige Artikel-Links nicht anklickbar', async () => {
         }
     }
 });
+
+test('lädt unzulässige Bildadressen nicht', async () => {
+    const testRoot = await createReactTestRoot();
+
+    try {
+        await vite.ssrLoadModule('/i18n.ts');
+        const { ArticleCard } = await vite.ssrLoadModule('/components/ArticleCard.tsx');
+        const article = createArticle('https://beispiel.example/artikel');
+
+        await testRoot.render(React.createElement(ArticleCard, {
+            article: { ...article, imageUrl: 'javascript:alert(1)' },
+            viewMode: 'grid',
+            isFavorite: false,
+            onToggleFavorite: () => {},
+            onMuteSource: () => {},
+        }));
+
+        const image = testRoot.container.querySelector('img');
+        assert.notEqual(image, null, 'kein Bildelement gefunden');
+        assert.equal(image.hasAttribute('src'), false, 'unzulässige Bildadresse wurde gesetzt');
+        assert.equal(image.getAttribute('alt'), 'Beispielartikel');
+    } finally {
+        await testRoot.cleanup();
+    }
+});

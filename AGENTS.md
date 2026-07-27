@@ -258,6 +258,12 @@ Feed-Verwaltung und aus RSS-Inhalten werden vorher geprüft:
 Eine abgelehnte Adresse erreicht das Netzwerk nicht und wird auch nicht über den
 PHP-Proxy abgerufen. Ablehnungen werden nicht wiederholt.
 
+Für Artikel- und Bildadressen aus RSS-Inhalten gilt zusätzlich
+`normalizeContentUrl` aus derselben gemeinsamen Schicht - beim Feed-Ingest, beim
+OG-Scraping, in der Artikelkarte und im statischen HTML unter `/gaming-news`.
+Ein abgelehnter Artikel wird isoliert übersprungen; an den Ausgabestellen
+entfallen `href` und `src`, statt eine unzulässige Adresse auszugeben.
+
 **Bekannte Grenze:** DNS-Rebinding ist nicht ausgeschlossen, weil sich die
 Verbindung beim globalen `fetch` nicht an die geprüften Adressen binden lässt.
 Einzelheiten, gesperrte Bereiche und die Bestandsprüfung
