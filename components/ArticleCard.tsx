@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, memo, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Article, ViewMode } from '../types';
+import { normalizeContentUrl } from '../shared/url-policy.js';
 import { StarIcon, MoreIcon, CopyIcon, BanIcon, ShareIcon, ArrowLeftIcon, TwitterIcon, FacebookIcon, RedditIcon, WhatsAppIcon, EmailIcon } from './Icons';
 
 
@@ -365,6 +366,11 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
     }, [isFavorite]);
 
 
+    // Ausgabe-Policy: Aeltere Cache-Eintraege koennen noch ungeprueft sein.
+    // Ohne href ist die Karte nicht anklickbar, statt einen unsicheren Link
+    // auszugeben.
+    const safeLink = normalizeContentUrl(article.link) ?? undefined;
+
     const cardBaseClasses = "bg-white dark:bg-zinc-800 rounded-xl shadow-md hover:shadow-xl border border-slate-200 dark:border-zinc-700";
 
     const handleSetIsMenuOpen = useCallback((open: boolean) => {
@@ -390,7 +396,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
         const moreButtonClass = "p-3 rounded-full transition-all duration-200 bg-slate-100 dark:bg-zinc-700 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-200 dark:hover:bg-zinc-600";
 
         return (
-            <a ref={ref as React.ForwardedRef<HTMLAnchorElement>} href={article.link} target="_blank" rel="noopener noreferrer" className={`group ${cardBaseClasses} flex flex-col relative ${allowCardOverflow ? '!overflow-visible z-30' : 'overflow-hidden'} transition-shadow duration-300`}>
+            <a ref={ref as React.ForwardedRef<HTMLAnchorElement>} href={safeLink} target="_blank" rel="noopener noreferrer" className={`group ${cardBaseClasses} flex flex-col relative ${allowCardOverflow ? '!overflow-visible z-30' : 'overflow-hidden'} transition-shadow duration-300`}>
                 <div className="relative overflow-hidden rounded-t-xl backface-hidden will-change-transform">
                     <img src={article.imageUrl} alt={article.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500 transform-gpu" loading="lazy" decoding="async" />
                     <div className="absolute top-3 left-3">
@@ -414,7 +420,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                             <MoreOptionsMenu
                                 title={article.title}
                                 source={article.source}
-                                link={article.link}
+                                link={safeLink ?? ''}
                                 onMuteSource={onMuteSource}
                                 isOpen={isMenuOpen}
                                 setIsOpen={handleSetIsMenuOpen}
@@ -434,7 +440,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
         return (
             <a
                 ref={ref as React.ForwardedRef<HTMLAnchorElement>}
-                href={article.link}
+                href={safeLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`group ${cardBaseClasses} flex flex-col md:flex-row items-center relative ${allowCardOverflow ? '!overflow-visible z-30' : 'overflow-hidden'} transition-shadow duration-300`}
@@ -467,7 +473,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                             <MoreOptionsMenu
                                 title={article.title}
                                 source={article.source}
-                                link={article.link}
+                                link={safeLink ?? ''}
                                 onMuteSource={onMuteSource}
                                 isOpen={isMenuOpen}
                                 setIsOpen={handleSetIsMenuOpen}
@@ -499,7 +505,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
         return (
             <a
                 ref={ref as React.ForwardedRef<HTMLAnchorElement>}
-                href={article.link}
+                href={safeLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`group ${cardBaseClasses} p-3 flex items-center justify-between gap-4 even:bg-slate-100 dark:even:bg-zinc-900/20 relative ${allowCardOverflow ? '!overflow-visible z-30' : ''} transition-shadow duration-200`}
@@ -531,7 +537,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                     <MoreOptionsMenu
                         title={article.title}
                         source={article.source}
-                        link={article.link}
+                        link={safeLink ?? ''}
                         onMuteSource={onMuteSource}
                         isOpen={isMenuOpen}
                         setIsOpen={handleSetIsMenuOpen}
