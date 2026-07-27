@@ -775,6 +775,10 @@ async function main() {
     const MAX_ARTICLES = 10000; // Maximale Anzahl Artikel (verhindert KV Limit-Überschreitung)
     const IMAGE_BACKFILL_LIMIT = 30;
     const IMAGE_BACKFILL_PER_SOURCE_LIMIT = 5;
+    // 8s waren zu knapp: langsame Feeds liefen aus dem Actions-Netz gelegentlich
+    // ins Timeout, obwohl sie erreichbar waren.
+    const FEED_FETCH_TIMEOUT_MS = 15000;
+    const FEED_PROXY_TIMEOUT_MS = 20000;
     // Endpunkt von tools/feed-proxy.php auf dem externen Hosting. Ohne dieses
     // Secret laeuft der Abruf ohne Fallback, statt fehlzuschlagen.
     const feedProxyUrl = process.env.FEED_PROXY_URL;
@@ -829,40 +833,63 @@ async function main() {
 
         for (const feed of feeds) {
             let xmlString = null;
-            let lastError = 'Unknown error';
+            let directError = 'Unknown error';
+            let proxyError = null;
             const feedUrl = getFetchUrlForFeed(feed);
             console.log(`📡 Fetching: ${feed.name}...`);
             if (feedUrl !== feed.url) {
                 console.log(`   ℹ️  Using normalized feed URL for ${feed.name}: ${feedUrl}`);
             }
 
-            try {
-                const response = await fetch(feedUrl, { headers: BROWSER_LIKE_HEADERS, signal: AbortSignal.timeout(8000) });
-                if (response.ok) {
+            // Netzwerkfehler und Timeouts werden einmal wiederholt, ein HTTP-Status
+            // dagegen nicht: ein 403 oder 404 faellt beim zweiten Mal genauso aus.
+            for (let attempt = 1; attempt <= 2; attempt++) {
+                try {
+                    const response = await fetch(feedUrl, { headers: BROWSER_LIKE_HEADERS, signal: AbortSignal.timeout(FEED_FETCH_TIMEOUT_MS) });
+                    if (!response.ok) {
+                        directError = `Direct fetch failed with status ${response.status}`;
+                        break;
+                    }
                     const text = await response.text();
                     if (text && text.trim().startsWith('<')) {
                         xmlString = text;
                         console.log(`   ✅ Direct fetch successful for ${feed.name}`);
-                    } else { lastError = `Direct fetch returned empty or invalid content. Status: ${response.status}`; }
-                } else { lastError = `Direct fetch failed with status ${response.status}`; }
-            } catch (e) { lastError = e instanceof Error ? e.message : String(e); }
+                    } else {
+                        directError = `Direct fetch returned empty or invalid content. Status: ${response.status}`;
+                    }
+                    break;
+                } catch (e) {
+                    directError = e instanceof Error ? e.message : String(e);
+                    if (attempt === 1) {
+                        console.log(`   ↻ Direct fetch failed for ${feed.name} (${directError}). Retrying once...`);
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
+                }
+            }
 
             // Fallback ueber den eigenen Proxy: manche Quellen (z.B. GamePro hinter
             // Cloudflare) blocken die Rechenzentrums-IPs der Actions-Runner.
             if (!xmlString && feedProxyUrl) {
-                console.log(`   ⚠️  Direct fetch failed for ${feed.name} (${lastError}). Trying feed proxy...`);
+                console.log(`   ⚠️  Direct fetch failed for ${feed.name} (${directError}). Trying feed proxy...`);
                 try {
                     // Der Proxy laesst sich 15s Zeit, hier muss etwas mehr stehen.
-                    const response = await fetch(`${feedProxyUrl}?url=${encodeURIComponent(feedUrl)}`, { signal: AbortSignal.timeout(20000) });
+                    const response = await fetch(`${feedProxyUrl}?url=${encodeURIComponent(feedUrl)}`, { signal: AbortSignal.timeout(FEED_PROXY_TIMEOUT_MS) });
                     if (response.ok) {
                         const text = await response.text();
                         if (text && text.trim().startsWith('<')) {
                             xmlString = text;
                             console.log(`   ✅ Feed proxy fetch successful for ${feed.name}`);
-                        } else { lastError = `Feed proxy returned empty or invalid content. Status: ${response.status}`; }
-                    } else { lastError = `Feed proxy failed with status ${response.status}`; }
-                } catch (e) { lastError = e instanceof Error ? e.message : String(e); }
+                        } else { proxyError = `feed proxy returned empty or invalid content (status ${response.status})`; }
+                    } else if (response.status === 403) {
+                        // Der Proxy laesst nur seine Allowlist durch - das ist kein
+                        // Hinweis auf eine Sperre bei der Quelle selbst.
+                        proxyError = 'feed proxy refused this URL (not in its allowlist)';
+                    } else { proxyError = `feed proxy failed with status ${response.status}`; }
+                } catch (e) { proxyError = e instanceof Error ? e.message : String(e); }
             }
+
+            // Beide Fehler behalten: sonst verdeckt der Proxy-Fehler die eigentliche Ursache.
+            const lastError = proxyError ? `${directError} / ${proxyError}` : directError;
 
             if (xmlString) {
                 try {
