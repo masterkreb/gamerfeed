@@ -42,6 +42,11 @@ Eine abgelehnte Adresse erreicht das Netzwerk nicht: Die Prüfung läuft
 vollständig vor dem Absetzen der Anfrage. Ein abgelehntes Ziel wird auch nicht
 stellvertretend über den PHP-Proxy abgerufen.
 
+**Der Proxy-Endpunkt selbst unterliegt derselben Policy.** Die Adresse aus
+`FEED_PROXY_URL` muss also öffentlich auflösen. Ein Proxy auf einem internen
+Host oder unter `localhost` würde abgelehnt – für eine lokale Erprobung ist das
+ein bewusster Nebeneffekt, kein Fehler.
+
 ## Bekannte Grenze: DNS-Rebinding
 
 **Diese Umsetzung schließt DNS-Rebinding nicht aus.**
