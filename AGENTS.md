@@ -302,6 +302,9 @@ npm test
 # Nur die Feed-Tests des Cron-Jobs
 npm run test:feeds
 
+# Browser-Abnahmen (Chromium, eigener Runner)
+npm run test:e2e
+
 # TypeScript prüfen
 npm run typecheck
 
@@ -330,7 +333,12 @@ tests/
 ```
 
 Grundlage sind `node:test`, `node:assert`, Linkedom und React über Vite SSR.
-Eine Browser-E2E-Suite gibt es derzeit nicht.
+
+Für echte Navigation, Cookies und Netzwerkverhalten gibt es zusätzlich eine
+kleine Chromium-Suite unter `tests/e2e/` mit `npm run test:e2e`. Sie ist von
+`npm test` getrennt (`*.test.js` gegen `*.spec.ts`), stellt alle API-Antworten
+selbst und bricht Anfragen an fremde Herkünfte ab. Einzelheiten in
+`docs/development/e2e-tests.md`.
 
 `.github/workflows/ci.yml` läuft bei Push auf `main`, bei Pull Requests und
 manuell, in dieser Reihenfolge: `npm ci`, `php -l tools/feed-proxy.php`,
