@@ -1,0 +1,206 @@
+// Outbound-Policy fuer serverseitige Abrufe (Feed-Cron, Bild-Scraping).
+//
+// Ziel ist, dass ein vom Admin eingetragener oder aus einem Feed stammender
+// Link keine Anfrage in interne Netze ausloest - weder direkt noch ueber DNS
+// noch ueber eine Weiterleitung.
+//
+// Bewusste Grenze dieser Umsetzung: Node stellt `undici` nicht als Modul
+// bereit, deshalb laesst sich beim globalen `fetch` die Verbindung nicht an die
+// zuvor geprueften Adressen binden. Zwischen Pruefung und Verbindungsaufbau
+// bleibt damit ein TOCTOU-Fenster (DNS-Rebinding): ein Angreifer mit Kontrolle
+// ueber eine sehr kurze TTL koennte zwischen beiden Schritten auf eine private
+// Adresse umschwenken. Wir arbeiten deshalb fail-closed - jede Unsicherheit
+// fuehrt zur Ablehnung - und pruefen jeden Weiterleitungsschritt erneut.
+// Siehe docs/deployment/outbound-policy.md.
+
+import { BlockList, isIP } from 'node:net';
+import { lookup as systemLookup } from 'node:dns/promises';
+import { parseAllowedUrl, UrlPolicyError } from '../shared/url-policy.js';
+
+export { UrlPolicyError };
+
+export const MAX_OUTBOUND_REDIRECTS = 5;
+
+const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
+
+export class OutboundPolicyError extends Error {
+    constructor(message, code) {
+        super(message);
+        this.name = 'OutboundPolicyError';
+        this.code = code;
+    }
+}
+
+// BlockList deckt IPv4-mapped IPv6 (::ffff:127.0.0.1) ueber die IPv4-Regeln mit
+// ab - das ist geprueft und in den Tests festgehalten.
+const blockedRanges = new BlockList();
+
+// IPv4
+blockedRanges.addSubnet('0.0.0.0', 8, 'ipv4');          // "this network"
+blockedRanges.addSubnet('10.0.0.0', 8, 'ipv4');         // privat
+blockedRanges.addSubnet('100.64.0.0', 10, 'ipv4');      // Carrier-Grade NAT
+blockedRanges.addSubnet('127.0.0.0', 8, 'ipv4');        // Loopback
+blockedRanges.addSubnet('169.254.0.0', 16, 'ipv4');     // Link-local, inkl. Cloud-Metadaten
+blockedRanges.addSubnet('172.16.0.0', 12, 'ipv4');      // privat
+blockedRanges.addSubnet('192.0.0.0', 24, 'ipv4');       // IETF-Zuweisungen
+blockedRanges.addSubnet('192.0.2.0', 24, 'ipv4');       // TEST-NET-1
+blockedRanges.addSubnet('192.88.99.0', 24, 'ipv4');     // 6to4-Relay-Anycast
+blockedRanges.addSubnet('192.168.0.0', 16, 'ipv4');     // privat
+blockedRanges.addSubnet('198.18.0.0', 15, 'ipv4');      // Benchmarking
+blockedRanges.addSubnet('198.51.100.0', 24, 'ipv4');    // TEST-NET-2
+blockedRanges.addSubnet('203.0.113.0', 24, 'ipv4');     // TEST-NET-3
+blockedRanges.addSubnet('224.0.0.0', 4, 'ipv4');        // Multicast
+blockedRanges.addSubnet('240.0.0.0', 4, 'ipv4');        // reserviert, inkl. 255.255.255.255
+
+// IPv6
+blockedRanges.addAddress('::', 'ipv6');                 // unspezifiziert
+blockedRanges.addAddress('::1', 'ipv6');                // Loopback
+blockedRanges.addSubnet('100::', 64, 'ipv6');           // Discard-Only
+blockedRanges.addSubnet('64:ff9b::', 96, 'ipv6');       // NAT64
+blockedRanges.addSubnet('2001:db8::', 32, 'ipv6');      // Dokumentation
+blockedRanges.addSubnet('2002::', 16, 'ipv6');          // 6to4
+blockedRanges.addSubnet('fc00::', 7, 'ipv6');           // Unique Local
+blockedRanges.addSubnet('fe80::', 10, 'ipv6');          // Link-local
+blockedRanges.addSubnet('ff00::', 8, 'ipv6');           // Multicast
+
+/**
+ * Prueft eine einzelne IP-Adresse gegen die gesperrten Bereiche.
+ * Unbekannte oder unparsbare Eingaben gelten als gesperrt (fail-closed).
+ *
+ * @param {unknown} address
+ * @returns {boolean}
+ */
+export function isBlockedIpAddress(address) {
+    if (typeof address !== 'string' || address === '') return true;
+
+    // Zone-Index (fe80::1%eth0) abschneiden, isIP akzeptiert ihn nicht.
+    const withoutZone = address.split('%')[0];
+    const family = isIP(withoutZone);
+    if (family === 0) return true;
+
+    return blockedRanges.check(withoutZone, family === 4 ? 'ipv4' : 'ipv6');
+}
+
+function stripIpv6Brackets(hostname) {
+    return hostname.startsWith('[') && hostname.endsWith(']')
+        ? hostname.slice(1, -1)
+        : hostname;
+}
+
+/**
+ * Prueft Schema, Zugangsdaten und alle aufgeloesten Adressen eines Ziels.
+ *
+ * Es reicht **eine** gesperrte Adresse in der DNS-Antwort, um das Ziel
+ * abzulehnen: Ein gemischter Datensatz waere sonst ein Umgehungsweg, weil der
+ * Verbindungsaufbau sich eine beliebige davon aussuchen darf.
+ *
+ * @param {unknown} rawUrl
+ * @param {{ lookup?: Function }} [options]
+ * @returns {Promise<{ url: URL, addresses: { address: string, family: number }[] }>}
+ */
+export async function assertOutboundTargetAllowed(rawUrl, { lookup = systemLookup } = {}) {
+    const url = parseAllowedUrl(rawUrl);
+    const hostname = stripIpv6Brackets(url.hostname);
+
+    // Numerische Ziele - auch dezimal, oktal oder hexadezimal notierte - hat der
+    // URL-Parser bereits normalisiert, hier steht also eine kanonische Adresse.
+    const literalFamily = isIP(hostname);
+    if (literalFamily !== 0) {
+        if (isBlockedIpAddress(hostname)) {
+            throw new OutboundPolicyError(
+                `Die Adresse ${hostname} liegt in einem gesperrten Bereich.`,
+                'blocked_address',
+            );
+        }
+        return { addresses: [{ address: hostname, family: literalFamily }], url };
+    }
+
+    let records;
+    try {
+        records = await lookup(hostname, { all: true, verbatim: true });
+    } catch {
+        throw new OutboundPolicyError(`Der Host "${hostname}" ist nicht auflösbar.`, 'dns_failed');
+    }
+
+    if (!Array.isArray(records) || records.length === 0) {
+        throw new OutboundPolicyError(`Der Host "${hostname}" lieferte keine Adressen.`, 'dns_empty');
+    }
+
+    const blocked = records.filter(record => isBlockedIpAddress(record?.address));
+    if (blocked.length > 0) {
+        throw new OutboundPolicyError(
+            `Der Host "${hostname}" löst auf eine gesperrte Adresse auf (${blocked[0].address}).`,
+            'blocked_address',
+        );
+    }
+
+    return { addresses: records, url };
+}
+
+function isRedirectResponse(response) {
+    return REDIRECT_STATUS_CODES.has(response?.status);
+}
+
+/**
+ * Fuehrt einen Abruf durch, bei dem jedes Ziel und jeder Weiterleitungsschritt
+ * einzeln gegen die Policy geprueft wird.
+ *
+ * Automatische Weiterleitungen sind abgeschaltet, damit kein ungeprueftes Ziel
+ * kontaktiert wird. Ein abgelehntes Ziel erreicht das Netzwerk nicht: die
+ * Pruefung laeuft vollstaendig vor dem Aufruf von `fetchImpl`.
+ *
+ * @param {unknown} rawUrl
+ * @param {{
+ *   fetchImpl?: Function,
+ *   lookup?: Function,
+ *   maxRedirects?: number,
+ * } & RequestInit} [options]
+ * @returns {Promise<Response>}
+ */
+export async function fetchWithOutboundPolicy(rawUrl, {
+    fetchImpl = globalThis.fetch,
+    lookup = systemLookup,
+    maxRedirects = MAX_OUTBOUND_REDIRECTS,
+    ...requestInit
+} = {}) {
+    const visited = new Set();
+    let currentUrl = rawUrl;
+
+    for (let hop = 0; hop <= maxRedirects; hop++) {
+        const { url } = await assertOutboundTargetAllowed(currentUrl, { lookup });
+
+        const visitKey = url.toString();
+        if (visited.has(visitKey)) {
+            throw new OutboundPolicyError('Die Weiterleitungen bilden eine Schleife.', 'redirect_loop');
+        }
+        visited.add(visitKey);
+
+        const response = await fetchImpl(url, { ...requestInit, redirect: 'manual' });
+
+        if (!isRedirectResponse(response)) {
+            return response;
+        }
+
+        const location = response.headers?.get?.('location');
+        await response.body?.cancel?.().catch(() => {});
+
+        // Weiterleitung ohne Ziel ist keine Weiterleitung - unveraendert melden.
+        if (!location) {
+            return response;
+        }
+
+        try {
+            currentUrl = new URL(location, url).toString();
+        } catch {
+            throw new OutboundPolicyError(
+                'Das Weiterleitungsziel ist syntaktisch ungültig.',
+                'invalid_redirect_target',
+            );
+        }
+    }
+
+    throw new OutboundPolicyError(
+        `Mehr als ${maxRedirects} Weiterleitungen.`,
+        'too_many_redirects',
+    );
+}
