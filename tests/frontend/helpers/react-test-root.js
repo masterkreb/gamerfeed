@@ -45,6 +45,15 @@ export async function createReactTestRoot(options = {}) {
         });
     }
 
+    // React ermittelt beim ersten Import von react-dom einmalig, ob native
+    // input-Events unterstuetzt werden, ueber `'oninput' in document`. linkedom
+    // definiert diese Eigenschaft nicht; ohne sie waehlt React einen
+    // Polyfill-Pfad, der nur auf keydown/keyup reagiert, und onChange feuert bei
+    // Textfeldern nie. Muss vor dem Import von react-dom gesetzt sein.
+    if (!('oninput' in window.document)) {
+        window.document.oninput = null;
+    }
+
     const { createRoot } = await import('react-dom/client');
     const container = window.document.getElementById('root');
     const root = createRoot(container);

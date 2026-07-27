@@ -24,23 +24,98 @@ const vite = await createServer({
 // Der Kontakt-Reiter laedt beim Aktivieren reCAPTCHA nach und greift dabei auf
 // Timer und grecaptcha zu. linkedom bringt beides nicht mit; ohne die Stubs
 // laeuft die Ladelogik nach Testende weiter und wirft.
-function installBrowserStubs(window) {
+function installBrowserStubs(window, { grecaptcha, timers } = {}) {
     Object.defineProperty(window, 'setTimeout', {
         configurable: true,
-        value: (...args) => nativeSetTimeout(...args),
+        value: timers ? timers.setTimeout : (...args) => nativeSetTimeout(...args),
     });
     Object.defineProperty(window, 'clearTimeout', {
         configurable: true,
-        value: (...args) => nativeClearTimeout(...args),
+        value: timers ? timers.clearTimeout : (...args) => nativeClearTimeout(...args),
     });
     Object.defineProperty(window, 'grecaptcha', {
         configurable: true,
-        value: {
+        value: grecaptcha ?? {
             ready: callback => callback(),
             execute: async () => 'test-token',
         },
     });
 }
+
+// Erlaubt es, eine Zeitgrenze auszuloesen, ohne sie real abzuwarten.
+function createManualTimers() {
+    const pending = new Map();
+    let nextId = 1;
+
+    return {
+        setTimeout(callback, delay) {
+            const id = nextId++;
+            pending.set(id, { callback, delay });
+            return id;
+        },
+        clearTimeout(id) {
+            pending.delete(id);
+        },
+        runPending() {
+            const entries = Array.from(pending.values());
+            pending.clear();
+            for (const entry of entries) entry.callback();
+        },
+        get pendingCount() {
+            return pending.size;
+        },
+    };
+}
+
+// React verfolgt den Feldwert ueber einen eigenen Setter; ohne den nativen
+// Setter bemerkt es die Aenderung nicht und onChange bleibt aus.
+function setFieldValue(window, element, value) {
+    const prototype = element.tagName === 'TEXTAREA'
+        ? window.HTMLTextAreaElement.prototype
+        : window.HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set;
+
+    if (setter) {
+        setter.call(element, value);
+    } else {
+        element.value = value;
+    }
+
+    element.dispatchEvent(new window.Event('input', { bubbles: true }));
+}
+
+const CONTACT_FIELDS = {
+    'contact-name': 'Test Person',
+    'contact-email': 'test@example.com',
+    'contact-subject': 'Betreff',
+    'contact-message': 'Nachricht',
+};
+
+async function openContactTabAndFill(testRoot, dialog) {
+    const contactTab = getTabs(dialog)[3];
+    await act(async () => {
+        click(testRoot.window, contactTab);
+    });
+
+    for (const [id, value] of Object.entries(CONTACT_FIELDS)) {
+        const field = dialog.querySelector(`#${id}`);
+        assert.notEqual(field, null, `Feld ${id} fehlt`);
+        await act(async () => {
+            setFieldValue(testRoot.window, field, value);
+        });
+    }
+}
+
+async function submitContactForm(testRoot, dialog) {
+    await act(async () => {
+        dialog.querySelector('form').dispatchEvent(new testRoot.window.Event('submit', {
+            bubbles: true,
+            cancelable: true,
+        }));
+    });
+}
+
+const getSubmitButton = dialog => dialog.querySelector('button[type="submit"]');
 
 test.after(async () => {
     await vite.close();
@@ -53,8 +128,11 @@ function click(window, element) {
     }));
 }
 
-async function renderSettingsModal(testRoot) {
-    installBrowserStubs(testRoot.window);
+async function renderSettingsModal(testRoot, stubOptions) {
+    installBrowserStubs(testRoot.window, stubOptions);
+    // SettingsModal merkt sich den geladenen reCAPTCHA-Client modulweit. Ohne
+    // frisches Modul erbte jeder Test den Client des vorherigen.
+    vite.environments.ssr.moduleGraph.invalidateAll();
     await vite.ssrLoadModule('/i18n.ts');
     const { SettingsModal } = await vite.ssrLoadModule('/components/SettingsModal.tsx');
 
@@ -285,6 +363,149 @@ test('wechselt die Reiter mit Pfeiltasten, Home und End', async () => {
         // Eine nicht belegte Taste laesst die Auswahl unveraendert.
         await press(3, 'ArrowUp');
         assert.equal(selectedIndex(), 3);
+    } finally {
+        await testRoot.cleanup();
+    }
+});
+
+test('bleibt während eines laufenden Versands schließbar und danach konsistent', async () => {
+    const fetchCalls = [];
+    let releaseFetch;
+    const testRoot = await createReactTestRoot({
+        fetch: async (url, options) => {
+            fetchCalls.push({ options, url: String(url) });
+            return new Promise(resolve => { releaseFetch = resolve; });
+        },
+    });
+
+    try {
+        const trigger = await renderSettingsModal(testRoot);
+        trigger.focus();
+        await act(async () => {
+            click(testRoot.window, trigger);
+        });
+
+        const dialog = getDialog(testRoot);
+        await openContactTabAndFill(testRoot, dialog);
+        await submitContactForm(testRoot, dialog);
+
+        // Sendezustand ist angekuendigt und der Knopf gesperrt.
+        assert.equal(dialog.querySelector('form').getAttribute('aria-busy'), 'true');
+        assert.equal(getSubmitButton(dialog).disabled, true);
+        assert.equal(fetchCalls.length, 1);
+        assert.equal(fetchCalls[0].url, '/api/contact');
+
+        // Ein zweites Absenden waehrend des Versands darf nichts ausloesen.
+        await submitContactForm(testRoot, dialog);
+        assert.equal(fetchCalls.length, 1);
+
+        // Escape schliesst trotz laufender Anfrage und gibt den Fokus zurueck.
+        await act(async () => {
+            dispatchKeyboardEvent(testRoot.window, 'Escape');
+        });
+        assert.equal(getDialog(testRoot), null);
+        assert.equal(testRoot.window.document.activeElement, trigger);
+
+        // Erneut geoeffnet ist der Sendezustand unveraendert vorhanden.
+        await act(async () => {
+            click(testRoot.window, trigger);
+        });
+        const reopened = getDialog(testRoot);
+        assert.equal(reopened.querySelector('form').getAttribute('aria-busy'), 'true');
+        assert.equal(getSubmitButton(reopened).disabled, true);
+        assert.equal(fetchCalls.length, 1);
+
+        // Antwort trifft ein: Erfolg wird als role="status" angekuendigt.
+        await act(async () => {
+            releaseFetch({ ok: true });
+        });
+        const success = reopened.querySelector('[role="status"]');
+        assert.notEqual(success, null);
+        assert.equal(success.getAttribute('aria-live'), 'polite');
+        assert.equal(reopened.querySelector('form').getAttribute('aria-busy'), 'false');
+        assert.equal(getSubmitButton(reopened).disabled, false);
+    } finally {
+        await testRoot.cleanup();
+    }
+});
+
+test('entsperrt das Formular nach einem reCAPTCHA-Timeout', async () => {
+    let fetchCalled = false;
+    const testRoot = await createReactTestRoot({
+        fetch: async () => {
+            fetchCalled = true;
+            return { ok: true };
+        },
+    });
+    const timers = createManualTimers();
+
+    try {
+        const trigger = await renderSettingsModal(testRoot, {
+            timers,
+            // execute() antwortet nie - ohne Zeitgrenze bliebe der Sendezustand bestehen.
+            grecaptcha: {
+                ready: callback => callback(),
+                execute: () => new Promise(() => {}),
+            },
+        });
+        trigger.focus();
+        await act(async () => {
+            click(testRoot.window, trigger);
+        });
+
+        const dialog = getDialog(testRoot);
+        await openContactTabAndFill(testRoot, dialog);
+        await submitContactForm(testRoot, dialog);
+
+        assert.equal(getSubmitButton(dialog).disabled, true);
+        assert.ok(timers.pendingCount > 0, 'keine Zeitgrenze fuer execute() gesetzt');
+
+        // Zeitgrenze ausloesen, statt sie real abzuwarten.
+        await act(async () => {
+            timers.runPending();
+        });
+
+        const alert = dialog.querySelector('[role="alert"]');
+        assert.notEqual(alert, null, 'Fehler wurde nicht als role="alert" angekuendigt');
+        assert.equal(getSubmitButton(dialog).disabled, false, 'Formular blieb gesperrt');
+        assert.equal(dialog.querySelector('form').getAttribute('aria-busy'), 'false');
+        assert.equal(fetchCalled, false, 'Versand trotz fehlendem Token');
+    } finally {
+        await testRoot.cleanup();
+    }
+});
+
+test('macht die textlastigen Reiter per Tastatur erreichbar', async () => {
+    const testRoot = await createReactTestRoot();
+
+    try {
+        const trigger = await renderSettingsModal(testRoot);
+        trigger.focus();
+        await act(async () => {
+            click(testRoot.window, trigger);
+        });
+
+        const dialog = getDialog(testRoot);
+
+        for (const [index, panelId] of [[1, 'settings-panel-legal'], [2, 'settings-panel-about']]) {
+            const panel = dialog.querySelector(`#${panelId}`);
+            assert.equal(panel.getAttribute('tabindex'), '0');
+
+            // Sichtbar geschaltet gehoert der Bereich zur Fokusfalle.
+            await act(async () => {
+                click(testRoot.window, getTabs(dialog)[index]);
+            });
+            assert.equal(panel.hasAttribute('hidden'), false);
+            assert.ok(
+                getFocusable(dialog).includes(panel),
+                `${panelId} ist nicht per Tastatur erreichbar`,
+            );
+        }
+
+        // Ausgeblendet zaehlt "Rechtliches" nicht mehr mit.
+        const legalPanel = dialog.querySelector('#settings-panel-legal');
+        assert.equal(legalPanel.hasAttribute('hidden'), true);
+        assert.equal(getFocusable(dialog).includes(legalPanel), false);
     } finally {
         await testRoot.cleanup();
     }

@@ -35,11 +35,31 @@ interface RecaptchaClient {
 const RECAPTCHA_SITE_KEY = '6LeKjy4sAAAAAPqI5SG57GRV4ZxSswqEgCtdilWp';
 const RECAPTCHA_SCRIPT_ID = 'gamerfeed-recaptcha';
 const RECAPTCHA_LOAD_TIMEOUT_MS = 10_000;
-// Ohne Zeitgrenze bliebe das Formular bei einer haengenden Anfrage dauerhaft im
-// Sendezustand und damit gesperrt.
-const CONTACT_REQUEST_TIMEOUT_MS = 20_000;
+// Nur der reCAPTCHA-Schritt bekommt eine Zeitgrenze. Der Versand selbst laeuft
+// ohne: eine clientseitige Grenze koennte kuerzer sein als die erlaubte
+// Serverlaufzeit und einen Fehler anzeigen, obwohl die Mail zugestellt wird.
+const RECAPTCHA_EXECUTE_TIMEOUT_MS = 15_000;
 
 let recaptchaLoadPromise: Promise<RecaptchaClient> | null = null;
+
+// Begrenzt ein Versprechen, das sonst nie abschliessen wuerde. Der Aufrufer
+// behandelt die Ablehnung wie jeden anderen Fehler.
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+        const timeoutId = window.setTimeout(() => reject(new Error(message)), timeoutMs);
+
+        promise.then(
+            value => {
+                window.clearTimeout(timeoutId);
+                resolve(value);
+            },
+            error => {
+                window.clearTimeout(timeoutId);
+                reject(error);
+            },
+        );
+    });
+}
 
 function getRecaptchaClient() {
     return (window as Window & { grecaptcha?: RecaptchaClient }).grecaptcha;
@@ -293,17 +313,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 return;
             }
 
-            // reCAPTCHA v3 Token erst nach vollständig geladenem Client holen
+            // reCAPTCHA v3 Token erst nach vollständig geladenem Client holen.
+            // execute() kann ohne Antwort haengen bleiben und wuerde das Formular
+            // sonst dauerhaft im Sendezustand lassen.
             const grecaptcha = await loadRecaptcha();
-            const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY, {
-                action: CONTACT_RECAPTCHA_ACTION,
-            });
+            const token = await withTimeout(
+                grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: CONTACT_RECAPTCHA_ACTION }),
+                RECAPTCHA_EXECUTE_TIMEOUT_MS,
+                'reCAPTCHA hat nicht rechtzeitig geantwortet.',
+            );
 
             const response = await fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...normalizedContact, recaptchaToken: token }),
-                signal: AbortSignal.timeout(CONTACT_REQUEST_TIMEOUT_MS),
             });
 
             if (response.ok) {
@@ -455,6 +478,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         id={getPanelId('legal')}
                         aria-labelledby={getTabId('legal')}
                         hidden={activeTab !== 'legal'}
+                        // Reiner Text ohne Bedienelemente: ohne tabIndex waere der
+                        // Bereich per Tastatur weder erreichbar noch scrollbar.
+                        tabIndex={0}
                         className="space-y-8 prose dark:prose-invert max-w-none prose-slate dark:prose-zinc">
                             <section>
                                 <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-200 mb-3">
@@ -534,6 +560,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         id={getPanelId('about')}
                         aria-labelledby={getTabId('about')}
                         hidden={activeTab !== 'about'}
+                        // Wie bei "Rechtliches": reiner Text, sonst nicht erreichbar.
+                        tabIndex={0}
                         className="space-y-6 prose dark:prose-invert max-w-none prose-slate dark:prose-zinc">
                             <section>
                                 <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-200 mb-3">
@@ -579,7 +607,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             <p className="text-sm text-slate-600 dark:text-zinc-400">
                                 {t('contact.openForm')}
                             </p>
-                            <form onSubmit={handleContactSubmit}>
+                            <form onSubmit={handleContactSubmit} aria-busy={isSendingContact}>
                                 <fieldset
                                     disabled={isSendingContact}
                                     className="space-y-4 border-0 p-0 m-0 min-w-0"
@@ -650,13 +678,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                      </div>
 
                                 {contactStatus === 'success' && (
-                                    <div className="p-4 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-lg text-sm">
+                                    <div
+                                        role="status"
+                                        aria-live="polite"
+                                        className="p-4 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-lg text-sm"
+                                    >
                                         {t('contact.success')}
                                     </div>
                                 )}
 
                                 {contactStatus === 'error' && (
-                                    <div className="p-4 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded-lg text-sm">
+                                    <div
+                                        role="alert"
+                                        className="p-4 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded-lg text-sm"
+                                    >
                                         {t('contact.error')}
                                     </div>
                                 )}
