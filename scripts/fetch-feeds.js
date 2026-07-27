@@ -96,11 +96,6 @@ export async function getOgImageFromUrl(url, sourceName) {
             requestUrl: url,
             options: { headers: BROWSER_LIKE_HEADERS },
         },
-        {
-            name: 'api.allorigins.win',
-            requestUrl: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-            options: {},
-        },
     ];
 
     const scrapeStart = Date.now();
@@ -829,8 +824,6 @@ async function main() {
 
         let newlyFetchedArticles = [];
 
-        const proxies = (url) => [ `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, `https://corsproxy.io/?${encodeURIComponent(url)}`, `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}` ];
-
         for (const feed of feeds) {
             let xmlString = null;
             let lastError = 'Unknown error';
@@ -840,7 +833,6 @@ async function main() {
                 console.log(`   ℹ️  Using normalized feed URL for ${feed.name}: ${feedUrl}`);
             }
 
-            // Attempt 1: Direct fetch
             try {
                 const response = await fetch(feedUrl, { headers: BROWSER_LIKE_HEADERS, signal: AbortSignal.timeout(8000) });
                 if (response.ok) {
@@ -852,25 +844,6 @@ async function main() {
                 } else { lastError = `Direct fetch failed with status ${response.status}`; }
             } catch (e) { lastError = e instanceof Error ? e.message : String(e); }
 
-            // Attempt 2: Proxies (if direct fetch failed)
-            if (!xmlString) {
-                console.log(`   ⚠️  Direct fetch failed for ${feed.name} (${lastError}). Trying proxies...`);
-                for (const proxyUrl of proxies(feedUrl)) {
-                    try {
-                        const proxyName = new URL(proxyUrl).hostname;
-                        console.log(`      -> Trying proxy: ${proxyName}`);
-                        const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
-                        if (response.ok) {
-                            const text = await response.text();
-                            if (text && text.trim().startsWith('<')) {
-                                xmlString = text;
-                                console.log(`      ✅ Proxy fetch successful!`);
-                                lastError = null; break;
-                            } else { lastError = `Proxy ${proxyName} returned empty or invalid content.`; }
-                        } else { lastError = `Proxy ${proxyName} failed with status ${response.status}`; }
-                    } catch (e) { lastError = e instanceof Error ? e.message : String(e); }
-                }
-            }
             if (xmlString) {
                 try {
                     const feedArticles = parseRssXml(xmlString, feed);
@@ -884,8 +857,8 @@ async function main() {
                     feedHealthStatus[feed.id] = { status: 'error', message: `Failed during parse. Error: ${message}` };
                 }
             } else {
-                console.error(`   ❌ All fetch attempts failed for ${feed.name}. Last error: ${lastError}`);
-                feedHealthStatus[feed.id] = { status: 'error', message: `All fetch attempts failed. Last error: ${lastError}` };
+                console.error(`   ❌ Fetch failed for ${feed.name}. Error: ${lastError}`);
+                feedHealthStatus[feed.id] = { status: 'error', message: `Fetch failed. Error: ${lastError}` };
             }
             await new Promise(r => setTimeout(r, 200));
         }
