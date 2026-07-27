@@ -1,5 +1,6 @@
 import { kv } from '@vercel/kv';
 import type { Article } from '../types';
+import { normalizeContentUrl } from '../shared/url-policy.js';
 
 export const config = {
     runtime: 'edge',
@@ -63,8 +64,23 @@ export default async function handler(_req: Request) {
             const badgeBg = isDE ? '#EEEDFE' : '#E1F5EE';
             const badgeColor = isDE ? '#3C3489' : '#085041';
 
+            // Dieselbe Ausgabe-Policy wie in der SPA. Aeltere Cache-Eintraege
+            // koennen noch ungeprueft sein, deshalb wird hier erneut geprueft
+            // statt dem Cache zu vertrauen.
+            const safeLink = normalizeContentUrl(article.link);
+            if (!safeLink) {
+                return `
+        <div class="article">
+            <span class="badge" style="background:${badgeBg};color:${badgeColor};">${escapeHtml(article.source)}</span>
+            <div class="article-body">
+                <p class="article-title">${escapeHtml(article.title)}</p>
+                <p class="article-meta">${timeAgo(article.publicationDate)}</p>
+            </div>
+        </div>`;
+            }
+
             return `
-        <a href="${escapeHtml(article.link)}" target="_blank" rel="noopener noreferrer" class="article">
+        <a href="${escapeHtml(safeLink)}" target="_blank" rel="noopener noreferrer" class="article">
             <span class="badge" style="background:${badgeBg};color:${badgeColor};">${escapeHtml(article.source)}</span>
             <div class="article-body">
                 <p class="article-title">${escapeHtml(article.title)}</p>
