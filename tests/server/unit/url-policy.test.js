@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
     isAllowedUrl,
+    normalizeContentUrl,
     parseAllowedUrl,
     toAllowedUrl,
     UrlPolicyError,
@@ -74,4 +75,31 @@ test('toAllowedUrl liefert null statt zu werfen', () => {
     assert.equal(toAllowedUrl(''), null);
     assert.equal(toAllowedUrl('https://example.com/x')?.href, 'https://example.com/x');
     assert.equal(isAllowedUrl('data:text/plain,x'), false);
+});
+
+test('normalizeContentUrl liefert absolute Adressen oder null', () => {
+    assert.equal(
+        normalizeContentUrl('https://beispiel.example/artikel?a=1'),
+        'https://beispiel.example/artikel?a=1',
+    );
+    assert.equal(
+        normalizeContentUrl('/bild.jpg', { base: 'https://beispiel.example/artikel/eins' }),
+        'https://beispiel.example/bild.jpg',
+    );
+    assert.equal(
+        normalizeContentUrl('../hoch.jpg', { base: 'https://beispiel.example/a/b/c' }),
+        'https://beispiel.example/a/hoch.jpg',
+    );
+
+    for (const value of [
+        'javascript:alert(1)',
+        'data:image/svg+xml,<svg onload=alert(1)>',
+        'https://nutzer:pw@beispiel.example/x',
+        '/ohne-basis.jpg',
+        '',
+        null,
+        undefined,
+    ]) {
+        assert.equal(normalizeContentUrl(value), null, `${String(value)} wurde akzeptiert`);
+    }
 });
