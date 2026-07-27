@@ -49,8 +49,8 @@ GamerFeed nutzt eine innovative 3-stufige Lade-Strategie, um eine sofortige Anze
 2. **Stufe 2**: 64 Artikel werden nachgeladen
 3. **Stufe 3**: Alle verbleibenden Artikel folgen im Hintergrund
 
-Die tatsächliche Größe und Dauer hängt von der Anzahl der Feeds, der Länge der
-Zusammenfassungen und der Netzverbindung ab.
+Die tatsächliche Größe hängt von Artikelanzahl und Feldlängen ab. Die Ladedauer
+wird zusätzlich von der Netzverbindung beeinflusst.
 
 ### Technische Umsetzung:
 
@@ -59,7 +59,7 @@ Der Cron-Job speichert drei optimierte Cache-Versionen in Vercel KV:
 - `news_cache_64`: Erste 64 Artikel für schnelles nachladen
 - `news_cache`: Alle Artikel für vollständige Darstellung
 
-**Ergebnis**: Der Nutzer sieht Inhalte sofort, ohne auf das Laden aller 10.000+ Artikel warten zu müssen.
+**Ergebnis**: Der Nutzer sieht Inhalte sofort, ohne auf das Laden des vollständigen Caches mit bis zu 10.000 Artikeln warten zu müssen.
 
 ---
 
@@ -246,6 +246,7 @@ tests/
 │   ├── unit/
 │   └── integration/
 ├── frontend/
+│   ├── helpers/
 │   └── unit/
 └── server/
     └── unit/
@@ -263,6 +264,11 @@ Der Workflow `.github/workflows/ci.yml` führt bei Pull Requests und Pushes auf
 TypeScript-Prüfung und den Produktions-Build aus. Der Feed-Cron nutzt zusätzlich
 die fokussierte Suite `test:feeds`. Die Tests sind kein separates Projekt und
 werden nicht in den Frontend-Build importiert.
+
+Die priorisierte technische Weiterentwicklung und die Abnahmekriterien der
+einzelnen Arbeitspakete stehen in der
+[Projekt-Roadmap](docs/development/roadmap.md). Sie ist eine Planungsgrundlage,
+keine Aufforderung, mehrere Punkte gleichzeitig umzusetzen.
 
 ### Manuelles Aktualisieren des Caches
 

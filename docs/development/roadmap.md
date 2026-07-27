@@ -1,0 +1,743 @@
+# GamerFeed – Projekt-Roadmap
+
+Stand: 27. Juli 2026
+
+Diese Roadmap ordnet die technische Weiterentwicklung von GamerFeed. Sie ist
+kein fester Veröffentlichungskalender und keine automatische Freigabe, alle
+Punkte auf einmal umzusetzen. Produktideen, Änderungen an externen Diensten und
+Produktions-Deployments bleiben bewusste Entscheidungen des Projektinhabers.
+
+## So wird die Roadmap verwendet
+
+Status:
+
+- **bereit**: das nächste klar abgegrenzte Arbeitspaket
+- **geplant**: fachlich eingeordnet, aber noch nicht beginnen
+- **Entscheidung nötig**: benötigt vor der Umsetzung eine Produkt- oder
+  Plattformentscheidung
+- **später**: erst nach Messdaten oder erkennbarem Bedarf
+- **erledigt**: umgesetzt, geprüft und dokumentiert
+
+Priorität:
+
+- **P0**: laufender Produktionsausfall oder unmittelbar ausnutzbare Lücke
+- **P1**: bekanntes Sicherheits-, Datenschutz- oder Zuverlässigkeitsrisiko
+- **P2**: wichtige Stabilisierung und Wartbarkeit
+- **P3**: Optimierung erst nach Messdaten oder erkennbarem Bedarf
+
+Es wird immer nur **ein Arbeitspaket** bearbeitet. Ein Arbeitspaket darf mehrere
+kleine Commits haben, wenn dadurch Tests, Implementierung und Dokumentation
+sauber getrennt bleiben. Nach einem vollständigen Meilenstein wird der gesamte
+Git-Diff nochmals unabhängig geprüft.
+
+### Definition of Done
+
+Ein Arbeitspaket ist erst abgeschlossen, wenn:
+
+1. das bisherige Verhalten vor einer riskanten Änderung durch Tests
+   charakterisiert wurde;
+2. die beschriebenen Abnahmekriterien erfüllt sind;
+3. `npm test`, `npm run typecheck` und `git diff --check` erfolgreich sind;
+   neue Dateien werden zusätzlich vollständig geprüft und nach dem Staging mit
+   `git diff --cached --check` erfasst;
+4. bei Frontend-, Build- oder Abhängigkeitsänderungen zusätzlich
+   `npm run build` erfolgreich ist;
+5. relevante Dokumentation im selben Arbeitspaket aktualisiert wurde;
+6. notwendige manuelle Schritte ausdrücklich genannt, aber nicht ungefragt auf
+   externen Systemen ausgeführt wurden.
+
+## Aktuelle Ausgangslage
+
+Am Ausgangspunkt dieser Roadmap (`1becba1`, Snapshot vom 27. Juli 2026):
+
+- sind keine akuten P0-Produktionsblocker bekannt;
+- laufen 129 zentrale Tests sowie TypeScript-Prüfung und Production-Build
+  erfolgreich;
+- prüft CI Pushes und Pull Requests mit Tests, PHP-Syntaxprüfung, Typecheck und
+  Build;
+- sind Feed-Abruf, eigener PHP-Fallback, Bildauswahl, Dialogfokus,
+  Einstellungs-Tabs und Kontaktformular bereits gezielt abgesichert;
+- ist kein Rewrite und kein Wechsel des State-Managements begründet.
+
+Die wichtigsten verbleibenden Risiken liegen an Daten- und Netzwerkgrenzen,
+bei der Erkennung veralteter Cron-Daten sowie in einigen noch ungetesteten
+Browser- und Request-Abläufen.
+
+## Empfohlene Reihenfolge
+
+| ID | Priorität | Status | Ergebnis |
+|---|---|---|---|
+| R1 | P1 | Entscheidung nötig | Release-Gate und Preview-Zugriffe festlegen |
+| S1a | P1 | **bereit** | Serverziele und Redirects gegen SSRF absichern |
+| S1b | P1 | geplant | Artikel-, Bild- und Ausgabe-URLs sicher behandeln |
+| T0 | P1 | geplant | Kleines Chromium-E2E-Grundgerüst bereitstellen |
+| F2 | P1 | geplant | Consent-Widerruf und Cookie-Einstellungen vervollständigen |
+| O1 | P1 | geplant | Cron-Heartbeat und veraltete Health-Daten sichtbar machen |
+| S2 | P1 | geplant | Admin-API-Payloads validieren und Fehlerausgaben härten |
+| O2a | P1 | geplant | Einzelitem-Fehler, Secrets und Provider-Timeouts absichern |
+| O2b | P1 | geplant | Feed-Kernlauf mit Deadline und Scrape-Budget begrenzen |
+| O3a | P1 | geplant | Generationsgebundenes Leseprotokoll und Migration vorbereiten |
+| F1 | P1 | geplant | Progressive News-Ladekette gegen veraltete Antworten absichern |
+| O3b | P1 | geplant | News-Caches größenbegrenzt und konsistent veröffentlichen |
+| F3a | P2 | geplant | Zentrale Tastatur- und DOM-Probleme im Frontend beheben |
+| F3b | P2 | geplant | Veraltetes ArticleCard-Rendering verhindern |
+| F4a | P2 | geplant | Persistierten Zustand robust validieren |
+| F4b | P2 | geplant | Verbliebene i18n-Inkonsistenzen schließen |
+| A1a | P2 | geplant | Admin-Mutationen synchron absichern |
+| A1b | P2 | geplant | Admin-Tabs und Health-Beschriftung korrigieren |
+| O4 | P2 | geplant | Historie, Alarmierung und Proxy-Version beobachtbar machen |
+| D1 | P2 | Entscheidung nötig | Datenbankschema, Backup und Restore festlegen |
+| D2 | P2 | geplant | Lokale Produktionsschreibvorgänge explizit absichern |
+| S3 | P2 | Entscheidung nötig | Rate Limits und SMTP-Laufzeit festlegen |
+| S4 | P2 | Entscheidung nötig | Security Headers und CSP einführen |
+| X1 | P2 | Entscheidung nötig | Externen PHP-Proxy authentifizieren |
+| SC1 | P2 | geplant | GitHub-Actions- und Abhängigkeitswartung härten |
+
+---
+
+## Vorbedingung: Release-Entscheidung
+
+### R1 – Release-Gate und Preview-Zugriffe
+
+**Warum:** CI prüft einen direkten Push erst nachträglich. Ohne geschützten
+Branch oder Deployment-Gate kann Vercel einen fehlerhaften Commit bereits in
+Production ausrollen.
+
+**Entscheidung:**
+
+- entweder den heutigen direkten `main`-Workflow bewusst beibehalten und das
+  verbleibende Risiko dokumentieren;
+- oder Pull Requests, erforderliche CI-/Vercel-Checks und Branch Protection
+  einführen;
+- Preview-Deployments erhalten keine produktiven Schreib-Secrets oder eigene
+  Testressourcen;
+- einen kurzen Rollback-Ablauf für Vercel dokumentieren.
+
+**Abnahme:**
+
+- der gewählte Ablauf ist als ADR oder Runbook dokumentiert;
+- tatsächlicher Production-Trigger und – falls vorhanden – der freigebende
+  Check sind nachweisbar dokumentiert;
+- ein Preview-Smoke kann weder News-Cache noch Feed-Datenbank in Production
+  verändern;
+- ein Rollback auf die letzte funktionierende Version wurde ohne Datenmutation
+  nachvollzogen;
+- Plattformänderungen erfolgen nur nach ausdrücklicher Freigabe des
+  Projektinhabers.
+
+S1a bleibt das nächste bereite Code-Arbeitspaket; vor dessen
+Production-Rollout muss R1 entschieden sein.
+
+---
+
+## Meilenstein 1: Sicherheits- und Datenverträge
+
+### S1a – Serverziele und Redirects absichern
+
+**Warum:** Feed- und Artikelziele werden serverseitig abgerufen. Eine reine
+Syntax- oder Hostname-Prüfung reicht nicht gegen DNS-Auflösungen auf private
+Netze, Redirects oder DNS-Rebinding.
+
+**Umfang:**
+
+- eigene Outbound-Policy für Node-Abrufe, getrennt von der Browser-Ausgabe;
+- nur bewusst erlaubte HTTP(S)-Ziele ohne eingebettete Zugangsdaten;
+- alle A- und AAAA-Ergebnisse einschließlich IPv4-mapped IPv6 prüfen;
+- automatische Redirects deaktivieren, jeden Hop erneut prüfen und Zahl sowie
+  Schleifen begrenzen;
+- Verbindung an das geprüfte Ziel binden oder eine nachweislich SSRF-sichere
+  Egress-Lösung verwenden; falls die aktuelle Runtime das nicht zuverlässig
+  ermöglicht, fail-closed beziehungsweise mit enger Allowlist arbeiten;
+- die exakte PHP-Allowlist nicht durch eine allgemeinere Policy aufweichen;
+- vor Aktivierung alle aktuell konfigurierten Feed-URLs read-only
+  charakterisieren.
+
+**Abnahme:**
+
+- Tests mit injizierbarem Resolver für private und gemischte DNS-Antworten,
+  IPv4/IPv6, IPv4-mapped IPv6, alternative numerische Adressen, Redirect auf
+  private Ziele und Redirect-Schleifen;
+- DNS-Rebinding/TOCTOU und die Grenzen der gewählten Runtime-Lösung sind im Code
+  und in der Betriebsdokumentation nachvollziehbar behandelt;
+- derzeit gültige öffentliche Produktions-Feeds funktionieren weiterhin;
+- eine ungültige Feed-URL ergibt beim Admin eine verständliche 400-Antwort;
+- kein abgewiesener Request erreicht das Netzwerk.
+
+### S1b – Artikel-, Bild- und Ausgabe-URLs absichern
+
+**Warum:** RSS-Inhalte werden in der SPA und unter `/gaming-news` ausgegeben und
+für Bilder teilweise serverseitig nachgeladen. Dafür gilt zusätzlich zur
+Outbound-Policy eine syntaktische Ausgabe-Policy.
+
+**Umfang:**
+
+- Artikel- und Bild-URLs auf erlaubte HTTP(S)-Schemata und fehlende Credentials
+  normalisieren;
+- relative URLs nur gegen eine definierte öffentliche Basis auflösen;
+- serverseitiges OG-Scraping über die Schutzschicht aus S1a führen;
+- ungültige Links in der SPA und unter `/gaming-news` nicht anklickbar machen;
+- abgelehnte Items protokollieren und isoliert überspringen.
+
+**Abnahme:**
+
+- Tests für `javascript:`, `data:`, Credentials, relative und fehlerhafte URLs;
+- dieselbe Policy gilt für Feed-Ingest, OG-Scraping, React-Links und statisches
+  HTML, ohne Logik zu duplizieren;
+- ein ungültiger Artikel beschädigt weder Cache noch restlichen Feed;
+- gültige Artikel- und Bild-URLs funktionieren unverändert.
+
+### S2 – Runtime-Validierung und sichere API-Fehler
+
+**Warum:** TypeScript-Casts prüfen eingehendes JSON nicht zur Laufzeit.
+Feed-Verwaltung und Ankündigungen benötigen daher serverseitige Verträge.
+
+**Umfang:**
+
+- gemeinsame Parser für Feed- und Announcement-Payloads;
+- Feldtypen, Längen, Enums, URLs, Zahlen und Booleans validieren;
+- ungültiges oder nicht parsebares JSON als 400 melden;
+- interne Exception-Texte nur serverseitig protokollieren;
+- stabile, für den Client geeignete Fehlercodes verwenden;
+- Admin-Antworten mit `private, no-store` ausliefern;
+- inaktive Ankündigungen im Admin weiterhin bearbeitbar machen, ohne sie
+  öffentlich anzuzeigen.
+
+**Abnahme:**
+
+- Handler-Tests für alle Methoden, Auth-Grenzen und wesentlichen Fehlpfade;
+- keine Datenbank- oder Providerdetails in Client-Antworten;
+- vorhandene gültige Admin-Abläufe bleiben unverändert nutzbar.
+
+---
+
+## Meilenstein 2: Feed- und Cache-Betrieb
+
+### O1 – Heartbeat und Frische
+
+**Warum:** Ein alter grüner `feed_health_status` bleibt momentan grün, auch
+wenn der geplante Workflow nicht mehr läuft.
+
+**Umfang:**
+
+- einen veränderlichen Attempt-Status (`runId`, `startedAt`, `finishedAt`,
+  Ergebnis und Fatalfehler) getrennt vom unveränderlichen aktiven Snapshot
+  führen;
+- Workflow-Frische, erfolgreichen Kern-Publish und Inhaltsfrische getrennt
+  darstellen, unter anderem über `lastCorePublishAt`, Feed-Zähler,
+  `lastSuccessAt` je Feed und neuesten Artikelzeitpunkt;
+- minimale Phasen- und Feed-Dauern bereits hier erfassen;
+- im Health-API und Admin ab der festen, dokumentierten Schwelle
+  `FEED_STALE_AFTER_MS` (Standard: 50 Minuten) eindeutig „veraltet“ anzeigen;
+- beim nächsten Workflow-Umbau den Zeitplan von der stark belasteten Minute
+  `0` weg verschieben.
+
+**Abnahme:**
+
+- Grenztests direkt vor und an `FEED_STALE_AFTER_MS` bestimmen den
+  Stale-Zustand deterministisch;
+- ein fehlgeschlagener Versuch überschreibt `lastCorePublishAt` und
+  Feed-`lastSuccessAt` nicht;
+- ein technisch beendeter Lauf mit ausschließlich fehlgeschlagenen Feeds
+  erscheint nicht als frischer Inhalt;
+- letzter Versuch, letzter Kern-Publish und Inhaltsfrische sind im Admin
+  unterscheidbar;
+- Tests verwenden eine injizierbare Uhr und benötigen keine echte Wartezeit.
+
+### O2a – Einzelitem-Fehler, Secrets und Provider-Timeouts
+
+**Warum:** Ein einzelnes ungültiges Datum kann derzeit einen ganzen Feed
+verwerfen. Core- und optionale Provider-Konfiguration müssen außerdem
+unterschiedlich behandelt und externe Aufrufe einzeln begrenzt werden.
+
+**Umfang:**
+
+- fehlerhafte Items einzeln überspringen und mitzählen;
+- Groq- und HTML-Abrufe mit Abort-Timeout und Größenlimit versehen;
+- Proxy nur für ausdrücklich dafür vorgesehene Quellen versuchen;
+- Core-Secrets (`POSTGRES_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`) vor
+  jedem externen Zugriff auf Vorhandensein prüfen, ohne Werte auszugeben;
+- optionale Werte wie `GROQ_API_KEY` und `FEED_PROXY_URL` getrennt validieren
+  und bei Fehlen kontrolliert überspringen.
+
+**Abnahme:**
+
+- Fixture mit einem ungültigen und mehreren gültigen Items behält die gültigen
+  und weist einen Skip-Zähler aus;
+- hängende HTML-Seiten oder Groq-Aufrufe enden über Abort-Signale;
+- fehlendes Core-Secret beendet den Lauf vor SQL-, KV- oder HTTP-Zugriff;
+  fehlende optionale Secrets verhindern den Kern-Publish nicht;
+- optionale Trendfehler machen einen erfolgreichen News-Kernlauf nicht alt.
+
+### O2b – Deadline und Scrape-Budget
+
+**Warum:** Feed-, Proxy- und Bildabrufe können zusammen das
+30-Minuten-Hardlimit des Workflows erreichen. Ein harter Actions-Abbruch führt
+nicht zuverlässig durch den normalen Fehlerpfad.
+
+**Umfang:**
+
+- neue Bild-Scrapes pro Lauf begrenzen;
+- ein globales Zeitbudget einführen und optionale Arbeiten bei knapper
+  Restzeit überspringen;
+- Ergebniszustände `success`, `degraded` und `fatal` definieren;
+- ein konfigurierbares `CORE_DEADLINE_MS` mit ausreichender Reserve vor dem
+  30-Minuten-Hardlimit verwenden;
+- zurückgestellte Bild-Scrapes fair über Quellen verteilen und in späteren
+  Läufen erneut versuchen;
+- Feed-Parallelität nur klein und kontrolliert erhöhen, falls Messdaten sie
+  rechtfertigen.
+
+**Abnahme:**
+
+- hängende Feeds und Scrapes enden per Request- und Gesamtabbruch vor
+  `CORE_DEADLINE_MS`;
+- alte Artikel ausgefallener Quellen bleiben innerhalb der bestehenden
+  Retention und Artikelgrenze erhalten; das Bytebudget folgt in O3b;
+- es gibt keine unbegrenzte Zahl von Artikel-Seitenabrufen pro Lauf;
+- übersprungene Arbeit führt deterministisch zu `degraded`, nicht unbemerkt zu
+  `success`;
+- kontrollierte Parallelität überschreitet nie das definierte Request-Limit.
+
+### O3a – Generationsgebundenes Leseprotokoll und Migration
+
+**Warum:** Ein einzelner Active-Pointer reicht bei drei zeitversetzten,
+unabhängig am Edge gecachten Endpunkten nicht aus. Preview, Medium und Full
+könnten trotz Pointer verschiedene Generationen liefern.
+
+**Umfang:**
+
+- ein versionsgebundenes Leseprotokoll definieren: Bootstrap-Antwort oder
+  Manifest liefert `schemaVersion` und `snapshotId`, nachfolgende Requests
+  pinnen diese Generation;
+- Cache-Header beziehungsweise Cache-Keys generationsspezifisch behandeln und
+  abweichende Antworten im Client verwerfen;
+- alle Consumer berücksichtigen: Preview/Medium/Full, Merge-Basis des Cron,
+  `/gaming-news` und Health-API;
+- Leser zuerst als Dual-Read ausrollen: Generation verwenden, sonst auf
+  Legacy-Keys zurückfallen;
+- Rollback auf Legacy und auf die vorherige Generation dokumentieren.
+
+**Abnahme:**
+
+- ein Pointerwechsel zwischen Preview-, Medium- und Full-Request sowie
+  unterschiedlich alte HTTP-Caches erzeugen keine gemischte sichtbare
+  Generation;
+- fehlender oder fehlerhafter Pointer fällt kontrolliert auf Legacy
+  beziehungsweise die vorherige Generation zurück;
+- bestehende Clients funktionieren während der schrittweisen Migration;
+- Contract-Tests decken jeden Consumer und einen Rollback ab.
+
+### O3b – Konsistenter, größenbegrenzter Publish
+
+**Warum:** Eine Artikelanzahl garantiert keine maximale Byte-Größe. Die drei
+News-Keys werden zudem nacheinander geschrieben und können bei Fehlern
+unterschiedliche Generationen enthalten.
+
+**Umfang:**
+
+- Full-, Preview- und Medium-Payload jeweils serialisiert messen;
+- Feldlängen begrenzen und einen selbst einzeln zu großen Artikel kontrolliert
+  überspringen;
+- ein konfigurierbares Byte-Budget mit Sicherheitsreserve verwenden und bei
+  Bedarf deterministisch die ältesten Artikel entfernen;
+- eine vollständige, unveränderliche Generation schreiben und erst danach den
+  Active-Pointer umschalten;
+- Attempt-Status aus O1 nicht in den unveränderlichen Snapshot mischen;
+- aktive und vorherige Generation für laufende Clients und Rollback behalten;
+  ältere und unvollständige Generationen erst nach Grace Period entfernen;
+- während der Migration Legacy-Keys weiter bedienen und erst nach
+  nachgewiesener Umstellung aller Consumer entfernen;
+- konkurrierende Writer durch Dry-Run/Lease/CAS oder monotone Aktivierung daran
+  hindern, eine ältere Generation zuletzt zu aktivieren;
+- Health-API aus Snapshot-Metadaten versorgen, statt den vollständigen
+  News-Cache nur für die Quellenliste zu laden.
+
+**Abnahme:**
+
+- Fault-Injection nach jedem KV-Write, einschließlich Pointer-Fehler und
+  verwaister Teilgeneration, lässt Leser nur einen vollständigen Snapshot
+  sehen;
+- zwei überlappende Läufe aktivieren niemals die ältere Generation zuletzt;
+- Rollback, Legacy-Fallback und Garbage Collection sind getestet;
+- die serialisierten Full-, 16er- und 64er-Payloads bleiben unter ihren Budgets,
+  auch bei einem einzelnen extrem großen Eingabeartikel;
+- Artikelreihenfolge bleibt stabil und newest-first.
+
+### O4 – Historie, Alarmierung und Versionsdrift
+
+**Status:** geplant, nachdem O1–O3b stehen.
+
+- strukturierte Run- und Feed-Metriken sowie eine kurze
+  `GITHUB_STEP_SUMMARY`;
+- Dauer, Transportweg, HTTP-Status und Item-/Skip-Zahlen ohne Secrets
+  nachvollziehbar machen;
+- begrenzte Historie und einen unabhängigen Alarmkanal für veralteten Cache oder
+  ungewöhnlich hohe Fehlerquote festlegen; ein ausgefallener Workflow darf
+  nicht sein eigener einziger Monitor sein;
+- nicht geheimen Versionsfingerprint verwenden, damit manuell deployter Proxy
+  und Repository verglichen werden können.
+
+**Abnahme:**
+
+- ein Run beantwortet ohne Rohlog-Suche Dauer, Transport, Item-Zahl,
+  Fehlerquote, Snapshot und Payload-Größe;
+- Summary und Historie enthalten weder Secrets noch vollständige Proxy-URLs;
+- Alarm, Deduplizierung und Recovery werden mit ausgefallenem sowie wieder
+  gesundem Cron getestet;
+- ein isolierter Smoke-Test vergleicht den erwarteten Proxy-Fingerprint, ohne
+  Produktionscache oder Feed-Anbieter zu verändern;
+- Authentifizierung und Rate Limit des Proxys bleiben ausschließlich X1.
+
+---
+
+## Meilenstein 3: Frontend-Zuverlässigkeit
+
+### T0 – Chromium-E2E-Grundgerüst
+
+**Warum:** Linkedom prüft weder echte Browser-Navigation und Cookies noch
+Netzwerk- und Fokusverhalten. F2 und spätere Browser-Abnahmen benötigen zuerst
+eine kleine, neutrale Infrastruktur.
+
+**Umfang:**
+
+- Chromium-Runner unter `tests/e2e/` und Script `npm run test:e2e`;
+- Dateimuster so trennen, dass `npm test` die Browser-Suite nicht versehentlich
+  ein zweites Mal startet;
+- Production-Build oder lokale Preview mit vollständig gemockten
+  API-Antworten;
+- eigener CI-Schritt ohne produktive Endpunkte oder Schreib-Secrets;
+- ein neutraler Smoke-Test, der Start und initiale News-Anzeige prüft.
+
+**Abnahme:**
+
+- `npm run test:e2e` läuft lokal dokumentiert und in CI reproduzierbar;
+- Netzwerkzugriffe auf echte Produktions-APIs schlagen im Test bewusst fehl;
+- Browser-Artefakte werden nur bei Fehlern beziehungsweise gemäß dokumentierter
+  Retention gespeichert;
+- fachliche Smokes werden anschließend im jeweiligen Arbeitspaket ergänzt.
+
+### F1 – Progressive Ladekette: „latest request wins“
+
+**Warum:** Eine verspätete Medium- oder Full-Antwort der initialen Ladekette
+kann momentan einen neueren manuellen Refresh wieder überschreiben. Scheitert
+Medium, wird Full nicht mehr versucht.
+
+**Umfang:**
+
+- den News-Lifecycle aus `App.tsx` in einen kleinen testbaren Hook oder
+  Controller auslagern;
+- Request-Generation oder Abort-Strategie verwenden;
+- das generationsgebundene Protokoll aus O3a über die drei Stufen beibehalten;
+- Full unabhängig vom Erfolg der Medium-Stufe versuchen;
+- bereits sichtbare Cache- oder Preview-Daten bei Hintergrundfehlern behalten;
+- Blocking-Fehler von nicht blockierenden Refresh-Fehlern unterscheiden.
+
+**Abnahme:**
+
+- verspätete ältere Antworten verändern weder React-State noch `localStorage`;
+- Medium-Fehler verhindert Full nicht;
+- Unmount und neuer Refresh brechen Arbeit ab oder invalidieren sie so, dass
+  sie weder State noch Cache verändern darf;
+- abweichende `snapshotId` wird verworfen;
+- Deferred-Promise-Tests decken Reihenfolge, Fallback und Fehlerzustände ab;
+- ein Chromium-Smoke ergänzt T0 für den vollständigen Stufenablauf.
+
+### F2 – Consent-Lifecycle vervollständigen
+
+**Warum:** Analytics wird nach Zustimmung initialisiert, ein späterer Widerruf
+stoppt den bereits geladenen Analytics-Lifecycle jedoch nicht vollständig.
+Die Cookie-Einstellungen sind nach dem ersten Banner außerdem nicht dauerhaft
+erreichbar.
+
+**Umfang:**
+
+- dauerhaft erreichbaren Link „Cookie-Einstellungen“ ergänzen;
+- vor Opt-in keine Analytics-Anfrage;
+- Zustimmung genau einmal initialisieren;
+- Widerruf als `denied` anwenden, weitere Hits stoppen und Analytics-Cookies
+  entfernen;
+- erneute Zustimmung ohne doppeltes Skript ermöglichen.
+
+**Abnahme:**
+
+- Unit-Tests für Zustandswechsel;
+- auf Basis von T0 kontrolliert ein echter Chromium-Test Netzwerk und Cookies;
+- Datenschutzerklärung und tatsächliches Verhalten stimmen überein;
+- eine rechtliche Beurteilung von Analytics/reCAPTCHA bleibt eine externe
+  fachliche Aufgabe, kein stillschweigender Codeentscheid.
+
+### F3a – Tastatur und gültige DOM-Struktur
+
+**Umfang:**
+
+- gespeicherte Suchen mit Enter und Leertaste auswählen und löschen;
+- Suchfeld und Icon-only-Schaltflächen eindeutig benennen;
+- in `ArticleCard` keine Buttons innerhalb eines Artikel-Links verschachteln;
+- Optionsdialog benennen sowie Escape und Fokus-Rückgabe erhalten.
+
+**Abnahme:**
+
+- DOM- und Tastaturtests für alle genannten Interaktionen;
+- Favorisieren oder Optionsmenü navigiert nie versehentlich zum Artikel;
+- ein Chromium-Smoke auf Basis von T0 prüft gespeicherte Suche,
+  ArticleCard-Aktionen und Fokus.
+
+### F3b – ArticleCard-Aktualisierung
+
+**Umfang:**
+
+- unvollständigen `React.memo`-Vergleich entfernen oder alle gerenderten
+  Artikelwerte berücksichtigen;
+- keine größere Card-Neustrukturierung über F3a hinaus.
+
+**Abnahme:**
+
+- Änderungen an Summary, Link, Quelle, Sprache oder Datum werden trotz gleicher
+  Artikel-ID gerendert;
+- Regressionstest prüft Text, Datum und `href`;
+- unveränderte Props verursachen keine nachweisbare funktionale Regression.
+
+### F4a – Persistierten Zustand validieren
+
+**Umfang:**
+
+- Decoder und sichere Defaults mindestens für `cachedNews`, Theme, ViewMode und
+  String-Arrays;
+- kaputtes JSON, falsche Struktur und Cross-Tab-Entfernung werfen nie.
+
+**Abnahme:**
+
+- Unit-Tests decken kaputtes JSON, falsche Formen, unbekannte Enum-Werte und
+  `storage`-Events mit entferntem Key ab;
+- jeder betroffene Key fällt deterministisch auf seinen dokumentierten Default
+  zurück.
+
+### F4b – i18n-Konsistenz
+
+**Umfang:**
+
+- Artikeldatum an die gewählte i18n-Sprache statt `navigator.language` binden;
+- verbliebene hart codierte sichtbare und ARIA-Texte nach DE/EN überführen.
+
+**Abnahme:**
+
+- Sprachwechsel aktualisiert Datum, sichtbare Texte und Accessible Names ohne
+  Reload;
+- DE- und EN-Tests verhindern neue hart codierte Texte in den bearbeiteten
+  Komponenten.
+
+---
+
+## Meilenstein 4: Admin
+
+### A1a – Admin-Mutationen
+
+**Umfang:**
+
+- synchronen Mutation-Latch für Feed- und Announcement-Aktionen verwenden;
+- Löschung erst nach fokussierter Bestätigung;
+- Fehler bewahren Eingaben und bestehenden Datensatz.
+
+**Abnahme:**
+
+- je mutierendem Flow erzeugen zwei synchrone identische Aktionen während
+  desselben laufenden Requests genau einen POST, PUT oder DELETE; nach Abschluss
+  bleibt eine legitime spätere Aktion möglich;
+- Fehlerpfade geben Sperren im `finally` frei;
+- Bestätigung erhält initialen Fokus, hält ihn fest, beachtet die definierte
+  Escape-Regel und gibt den Fokus zurück.
+
+### A1b – Admin-Tabs und Health-Semantik
+
+**Umfang:**
+
+- Admin-Tabs mit IDs, `aria-controls`, roving `tabIndex` und Pfeiltasten;
+- unbenannte Accordion-Schaltflächen benennen;
+- Health-Aktualisierung eindeutig als erneutes Laden des gespeicherten Status
+  beschriften.
+
+**Abnahme:**
+
+- Tab-Tests prüfen Pfeiltasten, Home, End, `aria-controls` und roving
+  `tabIndex`;
+- Accordion-Schaltflächen besitzen eindeutige Accessible Names;
+- die Oberfläche behauptet nicht, ein einzelner RSS-Feed werde live abgerufen.
+
+Ein echter manueller Einzelquellen-Abruf ist ein separates, derzeit nicht
+geplantes Produktfeature.
+
+---
+
+## Meilenstein 5: Release und Datenbetrieb
+
+### D1 – Datenbankschema, Backup und Restore
+
+**Status:** Entscheidung des Projektinhabers nötig.
+
+- versioniertes SQL-Schema und nachvollziehbare Migrationen für `feeds`;
+- Constraints wie eindeutige Feed-URL dort absichern, wo sie fachlich gelten;
+- anonymisierten lokalen Seed bereitstellen;
+- Verantwortung, Aufbewahrung, RPO und RTO für Neon-Backups festlegen;
+- Restore in eine getrennte Testumgebung mindestens einmal nachvollziehen.
+
+**Abnahme:**
+
+- eine leere sowie die aktuelle Datenbank lassen sich reproduzierbar auf den
+  dokumentierten Stand migrieren;
+- ein doppelter oder ungültiger Feed verletzt keine Datenkonsistenz;
+- Restore-Runbook nennt Eigentümer, Zielumgebung, Prüfung und Rückweg;
+- ein Restore-Test verändert niemals Production.
+
+### D2 – Sichere lokale Feed-Läufe
+
+**Umfang:**
+
+- lokaler Feed-Lauf standardmäßig Dry-Run;
+- Schreiben nur mit explizitem `--write` und eindeutigem Ziel;
+- Production-Ziel zusätzlich sichtbar bestätigen, ohne Secrets auszugeben;
+- redigierte `.env.example` nur mit Variablennamen und Erklärungen;
+- mit O3b eine Lease/CAS- oder monotone Aktivierung verwenden, damit ein älterer
+  lokaler Lauf keinen neueren Action-Snapshot zurücksetzt.
+
+**Abnahme:**
+
+- Dry-Run führt keine SQL- oder KV-Mutation aus;
+- `--write` ohne eindeutiges Ziel oder notwendige Production-Bestätigung bricht
+  vor der ersten externen Mutation ab; ein Dry-Run darf die erforderlichen
+  Daten weiterhin read-only abrufen;
+- Tests mit überlappendem lokalem und Action-Lauf aktivieren nie die ältere
+  Generation zuletzt;
+- README unterscheidet Diagnose, Dry-Run und Production-Write eindeutig.
+
+### S3 – Rate Limits und SMTP-Laufzeit
+
+**Status:** Plattform- und Datenschutzentscheidung nötig.
+
+- vorhandene Vercel-WAF-Regeln prüfen, bevor ein zweiter Rate-Limiter gebaut
+  wird;
+- `/api/contact` und Admin-Authentifizierung gegen wiederholte Versuche
+  begrenzen und 429 testen;
+- SMTP-Laufzeit explizit zur Function-Konfiguration passend begrenzen;
+- gehäufte 401-, 429-, Captcha- und Delivery-Fehler ohne personenbezogene
+  Inhalte beobachtbar machen.
+
+**Abnahme:**
+
+- dokumentierter Entscheid zwischen WAF und Anwendungslimiter verhindert
+  doppelte, widersprüchliche Limits;
+- Tests prüfen Grenzwert, 429, Retry-Verhalten und getrennte Schlüssel;
+- legitime Einzelanfragen funktionieren weiter und Mail-Inhalte landen nie in
+  Rate-Limit-Logs;
+- Function-Laufzeit ist länger als interne Timeouts, aber bewusst begrenzt.
+
+### S4 – Security Headers und CSP
+
+**Status:** Plattform- und Datenschutzentscheidung nötig.
+
+- CSP zuerst als Report-Only einführen, danach erst erzwingen;
+- `frame-ancestors`, `nosniff`, Referrer- und Permissions-Policy ergänzen;
+- nur tatsächlich benötigte Ziele für Analytics und reCAPTCHA freigeben.
+
+**Abnahme:**
+
+- Header-Smoke prüft Hauptseite, Admin und API;
+- Report-Only-Phase zeigt keine unbeabsichtigt blockierten eigenen Ressourcen;
+- erzwungene CSP lässt App, reCAPTCHA und den in F2 definierten Consent-Ablauf
+  funktionieren;
+- erlaubte Drittanbieter und Zweck jeder Ausnahme sind dokumentiert.
+
+### X1 – Externen PHP-Proxy authentifizieren
+
+**Status:** koordinierte Entscheidung und manuelles Hosting-Deployment nötig.
+
+**Umfang:**
+
+- separates Secret in einem Request-Header, nie in URL oder Querystring;
+- generische Authfehler, hostseitiges Rate Limit und bestehende exakte
+  GamePro-Allowlist beibehalten;
+- Node-Fallback, GitHub Secret und PHP-Datei gemeinsam umstellen;
+- Versionsfingerprint aus O4 für die Deploy-Prüfung verwenden.
+
+**Abnahme:**
+
+- isolierte Verhaltenstests prüfen Methode, Allowlist, fehlendes/falsches
+  Secret, Größenlimit und Versionsheader;
+- kein Test kontaktiert den Production-Proxy oder schreibt den
+  Production-Cache;
+- Secrets erscheinen weder in Log, URL noch Fehlermeldung;
+- nach manueller Freigabe stimmt der produktive Fingerprint mit dem Repository
+  überein.
+
+### SC1 – Supply-Chain- und Workflow-Pflege
+
+**Umfang:**
+
+- GitHub Actions auf vollständige Commit-SHAs pinnen und lesbare
+  Versionskommentare behalten;
+- Dependabot für npm und GitHub Actions mit begrenzter Frequenz einrichten;
+- Major-Upgrades getrennt und weiterhin manuell prüfen;
+- explizites CI-Zeitlimit ergänzen.
+
+**Abnahme:**
+
+- Workflow-Syntax und kompletter CI-Lauf sind erfolgreich;
+- Dependabot-Konfiguration validiert und erzeugt keine automatischen
+  Production-Merges;
+- SHA-Kommentare lassen die verwendete Release-Version erkennen;
+- Update-Dokumentation verlangt weiterhin Tests, Typecheck und Build.
+
+---
+
+## Später – nur nach Messdaten oder konkretem Bedarf
+
+Diese Punkte sind sinnvoll, aber aktuell nicht ausreichend begründet:
+
+- ETag/`If-Modified-Since` für RSS-Feeds; Validatoren müssten über Läufe hinweg
+  konsistent gespeichert und 304-Antworten gegen vorhandenen Cache geprüft
+  werden;
+- Delta-, Cursor- oder Pagination-Endpunkt statt vollständigem 60-Tage-Cache
+  beim Auto-Update;
+- stärkere Feed-Parallelisierung;
+- Kompression oder Aufteilung des Full-Cache;
+- Bundle-Splitting und Lazy Loading;
+- Cross-Browser- und visuelle Regressionstests;
+- automatisches Deployment des externen PHP-Proxys;
+- Wechsel von Storage-Paketen oder Edge zu Node nur nach aktuellem
+  Provider-Audit, Preview-Test und dokumentiertem Migrationsgrund;
+- Basic Auth langfristig bestätigen oder nach eigener Produktentscheidung durch
+  eine Identitätslösung mit MFA ersetzen;
+- Aufteilung großer Dateien wie `App.tsx`, `SettingsModal.tsx`,
+  `ArticleCard.tsx` oder `scripts/fetch-feeds.js` nur entlang bereits getesteter
+  Verantwortlichkeiten.
+
+## Bewusst nicht geplant
+
+- kein kompletter Rewrite;
+- kein neues globales State-Management ohne konkreten Bedarf;
+- kein Verschieben der Tests aus `tests/`;
+- kein pauschales 100-Prozent-Coverage-Ziel;
+- keine öffentlichen Gratis-Proxies;
+- keine ungezügelte Parallelisierung oder längere pauschale Retries;
+- keine unterschiedlichen Abrufintervalle pro Feed: alle aktiven Feeds bleiben
+  beim gemeinsamen 20-Minuten-Lauf;
+- kein produktiver Schreibzugriff aus Preview-Deployments;
+- kein automatisches Major-Upgrade von Node, Vite oder anderen Kernpaketen.
+
+## Vorlage für die Übergabe eines Arbeitspakets
+
+```text
+Lies AGENTS.md und docs/development/roadmap.md vollständig.
+
+Bearbeite ausschließlich Arbeitspaket <ID und Titel>. Beginne keine weiteren
+Roadmap-Punkte. Prüfe zuerst den aktuellen Git-Stand und die bestehenden Tests.
+
+Setze die Abnahmekriterien vollständig um, ergänze gezielte Regressionstests
+unter tests/ und aktualisiere betroffene Dokumentation. Mache kleine deutsche
+Commits, vermische keine unabhängigen Refactorings und führe die Definition of
+Done aus. Führe keine externen Deployments, Secret-, GitHub- oder
+Vercel-Änderungen ohne ausdrückliche Freigabe durch.
+
+Berichte am Ende: Ausgangs- und End-Commit, geänderte Dateien, begründete
+Entscheidungen, Testergebnisse, verbleibende Risiken und manuelle Schritte.
+Nicht pushen, sofern das nicht ausdrücklich verlangt wurde.
+```

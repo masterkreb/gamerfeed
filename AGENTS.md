@@ -92,6 +92,10 @@
 ├── server/                 # Getestete Backend-Hilfslogik
 ├── shared/                 # Gemeinsame Frontend-/Backend-Verträge
 ├── tests/                  # Zentrale Tests nach Fachbereich und Testart
+├── docs/
+│   ├── deployment/        # Betriebs- und Domain-Anleitungen
+│   └── development/
+│       └── roadmap.md      # Priorisierte Arbeitspakete und Abnahmekriterien
 ├── tools/
 │   └── feed-proxy.php      # Manuell deployter externer Feed-Fallback
 │
@@ -365,3 +369,5 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 5. **Vercel KV** für serverseitige Daten
 6. Bei Fragen zur Architektur: README.md lesen
 7. Bei einem Domainwechsel: `docs/deployment/custom-domain.md` vollständig abarbeiten
+8. Bei Roadmap-Arbeit `docs/development/roadmap.md` lesen und nur ein ausdrücklich beauftragtes Arbeitspaket bearbeiten; ausdrücklich beauftragte Hotfixes außerhalb der Roadmap bleiben möglich und werden danach eingeordnet
+9. Die Roadmap erlaubt keine ungefragten externen Deployments, Secret- oder Plattformänderungen
