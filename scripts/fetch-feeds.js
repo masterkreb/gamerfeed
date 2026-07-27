@@ -69,17 +69,32 @@ function getFetchUrlForFeed(feed) {
     return feed.url;
 }
 
+// Complete header set of a Chrome navigation request. Bot protection (e.g. Cloudflare
+// on gamepro.de) scores incomplete or inconsistent header sets as bot traffic, so the
+// User-Agent, the sec-ch-ua brands and the sec-fetch-* set must stay in sync when the
+// Chrome version here is refreshed.
+const BROWSER_LIKE_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
+    // Deliberately without zstd: undici cannot decode it, Chrome offers it.
+    'Accept-Encoding': 'gzip, deflate, br',
+    'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Upgrade-Insecure-Requests': '1',
+};
+
 export async function getOgImageFromUrl(url, sourceName) {
-    const browserLikeHeaders = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
-    };
     const fetchAttempts = [
         {
             name: 'direct',
             requestUrl: url,
-            options: { headers: browserLikeHeaders },
+            options: { headers: BROWSER_LIKE_HEADERS },
         },
         {
             name: 'api.allorigins.win',
@@ -827,7 +842,7 @@ async function main() {
 
             // Attempt 1: Direct fetch
             try {
-                const response = await fetch(feedUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'application/rss+xml, application/xml, text/xml', 'Accept-Language': 'en-US,en;q=0.9,de-DE;q=0.8,de;q=0.7' }, signal: AbortSignal.timeout(8000) });
+                const response = await fetch(feedUrl, { headers: BROWSER_LIKE_HEADERS, signal: AbortSignal.timeout(8000) });
                 if (response.ok) {
                     const text = await response.text();
                     if (text && text.trim().startsWith('<')) {
