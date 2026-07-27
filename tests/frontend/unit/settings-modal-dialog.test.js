@@ -429,23 +429,80 @@ test('bleibt während eines laufenden Versands schließbar und danach konsistent
     }
 });
 
+test('sendet nur einmal, wenn zwei Submits im selben Batch ausgelöst werden', async () => {
+    let executeCalls = 0;
+    const fetchCalls = [];
+    let releaseFetch;
+    const testRoot = await createReactTestRoot({
+        fetch: async (url, options) => {
+            fetchCalls.push({ options, url: String(url) });
+            return new Promise(resolve => { releaseFetch = resolve; });
+        },
+    });
+
+    try {
+        const trigger = await renderSettingsModal(testRoot, {
+            grecaptcha: {
+                ready: callback => callback(),
+                execute: async () => {
+                    executeCalls += 1;
+                    return 'test-token';
+                },
+            },
+        });
+        trigger.focus();
+        await act(async () => {
+            click(testRoot.window, trigger);
+        });
+
+        const dialog = getDialog(testRoot);
+        await openContactTabAndFill(testRoot, dialog);
+
+        // Beide Ereignisse laufen synchron im selben Batch: der React-State steht
+        // dabei noch auf 'idle', ein Guard daraus wuerde beide durchlassen.
+        const form = dialog.querySelector('form');
+        await act(async () => {
+            form.dispatchEvent(new testRoot.window.Event('submit', { bubbles: true, cancelable: true }));
+            form.dispatchEvent(new testRoot.window.Event('submit', { bubbles: true, cancelable: true }));
+        });
+
+        assert.equal(executeCalls, 1, 'grecaptcha.execute wurde mehrfach aufgerufen');
+        assert.equal(fetchCalls.length, 1, 'Versand wurde mehrfach ausgeloest');
+
+        await act(async () => {
+            releaseFetch({ ok: true });
+        });
+        assert.equal(fetchCalls.length, 1);
+    } finally {
+        await testRoot.cleanup();
+    }
+});
+
 test('entsperrt das Formular nach einem reCAPTCHA-Timeout', async () => {
-    let fetchCalled = false;
+    let fetchCalls = 0;
     const testRoot = await createReactTestRoot({
         fetch: async () => {
-            fetchCalled = true;
+            fetchCalls += 1;
             return { ok: true };
         },
     });
     const timers = createManualTimers();
+    let executeCalls = 0;
 
     try {
         const trigger = await renderSettingsModal(testRoot, {
             timers,
-            // execute() antwortet nie - ohne Zeitgrenze bliebe der Sendezustand bestehen.
+            // Der erste Versuch antwortet nie - ohne Zeitgrenze bliebe der
+            // Sendezustand bestehen. Der zweite belegt, dass danach wieder
+            // gesendet werden kann.
             grecaptcha: {
                 ready: callback => callback(),
-                execute: () => new Promise(() => {}),
+                execute: () => {
+                    executeCalls += 1;
+                    return executeCalls === 1
+                        ? new Promise(() => {})
+                        : Promise.resolve('test-token');
+                },
             },
         });
         trigger.focus();
@@ -469,7 +526,13 @@ test('entsperrt das Formular nach einem reCAPTCHA-Timeout', async () => {
         assert.notEqual(alert, null, 'Fehler wurde nicht als role="alert" angekuendigt');
         assert.equal(getSubmitButton(dialog).disabled, false, 'Formular blieb gesperrt');
         assert.equal(dialog.querySelector('form').getAttribute('aria-busy'), 'false');
-        assert.equal(fetchCalled, false, 'Versand trotz fehlendem Token');
+        assert.equal(fetchCalls, 0, 'Versand trotz fehlendem Token');
+
+        // Das Latch muss freigegeben sein, sonst bliebe ein spaeterer Versuch
+        // dauerhaft wirkungslos.
+        await submitContactForm(testRoot, dialog);
+        assert.equal(executeCalls, 2, 'zweiter Versuch wurde vom Latch blockiert');
+        assert.equal(fetchCalls, 1, 'zweiter Versuch hat nicht gesendet');
     } finally {
         await testRoot.cleanup();
     }

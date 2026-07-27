@@ -238,6 +238,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const [contactFormData, setContactFormData] = useState({ name: '', email: '', subject: '', message: '' });
     const [contactStatus, setContactStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const contactStatusResetTimeoutRef = useRef<number | null>(null);
+    const isSubmittingContactRef = useRef(false);
 
     useEffect(() => () => {
         if (contactStatusResetTimeoutRef.current !== null) {
@@ -289,18 +290,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const handleContactSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Verhindert eine zweite Uebermittlung, falls das Formular waehrend eines
-        // laufenden Versands erneut abgeschickt wird.
-        if (isSendingContact) return;
-
-        if (contactStatusResetTimeoutRef.current !== null) {
-            window.clearTimeout(contactStatusResetTimeoutRef.current);
-            contactStatusResetTimeoutRef.current = null;
-        }
-
-        setContactStatus('loading');
+        // Synchrones Latch statt eines Guards aus dem React-State: contactStatus
+        // steht erst beim naechsten Rendern zur Verfuegung, zwei im selben Batch
+        // ausgeloeste Submits saehen beide noch 'idle' und liefen beide durch.
+        if (isSubmittingContactRef.current) return;
+        isSubmittingContactRef.current = true;
 
         try {
+            if (contactStatusResetTimeoutRef.current !== null) {
+                window.clearTimeout(contactStatusResetTimeoutRef.current);
+                contactStatusResetTimeoutRef.current = null;
+            }
+
+            setContactStatus('loading');
+
             const normalizedContact = {
                 name: contactFormData.name.trim(),
                 email: contactFormData.email.trim(),
@@ -341,6 +344,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             }
         } catch {
             setContactStatus('error');
+        } finally {
+            // Greift auf jedem Weg: Validierungsfehler, reCAPTCHA-Fehler oder
+            // -Zeitgrenze, HTTP-Fehler und Erfolg.
+            isSubmittingContactRef.current = false;
         }
     };
 
