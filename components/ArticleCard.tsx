@@ -370,6 +370,9 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
     // Ohne href ist die Karte nicht anklickbar, statt einen unsicheren Link
     // auszugeben.
     const safeLink = normalizeContentUrl(article.link) ?? undefined;
+    // Auch Bildadressen aus aelteren Cache-Eintraegen sind ungeprueft. Ohne src
+    // bleibt der Alternativtext stehen, statt eine unzulaessige Adresse zu laden.
+    const safeImageUrl = normalizeContentUrl(article.imageUrl) ?? undefined;
 
     const cardBaseClasses = "bg-white dark:bg-zinc-800 rounded-xl shadow-md hover:shadow-xl border border-slate-200 dark:border-zinc-700";
 
@@ -398,7 +401,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
         return (
             <a ref={ref as React.ForwardedRef<HTMLAnchorElement>} href={safeLink} target="_blank" rel="noopener noreferrer" className={`group ${cardBaseClasses} flex flex-col relative ${allowCardOverflow ? '!overflow-visible z-30' : 'overflow-hidden'} transition-shadow duration-300`}>
                 <div className="relative overflow-hidden rounded-t-xl backface-hidden will-change-transform">
-                    <img src={article.imageUrl} alt={article.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500 transform-gpu" loading="lazy" decoding="async" />
+                    <img src={safeImageUrl} alt={article.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500 transform-gpu" loading="lazy" decoding="async" />
                     <div className="absolute top-3 left-3">
                         <LanguageTag language={article.language} />
                     </div>
@@ -447,7 +450,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
             >
                 <div className="relative w-full md:w-1/4 lg:w-1/5 h-44 flex-shrink-0 rounded-t-xl md:rounded-l-xl md:rounded-r-none overflow-hidden backface-hidden will-change-transform">
                     <img
-                        src={article.imageUrl}
+                        src={safeImageUrl}
                         alt={article.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 transform-gpu"
                         loading="lazy"

@@ -47,6 +47,31 @@ stellvertretend über den PHP-Proxy abgerufen.
 Host oder unter `localhost` würde abgelehnt – für eine lokale Erprobung ist das
 ein bewusster Nebeneffekt, kein Fehler.
 
+## Ausgabe-Policy für Inhalts-URLs
+
+Artikel- und Bildadressen stammen aus fremden RSS-Inhalten und werden zusätzlich
+zur Outbound-Prüfung normalisiert. `normalizeContentUrl` aus
+`shared/url-policy.js` liefert entweder eine absolute, geprüfte Adresse oder
+`null`. Relative Angaben werden nur gegen eine übergebene Basis aufgelöst:
+Artikel-Links gegen die Feed-Adresse, Bildadressen gegen den Artikel-Link.
+
+Dieselbe Funktion gilt an allen vier Stellen, damit die Regel nicht mehrfach
+gepflegt werden muss:
+
+| Ort | Verhalten bei Ablehnung |
+|---|---|
+| Feed-Ingest (`parseRssXml`) | Artikel wird übersprungen; abgelehntes Bild lässt den Artikel bestehen |
+| OG-Scraping | gescrapte Adresse wird verworfen |
+| Artikelkarte (SPA) | Karte bleibt sichtbar, aber ohne `href` und ohne `src` |
+| `/gaming-news` | Eintrag wird als `div` statt als Anker ausgegeben |
+
+Verworfene Elemente werden am Ende eines Feeds gebündelt nach Grund gemeldet.
+Ein einzelnes ungültiges Element beschädigt weder den Cache noch den restlichen
+Feed.
+
+Die Prüfung an den Ausgabestellen ist bewusst redundant zum Ingest: Ältere
+Cache-Einträge stammen aus der Zeit davor, und dem Cache wird nicht vertraut.
+
 ## Bekannte Grenze: DNS-Rebinding
 
 **Diese Umsetzung schließt DNS-Rebinding nicht aus.**
