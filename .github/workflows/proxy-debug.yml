@@ -1,7 +1,8 @@
 name: Feed-Proxy Diagnose
 
-# Einmalige Fehlersuche: klaert, wer den Actions-Runnern beim Feed-Proxy
-# antwortet und mit welchem Status. Laeuft nur manuell und schreibt nichts.
+# Einmalige Fehlersuche: openresty weist Anfragen der Actions-Runner mit 415 ab,
+# bevor PHP laeuft. Diese Sonde klaert, ob die IP-Kategorie oder das
+# Anfragemuster (Ziel-URL als Query-Parameter) blockiert wird.
 # Nach der Diagnose wieder entfernen.
 
 on:
@@ -16,7 +17,7 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: Proxy vom Runner aus abrufen
+      - name: Anfragemuster gegen den Proxy-Host testen
         env:
           FEED_PROXY_URL: ${{ secrets.FEED_PROXY_URL }}
         run: |
@@ -25,21 +26,28 @@ jobs:
             exit 1
           fi
 
+          base="${FEED_PROXY_URL%/*}"
           feed="https%3A%2F%2Fwww.gamepro.de%2Frss%2Fgamepro.rss"
 
-          # Die URL selbst wird bewusst nicht ausgegeben.
-          echo "--- Antwort-Header ---"
-          curl -s -D - -o /tmp/body.out --max-time 25 "$FEED_PROXY_URL?url=$feed" \
-            | sed 's/^/    /'
+          # Gibt nur Beschriftung und Status aus, nie die URL selbst.
+          probe() {
+            printf '    %-46s ' "$1"
+            curl -s -o /dev/null -w 'status=%{http_code}\n' --max-time 25 "$2"
+          }
 
-          echo "--- Erste 400 Zeichen des Rumpfs ---"
-          head -c 400 /tmp/body.out
-          echo
+          echo "--- Statische Datei im selben Ordner ---"
+          probe "index.html (kein PHP, keine Query)" "$base/index.html"
 
-          echo "--- Vergleich: Runner direkt zu GamePro ---"
-          curl -s -o /dev/null -w "    status=%{http_code}\n" --max-time 25 \
-            "https://www.gamepro.de/rss/gamepro.rss"
+          echo "--- PHP ohne Query ---"
+          probe "feed-proxy.php ohne Parameter" "$FEED_PROXY_URL"
 
-          echo "--- Vergleich: nur Kopfzeilen des Proxys (HEAD) ---"
-          curl -s -I -o /dev/null -w "    status=%{http_code}\n" --max-time 25 \
-            "$FEED_PROXY_URL?url=$feed"
+          echo "--- PHP mit harmloser Query ---"
+          probe "?feed=gamepro" "$FEED_PROXY_URL?feed=gamepro"
+          probe "?url=gamepro (kein http)" "$FEED_PROXY_URL?url=gamepro"
+
+          echo "--- PHP mit URL als Parameter ---"
+          probe "?url=<encoded https://...>" "$FEED_PROXY_URL?url=$feed"
+          probe "?url=<unencoded https://...>" "$FEED_PROXY_URL?url=https://www.gamepro.de/rss/gamepro.rss"
+
+          echo "--- Andere Seite auf demselben Hosting ---"
+          probe "Startseite der Domain" "${base%/*}/"
