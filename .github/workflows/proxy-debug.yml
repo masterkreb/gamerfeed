@@ -1,0 +1,45 @@
+name: Feed-Proxy Diagnose
+
+# Einmalige Fehlersuche: klaert, wer den Actions-Runnern beim Feed-Proxy
+# antwortet und mit welchem Status. Laeuft nur manuell und schreibt nichts.
+# Nach der Diagnose wieder entfernen.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Proxy vom Runner aus abrufen
+        env:
+          FEED_PROXY_URL: ${{ secrets.FEED_PROXY_URL }}
+        run: |
+          if [ -z "$FEED_PROXY_URL" ]; then
+            echo "FEED_PROXY_URL ist nicht gesetzt."
+            exit 1
+          fi
+
+          feed="https%3A%2F%2Fwww.gamepro.de%2Frss%2Fgamepro.rss"
+
+          # Die URL selbst wird bewusst nicht ausgegeben.
+          echo "--- Antwort-Header ---"
+          curl -s -D - -o /tmp/body.out --max-time 25 "$FEED_PROXY_URL?url=$feed" \
+            | sed 's/^/    /'
+
+          echo "--- Erste 400 Zeichen des Rumpfs ---"
+          head -c 400 /tmp/body.out
+          echo
+
+          echo "--- Vergleich: Runner direkt zu GamePro ---"
+          curl -s -o /dev/null -w "    status=%{http_code}\n" --max-time 25 \
+            "https://www.gamepro.de/rss/gamepro.rss"
+
+          echo "--- Vergleich: nur Kopfzeilen des Proxys (HEAD) ---"
+          curl -s -I -o /dev/null -w "    status=%{http_code}\n" --max-time 25 \
+            "$FEED_PROXY_URL?url=$feed"
