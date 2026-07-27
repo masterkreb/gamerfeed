@@ -7,6 +7,8 @@ import { DOMParser } from 'linkedom';
 import { escape } from 'html-escaper';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { normalizeContentUrl } from '../shared/url-policy.js';
+import { fetchWithOutboundPolicy } from './outbound-policy.js';
 import {
     chooseMergedImageUrl,
     hasUsableStoredImage,
@@ -74,7 +76,7 @@ function getFetchUrlForFeed(feed) {
     return feed.url;
 }
 
-export async function getOgImageFromUrl(url, sourceName) {
+export async function getOgImageFromUrl(url, sourceName, { lookup } = {}) {
     const fetchAttempts = [
         {
             name: 'direct',
@@ -88,8 +90,11 @@ export async function getOgImageFromUrl(url, sourceName) {
         const attemptStart = Date.now();
         try {
             console.log(`      -> Trying image fetch: ${attempt.name}`);
-            const response = await fetch(attempt.requestUrl, {
+            // Artikelseiten stammen aus Feed-Inhalten und sind damit fremde
+            // Eingaben: derselbe Schutz wie beim Feed-Abruf selbst.
+            const response = await fetchWithOutboundPolicy(attempt.requestUrl, {
                 ...attempt.options,
+                lookup,
                 signal: AbortSignal.timeout(5000),
             });
             const attemptDuration = Date.now() - attemptStart;
@@ -120,11 +125,8 @@ export async function getOgImageFromUrl(url, sourceName) {
 
             if (imageUrl) {
                 console.log(`         ✅ Found meta image via ${attempt.name} in ${formatDuration(Date.now() - scrapeStart)}`);
-                try {
-                    return new URL(imageUrl, url).href;
-                } catch {
-                    return imageUrl;
-                }
+                // Auch gescrapte Adressen unterliegen der Ausgabe-Policy.
+                return normalizeContentUrl(imageUrl, { base: url });
             }
 
             // Fallback: If no valid og:image, look for YouTube iframe in body
@@ -191,6 +193,9 @@ export function parseRssXml(xmlString, feed) {
     }
 
     const articles = [];
+    // Abgelehnte Items werden gesammelt und einmal gebuendelt gemeldet, statt
+    // pro Item eine Zeile ins Log zu schreiben.
+    const skippedItems = [];
     const isAtom = getElementLocalName(doc.documentElement) === 'feed';
     const itemNodes = getElementsByLocalName(doc, isAtom ? 'entry' : 'item');
 
@@ -213,6 +218,17 @@ export function parseRssXml(xmlString, feed) {
         const pubDate = getText(isAtom ? 'published' : 'pubDate') || getText('updated');
 
         if (!title || !link || !pubDate) return;
+
+        // Ausgabe-Policy: relative Angaben werden gegen die Feed-Adresse
+        // aufgeloest, alles andere als http/https und URLs mit Zugangsdaten
+        // fallen weg. Ein solches Item wird isoliert uebersprungen, damit es
+        // weder den Cache noch den restlichen Feed beschaedigt.
+        const normalizedLink = normalizeContentUrl(link, { base: feed?.url });
+        if (!normalizedLink) {
+            skippedItems.push({ reason: 'invalid_link', title, value: link });
+            return;
+        }
+        link = normalizedLink;
 
         const description = getFirstElementByLocalName(node, 'description')?.textContent
             || getFirstElementByLocalName(node, 'summary')?.textContent
@@ -327,10 +343,15 @@ export function parseRssXml(xmlString, feed) {
         }
 
         let finalImageUrl = null;
-        if (imageUrl && !isKnownNonArticleImageUrl(imageUrl, feed)) {
+        // Dieselbe Ausgabe-Policy wie beim Artikel-Link. Ein abgelehntes Bild
+        // laesst den Artikel bestehen; er bekommt spaeter einen Platzhalter.
+        const normalizedImageUrl = normalizeContentUrl(imageUrl, { base: link });
+        if (imageUrl && !normalizedImageUrl) {
+            skippedItems.push({ reason: 'invalid_image', title, value: imageUrl });
+        }
+        if (normalizedImageUrl && !isKnownNonArticleImageUrl(normalizedImageUrl, feed)) {
             try {
-                // Start with a valid, absolute URL
-                let processedUrl = new URL(imageUrl, link).href;
+                let processedUrl = normalizedImageUrl;
 
                 // Source-specific optimizations
                 const hostname = new URL(processedUrl).hostname;
@@ -362,12 +383,10 @@ export function parseRssXml(xmlString, feed) {
                 finalImageUrl = processedUrl;
 
             } catch (e) {
-                try {
-                    finalImageUrl = new URL(imageUrl, link).href;
-                } catch {
-                    finalImageUrl = imageUrl;
-                }
-                console.warn(`Could not process image URL '${imageUrl}': ${e.message}`);
+                // Die quellenspezifische Optimierung ist fehlgeschlagen; die
+                // bereits normalisierte Adresse bleibt gueltig.
+                finalImageUrl = normalizedImageUrl;
+                console.warn(`Could not process image URL '${normalizedImageUrl}': ${e.message}`);
             }
         }
 
@@ -384,6 +403,15 @@ export function parseRssXml(xmlString, feed) {
             language: feed.language
         });
     });
+
+    if (skippedItems.length > 0) {
+        const reasons = skippedItems.reduce((counts, item) => {
+            counts[item.reason] = (counts[item.reason] ?? 0) + 1;
+            return counts;
+        }, {});
+        const summary = Object.entries(reasons).map(([reason, count]) => `${reason}: ${count}`).join(', ');
+        console.warn(`   ⚠️  ${skippedItems.length} Element(e) aus ${feed?.name ?? 'Feed'} verworfen (${summary})`);
+    }
 
     return articles;
 }
