@@ -17,7 +17,8 @@
 | Bereich | Technologie |
 |---------|-------------|
 | Frontend | React 19, TypeScript (Strict Mode), Tailwind CSS v4 |
-| Build | Vite 8 (Rolldown) |
+| Build | Vite 8.1.5 (Rolldown), `build.rolldownOptions` in `vite.config.ts` |
+| Laufzeit | Node.js 24.x (bewusst fixiert, auch im Workflow) |
 | Styling | Tailwind CSS v4 (lokal, NICHT CDN) mit `@tailwindcss/postcss` |
 | i18n | i18next (DE/EN) |
 | Backend | Vercel Serverless Functions |
@@ -53,7 +54,7 @@
 │   ├── Header.tsx          # Navigation, Theme, Refresh, Language
 │   ├── FilterBar.tsx       # Such- und Filteroptionen
 │   ├── ArticleCard.tsx     # Einzelne Artikel-Darstellung
-│   ├── SettingsModal.tsx   # Quellen stummschalten
+│   ├── SettingsModal.tsx   # Vier Reiter: Quellen, Rechtliches, Über uns, Kontakt
 │   ├── LanguageSwitcher.tsx
 │   ├── ScrollToTopButton.tsx
 │   ├── TrendsView.tsx      # KI-Trend-Anzeige
@@ -76,7 +77,7 @@
 │   └── FilterContext.tsx   # Filter-State (React Context)
 │
 ├── hooks/
-│   ├── useDialogFocus.ts   # Fokusfalle und Escape-Handling für Dialoge
+│   ├── useDialogFocus.ts   # Fokusfalle, Escape, Fokus-Rückgabe für Dialoge
 │   ├── useFeeds.ts         # Feed-Daten fetchen
 │   └── useLocalStorage.ts  # localStorage Hook
 │
@@ -85,7 +86,8 @@
 │
 ├── scripts/
 │   ├── fetch-feeds.js      # Cron-Job Script (GitHub Actions)
-│   └── feed-fetch-utils.js # Getesteter Feed-Abruf mit Retry/Proxy-Fallback
+│   ├── feed-fetch-utils.js # Getesteter Feed-Abruf mit Retry/Proxy-Fallback
+│   └── feed-image-utils.js # Bildauswahl und -validierung für Artikel
 │
 ├── server/                 # Getestete Backend-Hilfslogik
 ├── shared/                 # Gemeinsame Frontend-/Backend-Verträge
@@ -116,9 +118,61 @@
 - ✅ Auto-Update alle 5 Min mit Badge + Tab-Titel
 - ✅ Toast-Benachrichtigungen (Swipe-to-Dismiss: links/hoch)
 - ✅ Scroll-to-Top Button
-- ✅ ESC schließt Modals
 - ✅ Focus-Ring nur bei Tastatur-Navigation
 - ✅ Ankündigungs-Banner (vom Admin gesteuert)
+- ✅ Kontaktformular im Einstellungsdialog (Gmail SMTP + reCAPTCHA v3)
+
+### Einstellungsdialog (`SettingsModal`)
+
+Vier Reiter in einem einzigen Dialog:
+
+| Reiter | Inhalt |
+|--------|--------|
+| Quellen | Quellen stummschalten, gruppiert nach Sprache, mit Sammelauswahl je Sprache |
+| Rechtliches | Impressum und Datenschutzerklärung |
+| Über uns | Projektbeschreibung, Funktionen, Technik |
+| Kontakt | Kontaktformular |
+
+Wichtige Eigenschaften:
+
+- Die Komponente bleibt in `App.tsx` dauerhaft gemountet und rendert bei
+  `isOpen=false` nur `null`. Der Formularzustand überlebt das Schließen.
+- Alle vier Tabpanels werden gerendert; inaktive tragen `hidden`. So zeigt
+  `aria-controls` nie auf eine fehlende ID, und `useDialogFocus` blendet sie
+  über den `[hidden]`-Filter aus der Fokusfalle aus.
+- Der Dialog ist **jederzeit** schließbar, auch während eines laufenden
+  Kontakt-Versands. Ein Sperren würde den Benutzer bei einer hängenden Anfrage
+  festhalten.
+
+### Barrierefreiheit von Dialogen
+
+`hooks/useDialogFocus.ts` ist die gemeinsame Grundlage für Admin-Formulardialog,
+Admin-Löschdialog, mobilen Filterdialog und `SettingsModal`. Er liefert
+Fokusfalle, initialen Fokus, Escape-Behandlung, Fokus-Rückgabe an das auslösende
+Element und optional `canClose` zum Blockieren während laufender Aktionen.
+
+Die Reiter im Einstellungsdialog sind vollwertige ARIA-Tabs: `role="tablist"`,
+`role="tab"`, `aria-selected`, `aria-controls`, `role="tabpanel"`,
+`aria-labelledby`, roving `tabIndex` sowie Pfeiltasten mit Umlauf, Home und End.
+Die textlastigen Reiter „Rechtliches" und „Über uns" haben `tabIndex={0}`, damit
+sie ohne Bedienelemente per Tastatur erreichbar und scrollbar sind.
+
+### Kontaktformular
+
+Integriert im Reiter „Kontakt" von `SettingsModal`, Gegenstelle ist
+`api/contact.ts` (bewusst eine Node.js Function, weil Nodemailer nicht auf Edge
+läuft).
+
+- Gemeinsamer Vertrag in `shared/contact-contract.js` (Feldlängen, reCAPTCHA-Action)
+- reCAPTCHA v3 wird erst beim Aktivieren des Reiters nachgeladen
+- `grecaptcha.execute()` hat eine eigene Zeitgrenze; der Versand selbst
+  **nicht** – eine clientseitige Grenze könnte kürzer sein als die erlaubte
+  Serverlaufzeit und einen Fehler anzeigen, obwohl die Mail zugestellt wird
+- Ein Wiedereintritts-Guard verhindert doppelte Übermittlung
+- Erfolg wird über `role="status"` / `aria-live="polite"` angekündigt, Fehler
+  über `role="alert"`, der Sendezustand über `aria-busy` am Formular
+- Serverseitig: Pflichtfeld- und Längenprüfung, E-Mail-Validierung, Schutz vor
+  Steuerzeichen und Header-Injection, keine Formulardaten in Logs
 
 ### Backend
 - ✅ Vercel KV Cache (news_cache, news_cache_16, news_cache_64)
@@ -168,21 +222,96 @@
 
 ---
 
+## 🔐 Sicherheit von Admin und Kontakt
+
+Die Admin-Absicherung liegt zentral in `server/admin-auth.js`.
+
+- `middleware.js` schützt `/admin.html` per Basic Authentication
+- Die Admin-APIs prüfen die Authentifizierung **zusätzlich selbst** und
+  verlassen sich nicht auf die Middleware
+- `api/feeds` und `api/get-health-data` sind vollständig geschützt;
+  `api/announcement` erlaubt öffentliches GET, aber geschützte Mutationen
+- Mutationen verlangen zusätzlich eine exakt übereinstimmende Origin (CSRF)
+- Fehlende `ADMIN_USERNAME`/`ADMIN_PASSWORD` führen zu 503 – es gibt keine
+  Standardzugangsdaten
+- `ADMIN_USERNAME` darf keinen Doppelpunkt enthalten, das Passwort schon
+
+Das Kontaktformular prüft serverseitig Typen, Pflichtfelder, Feldlängen und
+E-Mail-Format, schützt vor Steuerzeichen und Header-Injection und schreibt keine
+Formulardaten oder Adressen in Logs. reCAPTCHA v3 wird gegen `success`, Score
+≥ 0.5, die Action `contact_form` und optional erlaubte Hostnamen geprüft.
+
+## 🔌 Feed-Proxy
+
+Einzelne Quellen – aktuell GamePro – beantworten Anfragen aus dem
+GitHub-Actions-Netz mit HTTP 403. Für diese Fälle gibt es `tools/feed-proxy.php`
+auf einem externen Webhosting.
+
+- **Wird nicht von Vercel deployt.** Nach jeder Änderung an der Datei muss sie
+  manuell auf das Hosting hochgeladen werden
+- Die Adresse steht im GitHub-Actions-Secret `FEED_PROXY_URL`, nicht bei Vercel
+- Der Proxy akzeptiert nur GET, vergleicht die Ziel-URL exakt gegen eine
+  Allowlist, folgt keinen Redirects, erlaubt nur HTTPS und begrenzt die Antwort
+- `FEED_PROXY_URL` verbirgt nur die Adresse und ist **kein** Authentifizierungs-Token
+- Ohne das Secret läuft der Cron-Job weiter, nur ohne Fallback
+- Betrieb und Grenzen: `docs/deployment/feed-proxy.md`
+
+Der Hosting-Edge weist Anfragen sporadisch mit 415 ab, bevor PHP läuft. Da das
+Skript diesen Status nie selbst erzeugt, behandelt `scripts/feed-fetch-utils.js`
+415 **nur auf dem Proxy-Weg** als vorübergehend und wiederholt die Anfrage.
+
+---
+
 ## 🔧 Häufige Befehle
 
 ```bash
 # Development
 npm run dev
 
+# Alle Tests (zentral unter tests/)
+npm test
+
+# Nur die Feed-Tests des Cron-Jobs
+npm run test:feeds
+
+# TypeScript prüfen
+npm run typecheck
+
 # Production Build
 npm run build
 
-# Manueller Cache-Update (lokal)
+# Manueller Cache-Update (lokal) - schreibt in die konfigurierte KV/DB,
+# also kein harmloser Testlauf
 node scripts/fetch-feeds.js
-
-# Type Check
-npx tsc --noEmit
 ```
+
+Nach jedem Arbeitsblock mindestens `npm test`, `npm run typecheck`,
+`npm run build` und `git diff --check` ausführen.
+
+## 🧪 Tests und CI
+
+Alle Tests liegen zentral unter `tests/`, nie neben den Produktivdateien:
+
+```text
+tests/
+├── feeds/{unit,integration}
+├── frontend/{unit,helpers}
+└── server/unit
+```
+
+Grundlage sind `node:test`, `node:assert`, Linkedom und React über Vite SSR.
+Eine Browser-E2E-Suite gibt es bewusst nicht.
+
+`.github/workflows/ci.yml` läuft bei Push auf `main`, bei Pull Requests und
+manuell, in dieser Reihenfolge: `npm ci`, `php -l tools/feed-proxy.php`,
+`npm test`, `npm run typecheck`, `npm run build`. Die lokale Windows-Umgebung
+hat keine PHP-CLI; der Syntaxcheck läuft nur in CI.
+
+**Bekannte Eigenheit des Frontend-Harness:** React ermittelt beim ersten Import
+von `react-dom` einmalig über `'oninput' in document`, ob native Input-Events
+unterstützt werden. Linkedom definiert die Eigenschaft nicht, weshalb
+`tests/frontend/helpers/react-test-root.js` sie vorher setzt. Ohne diese Zeile
+wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 
 ---
 
@@ -215,6 +344,12 @@ npx tsc --noEmit
 - **Nov 2025:** Toast Swipe-to-Dismiss (links + hoch)
 - **Nov 2025:** Auto-Update mit Badge + Tab-Titel
 - **Dez 2025:** Artikel-Retention auf 60 Tage reduziert + Max 10.000 Artikel (Vercel KV 10MB Limit)
+- **Juli 2026:** News-Cache-Endpunkte auf gemeinsame Logik in `server/news-cache-handler.ts` vereinheitlicht
+- **Juli 2026:** Feed-Verwaltung über `services/feeds-api.ts` und `hooks/useFeeds.ts` mit sichtbaren Fehlerzuständen
+- **Juli 2026:** Dialoge auf `useDialogFocus` vereinheitlicht (Admin-Dialoge, mobiler Filter, Einstellungen)
+- **Juli 2026:** GamePro liefert an GitHub Actions HTTP 403; tote öffentliche Proxies entfernt, eigener PHP-Proxy als Fallback eingeführt
+- **Juli 2026:** Feed-Abruf nach `scripts/feed-fetch-utils.js` extrahiert – Wiederholungen, Größenbegrenzung, Feed-Validierung, getrennte Direkt- und Proxy-Fehler
+- **Juli 2026:** Einstellungsdialog mit echten ARIA-Tabs, angekündigten Formularmeldungen und jederzeit möglichem Schließen
 
 ---
 

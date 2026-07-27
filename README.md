@@ -7,7 +7,7 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
 ## ✨ Hauptfunktionen
 
 - **Umfassende Nachrichten-Aggregation**: Sammelt Artikel aus einer Vielzahl von RSS-Feeds.
-- **Moderne Benutzeroberfläche**: Ein sauberes, responsives Design, gebaut mit React und Tailwind CSS (lokal gebaut, keine CDN-Abhängigkeit).
+- **Moderne Benutzeroberfläche**: Ein sauberes, responsives Design, gebaut mit React und Tailwind CSS (lokal gebaut, keine CDN-Abhängigkeit im App-Bundle).
 - **⚡ Blitzschnelles Progressive Loading**: 3-stufiges Laden der Artikel für sofortige Anzeige (16 → 64 → alle Artikel).
 - **🔄 Auto-Update mit Live-Benachrichtigungen**: 
     - Automatische Prüfung auf neue Artikel alle 5 Minuten
@@ -28,7 +28,12 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
     - Volltextsuche in Titeln und Zusammenfassungen.
 - **Automatische Aktualisierung**: Ein GitHub-Action-Workflow aktualisiert den News-Cache alle 20 Minuten, sodass die angezeigten Nachrichten immer aktuell sind.
 - **🤖 KI-gestützte Trend-Analyse**: Automatische Erkennung aktueller Gaming-Trends mit Groq AI (tägliche und wöchentliche Trends). Intelligente Deduplizierung von Artikeln gleicher Verlagsgruppen für akkuratere Trend-Berechnung.
-- **♿ Barrierefreiheit**: Focus-Ring nur bei Tastatur-Navigation sichtbar (nicht bei Mausklicks).
+- **✉️ Kontaktformular**: In den Einstellungen integriert, versendet über Gmail SMTP und ist mit reCAPTCHA v3 gegen automatisierte Zusendungen abgesichert. Server- und clientseitige Prüfung von Pflichtfeldern, Feldlängen und E-Mail-Format.
+- **♿ Barrierefreiheit**:
+    - Focus-Ring nur bei Tastatur-Navigation sichtbar (nicht bei Mausklicks).
+    - Alle Dialoge halten den Fokus fest, schließen mit Escape und geben den Fokus an den auslösenden Knopf zurück.
+    - Die Reiter der Einstellungen sind echte ARIA-Tabs mit Pfeiltasten-, Home- und End-Navigation.
+    - Erfolgs- und Fehlermeldungen des Kontaktformulars werden Screenreadern angekündigt.
 - **Admin-Panel**: Ein passwortgeschütztes Admin-Panel zur einfachen Verwaltung der Feed-Quellen, Überwachung ihres Status und Veröffentlichung von Ankündigungen.
 - **📢 Ankündigungs-Banner**: Admins können wichtige Nachrichten (Info, Warnung, Wartung, Feier) als Banner für alle Benutzer anzeigen. Benutzer können Banner schließen (wird im localStorage gespeichert).
 
@@ -226,7 +231,7 @@ npm run build
 Dies erstellt einen optimierten Production-Build im `dist/`-Ordner:
 - **Tailwind CSS**: Nur genutzte Klassen werden inkludiert (~65KB statt ~300KB CDN)
 - **JavaScript**: Minifiziert und tree-shaked
-- **Keine externe Abhängigkeiten**: Alles wird lokal gebündelt
+- **Keine CDN-Abhängigkeiten für das App-Bundle**: Alle Bibliotheken werden lokal gebündelt. Zur Laufzeit werden weiterhin externe Dienste angesprochen: reCAPTCHA v3 lädt sein Skript von Google nach, dazu kommen die Backend-Dienste (Vercel KV, Neon PostgreSQL, Groq, Gmail SMTP).
 
 ### Tests und Qualitätsprüfung
 
