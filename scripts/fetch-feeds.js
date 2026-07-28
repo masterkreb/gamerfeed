@@ -26,6 +26,7 @@ import {
     BROWSER_LIKE_HEADERS,
     fetchFeedXml,
     isFeedXml,
+    isProxyEligibleSource,
 } from './feed-fetch-utils.js';
 
 // === HELPER FUNCTIONS (DECODING, STRIPPING, ETC.) ===
@@ -964,6 +965,8 @@ async function main({ groqFetch } = {}) {
 
             const feedStartMs = Date.now();
             const { xmlString, lastError } = await fetchFeedXml({
+                // Nur ausdrücklich vorgesehene Quellen dürfen über den Proxy.
+                allowProxy: isProxyEligibleSource(feed),
                 directTimeoutMs: FEED_FETCH_TIMEOUT_MS,
                 feedName: feed.name,
                 feedProxyUrl,

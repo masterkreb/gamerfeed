@@ -2,9 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
     BROWSER_LIKE_HEADERS,
+    PROXY_ELIGIBLE_SOURCES,
     buildFeedProxyRequestUrl,
     fetchFeedXml,
     isFeedXml,
+    isProxyEligibleSource,
 } from '../../../scripts/feed-fetch-utils.js';
 
 const FEED_URL = 'https://feeds.example.com/news.xml';
@@ -41,6 +43,9 @@ function createFetchSequence(...results) {
 
 function fetchTestFeed(options = {}) {
     return fetchFeedXml({
+        // Die Proxy-Tests unten beschreiben eine ausdrücklich freigegebene
+        // Quelle; die Freigabe selbst prüft der Abschnitt „Proxy-Freigabe".
+        allowProxy: true,
         feedName: 'Example',
         feedUrl: FEED_URL,
         logger: null,
@@ -322,4 +327,112 @@ test('baut Proxy-URLs ohne fehlerhafte doppelte Fragezeichen', () => {
 
     assert.equal(result.searchParams.get('instance'), 'main');
     assert.equal(result.searchParams.get('url'), FEED_URL);
+});
+
+// === Proxy-Freigabe (O2a) ===
+
+test('nur ausdrücklich vorgesehene Quellen sind für den Proxy freigegeben', () => {
+    assert.deepEqual([...PROXY_ELIGIBLE_SOURCES], ['gamepro']);
+
+    assert.equal(isProxyEligibleSource({ id: 'gamepro', name: 'GamePro' }), true);
+    assert.equal(isProxyEligibleSource({ id: 'GamePro' }), true);
+    assert.equal(isProxyEligibleSource({ name: '  gamepro  ' }), true);
+    assert.equal(isProxyEligibleSource('GamePro'), true);
+});
+
+test('XboxDynasty und andere Quellen sind nicht freigegeben', () => {
+    // Der einmalig beobachtete Timeout ist ein vorübergehendes Problem der
+    // Quelle und kein Grund, fremdes Hosting zu belasten.
+    for (const feed of [
+        { id: 'xboxdynasty', name: 'XboxDynasty' },
+        { id: 'gamestar', name: 'GameStar' },
+        { id: 'golem', name: 'Golem' },
+        { id: 'gamepro-news', name: 'GamePro News' },
+        {},
+        null,
+        undefined,
+        '',
+    ]) {
+        assert.equal(isProxyEligibleSource(feed), false, JSON.stringify(feed));
+    }
+});
+
+test('eine nicht freigegebene Quelle erzeugt trotz Direktfehler keinen Proxy-Aufruf', async () => {
+    const fetcher = createFetchSequence(
+        response('Forbidden', 403),
+        // Läge hier ein Proxy-Aufruf an, käme dieser gültige Feed zurück.
+        response(RSS_XML),
+    );
+
+    const result = await fetchTestFeed({
+        allowProxy: false,
+        feedName: 'XboxDynasty',
+        feedProxyUrl: 'https://proxy.example.com/feed-proxy.php',
+        fetchImpl: fetcher.fetchImpl,
+    });
+
+    assert.equal(result.xmlString, null);
+    assert.equal(result.usedProxy, false);
+    assert.equal(result.proxyError, null);
+    // 403 ist endgültig, deshalb gibt es nur einen Direktversuch - und keinen
+    // Proxy-Aufruf, obwohl eine Proxy-Adresse konfiguriert ist.
+    assert.equal(fetcher.calls.length, 1);
+    for (const call of fetcher.calls) {
+        assert.equal(String(call.url).includes('proxy.example.com'), false);
+    }
+});
+
+test('auch ein Timeout einer nicht freigegebenen Quelle führt nicht zum Proxy', async () => {
+    let aufrufe = 0;
+    const fetchImpl = async () => {
+        aufrufe += 1;
+        throw new Error('The operation was aborted due to timeout');
+    };
+
+    const result = await fetchTestFeed({
+        allowProxy: false,
+        feedName: 'XboxDynasty',
+        feedProxyUrl: 'https://proxy.example.com/feed-proxy.php',
+        fetchImpl,
+    });
+
+    assert.equal(result.xmlString, null);
+    assert.equal(result.usedProxy, false);
+    assert.equal(aufrufe, 2, 'zwei Direktversuche, kein Proxy');
+});
+
+test('eine freigegebene Quelle darf den Proxy nach einem 403 versuchen', async () => {
+    // Genau der beobachtete Produktionsfall: GamePro antwortet dem
+    // Actions-Netz mit 403, der Proxy holt den Feed stellvertretend.
+    const fetcher = createFetchSequence(
+        response('Forbidden', 403),
+        response(RSS_XML),
+    );
+
+    const result = await fetchTestFeed({
+        allowProxy: true,
+        feedName: 'GamePro',
+        feedProxyUrl: 'https://proxy.example.com/feed-proxy.php',
+        fetchImpl: fetcher.fetchImpl,
+    });
+
+    assert.equal(result.usedProxy, true);
+    assert.equal(result.xmlString, RSS_XML);
+    assert.equal(fetcher.calls.length, 2);
+    assert.equal(String(fetcher.calls.at(-1).url).includes('proxy.example.com'), true);
+});
+
+test('ohne konfigurierte Proxy-Adresse bleibt es beim Direktabruf', async () => {
+    const fetcher = createFetchSequence(response('Forbidden', 403));
+
+    const result = await fetchTestFeed({
+        allowProxy: true,
+        feedName: 'GamePro',
+        feedProxyUrl: undefined,
+        fetchImpl: fetcher.fetchImpl,
+    });
+
+    assert.equal(result.usedProxy, false);
+    assert.equal(result.proxyError, null);
+    assert.equal(fetcher.calls.length, 1);
 });

@@ -24,6 +24,37 @@ export const BROWSER_LIKE_HEADERS = Object.freeze({
 
 export const MAX_FEED_RESPONSE_BYTES = 5 * 1024 * 1024;
 
+/**
+ * Quellen, fuer die der externe PHP-Proxy ueberhaupt versucht werden darf.
+ *
+ * GamePro beantwortet Anfragen aus dem GitHub-Actions-Netz mit HTTP 403 - dafuer
+ * gibt es den Proxy. Alle anderen Quellen sind direkt erreichbar; ein
+ * gewoehnlicher Timeout ist dort ein voruebergehendes Problem der Quelle und
+ * kein Grund, den Umweg ueber fremdes Hosting zu nehmen.
+ *
+ * Die Liste steht bewusst hier und nicht im PHP-Skript: die Entscheidung gehoert
+ * auf diese Seite und darf nicht von der Gegenstelle abhaengen. Die exakte
+ * Allowlist des Proxys bleibt davon unberuehrt und zusaetzlich wirksam.
+ */
+export const PROXY_ELIGIBLE_SOURCES = Object.freeze(['gamepro']);
+
+/**
+ * Darf fuer diese Quelle der Proxy versucht werden?
+ *
+ * @param {{ id?: unknown, name?: unknown } | string | null | undefined} feed
+ * @returns {boolean}
+ */
+export function isProxyEligibleSource(feed) {
+    const identifiers = typeof feed === 'string'
+        ? [feed]
+        : [feed?.id, feed?.name];
+
+    return identifiers.some(identifier => (
+        typeof identifier === 'string'
+        && PROXY_ELIGIBLE_SOURCES.includes(identifier.trim().toLowerCase())
+    ));
+}
+
 const RETRYABLE_HTTP_STATUSES = new Set([408, 425, 429]);
 
 // Der Hosting-Edge vor tools/feed-proxy.php weist Anfragen sporadisch mit 415 ab,
@@ -164,6 +195,9 @@ async function fetchTextWithRetry({
 }
 
 export async function fetchFeedXml({
+    // Der Proxy ist die Ausnahme, nicht die Regel: ohne ausdrueckliche Freigabe
+    // der Quelle wird er selbst bei einem Direktfehler nicht versucht.
+    allowProxy = false,
     directAttempts = 2,
     directTimeoutMs = 15000,
     feedName,
@@ -212,7 +246,11 @@ export async function fetchFeedXml({
     // stellvertretend über den Proxy abgerufen werden. Die exakte Allowlist des
     // PHP-Proxys würde es zwar ebenfalls zurückweisen, aber die Entscheidung
     // gehört auf diese Seite und darf nicht von der Gegenstelle abhängen.
-    if (!feedProxyUrl?.trim() || directResult.policyRejected) {
+    //
+    // `allowProxy` kommt aus der Quellenliste: nur wer den Umweg wirklich
+    // braucht, bekommt ihn. Sonst würde jeder gewöhnliche Timeout einer
+    // beliebigen Quelle fremdes Hosting belasten.
+    if (!allowProxy || !feedProxyUrl?.trim() || directResult.policyRejected) {
         return {
             directError,
             lastError: directError,
