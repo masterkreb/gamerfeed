@@ -1294,6 +1294,17 @@ export async function main({
                         article.needsScraping = false;
                         scrapeStats.found++;
                         logger.log(`      ✅ Found image (${formatDuration(articleScrapeDuration)})`);
+                    } else if (runBudget.signal.aborted) {
+                        // Kein fehlendes Bild, sondern eine vom Gesamtabbruch
+                        // beendete Anfrage. `getOgImageFromUrl` fängt ihren
+                        // Fehler selbst ab und liefert null - ohne diese
+                        // Unterscheidung endete ein Lauf, dessen *letzter*
+                        // Scrape abgeschnitten wurde, fälschlich als `success`.
+                        runBudget.defer({
+                            reason: DEFERRAL_REASONS.DEADLINE,
+                            kind: DEFERRAL_KINDS.IMAGE_SCRAPE,
+                        });
+                        logger.warn(`      ⏱️  Bild-Scrape zurückgestellt (Zeitbudget während des Abrufs erschöpft)`);
                     } else {
                         scrapeStats.missing++;
                         logger.log(`      ⚠️  No image found, using placeholder (${formatDuration(articleScrapeDuration)})`);
@@ -1367,6 +1378,14 @@ export async function main({
                         article.imageUrl = scrapedImage;
                         backfillStats.found++;
                         logger.log(`      ✅ Backfilled image (${formatDuration(articleBackfillDuration)})`);
+                    } else if (runBudget.signal.aborted) {
+                        // Dieselbe Unterscheidung wie beim Neu-Scrape:
+                        // abgebrochen heißt zurückgestellt, nicht gescheitert.
+                        runBudget.defer({
+                            reason: DEFERRAL_REASONS.DEADLINE,
+                            kind: DEFERRAL_KINDS.IMAGE_BACKFILL,
+                        });
+                        logger.warn(`      ⏱️  Bild-Backfill zurückgestellt (Zeitbudget während des Abrufs erschöpft)`);
                     } else {
                         backfillStats.missing++;
                         logger.log(`      ⚠️  Still no image found (${formatDuration(articleBackfillDuration)})`);

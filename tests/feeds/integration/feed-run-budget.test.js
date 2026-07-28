@@ -180,6 +180,27 @@ test('ein haengender Bild-Scrape endet ebenfalls vor der Gesamtdeadline', async 
     assert.ok(spies.kvSets.some(entry => entry.key === 'news_cache'));
 });
 
+test('auch ein abgebrochener letzter Scrape ergibt degraded, nicht success', async () => {
+    // Der heikelste Fall: es bleibt nichts mehr übrig, das zurückgestellt
+    // werden könnte. Ohne die Zurückstellung im Fehlerpfad meldete der Lauf
+    // hier `success`, obwohl die Deadline eine Anfrage abgeschnitten hat.
+    const spies = createSpies({ feeds: [SCRAPE_FEED] });
+    const uhr = createControlledClock();
+    const { budget } = createTestBudget(uhr, { deadlineMs: 60_000, optionalPhaseMinRemainingMs: 0 });
+    const { sleep } = createSchlaf();
+
+    const { fetchImpl } = createNetz(spies, {
+        feedAntwort: async () => new Response(rssOhneBilder(SCRAPE_FEED, 1), { status: 200 }),
+        seitenAntwort: haengendeAntwort(uhr, { vorMs: 60_000 }),
+    });
+
+    await runMain(spies, { budget, sleep, fetchImpl, groqFetch: spies.makeGroqFetch(GROQ_LEER) });
+
+    assert.deepEqual(spies.exitCodes, []);
+    assert.equal(spies.kvStore.feed_run_status.result, 'degraded');
+    assert.match(spies.kvStore.feed_run_status.degradedReason, /Zeitbudget/);
+});
+
 // === Scrape-Budget ===
 
 test('die Zahl der Artikel-Seitenabrufe ueberschreitet das Limit nie', async () => {
