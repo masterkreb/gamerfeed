@@ -86,6 +86,14 @@ erfolgreich. Damit verschiebt sich das Hauptrisiko zurück auf den Feed-Lauf
 selbst: einzelne fehlerhafte Items können weiterhin einen ganzen Feed verwerfen
 und externe Aufrufe sind unbegrenzt – dort setzt O2a an.
 
+**Stand 28. Juli 2026 (Branch `claude/o2a-feed-resilience`):** O2a ist
+abgeschlossen. Ein kaputtes Einzelelement kostet nicht mehr die ganze Quelle,
+jeder externe Aufruf hat Timeout und Byte-Limit, der Proxy wird nur noch für
+GamePro versucht, und ein fehlender Core-Wert beendet den Lauf vor dem ersten
+externen Zugriff. 416 zentrale Tests und 9 Browser-Abnahmen laufen erfolgreich.
+Offen bleibt die **Summe** aller Aufrufe gegen das 30-Minuten-Hardlimit des
+Workflows – dort setzt O2b an.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -97,8 +105,8 @@ und externe Aufrufe sind unbegrenzt – dort setzt O2a an.
 | F2 | P1 | erledigt | Consent-Widerruf und Cookie-Einstellungen vervollständigen |
 | O1 | P1 | erledigt | Cron-Heartbeat und veraltete Health-Daten sichtbar machen |
 | S2 | P1 | erledigt | Admin-API-Payloads validieren und Fehlerausgaben härten |
-| O2a | P1 | **bereit** | Einzelitem-Fehler, Secrets und Provider-Timeouts absichern |
-| O2b | P1 | geplant | Feed-Kernlauf mit Deadline und Scrape-Budget begrenzen |
+| O2a | P1 | erledigt | Einzelitem-Fehler, Secrets und Provider-Timeouts absichern |
+| O2b | P1 | **bereit** | Feed-Kernlauf mit Deadline und Scrape-Budget begrenzen |
 | O3a | P1 | geplant | Generationsgebundenes Leseprotokoll und Migration vorbereiten |
 | F1 | P1 | geplant | Progressive News-Ladekette gegen veraltete Antworten absichern |
 | O3b | P1 | geplant | News-Caches größenbegrenzt und konsistent veröffentlichen |
@@ -315,7 +323,19 @@ wenn der geplante Workflow nicht mehr läuft.
 
 ### O2a – Einzelitem-Fehler, Secrets und Provider-Timeouts
 
-**Status:** bereit – nächstes Code-Arbeitspaket.
+**Status:** erledigt. `parseFeedItems` prüft das Datum ausdrücklich und klammert
+jedes Element einzeln; übersprungene Elemente werden nach Grund gezählt, ohne
+Titel, Adressen oder Inhalte auszuweisen. `parseRssXml` bleibt als reine
+Artikelliste erhalten. HTML- und Groq-Abrufe haben Abort-Timeout und Byte-Limit
+über die gemeinsame `scripts/limited-response.js`, die auch bei Streams ohne
+`Content-Length` greift und den Stream abbricht. Groq-Fehler enden als Wert
+statt als Ausnahme und machen einen erfolgten Kern-Publish nicht nachträglich
+alt. Der PHP-Proxy wird nur noch für Quellen aus `PROXY_ELIGIBLE_SOURCES`
+(aktuell nur GamePro) versucht. `scripts/feed-run-config.js` trennt Core- von
+optionaler Konfiguration; fehlt ein Core-Wert, endet der Lauf vor dem ersten
+SQL-, KV-, Recorder- oder HTTP-Zugriff, was die Orchestrierungstests mit Spies
+belegen. Einzelheiten:
+[`docs/deployment/feed-run-resilience.md`](../deployment/feed-run-resilience.md).
 
 **Warum:** Ein einzelnes ungültiges Datum kann derzeit einen ganzen Feed
 verwerfen. Core- und optionale Provider-Konfiguration müssen außerdem
@@ -341,6 +361,10 @@ unterschiedlich behandelt und externe Aufrufe einzeln begrenzt werden.
 - optionale Trendfehler machen einen erfolgreichen News-Kernlauf nicht alt.
 
 ### O2b – Deadline und Scrape-Budget
+
+**Status:** bereit – nächstes Code-Arbeitspaket. O2a hat jeden **einzelnen**
+Aufruf begrenzt; ihre Summe ist weiterhin nicht gegen das 30-Minuten-Hardlimit
+gedeckelt.
 
 **Warum:** Feed-, Proxy- und Bildabrufe können zusammen das
 30-Minuten-Hardlimit des Workflows erreichen. Ein harter Actions-Abbruch führt

@@ -88,7 +88,10 @@
 │   ├── fetch-feeds.js      # Cron-Job Script (GitHub Actions)
 │   ├── feed-fetch-utils.js # Getesteter Feed-Abruf mit Retry/Proxy-Fallback
 │   ├── feed-image-utils.js # Bildauswahl und -validierung für Artikel
-│   └── feed-run-recorder.js # Reihenfolge und Schreibregeln des Heartbeats
+│   ├── feed-run-config.js  # Core- und optionale Konfiguration des Laufs
+│   ├── feed-run-recorder.js # Reihenfolge und Schreibregeln des Heartbeats
+│   ├── groq-client.js      # Begrenzter Zugang zur Groq-API
+│   └── limited-response.js # Begrenztes Lesen fremder HTTP-Antworten
 │
 ├── server/                 # Getestete Backend-Hilfslogik
 │   ├── admin-api.js            # Antwortbau und Rumpflesen der Admin-APIs
@@ -192,6 +195,8 @@ läuft).
 - ✅ 60 Tage Artikel-Retention (max. 10.000 Artikel)
 - ✅ Feed Health Status Tracking mit Cron-Heartbeat und Frische-Schwelle
 - ✅ Validierter Feed-Abruf mit Retry und optionalem PHP-Proxy-Fallback
+- ✅ Einzelne fehlerhafte Feed-Items werden übersprungen, nicht der ganze Feed
+- ✅ Alle externen Abrufe mit Abort-Timeout und Byte-Limit
 - ✅ KI-Trend-Analyse (täglich + wöchentlich)
 - ✅ Deduplizierung nach Verlagsgruppen (SOURCE_GROUPS)
 
@@ -344,12 +349,42 @@ nicht. Gesperrte Bereiche, verbleibende Grenzen und die noch ausstehende
 Bestandsprüfung `node scripts/check-feed-urls.js` stehen in
 `docs/deployment/outbound-policy.md`.
 
+## 🧯 Belastbarkeit des Cron-Laufs
+
+Der Lauf spricht mit Systemen, die er nicht kontrolliert. Die Regeln dafür:
+
+- **Ein kaputtes Element kostet nur dieses Element.** `parseFeedItems` prüft das
+  Datum ausdrücklich und klammert jedes Element in `try/catch`; gezählt wird nach
+  Grund (`incomplete`, `invalid_date`, `invalid_link`, `invalid_image`,
+  `item_error`). Der Bericht enthält **nur Grund und Anzahl** – keine Titel,
+  Adressen oder Inhalte. `parseRssXml` bleibt als reine Artikelliste erhalten.
+- **Jeder externe Abruf hat Timeout und Byte-Limit:** Feed 15 s / 5 MB, Proxy
+  20 s / 5 MB, Artikelseite 5 s / 2 MB, Groq 20 s / 256 KB. Gelesen wird überall
+  über `scripts/limited-response.js`, das die real gelesenen Bytes zählt und den
+  Stream abbricht – eine `Content-Length` allein genügt nicht.
+- **Trends sind optional.** `scripts/groq-client.js` liefert jeden Fehler als
+  Wert statt als Ausnahme; die Trendphase fängt ihre Fehler selbst ab, damit ein
+  bereits erfolgter Kern-Publish nicht nachträglich zu `fatal` wird.
+- **Konfiguration wird vorab geprüft.** `scripts/feed-run-config.js` trennt Core
+  (`POSTGRES_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN` – fehlt einer, endet
+  der Lauf fatal **vor** dem ersten SQL-, KV-, Recorder- oder HTTP-Zugriff) von
+  optional (`GROQ_API_KEY`, `FEED_PROXY_URL` – Zusatzfunktion wird übersprungen).
+  Leerzeichen zählen nicht als Wert; gemeldet wird nur der Variablenname.
+- `main()` nimmt `env`, `store`, `database`, `createRecorder`, `fetchImpl`,
+  `lookup`, `groqFetch`, `exit` und `logger` als Parameter, damit genau diese
+  Reihenfolge prüfbar ist. In Produktion gelten die bisherigen Vorgaben.
+
+Einzelheiten und die bewussten Grenzen: `docs/deployment/feed-run-resilience.md`.
+
 ## 🔌 Feed-Proxy
 
 Einzelne Quellen – aktuell GamePro – beantworten Anfragen aus dem
 GitHub-Actions-Netz mit HTTP 403. Für diese Fälle gibt es `tools/feed-proxy.php`
 auf einem externen Webhosting.
 
+- Der Proxy wird **nur für Quellen aus `PROXY_ELIGIBLE_SOURCES`** versucht
+  (aktuell ausschließlich GamePro). Ein gewöhnlicher Timeout einer anderen
+  Quelle führt nicht mehr zum Umweg über fremdes Hosting
 - **Wird nicht von Vercel deployt.** Nach jeder Änderung an der Datei muss sie
   manuell auf das Hosting hochgeladen werden
 - Die Adresse steht im GitHub-Actions-Secret `FEED_PROXY_URL`, nicht bei Vercel
@@ -449,7 +484,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 
 - `npm run dev` nutzt für `/api` den Proxy zur produktiven GamerFeed-API
 - Für lokale Änderungen an Serverless Functions: `vercel dev` nutzen
-- GitHub Actions braucht Secrets: `POSTGRES_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`, `GROQ_API_KEY`; optional `FEED_PROXY_URL`
+- GitHub Actions braucht die Core-Secrets `POSTGRES_URL`, `KV_REST_API_URL` und `KV_REST_API_TOKEN`; ohne sie endet der Lauf sofort. `GROQ_API_KEY` und `FEED_PROXY_URL` sind optional und schalten nur ihre Zusatzfunktion ab
 - Der PHP-Feed-Proxy wird separat und manuell betrieben: `docs/deployment/feed-proxy.md`
 
 ---
@@ -470,6 +505,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Einstellungsdialog mit echten ARIA-Tabs, angekündigten Formularmeldungen und jederzeit möglichem Schließen
 - **Juli 2026:** Cron-Heartbeat (O1): Attempt-Status, Kern-Publish und Inhaltsfrische getrennt geführt, veraltete Daten ab 50 Minuten sichtbar; Workflow startet zu Minute 7/27/47
 - **Juli 2026:** Admin-APIs (S2): Laufzeitverträge statt TypeScript-Casts, stabile Fehlercodes, keine internen Fehlertexte mehr im Client, `private, no-store` auf allen geschützten Antworten, inaktive Ankündigungen im Admin wieder bearbeitbar
+- **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 
 ---
 
