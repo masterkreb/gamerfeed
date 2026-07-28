@@ -1,7 +1,29 @@
 import type { Announcement } from '../types';
-import { requireAdminAuth, requireAdminMutation } from './admin-auth.js';
+import { requireAdminApiAuth, requireAdminApiMutation } from './admin-auth.js';
+import {
+    adminJsonResponse,
+    internalErrorResponse,
+    methodNotAllowedResponse,
+    readAdminJsonObject,
+    validationErrorResponse,
+} from './admin-api.js';
+import { parseAnnouncementPayload } from '../shared/announcement-contract.js';
 
 export const ANNOUNCEMENT_KV_KEY = 'site_announcement';
+
+/**
+ * Query-Parameter für den geschützten Admin-Abruf.
+ *
+ * Ein eigener Parameter statt einer stillen Erweiterung des öffentlichen GET:
+ * die Antwort bekommt dadurch einen eigenen Cache-Key und trägt
+ * `private, no-store`. Der öffentliche Pfad kann so gar nicht an eine inaktive
+ * Ankündigung kommen – auch nicht über einen geteilten CDN-Eintrag.
+ */
+export const ANNOUNCEMENT_ADMIN_PARAM = 'admin';
+export const ANNOUNCEMENT_ADMIN_VALUE = '1';
+
+const PUBLIC_CACHE_CONTROL = 's-maxage=60, stale-while-revalidate=120';
+const ALLOWED_METHODS = 'GET, POST, DELETE';
 
 interface AnnouncementKv {
     get<T>(key: string): Promise<T | null>;
@@ -18,6 +40,24 @@ interface AnnouncementHandlerOptions {
     logger?: Pick<Console, 'error'>;
 }
 
+function isAdminRequest(req: Request): boolean {
+    try {
+        return new URL(req.url).searchParams.get(ANNOUNCEMENT_ADMIN_PARAM) === ANNOUNCEMENT_ADMIN_VALUE;
+    } catch {
+        return false;
+    }
+}
+
+function publicJsonResponse(body: unknown): Response {
+    return new Response(JSON.stringify(body), {
+        status: 200,
+        headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': PUBLIC_CACHE_CONTROL,
+        },
+    });
+}
+
 export function createAnnouncementHandler({
     kv,
     now = () => new Date(),
@@ -25,91 +65,76 @@ export function createAnnouncementHandler({
     logger = console,
 }: AnnouncementHandlerOptions) {
     return async function handler(req: Request): Promise<Response> {
-        if (req.method !== 'GET') {
+        const wantsAdminView = isAdminRequest(req);
+
+        // Der Admin-Modus ist immer geschützt – auch beim GET. Ohne diese Zeile
+        // wäre der Parameter ein offener Weg an der Sichtbarkeitsregel vorbei.
+        if (req.method !== 'GET' || wantsAdminView) {
             const authResponse = ['POST', 'DELETE'].includes(req.method)
-                ? requireAdminMutation(req, env)
-                : requireAdminAuth(req, env);
+                ? requireAdminApiMutation(req, env)
+                : requireAdminApiAuth(req, env);
             if (authResponse) {
                 return authResponse;
             }
         }
 
         try {
-            // GET - Fetch current announcement (public)
             if (req.method === 'GET') {
                 const announcement = await kv.get<Announcement>(ANNOUNCEMENT_KV_KEY);
 
-                // Return null if no announcement or not active
-                if (!announcement || !announcement.isActive) {
-                    return new Response(JSON.stringify(null), {
-                        status: 200,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Cache-Control': 's-maxage=60, stale-while-revalidate=120',
-                        },
-                    });
+                // Der authentifizierte Admin sieht den gespeicherten Stand
+                // unverändert, damit er eine abgeschaltete Ankündigung wieder
+                // bearbeiten, aktivieren oder löschen kann.
+                if (wantsAdminView) {
+                    return adminJsonResponse(announcement ?? null);
                 }
 
-                return new Response(JSON.stringify(announcement), {
-                    status: 200,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Cache-Control': 's-maxage=60, stale-while-revalidate=120',
-                    },
-                });
+                if (!announcement || !announcement.isActive) {
+                    return publicJsonResponse(null);
+                }
+
+                return publicJsonResponse(announcement);
             }
 
             // POST - Create/Update announcement (server-side protected)
             if (req.method === 'POST') {
-                const body = await req.json();
-                const { message, type, isActive } = body;
+                const { value: body, error: bodyError } = await readAdminJsonObject(req);
+                if (bodyError) {
+                    return bodyError;
+                }
 
-                if (!message || !type) {
-                    return new Response(JSON.stringify({ error: 'Message and type are required' }), {
-                        status: 400,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
+                const parsed = parseAnnouncementPayload(body);
+                if (!parsed.value) {
+                    return validationErrorResponse(parsed);
                 }
 
                 const timestamp = now();
                 const announcement: Announcement = {
                     id: `announcement-${timestamp.getTime()}`,
-                    message,
-                    type,
-                    isActive: isActive ?? true,
+                    message: parsed.value.message,
+                    type: parsed.value.type,
+                    isActive: parsed.value.isActive,
                     createdAt: timestamp.toISOString(),
                 };
 
                 await kv.set(ANNOUNCEMENT_KV_KEY, announcement);
 
-                return new Response(JSON.stringify(announcement), {
-                    status: 200,
-                    headers: { 'Content-Type': 'application/json' },
-                });
+                return adminJsonResponse(announcement);
             }
 
             // DELETE - Remove announcement (server-side protected)
             if (req.method === 'DELETE') {
                 await kv.del(ANNOUNCEMENT_KV_KEY);
-
-                return new Response(JSON.stringify({ success: true }), {
-                    status: 200,
-                    headers: { 'Content-Type': 'application/json' },
-                });
+                return adminJsonResponse({ success: true });
             }
 
-            return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-                status: 405,
-                headers: { 'Content-Type': 'application/json' },
-            });
+            return methodNotAllowedResponse(req.method, ALLOWED_METHODS);
 
         } catch (error) {
+            // Der Originaltext bleibt im Log: KV-Fehler tragen Endpunkt und
+            // Tokenreste mit sich.
             logger.error('Announcement API Error:', error);
-            const message = error instanceof Error ? error.message : 'An unknown error occurred';
-            return new Response(JSON.stringify({ error: message }), {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' },
-            });
+            return internalErrorResponse();
         }
     };
 }
