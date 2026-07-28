@@ -137,5 +137,11 @@ test('schließt den Einstellungsdialog, bevor der Consent-Dialog öffnet', async
 
     // Zwei dokumentweite Fokusfallen duerfen nicht gleichzeitig aktiv sein.
     await expect(settingsDialog).toHaveCount(0);
-    await expect(consentDialog(page).first()).toBeVisible();
+
+    // Gezielt der Praeferenzdialog (.pm), nicht `consentDialog(...).first()`:
+    // Nach dem Zustimmen bleibt das Banner (.cm) als verstecktes Element im DOM
+    // und steht davor. `.first()` traf deshalb je nach Zeitpunkt das
+    // ausgeblendete Banner statt des gerade geoeffneten Dialogs - der Test war
+    // vom Animationszeitpunkt abhaengig statt von der Zusage.
+    await expect(page.locator('#cc-main .pm')).toBeVisible();
 });
