@@ -5,9 +5,12 @@ import { kv } from '@vercel/kv';
 import { sql } from '@vercel/postgres';
 import { DOMParser } from 'linkedom';
 import { escape } from 'html-escaper';
+import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeContentUrl } from '../shared/url-policy.js';
+import { sanitizeErrorMessage } from '../shared/feed-health-model.js';
+import { createFeedRunRecorder } from './feed-run-recorder.js';
 import { fetchWithOutboundPolicy } from './outbound-policy.js';
 import {
     chooseMergedImageUrl,
@@ -807,6 +810,34 @@ async function generateAndSaveTrends(articles) {
     console.log('   🧠 Trend analysis complete!\n');
 }
 
+// === HEARTBEAT (Roadmap O1) ===
+
+// Die Actions-Run-ID ist nicht geheim und laesst einen Lauf im Admin direkt dem
+// Workflow-Protokoll zuordnen. Lokale Laeufe bekommen eine eigene Kennung.
+function createRunId() {
+    const actionsRunId = process.env.GITHUB_RUN_ID;
+    if (actionsRunId) {
+        const attempt = process.env.GITHUB_RUN_ATTEMPT;
+        return `gha-${actionsRunId}${attempt ? `-${attempt}` : ''}`;
+    }
+    return `local-${randomUUID()}`;
+}
+
+// Fehlermeldungen von Postgres, KV, Groq oder dem Feed-Proxy tragen die
+// Zieladresse oft im Klartext. Alles, was im Admin-Panel landet, wird deshalb
+// vorher um die konfigurierten Werte bereinigt.
+function redactMessage(message) {
+    const secrets = [
+        process.env.POSTGRES_URL,
+        process.env.KV_REST_API_URL,
+        process.env.KV_REST_API_TOKEN,
+        process.env.GROQ_API_KEY,
+        process.env.FEED_PROXY_URL,
+    ].filter(value => typeof value === 'string' && value !== '');
+
+    return sanitizeErrorMessage(message, { secrets }) ?? '';
+}
+
 // === MAIN SCRIPT LOGIC ===
 async function main() {
     const feedHealthStatus = {};
@@ -822,7 +853,24 @@ async function main() {
     // Secret laeuft der Abruf ohne Fallback, statt fehlzuschlagen.
     const feedProxyUrl = process.env.FEED_PROXY_URL;
 
+    const runStartMs = Date.now();
+    const durations = {};
+    const recorder = createFeedRunRecorder({
+        store: kv,
+        runId: createRunId(),
+        startedAt: new Date(),
+        redact: redactMessage,
+    });
+
+    console.log(`\n🫀 Lauf ${recorder.runId} gestartet um ${recorder.startedAt}`);
+    await recorder.begin();
+
     try {
+        // Diagnosedaten: ein Lesefehler darf den Kernlauf nicht verhindern. Er
+        // verhindert nur, dass ein nicht sicher gelesener historischer Stand
+        // spaeter mit Ersatzwerten ueberschrieben wird.
+        await recorder.loadPreviousState();
+
         let oldArticles = [];
         try {
             const cachedData = await kv.get('news_cache');
@@ -864,11 +912,22 @@ async function main() {
 
         const { rows: feeds } = await sql`SELECT * FROM feeds;`;
         console.log(`\n🔍 Found ${feeds.length} feeds in database\n`);
+        // Ab hier gilt die Feed-Liste als bekannt: eine leere Liste darf den
+        // gespeicherten Status jetzt leeren, ein Abbruch davor nicht.
+        recorder.markFeedListLoaded();
         feeds.forEach(feed => {
-            feedHealthStatus[feed.id] = { status: 'unknown', message: 'Not processed yet.' };
+            feedHealthStatus[feed.id] = {
+                status: 'unknown',
+                message: 'Not processed yet.',
+                lastAttemptAt: null,
+                lastSuccessAt: recorder.lastSuccessAtFor(feed.id),
+                durationMs: null,
+                articleCount: null,
+            };
         });
 
         let newlyFetchedArticles = [];
+        const feedFetchStartMs = Date.now();
 
         for (const feed of feeds) {
             const feedUrl = getFetchUrlForFeed(feed);
@@ -877,6 +936,7 @@ async function main() {
                 console.log(`   ℹ️  Using normalized feed URL for ${feed.name}: ${feedUrl}`);
             }
 
+            const feedStartMs = Date.now();
             const { xmlString, lastError } = await fetchFeedXml({
                 directTimeoutMs: FEED_FETCH_TIMEOUT_MS,
                 feedName: feed.name,
@@ -885,26 +945,60 @@ async function main() {
                 proxyTimeoutMs: FEED_PROXY_TIMEOUT_MS,
             });
 
+            // Minimale Feed-Dauer: sie beantwortet spaeter, welche Quelle das
+            // Zeitbudget aufbraucht (O2b), ohne heute schon zu regeln.
+            const attemptAt = new Date().toISOString();
+            const feedDurationMs = Date.now() - feedStartMs;
+            const baseEntry = {
+                lastAttemptAt: attemptAt,
+                lastSuccessAt: recorder.lastSuccessAtFor(feed.id),
+                durationMs: feedDurationMs,
+                articleCount: null,
+            };
+
             if (xmlString) {
                 try {
                     const feedArticles = parseRssXml(xmlString, feed);
-                    if (feedArticles.length === 0) { feedHealthStatus[feed.id] = { status: 'warning', message: 'Feed fetched successfully, but no articles were found.' };
-                    } else { feedHealthStatus[feed.id] = { status: 'success', message: `Successfully fetched and parsed ${feedArticles.length} articles.` }; }
+                    if (feedArticles.length === 0) {
+                        feedHealthStatus[feed.id] = {
+                            ...baseEntry,
+                            status: 'warning',
+                            message: 'Feed fetched successfully, but no articles were found.',
+                            articleCount: 0,
+                        };
+                    } else {
+                        feedHealthStatus[feed.id] = {
+                            ...baseEntry,
+                            status: 'success',
+                            message: `Successfully fetched and parsed ${feedArticles.length} articles.`,
+                            lastSuccessAt: attemptAt,
+                            articleCount: feedArticles.length,
+                        };
+                    }
                     newlyFetchedArticles.push(...feedArticles);
-                    console.log(`   ✅ Parsed ${feedArticles.length} articles from ${feed.name}`);
+                    console.log(`   ✅ Parsed ${feedArticles.length} articles from ${feed.name} (${formatDuration(feedDurationMs)})`);
                 } catch (parseError) {
                     const message = parseError instanceof Error ? parseError.message : 'Unknown parse error';
                     console.error(`   ❌ Error parsing ${feed.name}: ${message}`);
-                    feedHealthStatus[feed.id] = { status: 'error', message: `Failed during parse. Error: ${message}` };
+                    feedHealthStatus[feed.id] = {
+                        ...baseEntry,
+                        status: 'error',
+                        message: redactMessage(`Failed during parse. Error: ${message}`),
+                    };
                 }
             } else {
                 console.error(`   ❌ Fetch failed for ${feed.name}. Error: ${lastError}`);
-                feedHealthStatus[feed.id] = { status: 'error', message: `Fetch failed. Error: ${lastError}` };
+                feedHealthStatus[feed.id] = {
+                    ...baseEntry,
+                    status: 'error',
+                    message: redactMessage(`Fetch failed. Error: ${lastError}`),
+                };
             }
             await new Promise(r => setTimeout(r, 200));
         }
 
-        console.log(`\n📰 Total new articles fetched: ${newlyFetchedArticles.length}`);
+        durations.feedFetchMs = Date.now() - feedFetchStartMs;
+        console.log(`\n📰 Total new articles fetched: ${newlyFetchedArticles.length} (${formatDuration(durations.feedFetchMs)})`);
 
         const cachedArticlesByIdentity = new Map();
         oldArticles.forEach(article => {
@@ -935,6 +1029,7 @@ async function main() {
         }
 
         const articlesNeedingScraping = newlyFetchedArticles.filter(a => a.needsScraping);
+        const imageScrapeStartMs = Date.now();
         if (articlesNeedingScraping.length > 0) {
             console.log(`\n🔎 Scraping images for ${articlesNeedingScraping.length} articles...\n`);
             const scrapeStats = { found: 0, missing: 0, failed: 0, totalMs: 0 };
@@ -964,6 +1059,7 @@ async function main() {
             }
             console.log(`\n🔎 Image scraping summary: ${scrapeStats.found} found, ${scrapeStats.missing} placeholders, ${scrapeStats.failed} failed in ${formatDuration(scrapeStats.totalMs)} active scraping time.\n`);
         }
+        durations.imageScrapeMs = Date.now() - imageScrapeStartMs;
 
         newlyFetchedArticles = newlyFetchedArticles.map(article => {
             if (!article.imageUrl) article.imageUrl = getPlaceholderImageUrl(article.source);
@@ -984,6 +1080,7 @@ async function main() {
             })
             .slice(0, IMAGE_BACKFILL_LIMIT);
 
+        const imageBackfillStartMs = Date.now();
         if (imageBackfillArticles.length > 0) {
             console.log(`\n🧩 Backfilling images for ${imageBackfillArticles.length} old articles with missing or invalid images...\n`);
             const backfillStats = { found: 0, missing: 0, failed: 0, totalMs: 0 };
@@ -1014,6 +1111,7 @@ async function main() {
         } else {
             console.log(`\n🧩 No old articles need image backfill.\n`);
         }
+        durations.imageBackfillMs = Date.now() - imageBackfillStartMs;
 
         console.log('\n🔄 Merging, pruning, and sorting articles...');
         const uniqueArticlesMap = new Map();
@@ -1050,6 +1148,7 @@ async function main() {
         }
 
         console.log('\n💾 Saving data to Vercel KV...');
+        const publishStartMs = Date.now();
 
         // Save full cache
         await kv.set('news_cache', sortedArticles);
@@ -1062,17 +1161,55 @@ async function main() {
         await kv.set('news_cache_64', sortedArticles.slice(0, 64));
         console.log(`   ⚡ Saved 64 medium articles to KV key 'news_cache_64'`);
 
-        await kv.set('feed_health_status', feedHealthStatus);
-        console.log(`   📊 Saved health status for ${Object.keys(feedHealthStatus).length} feeds to KV key 'feed_health_status'`);
+        durations.publishMs = Date.now() - publishStartMs;
+        durations.totalMs = Date.now() - runStartMs;
+
+        // Erst ab hier gilt der Kern-Publish als erfolgt. Der Versuch bleibt
+        // trotzdem `running`, weil die Trendphase noch aussteht.
+        const publish = await recorder.recordCorePublish({
+            feedHealth: feedHealthStatus,
+            articleCount: sortedArticles.length,
+            newestArticleAt: sortedArticles[0]?.publicationDate ?? null,
+            durations,
+        });
+
+        if (publish) {
+            console.log(
+                `   🫀 Kern-Publish ${publish.lastCorePublishAt}, `
+                + `Inhaltsstand ${publish.lastContentUpdateAt ?? 'unbekannt'}, `
+                + `Feeds ${publish.feeds.success}/${publish.feeds.total} mit Artikeln`,
+            );
+        }
 
         // Generate trends with Groq AI (respects cache TTL)
+        const trendsStartMs = Date.now();
         await generateAndSaveTrends(sortedArticles);
+        durations.trendsMs = Date.now() - trendsStartMs;
+
+        // Erst jetzt ist der Lauf wirklich durch und bekommt sein `finishedAt`.
+        await recorder.finish({
+            feedHealth: feedHealthStatus,
+            durations: { ...durations, totalMs: Date.now() - runStartMs },
+        });
 
     } catch (error) {
         console.error('\n❌ Fatal error in fetch script:', error);
-        // Still try to save the partial health status on error
-        await kv.set('feed_health_status', feedHealthStatus);
-        console.log(`\n📊 Saved partial health status to Vercel KV before exiting.\n`);
+
+        // Ein gescheiterter Versuch fasst den gespeicherten Kern-Publish nie an
+        // und schreibt den Feed-Status nur, wenn die Feed-Liste geladen war.
+        // Scheitert auch das Festhalten des Abbruchs, bleibt es beim
+        // urspruenglichen Fehler: der Exit-Code ist wichtiger als das Protokoll.
+        try {
+            await recorder.recordFatal({
+                error,
+                feedHealth: feedHealthStatus,
+                durations: { ...durations, totalMs: Date.now() - runStartMs },
+            });
+        } catch (recorderError) {
+            console.error(`   ⚠️  Abbruch konnte nicht festgehalten werden: ${redactMessage(
+                recorderError instanceof Error ? recorderError.message : String(recorderError),
+            )}`);
+        }
         process.exit(1);
     }
 }

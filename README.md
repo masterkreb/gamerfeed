@@ -87,7 +87,8 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     - `news_cache`: Alle Artikel (vollständig)
     - `news_cache_16`: Erste 16 Artikel (Preview)
     - `news_cache_64`: Erste 64 Artikel (Medium)
-    - `feed_health_status`: Systemstatus
+    - `feed_health_status`: Systemstatus je Feed
+    - `feed_run_status` & `feed_publish_status`: Cron-Heartbeat und letzter Kern-Publish
     - `daily_trends` & `weekly_trends`: KI-generierte Trends
 4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 20 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung. Falls eine freigegebene Quelle GitHub-Runner blockiert, kann der Workflow optional auf den extern betriebenen PHP-Fallback `tools/feed-proxy.php` zurückgreifen. Einrichtung und Grenzen stehen in der [Feed-Proxy-Betriebsanleitung](docs/deployment/feed-proxy.md).
 5.  **API-Schicht (Vercel Functions)**: Schlanke Edge Functions für Datenabrufe sowie eine Node.js Function für den SMTP-Versand:
@@ -119,6 +120,8 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
         *   `news_cache_16`: Erste 16 Artikel (für Progressive Loading)
         *   `news_cache_64`: Erste 64 Artikel (für Progressive Loading)
         *   `feed_health_status`: Protokoll über Erfolg/Misserfolg der Feed-Abrufe
+        *   `feed_run_status`: Veränderlicher Status des laufenden bzw. letzten Versuchs
+        *   `feed_publish_status`: Zeitpunkt des letzten erfolgreichen Kern-Publish
         *   `daily_trends` & `weekly_trends`: KI-generierte Trend-Analysen
     4.  Anschliessend schreibt das Skript diese Datensätze in den **Vercel KV Store**.
 *   **WICHTIG:** Der Workflow committet **keine Dateien** mehr in das Git-Repository. Der Prozess ist vollständig vom Code der Webseite getrennt.
@@ -150,6 +153,27 @@ Die Statusanzeige wird wie folgt ermittelt:
 *   **Status: OK (Grün)**: Der Feed hat im `feed_health_status` den Status `success` **UND** es gibt Artikel von dieser Quelle im `news_cache`.
 *   **Status: Warnung (Gelb)**: Der Feed hat den Status `success`, **ABER** es gibt **keine** Artikel von dieser Quelle im `news_cache`. (Mögliche Gründe: Feed ist leer, Name stimmt nicht überein, etc.)
 *   **Status: Fehler (Rot)**: Der Feed hat im `feed_health_status` den Status `error`. (Mögliche Gründe: URL nicht erreichbar, XML-Fehler, etc.)
+
+#### Cron-Heartbeat: Wann ist ein grüner Status trotzdem alt?
+
+Diese Feed-Tabelle beschreibt immer nur den **letzten** Lauf – auch wenn dieser
+Lauf Stunden zurückliegt. Darüber steht deshalb der Heartbeat, der drei Fragen
+getrennt beantwortet:
+
+*   **Letzter Lauf**: Hat der Workflow überhaupt noch gestartet? (`feed_run_status`)
+*   **Letzter Kern-Publish**: Wurden die News-Caches wirklich geschrieben?
+*   **Inhaltsfrische**: Wann hat zuletzt mindestens ein Feed überhaupt Artikel geliefert?
+
+Die Inhaltsfrische sagt bewusst **nicht**, ob darunter *neue* Artikel waren – ein
+unveränderter, aber technisch einwandfreier Feed hält sie grün. Eine
+Novelty-Erkennung ist nicht Teil dieser Stufe.
+
+Als **veraltet** gilt alles, was älter als 50 Minuten ist (`FEED_STALE_AFTER_MS`
+in `shared/feed-health-model.js`); ein Zeitstempel mehr als 2 Minuten in der
+Zukunft gilt als ungültig und nie als frisch. Ein fehlgeschlagener Lauf
+überschreibt weder den letzten Kern-Publish noch das `lastSuccessAt` eines Feeds.
+Datenformate, Grenzfälle und Betriebshinweise stehen in der
+[Heartbeat-Dokumentation](docs/deployment/feed-heartbeat.md).
 
 ---
 

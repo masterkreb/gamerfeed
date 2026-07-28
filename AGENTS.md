@@ -87,10 +87,14 @@
 ├── scripts/
 │   ├── fetch-feeds.js      # Cron-Job Script (GitHub Actions)
 │   ├── feed-fetch-utils.js # Getesteter Feed-Abruf mit Retry/Proxy-Fallback
-│   └── feed-image-utils.js # Bildauswahl und -validierung für Artikel
+│   ├── feed-image-utils.js # Bildauswahl und -validierung für Artikel
+│   └── feed-run-recorder.js # Reihenfolge und Schreibregeln des Heartbeats
 │
 ├── server/                 # Getestete Backend-Hilfslogik
+│   ├── health-data-handler.ts  # Feed-Status und Frischebericht für das Admin
+│   └── news-cache-handler.ts   # Gemeinsame Logik der News-Endpunkte
 ├── shared/                 # Gemeinsame Frontend-/Backend-Verträge
+│   └── feed-health-model.js    # Cron-Heartbeat, Frische, FEED_STALE_AFTER_MS
 ├── tests/                  # Zentrale Tests nach Fachbereich und Testart
 ├── docs/
 │   ├── deployment/        # Betrieb, Release, Rollback und Domain-Anleitungen
@@ -181,7 +185,7 @@ läuft).
 ### Backend
 - ✅ Vercel KV Cache (news_cache, news_cache_16, news_cache_64)
 - ✅ 60 Tage Artikel-Retention (max. 10.000 Artikel)
-- ✅ Feed Health Status Tracking
+- ✅ Feed Health Status Tracking mit Cron-Heartbeat und Frische-Schwelle
 - ✅ Validierter Feed-Abruf mit Retry und optionalem PHP-Proxy-Fallback
 - ✅ KI-Trend-Analyse (täglich + wöchentlich)
 - ✅ Deduplizierung nach Verlagsgruppen (SOURCE_GROUPS)
@@ -189,7 +193,7 @@ läuft).
 ### Admin-Panel (/admin.html)
 - ✅ Basic Auth geschützt
 - ✅ Feed-Verwaltung (CRUD)
-- ✅ Health Center (Feed-Status)
+- ✅ Health Center (Feed-Status, letzter Lauf, Kern-Publish, Inhaltsfrische)
 - ✅ Ankündigungs-System (Info, Warnung, Wartung, Feier)
 
 ---
@@ -219,10 +223,49 @@ läuft).
 | `news_cache` | Alle Artikel (Array) |
 | `news_cache_16` | Erste 16 Artikel |
 | `news_cache_64` | Erste 64 Artikel |
-| `feed_health_status` | Status pro Feed |
+| `feed_health_status` | Status pro Feed, mit `lastAttemptAt`/`lastSuccessAt` |
+| `feed_run_status` | Veränderlicher Attempt-Status des Cron-Laufs |
+| `feed_publish_status` | Letzter erfolgreicher Kern-Publish |
 | `daily_trends` | Tägliche KI-Trends |
 | `weekly_trends` | Wöchentliche KI-Trends |
 | `site_announcement` | Aktuelles Banner |
+
+## 🫀 Cron-Heartbeat und Frische
+
+Ein alter grüner `feed_health_status` sagt nichts darüber aus, ob der Workflow
+noch läuft. `shared/feed-health-model.js` trennt deshalb drei Fragen, die
+Cron-Skript, Health-API und Admin-Panel gemeinsam beantworten:
+
+- **Läuft der Workflow?** `feed_run_status` – veränderlicher Versuch mit `runId`,
+  `startedAt`, `finishedAt`, Ergebnis, bereinigtem Fatalfehler, Feed-Zählern und
+  Phasendauern. Bleibt `running`, bis **alle** Phasen durch sind; `finishedAt`
+  fällt erst nach der Trendphase.
+- **Wurde veröffentlicht?** `feed_publish_status.lastCorePublishAt` – nur nach
+  erfolgreich geschriebenen News-Caches. Ein gescheiterter Versuch lässt den
+  Schlüssel unangetastet.
+- **Wann kam zuletzt etwas an?** `feed_publish_status.lastContentUpdateAt` –
+  steigt nur, wenn mindestens ein Feed Artikel geliefert hat. Das belegt
+  **nicht**, dass die Artikel neu waren; eine Novelty-Erkennung gehört nicht zu
+  O1.
+
+Als **veraltet** gilt ein Alter **über** `FEED_STALE_AFTER_MS` (fest 50 Minuten);
+genau auf der Schwelle noch nicht, ein fehlender Zeitstempel immer. Ein
+Zeitstempel weiter als `FEED_CLOCK_SKEW_TOLERANCE_MS` (2 Minuten) in der Zukunft
+gilt als ungültig und nie als frisch. `lastSuccessAt` je Feed kann nur vorwärts
+laufen. Fatalfehler und Feed-Meldungen werden vor dem Speichern von
+Secret-Werten, URL-Zugangsdaten und Querystrings befreit.
+
+`scripts/feed-run-recorder.js` entscheidet, **ob** überhaupt geschrieben werden
+darf: einen nicht sicher gelesenen historischen Stand nie mit Ersatzwerten
+überschreiben, und einen Abbruch vor der Feed-Liste von einer geladenen, aber
+leeren Liste unterscheiden.
+
+Ein Schreibfehler bei `feed_health_status` bleibt **fatal** (Exit-Code ≠ 0), wie
+schon vor O1 – sonst meldet ein Lauf Erfolg, obwohl das Admin auf altem Stand
+steht. Nur die neuen Metadaten `feed_run_status` und `feed_publish_status` sind
+best effort.
+
+Einzelheiten, Datenformate und Grenzen: `docs/deployment/feed-heartbeat.md`.
 
 ---
 
@@ -390,6 +433,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** GamePro liefert an GitHub Actions HTTP 403; tote öffentliche Proxies entfernt, eigener PHP-Proxy als Fallback eingeführt
 - **Juli 2026:** Feed-Abruf nach `scripts/feed-fetch-utils.js` extrahiert – Wiederholungen, Größenbegrenzung, Feed-Validierung, getrennte Direkt- und Proxy-Fehler
 - **Juli 2026:** Einstellungsdialog mit echten ARIA-Tabs, angekündigten Formularmeldungen und jederzeit möglichem Schließen
+- **Juli 2026:** Cron-Heartbeat (O1): Attempt-Status, Kern-Publish und Inhaltsfrische getrennt geführt, veraltete Daten ab 50 Minuten sichtbar; Workflow startet zu Minute 7/27/47
 
 ---
 

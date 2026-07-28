@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { FeedSource } from '../../types';
+import type { FeedHeartbeat, FeedSource } from '../../types';
 import type { FeedHealth } from './AdminPanel';
 import type { HealthState } from './healthTypes';
+import { FeedHeartbeatPanel } from './FeedHeartbeatPanel';
 import {
     CheckCircleIcon, XCircleIcon, QuestionMarkCircleIcon, LoadingSpinner, WarningIcon, ChevronDownIcon, ChevronUpIcon
 } from '../Icons';
@@ -65,6 +66,7 @@ const SortableHeader: React.FC<{
 interface HealthCenterTabProps {
     feeds: FeedSource[];
     feedHealth: FeedHealth;
+    heartbeat: FeedHeartbeat | null;
     onCheckAll: () => void;
     isCheckingAll: boolean;
 }
@@ -72,6 +74,7 @@ interface HealthCenterTabProps {
 export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                                                                     feeds,
                                                                     feedHealth,
+                                                                    heartbeat,
                                                                     onCheckAll,
                                                                     isCheckingAll
                                                                 }) => {
@@ -124,6 +127,7 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
 
     return (
         <section className="bg-white dark:bg-zinc-800 rounded-lg shadow overflow-hidden">
+            <FeedHeartbeatPanel heartbeat={heartbeat} />
             <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-slate-200 dark:border-zinc-700">
                 <div className="text-center sm:text-left">
                     <h2 className="text-lg font-semibold">{t('admin.health.title')}</h2>

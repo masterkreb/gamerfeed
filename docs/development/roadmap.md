@@ -71,6 +71,13 @@ CI-Schritt, und der Consent-Lebenszyklus deckt Widerruf und erneute Zustimmung
 ab. 178 zentrale Tests und 9 Browser-Abnahmen laufen erfolgreich. Damit
 verschiebt sich das Hauptrisiko auf den Cron-Betrieb selbst – dort setzt O1 an.
 
+**Stand 28. Juli 2026 (Branch `claude/o1-cron-heartbeat`):** O1 ist
+abgeschlossen. Ein ausgefallener oder erfolgloser Cron-Lauf ist im Admin
+erkennbar, statt als alter grüner Status weiterzulaufen. 236 zentrale Tests und
+9 Browser-Abnahmen laufen erfolgreich. Das nächste Hauptrisiko ist die fehlende
+Laufzeit-Validierung der Admin-Payloads – dort setzt S2 an. Beobachtbarkeit über
+den letzten Lauf hinaus (Historie, Alarm) bleibt O4 vorbehalten.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -80,8 +87,8 @@ verschiebt sich das Hauptrisiko auf den Cron-Betrieb selbst – dort setzt O1 an
 | S1b | P1 | erledigt | Artikel-, Bild- und Ausgabe-URLs sicher behandeln |
 | T0 | P1 | erledigt | Kleines Chromium-E2E-Grundgerüst bereitstellen |
 | F2 | P1 | erledigt | Consent-Widerruf und Cookie-Einstellungen vervollständigen |
-| O1 | P1 | **bereit** | Cron-Heartbeat und veraltete Health-Daten sichtbar machen |
-| S2 | P1 | geplant | Admin-API-Payloads validieren und Fehlerausgaben härten |
+| O1 | P1 | erledigt | Cron-Heartbeat und veraltete Health-Daten sichtbar machen |
+| S2 | P1 | **bereit** | Admin-API-Payloads validieren und Fehlerausgaben härten |
 | O2a | P1 | geplant | Einzelitem-Fehler, Secrets und Provider-Timeouts absichern |
 | O2b | P1 | geplant | Feed-Kernlauf mit Deadline und Scrape-Budget begrenzen |
 | O3a | P1 | geplant | Generationsgebundenes Leseprotokoll und Migration vorbereiten |
@@ -141,8 +148,8 @@ Production ausrollen.
 - Plattformänderungen erfolgen nur nach ausdrücklicher Freigabe des
   Projektinhabers.
 
-S1a bleibt das nächste bereite Code-Arbeitspaket; vor dessen
-Production-Rollout muss R1 entschieden sein.
+R1 ist entschieden und verifiziert; alle folgenden Arbeitspakete laufen über den
+dort beschriebenen Pull-Request-Weg.
 
 ---
 
@@ -210,6 +217,8 @@ Outbound-Policy eine syntaktische Ausgabe-Policy.
 
 ### S2 – Runtime-Validierung und sichere API-Fehler
 
+**Status:** bereit – nächstes Code-Arbeitspaket.
+
 **Warum:** TypeScript-Casts prüfen eingehendes JSON nicht zur Laufzeit.
 Feed-Verwaltung und Ankündigungen benötigen daher serverseitige Verträge.
 
@@ -236,7 +245,23 @@ Feed-Verwaltung und Ankündigungen benötigen daher serverseitige Verträge.
 
 ### O1 – Heartbeat und Frische
 
-**Status:** bereit – nächstes Code-Arbeitspaket.
+**Status:** erledigt. `shared/feed-health-model.js` führt den veränderlichen
+Attempt-Status (`feed_run_status`) getrennt vom letzten Kern-Publish
+(`feed_publish_status`); `feed_health_status` schreibt `lastSuccessAt` je Feed
+fort und wird von einem gescheiterten Versuch nicht zurückgesetzt.
+`scripts/feed-run-recorder.js` entscheidet über Reihenfolge und Zulässigkeit der
+Schreibvorgänge: der Versuch bleibt bis nach der Trendphase `running`, ein nicht
+sicher gelesener historischer Stand wird nie mit Ersatzwerten überschrieben, und
+ein Abbruch vor der Feed-Liste wird von einer geladenen, aber leeren Liste
+unterschieden. Health-API und Admin zeigen Lauf, Kern-Publish und Inhaltsfrische
+getrennt und ab `FEED_STALE_AFTER_MS` (50 Minuten) als „veraltet“; Zeitstempel
+jenseits von `FEED_CLOCK_SKEW_TOLERANCE_MS` in der Zukunft gelten als ungültig.
+Der Workflow startet zu den Minuten 7/27/47 statt zur Minute 0.
+
+Bewusst nicht enthalten: die Inhaltsfrische belegt nur, dass eine Quelle
+überhaupt Artikel geliefert hat, nicht dass darunter neue waren – eine
+Novelty-Erkennung ist kein Bestandteil von O1. Einzelheiten:
+[`docs/deployment/feed-heartbeat.md`](../deployment/feed-heartbeat.md).
 
 **Warum:** Ein alter grüner `feed_health_status` bleibt momentan grün, auch
 wenn der geplante Workflow nicht mehr läuft.
