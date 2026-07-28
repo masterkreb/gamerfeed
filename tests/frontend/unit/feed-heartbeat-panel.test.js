@@ -168,6 +168,26 @@ test('ohne Heartbeat wird kein grüner Zustand behauptet', async () => {
     }
 });
 
+test('ein Zeitstempel aus der Zukunft wird als ungültig gekennzeichnet, nicht als aktuell', async () => {
+    const view = await renderPanel(heartbeatFor({
+        runAgeMs: -(24 * 60 * 60 * 1000),
+        publishAgeMs: -(24 * 60 * 60 * 1000),
+        contentAgeMs: -(24 * 60 * 60 * 1000),
+        feeds: { total: 15, success: 15, warning: 0, error: 0, unknown: 0 },
+    }));
+
+    try {
+        assert.equal(view.state('run'), 'invalid');
+        assert.equal(view.state('publish'), 'invalid');
+        assert.equal(view.state('content'), 'invalid');
+        assert.equal(view.card('panel').getAttribute('data-heartbeat-stale'), 'true');
+        assert.match(view.card('run').textContent, /Zeitstempel in der Zukunft/);
+        assert.doesNotMatch(view.card('run').textContent, /vor -/, 'kein negatives Alter');
+    } finally {
+        await view.testRoot.cleanup();
+    }
+});
+
 test('ein nie erfolgter Kern-Publish erscheint als unbekannt, nicht als aktuell', async () => {
     const view = await renderPanel(heartbeatFor({
         runAgeMs: 60_000,

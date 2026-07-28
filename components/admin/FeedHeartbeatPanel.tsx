@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { FeedHeartbeat, FeedRunResult } from '../../types';
+import type { FeedFreshness, FeedHeartbeat, FeedRunResult } from '../../types';
 import { CheckCircleIcon, WarningIcon, QuestionMarkCircleIcon } from '../Icons';
 
 const MINUTE_MS = 60 * 1000;
@@ -23,19 +23,22 @@ function formatTimestamp(iso: string | null, language: string, fallback: string)
 
 interface HeartbeatCardProps {
     title: string;
-    isStale: boolean;
-    at: string | null;
-    ageMs: number | null;
+    freshness: FeedFreshness;
     details: string[];
     testId: string;
 }
 
-const HeartbeatCard: React.FC<HeartbeatCardProps> = ({ title, isStale, at, ageMs, details, testId }) => {
+const HeartbeatCard: React.FC<HeartbeatCardProps> = ({ title, freshness, details, testId }) => {
     const { t, i18n } = useTranslation();
+    const { at, ageMs, isStale, isFuture } = freshness;
 
-    // Ohne Zeitstempel ist der Zustand nicht „gut“, sondern unbekannt. Farbe
-    // allein traegt die Aussage nicht: Symbol und Text nennen sie ebenfalls.
-    const state = at === null ? 'unknown' : (isStale ? 'stale' : 'fresh');
+    // Ohne Zeitstempel ist der Zustand nicht „gut“, sondern unbekannt; ein
+    // Zeitstempel aus der Zukunft ist schlicht unbrauchbar. Farbe allein traegt
+    // die Aussage nicht: Symbol und Text nennen sie ebenfalls.
+    const state = at === null
+        ? 'unknown'
+        : (isFuture ? 'invalid' : (isStale ? 'stale' : 'fresh'));
+
     const badge = {
         fresh: {
             icon: <CheckCircleIcon className="w-4 h-4" />,
@@ -47,6 +50,11 @@ const HeartbeatCard: React.FC<HeartbeatCardProps> = ({ title, isStale, at, ageMs
             label: t('admin.health.heartbeat.stale'),
             colors: 'text-red-700 dark:text-red-200 bg-red-100 dark:bg-red-900/40',
         },
+        invalid: {
+            icon: <WarningIcon className="w-4 h-4" />,
+            label: t('admin.health.heartbeat.invalid'),
+            colors: 'text-amber-700 dark:text-amber-200 bg-amber-100 dark:bg-amber-900/40',
+        },
         unknown: {
             icon: <QuestionMarkCircleIcon className="w-4 h-4" />,
             label: t('admin.health.heartbeat.never'),
@@ -54,7 +62,10 @@ const HeartbeatCard: React.FC<HeartbeatCardProps> = ({ title, isStale, at, ageMs
         },
     }[state];
 
-    const ageMinutes = ageMs === null ? null : Math.max(0, Math.round(ageMs / MINUTE_MS));
+    // Ein „vor -3 Minuten“ waere unlesbar; der Zustand steht ohnehin im Badge.
+    const ageMinutes = ageMs === null || isFuture
+        ? null
+        : Math.max(0, Math.round(ageMs / MINUTE_MS));
 
     return (
         <div
@@ -151,25 +162,19 @@ export const FeedHeartbeatPanel: React.FC<{ heartbeat: FeedHeartbeat | null }> =
                 <HeartbeatCard
                     testId="run"
                     title={t('admin.health.heartbeat.runTitle')}
-                    isStale={run.isStale}
-                    at={run.at}
-                    ageMs={run.ageMs}
+                    freshness={run}
                     details={runDetails}
                 />
                 <HeartbeatCard
                     testId="publish"
                     title={t('admin.health.heartbeat.publishTitle')}
-                    isStale={corePublish.isStale}
-                    at={corePublish.at}
-                    ageMs={corePublish.ageMs}
+                    freshness={corePublish}
                     details={publishDetails}
                 />
                 <HeartbeatCard
                     testId="content"
                     title={t('admin.health.heartbeat.contentTitle')}
-                    isStale={content.isStale}
-                    at={content.at}
-                    ageMs={content.ageMs}
+                    freshness={content}
                     details={contentDetails}
                 />
             </div>
