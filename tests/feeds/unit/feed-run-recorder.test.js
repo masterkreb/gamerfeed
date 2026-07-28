@@ -572,3 +572,66 @@ test('Fehlermeldungen laufen vor dem Speichern durch die Bereinigung', async () 
 
     assert.equal(harness.lastWrite('feed_run_status').fatalError, 'connect failed for [redacted]');
 });
+
+// === Ergebniszustand des abgeschlossenen Laufs (O2b) ===
+
+test('ein degradierter Lauf wird nicht als success gespeichert', async () => {
+    const harness = createStore({
+        initial: {
+            feed_health_status: storedHealth('2026-07-28T10:40:00.000Z'),
+            feed_publish_status: storedPublish('2026-07-28T10:40:00.000Z'),
+        },
+    });
+    const clock = createClock();
+    const recorder = createRecorder(harness, clock);
+
+    await recorder.begin();
+    await recorder.loadPreviousState();
+    recorder.markFeedListLoaded();
+    clock.advance(120_000);
+    await recorder.recordCorePublish({
+        feedHealth: successfulFeedHealth('2026-07-28T11:01:30.000Z'),
+        articleCount: 1200,
+        newestArticleAt: '2026-07-28T10:58:00.000Z',
+        durations: { publishMs: 800 },
+    });
+    clock.advance(30_000);
+    await recorder.finish({
+        feedHealth: successfulFeedHealth('2026-07-28T11:01:30.000Z'),
+        durations: { totalMs: 150_000 },
+        result: 'degraded',
+        degradedReason: 'Zeitbudget erschöpft: 2 Quelle(n) zurückgestellt',
+    });
+
+    const finished = harness.lastWrite('feed_run_status');
+    assert.equal(finished.result, 'degraded');
+    assert.match(finished.degradedReason, /2 Quelle/);
+    // Der Kern-Publish hat trotzdem stattgefunden - das ist der Unterschied zu
+    // `fatal`.
+    assert.equal(
+        harness.lastWrite('feed_publish_status').lastCorePublishAt,
+        '2026-07-28T11:02:00.000Z',
+    );
+});
+
+test('ein unbekannter Ergebniswert wird nicht stillschweigend zu degraded', async () => {
+    const harness = createStore({
+        initial: {
+            feed_health_status: storedHealth('2026-07-28T10:40:00.000Z'),
+            feed_publish_status: storedPublish('2026-07-28T10:40:00.000Z'),
+        },
+    });
+    const clock = createClock();
+    const recorder = createRecorder(harness, clock);
+
+    await recorder.begin();
+    await recorder.loadPreviousState();
+    recorder.markFeedListLoaded();
+    await recorder.finish({
+        feedHealth: successfulFeedHealth('2026-07-28T11:01:30.000Z'),
+        durations: {},
+        result: 'irgendwas',
+    });
+
+    assert.equal(harness.lastWrite('feed_run_status').result, 'success');
+});

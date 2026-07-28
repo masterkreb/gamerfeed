@@ -128,6 +128,11 @@ export const FeedHeartbeatPanel: React.FC<{ heartbeat: FeedHeartbeat | null }> =
             ? null
             : t('admin.health.heartbeat.runDuration', { seconds: Math.round(run.durations.totalMs / 1000) }),
         run.fatalError ? t('admin.health.heartbeat.runFatalError', { message: run.fatalError }) : null,
+        // Ein eingeschränkter Lauf ohne Begründung wäre nicht handhabbar: der
+        // Grund unterscheidet „Zeit war um" von „Scrape-Budget war aufgebraucht".
+        run.degradedReason
+            ? t('admin.health.heartbeat.runDegradedReason', { message: run.degradedReason })
+            : null,
     ].filter((detail): detail is string => detail !== null);
 
     const publishDetails = [

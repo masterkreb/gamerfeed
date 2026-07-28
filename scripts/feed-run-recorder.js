@@ -93,8 +93,11 @@ export function createFeedRunRecorder({
      * von vor O1: `feed_health_status` ist kein Diagnosebeiwerk, sondern der
      * Datensatz, auf dem das Admin-Panel steht. Faellt er aus, muss der
      * Actions-Lauf fehlschlagen, statt einen gesunden Lauf vorzutaeuschen.
-     * Solange es `degraded` aus O2b nicht gibt, ist „fatal“ die einzige
-     * ehrliche Antwort.
+     *
+     * Auch mit `degraded` aus O2b bleibt das so: `degraded` beschreibt
+     * *bewusst zurueckgestellte* Arbeit bei sonst vertrauenswuerdigem Stand.
+     * Ein nicht geschriebener Feed-Status ist dagegen ein **unbekannter**
+     * Stand – dafuer ist „fatal“ weiterhin die einzige ehrliche Antwort.
      */
     async function writeFeedHealth(feedHealth, { critical }) {
         if (!feedListLoaded) {
@@ -232,11 +235,19 @@ export function createFeedRunRecorder({
             return writeFeedHealth(feedHealth, { critical: true });
         },
 
-        /** Der Lauf ist wirklich durch – erst hier faellt `finishedAt`. */
-        async finish({ feedHealth, durations }) {
+        /**
+         * Der Lauf ist wirklich durch – erst hier faellt `finishedAt`.
+         *
+         * `result` unterscheidet `success` von `degraded` (O2b). Ein Lauf, der
+         * Arbeit wegen Deadline oder Scrape-Budget zurueckgestellt hat, darf
+         * **nicht** als `success` gespeichert werden: sonst meldete er einen
+         * vollstaendigen Stand, obwohl Quellen oder Bilder fehlen.
+         */
+        async finish({ feedHealth, durations, result = 'success', degradedReason = null }) {
             const finished = finishRunStatus(runStatus, {
                 finishedAt: now(),
-                result: 'success',
+                result: result === 'degraded' ? 'degraded' : 'success',
+                degradedReason,
                 feeds: summarizeFeedHealth(feedHealth),
                 durations,
             });

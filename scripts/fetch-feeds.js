@@ -9,9 +9,15 @@ import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeContentUrl } from '../shared/url-policy.js';
-import { sanitizeErrorMessage } from '../shared/feed-health-model.js';
+import { resolveRunResult, sanitizeErrorMessage } from '../shared/feed-health-model.js';
 import { createFeedRunRecorder } from './feed-run-recorder.js';
 import { readFeedRunConfiguration } from './feed-run-config.js';
+import {
+    DEFERRAL_KINDS,
+    DEFERRAL_REASONS,
+    createRunBudget,
+    distributeBySourceFairly,
+} from './feed-run-budget.js';
 import { parseGroqJsonContent, requestGroqCompletion } from './groq-client.js';
 import { readLimitedResponseText } from './limited-response.js';
 import { fetchWithOutboundPolicy } from './outbound-policy.js';
@@ -93,6 +99,10 @@ export const HTML_SCRAPE_TIMEOUT_MS = 5000;
 export const MAX_HTML_RESPONSE_BYTES = 2 * 1024 * 1024;
 
 export async function getOgImageFromUrl(url, sourceName, {
+    // Vorgabe ist das reine Einzeltimeout aus O2a. Der Cron-Lauf reicht hier
+    // das Signal seines Gesamtbudgets herein, damit ein haengender Scrape auch
+    // dann endet, wenn die Laufdeadline zuerst greift (O2b).
+    createSignal = timeoutMs => AbortSignal.timeout(timeoutMs),
     fetchImpl,
     lookup,
     logger = console,
@@ -120,7 +130,7 @@ export async function getOgImageFromUrl(url, sourceName, {
                 ...attempt.options,
                 fetchImpl,
                 lookup,
-                signal: AbortSignal.timeout(timeoutMs),
+                signal: createSignal(timeoutMs),
             });
             const attemptDuration = Date.now() - attemptStart;
             logger.log(`         ${attempt.name} responded with ${response.status} in ${formatDuration(attemptDuration)}`);
@@ -953,6 +963,10 @@ export async function main({
     // Die Hoeflichkeitspausen zwischen Abrufen sind injizierbar, damit Tests den
     // gesamten Lauf ohne echte Wartezeit durchspielen koennen.
     sleep = ms => new Promise(resolve => setTimeout(resolve, ms)),
+    // Zeit- und Scrape-Budget (O2b). Tests reichen ein Budget mit gestellter
+    // Uhr und gestellten Timern herein; in Produktion entsteht es unten aus der
+    // geprueften Konfiguration.
+    budget,
 } = {}) {
     // === Vorpruefung: laeuft vor jeder Verbindung ===
     //
@@ -983,6 +997,15 @@ export async function main({
     // Secret laeuft der Abruf ohne Fallback, statt fehlzuschlagen; eine
     // unbrauchbare Adresse wurde oben bereits verworfen.
     const feedProxyUrl = configuration.feedProxyUrl;
+
+    // Das Budget zaehlt ab hier: die Konfigurationspruefung selbst kostet keine
+    // messbare Zeit, jeder externe Zugriff liegt dahinter.
+    const runBudget = budget ?? createRunBudget({
+        deadlineMs: configuration.coreDeadlineMs,
+        scrapeLimit: configuration.scrapeLimit,
+    });
+    const requestSignal = timeoutMs => runBudget.requestSignal(timeoutMs);
+    const isBudgetExhausted = () => runBudget.isDeadlineReached();
 
     const runStartMs = Date.now();
     const durations = {};
@@ -1065,6 +1088,29 @@ export async function main({
         const feedFetchStartMs = Date.now();
 
         for (const feed of feeds) {
+            // Restzeitprüfung **vor** jeder einzelnen Quelle, nicht nur vor der
+            // Phase: die Deadline kann mitten in der Liste fallen.
+            if (runBudget.isDeadlineReached()) {
+                runBudget.defer({
+                    reason: DEFERRAL_REASONS.DEADLINE,
+                    kind: DEFERRAL_KINDS.FEED,
+                });
+                // Kein `error`: die Quelle ist nicht kaputt, sie kam nur nicht
+                // mehr dran. `lastSuccessAt` bleibt erhalten, ihre alten
+                // Artikel ebenso.
+                feedHealthStatus[feed.id] = {
+                    status: 'warning',
+                    message: 'Zurückgestellt: Zeitbudget des Laufs erschöpft.',
+                    lastAttemptAt: null,
+                    lastSuccessAt: recorder.lastSuccessAtFor(feed.id),
+                    durationMs: null,
+                    articleCount: null,
+                    skippedItemCount: 0,
+                };
+                logger.warn(`   ⏱️  Zurückgestellt: ${feed.name} (Zeitbudget erschöpft)`);
+                continue;
+            }
+
             const feedUrl = getFetchUrlForFeed(feed);
             logger.log(`📡 Fetching: ${feed.name}...`);
             if (feedUrl !== feed.url) {
@@ -1072,9 +1118,11 @@ export async function main({
             }
 
             const feedStartMs = Date.now();
-            const { xmlString, lastError } = await fetchFeedXml({
+            const { xmlString, lastError, budgetExhausted } = await fetchFeedXml({
                 // Nur ausdrücklich vorgesehene Quellen dürfen über den Proxy.
                 allowProxy: isProxyEligibleSource(feed),
+                createSignal: requestSignal,
+                isBudgetExhausted,
                 directTimeoutMs: FEED_FETCH_TIMEOUT_MS,
                 feedName: feed.name,
                 feedProxyUrl,
@@ -1144,6 +1192,19 @@ export async function main({
                         message: redactMessage(`Failed during parse. Error: ${message}`),
                     };
                 }
+            } else if (budgetExhausted) {
+                // Der Abruf ist nicht gescheitert, er wurde vom Gesamtabbruch
+                // beendet. Das ist kein Fehler dieser Quelle.
+                runBudget.defer({
+                    reason: DEFERRAL_REASONS.DEADLINE,
+                    kind: DEFERRAL_KINDS.FEED,
+                });
+                feedHealthStatus[feed.id] = {
+                    ...baseEntry,
+                    status: 'warning',
+                    message: 'Zurückgestellt: Zeitbudget des Laufs erschöpft.',
+                };
+                logger.warn(`   ⏱️  Zurückgestellt: ${feed.name} (Zeitbudget während des Abrufs erschöpft)`);
             } else {
                 logger.error(`   ❌ Fetch failed for ${feed.name}. Error: ${redactMessage(String(lastError))}`);
                 feedHealthStatus[feed.id] = {
@@ -1152,7 +1213,9 @@ export async function main({
                     message: redactMessage(`Fetch failed. Error: ${lastError}`),
                 };
             }
-            await sleep(200);
+
+            // Die Höflichkeitspause entfällt, sobald die Zeit ohnehin um ist.
+            if (!runBudget.isDeadlineReached()) await sleep(200);
         }
 
         durations.feedFetchMs = Date.now() - feedFetchStartMs;
@@ -1186,16 +1249,44 @@ export async function main({
             logger.log(`\n♻️  Reused ${reusedCachedImageCount} valid cached image(s); skipped redundant page scraping.`);
         }
 
-        const articlesNeedingScraping = newlyFetchedArticles.filter(a => a.needsScraping);
+        // Reihum statt der Reihe nach: sonst frisst die erste Quelle das ganze
+        // Scrape-Budget und alle folgenden gehen Lauf für Lauf leer aus.
+        const articlesNeedingScraping = distributeBySourceFairly(
+            newlyFetchedArticles.filter(a => a.needsScraping),
+        );
         const imageScrapeStartMs = Date.now();
         if (articlesNeedingScraping.length > 0) {
             logger.log(`\n🔎 Scraping images for ${articlesNeedingScraping.length} articles...\n`);
             const scrapeStats = { found: 0, missing: 0, failed: 0, totalMs: 0 };
-            for (const article of articlesNeedingScraping) {
+            for (const [index, article] of articlesNeedingScraping.entries()) {
+                // Beide Grenzen vor jedem einzelnen Abruf. Der Rest der Liste
+                // wird geschlossen zurückgestellt statt einzeln zu scheitern;
+                // die Artikel bekommen unten einen Platzhalter und sind damit
+                // im nächsten Lauf wieder Kandidaten für den Backfill.
+                const stopReason = !runBudget.hasPageFetchBudget()
+                    ? DEFERRAL_REASONS.SCRAPE_BUDGET
+                    : (runBudget.isDeadlineReached() ? DEFERRAL_REASONS.DEADLINE : null);
+                if (stopReason) {
+                    const offen = articlesNeedingScraping.length - index;
+                    runBudget.defer({
+                        reason: stopReason,
+                        kind: DEFERRAL_KINDS.IMAGE_SCRAPE,
+                        count: offen,
+                    });
+                    logger.warn(`   ⏱️  ${offen} Bild-Scrape(s) zurückgestellt (${stopReason}).`);
+                    break;
+                }
+                runBudget.consumePageFetch();
+
                 const articleScrapeStart = Date.now();
                 try {
                     logger.log(`   🖼️  Scraping: ${article.source} - ${article.title.substring(0, 40)}...`);
-                    const scrapedImage = await getOgImageFromUrl(article.link, article.source, { fetchImpl, logger, lookup });
+                    const scrapedImage = await getOgImageFromUrl(article.link, article.source, {
+                        createSignal: requestSignal,
+                        fetchImpl,
+                        logger,
+                        lookup,
+                    });
                     const articleScrapeDuration = Date.now() - articleScrapeStart;
                     scrapeStats.totalMs += articleScrapeDuration;
                     if (scrapedImage) {
@@ -1207,7 +1298,7 @@ export async function main({
                         scrapeStats.missing++;
                         logger.log(`      ⚠️  No image found, using placeholder (${formatDuration(articleScrapeDuration)})`);
                     }
-                    await sleep(500);
+                    if (!runBudget.isDeadlineReached()) await sleep(500);
                 } catch (error) {
                     const articleScrapeDuration = Date.now() - articleScrapeStart;
                     scrapeStats.totalMs += articleScrapeDuration;
@@ -1227,26 +1318,49 @@ export async function main({
 
         const newlyFetchedLinks = new Set(newlyFetchedArticles.map(article => article.link).filter(Boolean));
         const backfillSourceCounts = new Map();
-        const imageBackfillArticles = oldArticles
-            .filter(article => article?.link && needsStoredImageRepair(article) && !newlyFetchedLinks.has(article.link))
-            .filter(article => {
-                const source = article.source || 'Unknown';
-                const currentCount = backfillSourceCounts.get(source) || 0;
-                if (currentCount >= IMAGE_BACKFILL_PER_SOURCE_LIMIT) return false;
-                backfillSourceCounts.set(source, currentCount + 1);
-                return true;
-            })
-            .slice(0, IMAGE_BACKFILL_LIMIT);
+        const imageBackfillArticles = distributeBySourceFairly(
+            oldArticles
+                .filter(article => article?.link && needsStoredImageRepair(article) && !newlyFetchedLinks.has(article.link))
+                .filter(article => {
+                    const source = article.source || 'Unknown';
+                    const currentCount = backfillSourceCounts.get(source) || 0;
+                    if (currentCount >= IMAGE_BACKFILL_PER_SOURCE_LIMIT) return false;
+                    backfillSourceCounts.set(source, currentCount + 1);
+                    return true;
+                }),
+        ).slice(0, IMAGE_BACKFILL_LIMIT);
 
         const imageBackfillStartMs = Date.now();
         if (imageBackfillArticles.length > 0) {
             logger.log(`\n🧩 Backfilling images for ${imageBackfillArticles.length} old articles with missing or invalid images...\n`);
             const backfillStats = { found: 0, missing: 0, failed: 0, totalMs: 0 };
-            for (const article of imageBackfillArticles) {
+            for (const [index, article] of imageBackfillArticles.entries()) {
+                // Backfill und Neu-Scrape teilen sich dasselbe Budget: es sind
+                // dieselben fremden Artikelseiten und dieselbe Laufzeit.
+                const stopReason = !runBudget.hasPageFetchBudget()
+                    ? DEFERRAL_REASONS.SCRAPE_BUDGET
+                    : (runBudget.isDeadlineReached() ? DEFERRAL_REASONS.DEADLINE : null);
+                if (stopReason) {
+                    const offen = imageBackfillArticles.length - index;
+                    runBudget.defer({
+                        reason: stopReason,
+                        kind: DEFERRAL_KINDS.IMAGE_BACKFILL,
+                        count: offen,
+                    });
+                    logger.warn(`   ⏱️  ${offen} Bild-Backfill(s) zurückgestellt (${stopReason}).`);
+                    break;
+                }
+                runBudget.consumePageFetch();
+
                 const articleBackfillStart = Date.now();
                 try {
                     logger.log(`   🖼️  Backfill: ${article.source} - ${article.title.substring(0, 40)}...`);
-                    const scrapedImage = await getOgImageFromUrl(article.link, article.source, { fetchImpl, logger, lookup });
+                    const scrapedImage = await getOgImageFromUrl(article.link, article.source, {
+                        createSignal: requestSignal,
+                        fetchImpl,
+                        logger,
+                        lookup,
+                    });
                     const articleBackfillDuration = Date.now() - articleBackfillStart;
                     backfillStats.totalMs += articleBackfillDuration;
                     if (scrapedImage) {
@@ -1257,7 +1371,7 @@ export async function main({
                         backfillStats.missing++;
                         logger.log(`      ⚠️  Still no image found (${formatDuration(articleBackfillDuration)})`);
                     }
-                    await sleep(500);
+                    if (!runBudget.isDeadlineReached()) await sleep(500);
                 } catch (error) {
                     const articleBackfillDuration = Date.now() - articleBackfillStart;
                     backfillStats.totalMs += articleBackfillDuration;
@@ -1346,19 +1460,43 @@ export async function main({
         // Lauf nicht nachtraeglich zu `fatal` machen - deshalb endet die Phase
         // hier und nicht im aeusseren catch.
         const trendsStartMs = Date.now();
-        try {
-            await generateAndSaveTrends(sortedArticles, { groqApiKey: configuration.groqApiKey, groqFetch, logger, store });
-        } catch (trendsError) {
-            logger.warn(`   ⚠️  Trendphase übersprungen: ${redactMessage(
-                trendsError instanceof Error ? trendsError.message : String(trendsError),
-            )}`);
+        if (!runBudget.canRunOptionalPhase()) {
+            // Frühzeitig verzichten statt anfangen und mittendrin abgeschnitten
+            // werden: die Trends sind verzichtbar, der saubere Laufabschluss
+            // nicht.
+            runBudget.defer({
+                reason: DEFERRAL_REASONS.DEADLINE,
+                kind: DEFERRAL_KINDS.TRENDS,
+            });
+            logger.warn('   ⏱️  Trendphase zurückgestellt: die Restzeit unterschreitet die Reserve.');
+        } else {
+            try {
+                await generateAndSaveTrends(sortedArticles, { groqApiKey: configuration.groqApiKey, groqFetch, logger, store });
+            } catch (trendsError) {
+                logger.warn(`   ⚠️  Trendphase übersprungen: ${redactMessage(
+                    trendsError instanceof Error ? trendsError.message : String(trendsError),
+                )}`);
+            }
         }
         durations.trendsMs = Date.now() - trendsStartMs;
 
         // Erst jetzt ist der Lauf wirklich durch und bekommt sein `finishedAt`.
+        //
+        // `degraded` statt `success`, sobald irgendeine Arbeit wegen Deadline
+        // oder Scrape-Budget zurückgestellt wurde. Ein stillschweigendes
+        // `success` wäre die eigentliche Gefahr: der Heartbeat meldete dann
+        // einen vollständigen Stand, obwohl Quellen oder Bilder fehlen.
+        const degradedReason = runBudget.describeDeferrals();
+        const result = resolveRunResult({ deferredWork: runBudget.isDegraded() });
+        if (result === 'degraded') {
+            logger.warn(`   ⏱️  Lauf eingeschränkt abgeschlossen – ${degradedReason}`);
+        }
+
         await recorder.finish({
             feedHealth: feedHealthStatus,
             durations: { ...durations, totalMs: Date.now() - runStartMs },
+            result,
+            degradedReason,
         });
 
     } catch (error) {
@@ -1384,6 +1522,10 @@ export async function main({
             )}`);
         }
         return exit(1);
+    } finally {
+        // Der Deadline-Timer würde den Prozess sonst bis zu seinem Ablauf
+        // offen halten, auch wenn der Lauf längst durch ist.
+        runBudget.dispose();
     }
 }
 

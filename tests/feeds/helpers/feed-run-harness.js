@@ -173,6 +173,60 @@ export function feedFetch(spies, { xml = rssFeed(), status = 200 } = {}) {
 export const lookupStub = async () => [{ address: '93.184.216.34', family: 4 }];
 
 /**
+ * Kontrollierte Uhr samt Timerliste.
+ *
+ * Damit sind Deadline-Grenzfaelle ohne echte Wartezeit pruefbar: `vor()` setzt
+ * die Uhr und feuert dabei genau die Timer, die faellig geworden sind.
+ */
+export function createControlledClock(start = 1_000_000) {
+    let jetzt = start;
+    const timer = [];
+
+    return {
+        now: () => jetzt,
+        vor(ms) {
+            jetzt += ms;
+            for (const eintrag of timer) {
+                if (eintrag.geloescht || eintrag.gefeuert || eintrag.faelligAt > jetzt) continue;
+                eintrag.gefeuert = true;
+                eintrag.callback();
+            }
+        },
+        setTimer(callback, ms) {
+            const eintrag = { callback, faelligAt: jetzt + ms, geloescht: false, gefeuert: false };
+            timer.push(eintrag);
+            return eintrag;
+        },
+        clearTimer(eintrag) {
+            if (eintrag) eintrag.geloescht = true;
+        },
+        timer,
+    };
+}
+
+/**
+ * Ersatz fuer `AbortSignal.timeout`: kein echter Timer, dafuer steuerbar.
+ *
+ * `angefragt` haelt fest, mit welcher Frist jede einzelne Anfrage gebaut wurde;
+ * ueber `controller` laesst sich ein Einzeltimeout gezielt ausloesen.
+ */
+export function createTimeoutSignalFactory() {
+    const angefragt = [];
+    const controller = [];
+
+    return {
+        angefragt,
+        controller,
+        createTimeoutSignal(ms) {
+            angefragt.push(ms);
+            const eigener = new AbortController();
+            controller.push(eigener);
+            return eigener.signal;
+        },
+    };
+}
+
+/**
  * Startet `main()` mit vollständig injizierten Aussenkanten.
  *
  * @param {(options: object) => Promise<unknown>} main

@@ -12,54 +12,13 @@ import {
     createRunBudget,
     distributeBySourceFairly,
 } from '../../../scripts/feed-run-budget.js';
+import {
+    createControlledClock as createUhr,
+    createTimeoutSignalFactory as createSignalFabrik,
+} from '../helpers/feed-run-harness.js';
 
 // Alle Grenzfaelle laufen ueber eine gestellte Uhr und gestellte Timer.
 // Kein Test wartet echt, keiner beruehrt das Netz.
-
-/** Kontrollierte Uhr samt Timerliste. */
-function createUhr(start = 1_000_000) {
-    let jetzt = start;
-    const timer = [];
-
-    return {
-        now: () => jetzt,
-        /** Setzt die Uhr vor und feuert alle faelligen Timer. */
-        vor(ms) {
-            jetzt += ms;
-            for (const eintrag of timer) {
-                if (eintrag.geloescht || eintrag.gefeuert || eintrag.faelligAt > jetzt) continue;
-                eintrag.gefeuert = true;
-                eintrag.callback();
-            }
-        },
-        setTimer(callback, ms) {
-            const eintrag = { callback, faelligAt: jetzt + ms, geloescht: false, gefeuert: false };
-            timer.push(eintrag);
-            return eintrag;
-        },
-        clearTimer(eintrag) {
-            if (eintrag) eintrag.geloescht = true;
-        },
-        timer,
-    };
-}
-
-/** Ersatz fuer AbortSignal.timeout: kein echter Timer, dafuer steuerbar. */
-function createSignalFabrik() {
-    const angefragt = [];
-    const controller = [];
-
-    return {
-        angefragt,
-        controller,
-        createTimeoutSignal(ms) {
-            angefragt.push(ms);
-            const eigener = new AbortController();
-            controller.push(eigener);
-            return eigener.signal;
-        },
-    };
-}
 
 function createBudget(uhr, optionen = {}) {
     const fabrik = createSignalFabrik();

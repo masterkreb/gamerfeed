@@ -4,10 +4,18 @@ import {
     CORE_ENV_KEYS,
     checkCoreConfiguration,
     describeMissingCoreConfiguration,
+    readCoreDeadlineMs,
     readFeedRunConfiguration,
     readOptionalGroqKey,
     readOptionalProxyUrl,
+    readScrapeLimit,
 } from '../../../scripts/feed-run-config.js';
+import {
+    CORE_DEADLINE_MS,
+    MAX_ARTICLE_PAGE_FETCHES_PER_RUN,
+    MAX_CORE_DEADLINE_MS,
+    MIN_CORE_DEADLINE_MS,
+} from '../../../scripts/feed-run-budget.js';
 
 const VOLLSTAENDIG = Object.freeze({
     POSTGRES_URL: 'postgres://nutzer:geheim@db.example/main',
@@ -166,4 +174,56 @@ test('bei fehlender Core-Konfiguration werden optionale Werte gar nicht erst gel
     assert.equal(groqApiKey, null);
     assert.equal(feedProxyUrl, null);
     assert.deepEqual(skipped, []);
+});
+
+// === Zeit- und Scrape-Budget (O2b) ===
+
+test('ohne Angabe gelten die dokumentierten Vorgaben', () => {
+    const { coreDeadlineMs, scrapeLimit, skipped } = readFeedRunConfiguration(VOLLSTAENDIG);
+
+    assert.equal(coreDeadlineMs, CORE_DEADLINE_MS);
+    assert.equal(scrapeLimit, MAX_ARTICLE_PAGE_FETCHES_PER_RUN);
+    assert.deepEqual(skipped, []);
+});
+
+test('eine gueltige Deadline aus der Umgebung wird uebernommen', () => {
+    assert.deepEqual(readCoreDeadlineMs({ FEED_CORE_DEADLINE_MS: ' 600000 ' }), {
+        value: 600_000,
+        skipReason: null,
+    });
+});
+
+test('die Grenzen des erlaubten Deadline-Bereichs gelten beidseitig', () => {
+    assert.equal(readCoreDeadlineMs({ FEED_CORE_DEADLINE_MS: String(MIN_CORE_DEADLINE_MS) }).value, MIN_CORE_DEADLINE_MS);
+    assert.equal(readCoreDeadlineMs({ FEED_CORE_DEADLINE_MS: String(MAX_CORE_DEADLINE_MS) }).value, MAX_CORE_DEADLINE_MS);
+});
+
+test('eine unbrauchbare Deadline faellt auf die Vorgabe zurueck, statt sie abzuschalten', () => {
+    // Der gefaehrliche Fall: eine kaputte Zahl darf weder eine unbegrenzte noch
+    // eine absurd kurze Laufzeit ergeben.
+    for (const wert of ['keine-zahl', '0', '1.5', String(MAX_CORE_DEADLINE_MS + 1), '-5000']) {
+        const { value, skipReason } = readCoreDeadlineMs({ FEED_CORE_DEADLINE_MS: wert });
+        assert.equal(value, CORE_DEADLINE_MS, `${wert}: die Vorgabe bleibt`);
+        assert.match(skipReason, /FEED_CORE_DEADLINE_MS/);
+    }
+});
+
+test('das Scrape-Limit wird ebenso geprueft und darf null sein', () => {
+    assert.equal(readScrapeLimit({ FEED_SCRAPE_LIMIT: '0' }).value, 0);
+    assert.equal(readScrapeLimit({ FEED_SCRAPE_LIMIT: '25' }).value, 25);
+    assert.equal(readScrapeLimit({ FEED_SCRAPE_LIMIT: '5000' }).value, MAX_ARTICLE_PAGE_FETCHES_PER_RUN);
+    assert.match(readScrapeLimit({ FEED_SCRAPE_LIMIT: 'viele' }).skipReason, /FEED_SCRAPE_LIMIT/);
+});
+
+test('eine verworfene Grenze meldet nur den Variablennamen', () => {
+    const { skipped } = readFeedRunConfiguration({
+        ...VOLLSTAENDIG,
+        FEED_CORE_DEADLINE_MS: '99999999',
+        FEED_SCRAPE_LIMIT: 'viele',
+    });
+
+    const begruendung = skipped.join(' ');
+    assert.match(begruendung, /FEED_CORE_DEADLINE_MS/);
+    assert.match(begruendung, /FEED_SCRAPE_LIMIT/);
+    assert.doesNotMatch(begruendung, /99999999|viele/);
 });

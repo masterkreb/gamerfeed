@@ -13,6 +13,12 @@
 // ausschliesslich der Name der Variablen.
 
 import { parseAllowedUrl } from '../shared/url-policy.js';
+import {
+    CORE_DEADLINE_MS,
+    MAX_ARTICLE_PAGE_FETCHES_PER_RUN,
+    MAX_CORE_DEADLINE_MS,
+    MIN_CORE_DEADLINE_MS,
+} from './feed-run-budget.js';
 
 export const CORE_ENV_KEYS = Object.freeze([
     'POSTGRES_URL',
@@ -102,6 +108,62 @@ export function readOptionalProxyUrl(env = {}) {
 }
 
 /**
+ * Liest eine optionale ganzzahlige Grenze aus der Umgebung.
+ *
+ * Ein unbrauchbarer Wert **ersetzt die Vorgabe nicht** und schaltet auch nichts
+ * ab: eine kaputte Zahl darf weder eine unbegrenzte noch eine absurd kurze
+ * Laufzeit ergeben. Gemeldet wird nur der Variablenname.
+ *
+ * @param {Record<string, unknown>} env
+ * @param {{ key: string, fallback: number, min: number, max: number }} bounds
+ * @returns {{ value: number, skipReason: string|null }}
+ */
+function readOptionalLimit(env, { key, fallback, min, max }) {
+    const raw = env?.[key];
+    if (!hasUsableValue(raw)) return { value: fallback, skipReason: null };
+
+    const numeric = Number(raw.trim());
+    if (!Number.isFinite(numeric) || !Number.isInteger(numeric)) {
+        return { value: fallback, skipReason: `${key} ist keine ganze Zahl; die Vorgabe gilt weiter` };
+    }
+    if (numeric < min || numeric > max) {
+        return { value: fallback, skipReason: `${key} liegt außerhalb des erlaubten Bereichs; die Vorgabe gilt weiter` };
+    }
+
+    return { value: numeric, skipReason: null };
+}
+
+/**
+ * Deadline der Kernphasen (O2b).
+ *
+ * @param {Record<string, unknown>} env
+ * @returns {{ value: number, skipReason: string|null }}
+ */
+export function readCoreDeadlineMs(env = {}) {
+    return readOptionalLimit(env, {
+        key: 'FEED_CORE_DEADLINE_MS',
+        fallback: CORE_DEADLINE_MS,
+        min: MIN_CORE_DEADLINE_MS,
+        max: MAX_CORE_DEADLINE_MS,
+    });
+}
+
+/**
+ * Obergrenze der Artikel-Seitenabrufe pro Lauf (O2b).
+ *
+ * @param {Record<string, unknown>} env
+ * @returns {{ value: number, skipReason: string|null }}
+ */
+export function readScrapeLimit(env = {}) {
+    return readOptionalLimit(env, {
+        key: 'FEED_SCRAPE_LIMIT',
+        fallback: MAX_ARTICLE_PAGE_FETCHES_PER_RUN,
+        min: 0,
+        max: 1000,
+    });
+}
+
+/**
  * Fasst die gesamte Laufkonfiguration zusammen.
  *
  * @param {Record<string, unknown>} env
@@ -111,6 +173,8 @@ export function readOptionalProxyUrl(env = {}) {
  *   fatalMessage: string|null,
  *   groqApiKey: string|null,
  *   feedProxyUrl: string|null,
+ *   coreDeadlineMs: number,
+ *   scrapeLimit: number,
  *   skipped: string[],
  * }}
  */
@@ -123,12 +187,16 @@ export function readFeedRunConfiguration(env = {}) {
             fatalMessage: describeMissingCoreConfiguration(core.missing),
             groqApiKey: null,
             feedProxyUrl: null,
+            coreDeadlineMs: CORE_DEADLINE_MS,
+            scrapeLimit: MAX_ARTICLE_PAGE_FETCHES_PER_RUN,
             skipped: [],
         };
     }
 
     const groq = readOptionalGroqKey(env);
     const proxy = readOptionalProxyUrl(env);
+    const deadline = readCoreDeadlineMs(env);
+    const scrapeLimit = readScrapeLimit(env);
 
     return {
         ok: true,
@@ -136,6 +204,9 @@ export function readFeedRunConfiguration(env = {}) {
         fatalMessage: null,
         groqApiKey: groq.value,
         feedProxyUrl: proxy.value,
-        skipped: [groq.skipReason, proxy.skipReason].filter(reason => reason !== null),
+        coreDeadlineMs: deadline.value,
+        scrapeLimit: scrapeLimit.value,
+        skipped: [groq.skipReason, proxy.skipReason, deadline.skipReason, scrapeLimit.skipReason]
+            .filter(reason => reason !== null),
     };
 }
