@@ -1,12 +1,21 @@
+import { ADMIN_CACHE_CONTROL, API_ERROR_CODES } from '../shared/api-errors.js';
+
 const ADMIN_REALM = 'GamerFeed Admin';
 
 function noStoreResponse(body, status, headers = {}) {
     return new Response(body, {
         status,
         headers: {
-            'Cache-Control': 'no-store',
+            'Cache-Control': ADMIN_CACHE_CONTROL,
             ...headers,
         },
+    });
+}
+
+function jsonNoStoreResponse(code, message, status, headers = {}) {
+    return noStoreResponse(JSON.stringify({ error: message, code }), status, {
+        'Content-Type': 'application/json',
+        ...headers,
     });
 }
 
@@ -53,12 +62,25 @@ function parseBasicCredentials(authorization) {
     }
 }
 
-export function requireAdminAuth(request, env = process.env) {
+/**
+ * Trifft die Entscheidung, ohne sie schon in eine Antwort zu gießen.
+ *
+ * Die Middleware für `/admin.html` und die Admin-APIs brauchen dasselbe Urteil,
+ * aber unterschiedliche Antwortformate: der Browser bekommt Text, der Client
+ * JSON mit stabilem Fehlercode.
+ *
+ * @returns {null | { status: number, code: string, message: string, headers?: Record<string, string> }}
+ */
+function evaluateAdminAuth(request, env) {
     const expectedUsername = env.ADMIN_USERNAME;
     const expectedPassword = env.ADMIN_PASSWORD;
 
     if (!expectedUsername || !expectedPassword || expectedUsername.includes(':')) {
-        return noStoreResponse('Service unavailable', 503);
+        return {
+            status: 503,
+            code: API_ERROR_CODES.AUTH_UNAVAILABLE,
+            message: 'Service unavailable',
+        };
     }
 
     const credentials = parseBasicCredentials(request.headers.get('authorization'));
@@ -69,27 +91,62 @@ export function requireAdminAuth(request, env = process.env) {
         return null;
     }
 
-    return noStoreResponse('Authentication required', 401, {
-        'WWW-Authenticate': `Basic realm="${ADMIN_REALM}", charset="UTF-8"`,
-    });
+    return {
+        status: 401,
+        code: API_ERROR_CODES.UNAUTHORIZED,
+        message: 'Authentication required',
+        headers: { 'WWW-Authenticate': `Basic realm="${ADMIN_REALM}", charset="UTF-8"` },
+    };
 }
 
-export function requireAdminMutation(request, env = process.env) {
-    const authResponse = requireAdminAuth(request, env);
-    if (authResponse) {
-        return authResponse;
+function evaluateAdminMutation(request, env) {
+    const authFailure = evaluateAdminAuth(request, env);
+    if (authFailure) {
+        return authFailure;
     }
 
     let requestOrigin;
     try {
         requestOrigin = new URL(request.url).origin;
     } catch {
-        return noStoreResponse('Forbidden', 403);
+        return { status: 403, code: API_ERROR_CODES.FORBIDDEN, message: 'Forbidden' };
     }
 
     if (request.headers.get('origin') !== requestOrigin) {
-        return noStoreResponse('Forbidden', 403);
+        return { status: 403, code: API_ERROR_CODES.FORBIDDEN, message: 'Forbidden' };
     }
 
     return null;
+}
+
+/** Textantwort für die Edge-Middleware vor `/admin.html`. */
+export function requireAdminAuth(request, env = process.env) {
+    const failure = evaluateAdminAuth(request, env);
+    return failure
+        ? noStoreResponse(failure.message, failure.status, failure.headers)
+        : null;
+}
+
+/** Textantwort für die Edge-Middleware vor `/admin.html`. */
+export function requireAdminMutation(request, env = process.env) {
+    const failure = evaluateAdminMutation(request, env);
+    return failure
+        ? noStoreResponse(failure.message, failure.status, failure.headers)
+        : null;
+}
+
+/** JSON-Antwort mit stabilem Fehlercode für die Admin-APIs. */
+export function requireAdminApiAuth(request, env = process.env) {
+    const failure = evaluateAdminAuth(request, env);
+    return failure
+        ? jsonNoStoreResponse(failure.code, failure.message, failure.status, failure.headers)
+        : null;
+}
+
+/** JSON-Antwort mit stabilem Fehlercode für mutierende Admin-APIs. */
+export function requireAdminApiMutation(request, env = process.env) {
+    const failure = evaluateAdminMutation(request, env);
+    return failure
+        ? jsonNoStoreResponse(failure.code, failure.message, failure.status, failure.headers)
+        : null;
 }
