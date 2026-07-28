@@ -209,10 +209,16 @@ async function fetchTextWithRetry({
                 return { error: lastError, policyRejected: true, status: null, text: null };
             }
             // Der Abbruch kann vom Gesamtbudget kommen; dann war das hier der
-            // letzte Versuch dieser Quelle. Und selbst wenn nicht: reicht die
-            // Restzeit nicht einmal fuer die Pause, endet es hier ebenfalls.
-            if (!hasTimeFor(retryDelayMs)) return budgetExhausted();
+            // letzte Versuch dieser Quelle.
+            if (!hasTimeFor()) return budgetExhausted();
             if (attempt < attempts) {
+                // Eine Wiederholung, deren Pause nicht mehr hineinpasst, ist
+                // keine. Die Pruefung gehoert **in** diesen Zweig: nach dem
+                // letzten Versuch folgt gar keine Pause mehr, und ein echter
+                // Fehler der Quelle darf dort nicht als Zurueckstellung
+                // erscheinen - sonst verdeckt knappe Restzeit eine kaputte
+                // Quelle.
+                if (!hasTimeFor(retryDelayMs)) return budgetExhausted();
                 logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                 await sleep(retryDelayMs);
                 continue;

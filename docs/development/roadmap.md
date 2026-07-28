@@ -98,7 +98,7 @@ Workflows – dort setzt O2b an.
 abgeschlossen. Der Lauf hat jetzt eine Deadline von 18 Minuten mit 12 Minuten
 Reserve vor dem 30-Minuten-Hardlimit, ein gemeinsames Budget von 80
 Artikel-Seitenabrufen und drei klar getrennte Ergebniszustände. Zurückgestellte
-Arbeit ergibt `degraded` statt stillschweigend `success`. 497 zentrale Tests und
+Arbeit ergibt `degraded` statt stillschweigend `success`. 502 zentrale Tests und
 9 Browser-Abnahmen laufen erfolgreich. Das nächste Hauptrisiko liegt bei den
 zeitversetzt gecachten News-Endpunkten, die trotz Pointer verschiedene
 Generationen liefern können – dort setzt O3a an.
