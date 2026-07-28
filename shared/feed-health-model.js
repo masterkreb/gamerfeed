@@ -27,6 +27,17 @@ export const FEED_HEALTH_SCHEMA_VERSION = 1;
  */
 export const FEED_STALE_AFTER_MS = 50 * 60 * 1000;
 
+/**
+ * Erlaubte Uhrabweichung fuer Zeitstempel, die in der Zukunft liegen.
+ *
+ * GitHub-Runner, Vercel-Edge und KV haben leicht unterschiedliche Uhren; ein
+ * paar Sekunden Vorlauf sind normal. Ein Zeitstempel, der weiter als diese
+ * Toleranz in der Zukunft liegt, ist dagegen nicht plausibel und wird
+ * konservativ als ungueltig behandelt – sonst waere ein einziger falsch
+ * gesetzter Wert unbegrenzt lange „frisch“.
+ */
+export const FEED_CLOCK_SKEW_TOLERANCE_MS = 2 * 60 * 1000;
+
 export const FEED_HEALTH_STATUS_KEY = 'feed_health_status';
 export const FEED_RUN_STATUS_KEY = 'feed_run_status';
 export const FEED_PUBLISH_STATUS_KEY = 'feed_publish_status';
@@ -202,17 +213,17 @@ export function summarizeFeedHealth(health) {
  *
  * `lastSuccessAt` wird nur von einem Lauf fortgeschrieben, in dem der Feed
  * tatsaechlich Artikel geliefert hat; sonst bleibt der gespeicherte Wert
- * stehen. Ein leerer aktueller Status bedeutet, dass ueber keinen Feed etwas
- * bekannt ist – dann bleibt der gespeicherte Stand unangetastet, statt ihn zu
- * loeschen.
+ * stehen.
+ *
+ * Ein leerer aktueller Status ergibt hier bewusst ein leeres Ergebnis. Ob das
+ * gespeichert werden darf, haengt davon ab, warum er leer ist – eine
+ * tatsaechlich leere Feed-Liste soll geloeschte Feeds entfernen, ein Abbruch
+ * vor dem Laden der Liste dagegen nichts anfassen. Diese Entscheidung trifft
+ * `scripts/feed-run-recorder.js`, nicht diese Funktion.
  */
 export function mergeFeedHealth(previousHealth, currentHealth) {
     const previous = normalizeFeedHealth(previousHealth);
     const current = normalizeFeedHealth(currentHealth);
-
-    if (Object.keys(current).length === 0) {
-        return previous;
-    }
 
     const merged = {};
     for (const [feedId, entry] of Object.entries(current)) {
@@ -245,12 +256,7 @@ export function createRunStatus({ runId, startedAt }) {
     };
 }
 
-/**
- * Schliesst den Attempt-Status ab, ohne das Ausgangsobjekt zu veraendern.
- *
- * @param {ReturnType<typeof createRunStatus>} run
- */
-export function finishRunStatus(run, { finishedAt, result, fatalError = null, feeds, durations } = {}) {
+function buildRunStatus(run, { finishedAt, result, fatalError = null, feeds, durations }) {
     const started = normalizeRunStatus(run);
 
     return {
@@ -263,6 +269,28 @@ export function finishRunStatus(run, { finishedAt, result, fatalError = null, fe
         feeds: normalizeCounters(feeds ?? run?.feeds),
         durations: normalizeDurations(durations ?? run?.durations),
     };
+}
+
+/**
+ * Schreibt Zwischenstaende eines noch laufenden Versuchs fort.
+ *
+ * `finishedAt` bleibt dabei bewusst leer: solange noch eine Phase aussteht, ist
+ * der Lauf nicht beendet. Ein Abbruch danach wird deshalb am `startedAt`
+ * gemessen und faellt als haengender Lauf auf.
+ *
+ * @param {ReturnType<typeof createRunStatus>} run
+ */
+export function progressRunStatus(run, { feeds, durations } = {}) {
+    return buildRunStatus(run, { finishedAt: null, result: 'running', feeds, durations });
+}
+
+/**
+ * Schliesst den Attempt-Status ab, ohne das Ausgangsobjekt zu veraendern.
+ *
+ * @param {ReturnType<typeof createRunStatus>} run
+ */
+export function finishRunStatus(run, options = {}) {
+    return buildRunStatus(run, options);
 }
 
 /** @returns {ReturnType<typeof createRunStatus>|null} */
@@ -308,10 +336,17 @@ export function normalizePublishStatus(raw) {
  * Schreibt den Kern-Publish fort.
  *
  * `lastCorePublishAt` gilt jedem geschriebenen News-Cache, auch wenn der Lauf
- * nur alte Artikel erneut veroeffentlicht hat. `lastContentUpdateAt` verlangt
- * zusaetzlich mindestens einen Feed mit Artikeln – ein technisch beendeter Lauf
- * mit ausschliesslich fehlgeschlagenen Feeds erscheint deshalb nicht als
- * frischer Inhalt.
+ * nur alte Artikel erneut veroeffentlicht hat.
+ *
+ * `lastContentUpdateAt` verlangt zusaetzlich `feeds.success > 0`. Das belegt
+ * genau eine Sache: mindestens ein Feed hat ueberhaupt Artikel geliefert. Es
+ * belegt **nicht**, dass darunter neue Artikel waren – ein unveraenderter Feed
+ * zaehlt hier ebenso. Eine Novelty-Erkennung gehoert nicht zu O1.
+ *
+ * Ist `previous` nicht sicher gelesen worden, darf das Ergebnis bei
+ * `feeds.success === 0` nicht gespeichert werden: es enthielte dann ein
+ * geratenes `lastContentUpdateAt`. Diese Entscheidung trifft
+ * `scripts/feed-run-recorder.js`.
  */
 export function buildPublishStatus({
     previous,
@@ -340,36 +375,23 @@ export function buildPublishStatus({
     };
 }
 
-/**
- * Bestimmt die Datensaetze, die ein Lauf schreiben darf.
- *
- * `publish === null` heisst ausdruecklich: den gespeicherten Kern-Publish nicht
- * anfassen. Genau das trennt einen gescheiterten Versuch von einem
- * erfolgreichen.
- *
- * @returns {{ health: object, run: object, publish: object|null }}
- */
-export function buildRunRecords({ previous = {}, run, feedHealth, publish = null }) {
-    return {
-        health: mergeFeedHealth(previous.health, feedHealth),
-        run: normalizeRunStatus(run),
-        publish: publish === null
-            ? null
-            : buildPublishStatus({ ...publish, previous: previous.publish }),
-    };
-}
-
 function describeFreshness(timestamp, nowMs, staleAfterMs) {
     const at = toIsoTimestamp(timestamp);
     const atMs = toMilliseconds(timestamp);
     const ageMs = atMs === null ? null : nowMs - atMs;
 
+    // Ein Zeitstempel jenseits der Uhrtoleranz in der Zukunft ist nicht
+    // plausibel. Ohne diese Pruefung wuerde er dauerhaft als frisch gelten und
+    // genau den Ausfall verdecken, den der Heartbeat melden soll.
+    const isFuture = ageMs !== null && ageMs < -FEED_CLOCK_SKEW_TOLERANCE_MS;
+
     return {
         at,
         ageMs,
+        isFuture,
         // Fehlender Zeitstempel gilt als veraltet. Genau auf der Schwelle noch
         // nicht, erst darueber – das macht die Grenze eindeutig testbar.
-        isStale: ageMs === null || ageMs > staleAfterMs,
+        isStale: ageMs === null || isFuture || ageMs > staleAfterMs,
     };
 }
 

@@ -99,6 +99,8 @@ export interface FeedRunDurations {
 export interface FeedFreshness {
     at: string | null;
     ageMs: number | null;
+    /** Zeitstempel liegt jenseits der erlaubten Uhrabweichung in der Zukunft. */
+    isFuture: boolean;
     isStale: boolean;
 }
 

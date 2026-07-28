@@ -1,15 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+    FEED_CLOCK_SKEW_TOLERANCE_MS,
     FEED_STALE_AFTER_MS,
     buildFreshnessReport,
     buildPublishStatus,
-    buildRunRecords,
     createRunStatus,
     finishRunStatus,
     mergeFeedHealth,
     normalizePublishStatus,
     normalizeRunStatus,
+    progressRunStatus,
     sanitizeErrorMessage,
     summarizeFeedHealth,
 } from '../../../shared/feed-health-model.js';
@@ -104,6 +105,40 @@ test('die Schwelle ist ueberschreibbar, ohne den Standard zu veraendern', () => 
     assert.equal(FEED_STALE_AFTER_MS, 50 * 60 * 1000);
 });
 
+// === Zeitstempel aus der Zukunft ===
+
+test('eine kleine Uhrabweichung nach vorn gilt weiterhin als aktuell', () => {
+    const report = reportAged(-FEED_CLOCK_SKEW_TOLERANCE_MS);
+
+    assert.equal(report.run.ageMs, -FEED_CLOCK_SKEW_TOLERANCE_MS);
+    assert.equal(report.run.isFuture, false);
+    assert.equal(report.run.isStale, false);
+    assert.equal(report.isStale, false);
+});
+
+test('ein Zeitstempel jenseits der Uhrtoleranz gilt nie als frisch', () => {
+    const report = reportAged(-(FEED_CLOCK_SKEW_TOLERANCE_MS + 1));
+
+    assert.equal(report.run.isFuture, true);
+    assert.equal(report.run.isStale, true);
+    assert.equal(report.corePublish.isFuture, true);
+    assert.equal(report.corePublish.isStale, true);
+    assert.equal(report.content.isStale, true);
+    assert.equal(report.isStale, true);
+});
+
+test('ein weit in der Zukunft gesetzter Kern-Publish verdeckt keinen Ausfall', () => {
+    const report = buildFreshnessReport({
+        run: runStatusAged(3 * 60 * 60 * 1000),
+        publish: publishStatusAged(-(365 * 24 * 60 * 60 * 1000)),
+        now: NOW,
+    });
+
+    assert.equal(report.corePublish.isStale, true);
+    assert.equal(report.run.isStale, true);
+    assert.equal(report.isStale, true);
+});
+
 test('fehlende Datensaetze gelten als veraltet, nicht als gesund', () => {
     const report = buildFreshnessReport({ run: null, publish: null, now: NOW });
 
@@ -179,6 +214,29 @@ test('ein Lauf mit mindestens einem erfolgreichen Feed schreibt die Inhaltsfrisc
     assert.equal(report.content.newestArticleAgeMs, 2 * 60_000);
 });
 
+test('gelieferte Artikel schreiben die Inhaltsfrische fort, auch wenn nichts neu ist', () => {
+    // Bewusst festgehaltene Grenze: feeds.success > 0 belegt nur, dass ein Feed
+    // ueberhaupt Artikel geliefert hat. Ob darunter neue waren, weiss O1 nicht.
+    const previous = publishStatusAged(20 * 60_000);
+    const unveraenderterArtikel = previous.newestArticleAt;
+
+    const publish = buildPublishStatus({
+        previous,
+        runId: 'run-unchanged',
+        publishedAt: new Date(NOW),
+        articleCount: previous.articleCount,
+        newestArticleAt: unveraenderterArtikel,
+        feeds: { total: 3, success: 3, warning: 0, error: 0, unknown: 0 },
+    });
+
+    assert.equal(publish.newestArticleAt, unveraenderterArtikel, 'kein neuerer Artikel');
+    assert.equal(
+        publish.lastContentUpdateAt,
+        new Date(NOW).toISOString(),
+        'die Inhaltsfrische steigt trotzdem – eine Novelty-Erkennung gehoert nicht zu O1',
+    );
+});
+
 test('ohne vorherigen Publish bleibt die Inhaltsfrische ohne erfolgreiche Feeds leer', () => {
     const publish = buildPublishStatus({
         previous: null,
@@ -195,35 +253,18 @@ test('ohne vorherigen Publish bleibt die Inhaltsfrische ohne erfolgreiche Feeds 
 
 // === Gescheiterter Versuch ueberschreibt keine Erfolgsdaten ===
 
-test('ein gescheiterter Versuch laesst den gespeicherten Kern-Publish unberuehrt', () => {
-    const storedPublish = publishStatusAged(15 * 60_000);
+test('ein gescheiterter Feed uebernimmt den gespeicherten lastSuccessAt unveraendert', () => {
     const storedHealth = {
         gamestar: { status: 'success', message: 'ok', lastSuccessAt: isoAgo(15 * 60_000) },
     };
 
-    const records = buildRunRecords({
-        previous: { health: storedHealth, publish: storedPublish },
-        run: finishRunStatus(createRunStatus({ runId: 'run-5', startedAt: isoAgo(60_000) }), {
-            finishedAt: new Date(NOW),
-            result: 'fatal',
-            fatalError: new Error('KV nicht erreichbar').message,
-            feeds: { total: 1, success: 0, warning: 0, error: 1, unknown: 0 },
-        }),
-        feedHealth: {
-            gamestar: { status: 'error', message: 'Fetch failed.', lastAttemptAt: new Date(NOW).toISOString() },
-        },
-        publish: null,
+    const merged = mergeFeedHealth(storedHealth, {
+        gamestar: { status: 'error', message: 'Fetch failed.', lastAttemptAt: new Date(NOW).toISOString() },
     });
 
-    assert.equal(records.publish, null, 'der Kern-Publish wird nicht geschrieben');
-    assert.equal(records.run.result, 'fatal');
-    assert.equal(records.run.fatalError, 'KV nicht erreichbar');
-    assert.equal(records.health.gamestar.status, 'error');
-    assert.equal(
-        records.health.gamestar.lastSuccessAt,
-        storedHealth.gamestar.lastSuccessAt,
-        'lastSuccessAt bleibt erhalten',
-    );
+    assert.equal(merged.gamestar.status, 'error');
+    assert.equal(merged.gamestar.lastSuccessAt, storedHealth.gamestar.lastSuccessAt);
+    assert.equal(merged.gamestar.lastAttemptAt, new Date(NOW).toISOString());
 });
 
 test('ein erfolgreicher Feed schreibt lastSuccessAt fort', () => {
@@ -245,15 +286,15 @@ test('eine Warnung ohne Artikel schreibt lastSuccessAt nicht fort', () => {
     assert.equal(merged.gamestar.lastAttemptAt, new Date(NOW).toISOString());
 });
 
-test('ein Abbruch vor der Feed-Liste loescht den gespeicherten Feed-Status nicht', () => {
+test('mergeFeedHealth entscheidet nicht selbst ueber eine leere Feed-Liste', () => {
+    // Ob ein leeres Ergebnis gespeichert werden darf, haengt davon ab, warum es
+    // leer ist. Diese Unterscheidung trifft der Recorder, nicht das Modell –
+    // siehe tests/feeds/unit/feed-run-recorder.test.js.
     const stored = {
         gamestar: { status: 'success', message: 'ok', lastSuccessAt: isoAgo(20 * 60_000) },
     };
 
-    const merged = mergeFeedHealth(stored, {});
-
-    assert.deepEqual(Object.keys(merged), ['gamestar']);
-    assert.equal(merged.gamestar.lastSuccessAt, stored.gamestar.lastSuccessAt);
+    assert.deepEqual(mergeFeedHealth(stored, {}), {});
 });
 
 test('ein geloeschter Feed verschwindet aus dem Status', () => {
@@ -297,6 +338,20 @@ test('finishRunStatus veraendert den laufenden Versuch nicht', () => {
     assert.equal(finished.startedAt, running.startedAt);
     assert.equal(finished.durations.totalMs, 120_000);
     assert.equal(finished.durations.imageScrapeMs, null);
+});
+
+test('progressRunStatus haelt den Versuch offen und traegt nur Zwischenstaende nach', () => {
+    const running = createRunStatus({ runId: 'run-9', startedAt: isoAgo(120_000) });
+    const progressed = progressRunStatus(running, {
+        feeds: { total: 3, success: 2, warning: 0, error: 1, unknown: 0 },
+        durations: { publishMs: 700 },
+    });
+
+    assert.equal(progressed.result, 'running');
+    assert.equal(progressed.finishedAt, null, 'der Lauf ist noch nicht beendet');
+    assert.equal(progressed.startedAt, running.startedAt);
+    assert.equal(progressed.feeds.success, 2);
+    assert.equal(progressed.durations.publishMs, 700);
 });
 
 test('ein unbekanntes Ergebnis wird nicht als Erfolg durchgereicht', () => {
