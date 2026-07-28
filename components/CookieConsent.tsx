@@ -105,11 +105,15 @@ export const useCookieConsent = ({ onConsent }: CookieConsentConfig) => {
                 }
             },
 
-            onFirstConsent: () => {
+            // onConsent statt onFirstConsent: Der Rueckruf feuert auch bei einem
+            // wiederkehrenden Nutzer mit bereits erteilter Zustimmung, sodass
+            // Analytics nach einem Reload wieder aktiviert wird. Die
+            // Initialisierung im Lebenszyklus ist idempotent.
+            onConsent: () => {
                 const acceptedCategories = CookieConsent.acceptedCategory('analytics') ? ['analytics'] : [];
                 onConsent(acceptedCategories);
             },
-            
+
             onChange: ({ changedCategories }) => {
                 if (changedCategories.includes('analytics')) {
                     const acceptedCategories = CookieConsent.acceptedCategory('analytics') ? ['analytics'] : [];

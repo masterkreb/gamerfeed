@@ -840,7 +840,12 @@ const AppContent: React.FC = () => {
             <SettingsModal
                 isOpen={isSettingsModalOpen}
                 onClose={() => setIsSettingsModalOpen(false)}
-                onShowCookieSettings={showPreferences}
+                onShowCookieSettings={() => {
+                    // Erst schliessen, dann oeffnen: sonst konkurrieren zwei
+                    // dokumentweite Fokusfallen miteinander.
+                    setIsSettingsModalOpen(false);
+                    showPreferences();
+                }}
                 allSources={allSources}
                 mutedSources={mutedSources}
                 setMutedSources={setMutedSources}
