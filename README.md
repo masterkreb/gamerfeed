@@ -162,12 +162,17 @@ getrennt beantwortet:
 
 *   **Letzter Lauf**: Hat der Workflow überhaupt noch gestartet? (`feed_run_status`)
 *   **Letzter Kern-Publish**: Wurden die News-Caches wirklich geschrieben?
-*   **Inhaltsfrische**: Hat dabei mindestens ein Feed neue Artikel geliefert?
+*   **Inhaltsfrische**: Wann hat zuletzt mindestens ein Feed überhaupt Artikel geliefert?
+
+Die Inhaltsfrische sagt bewusst **nicht**, ob darunter *neue* Artikel waren – ein
+unveränderter, aber technisch einwandfreier Feed hält sie grün. Eine
+Novelty-Erkennung ist nicht Teil dieser Stufe.
 
 Als **veraltet** gilt alles, was älter als 50 Minuten ist (`FEED_STALE_AFTER_MS`
-in `shared/feed-health-model.js`). Ein fehlgeschlagener Lauf überschreibt weder
-den letzten Kern-Publish noch das `lastSuccessAt` eines Feeds. Datenformate,
-Grenzfälle und Betriebshinweise stehen in der
+in `shared/feed-health-model.js`); ein Zeitstempel mehr als 2 Minuten in der
+Zukunft gilt als ungültig und nie als frisch. Ein fehlgeschlagener Lauf
+überschreibt weder den letzten Kern-Publish noch das `lastSuccessAt` eines Feeds.
+Datenformate, Grenzfälle und Betriebshinweise stehen in der
 [Heartbeat-Dokumentation](docs/deployment/feed-heartbeat.md).
 
 ---

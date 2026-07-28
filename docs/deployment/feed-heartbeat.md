@@ -12,7 +12,13 @@ Seit O1 werden drei Fragen getrennt beantwortet:
 |---|---|---|
 | Läuft der Workflow überhaupt noch? | `feed_run_status` | „Letzter Lauf“ |
 | Hat der Lauf wirklich veröffentlicht? | `feed_publish_status.lastCorePublishAt` | „Letzter Kern-Publish“ |
-| Ist der Inhalt neu? | `feed_publish_status.lastContentUpdateAt` | „Inhaltsfrische“ |
+| Wann hat zuletzt ein Feed Artikel geliefert? | `feed_publish_status.lastContentUpdateAt` | „Inhaltsfrische“ |
+
+> **Was „Inhaltsfrische“ nicht bedeutet:** Sie belegt nicht, dass **neue**
+> Artikel erkannt wurden. Ein Feed, der unverändert dieselben Artikel liefert,
+> schreibt die Inhaltsfrische genauso fort wie ein Feed mit echten Neuigkeiten.
+> Eine Novelty- oder Deduplizierungserkennung gehört ausdrücklich nicht zu O1.
+> Die Aussage lautet: „Mindestens eine Quelle hat überhaupt Artikel geliefert.“
 
 Die gemeinsame Logik steht in [`shared/feed-health-model.js`](../../shared/feed-health-model.js)
 und wird vom Cron-Skript, von der Health-API und vom Admin-Panel benutzt. Sie
@@ -36,6 +42,23 @@ Die Grenze ist bewusst eindeutig definiert:
 - Alter **größer als** die Schwelle: veraltet
 - **kein** Zeitstempel vorhanden: veraltet, nie „aktuell“
 
+## Zeitstempel aus der Zukunft
+
+```text
+FEED_CLOCK_SKEW_TOLERANCE_MS = 2 * 60 * 1000   // 2 Minuten
+```
+
+GitHub-Runner, Vercel-Edge und KV laufen auf unterschiedlichen Uhren; ein paar
+Sekunden Vorlauf sind normal und bleiben deshalb folgenlos. Ein Zeitstempel, der
+**weiter als diese Toleranz** in der Zukunft liegt, wird konservativ als
+ungültig behandelt: `isFuture: true` und damit auch `isStale: true`.
+
+Ohne diese Regel würde ein einziger falsch gesetzter Wert – eine verstellte
+Runner-Uhr, ein manuell geschriebener KV-Eintrag – unbegrenzt lange als „frisch“
+gelten und genau den Ausfall verdecken, den der Heartbeat melden soll. Das Admin
+zeigt solche Werte als „Zeitstempel in der Zukunft“ und blendet die Altersangabe
+aus, statt ein negatives Alter anzuzeigen.
+
 Die Schwelle ist fest im Code dokumentiert, nicht über eine Umgebungsvariable
 konfigurierbar. Sie ist damit Teil des geprüften Verhaltens; ein Testlauf kann
 sie über den Parameter `staleAfterMs` überschreiben.
@@ -48,9 +71,18 @@ Minute `0`.
 
 ### `feed_run_status` – veränderlicher Versuch
 
-Wird **zweimal je Lauf** geschrieben: beim Start mit `result: "running"` und am
-Ende mit dem Ergebnis. Ein hart abgebrochener Lauf (Actions-Timeout) hinterlässt
-deshalb einen Datensatz ohne `finishedAt`; gemessen wird dann `startedAt`.
+Wird **dreimal je Lauf** geschrieben:
+
+1. beim Start mit `result: "running"`;
+2. nach dem Kern-Publish – weiterhin `running`, nur mit nachgetragenen Zählern
+   und Phasendauern;
+3. am tatsächlichen Ende mit `finishedAt` und dem Ergebnis.
+
+Der zweite Schreibvorgang setzt bewusst **nicht** auf `success`. Die Trendphase
+läuft zu diesem Zeitpunkt noch; ein Abbruch oder Timeout zwischen Kern-Publish
+und Laufende soll als hängen gebliebener Lauf sichtbar sein, nicht als sauber
+beendeter. Ein Datensatz ohne `finishedAt` wird am `startedAt` gemessen und
+damit nach `FEED_STALE_AFTER_MS` veraltet.
 
 ```json
 {
@@ -106,6 +138,16 @@ Der Unterschied zwischen den beiden Zeitstempeln trägt die eigentliche Aussage:
 Ein technisch beendeter Lauf, bei dem alle Feeds fehlgeschlagen sind, erscheint
 dadurch als frischer Lauf mit frischem Publish, aber als **alter Inhalt**.
 
+Umgekehrt gilt der Schluss **nicht**: `feeds.success > 0` beweist nur, dass eine
+Quelle Artikel ausgeliefert hat, nicht dass darunter unbekannte waren. Ein
+seit Stunden unveränderter, aber technisch einwandfreier Feed hält die
+Inhaltsfrische grün. Wer das erkennen will, braucht eine Novelty-Erkennung –
+die ist bewusst kein Bestandteil von O1.
+
+Kann `previous` nicht sicher gelesen werden und hat der Lauf selbst keine
+Artikel gesehen, wird `feed_publish_status` **gar nicht** geschrieben. Ein
+geratenes `lastContentUpdateAt` wäre schlimmer als ein fehlender Schreibvorgang.
+
 ### `feed_health_status` – Status je Feed
 
 Bestehender Schlüssel, abwärtskompatibel erweitert. `status` und `message`
@@ -132,11 +174,29 @@ weiter.
   URL-Querystrings werden vor dem Speichern entfernt.
 - Ein fehlgeschlagener Versuch übernimmt den gespeicherten `lastSuccessAt`
   unverändert. Er kann nur vorwärts laufen.
-- Bricht ein Lauf ab, **bevor** die Feed-Liste gelesen wurde, bleibt der
-  gespeicherte Status vollständig erhalten, statt durch ein leeres Objekt ersetzt
-  zu werden.
-- Feeds, die in der Datenbank gelöscht wurden, verschwinden beim nächsten
-  vollständigen Lauf aus dem Status.
+
+## Wann ein Lauf lieber gar nichts schreibt
+
+Ein Schreibvorgang mit unvollständigen Ersatzwerten ist schlechter als keiner.
+`scripts/feed-run-recorder.js` trifft deshalb drei Entscheidungen, bevor
+überhaupt gespeichert wird:
+
+| Situation | `feed_health_status` | `feed_publish_status` |
+|---|---|---|
+| Abbruch **vor** dem Laden der Feed-Liste | bleibt unverändert | bleibt unverändert |
+| Feed-Liste geladen, aber **leer** | wird auf `{}` geleert | normal |
+| Abbruch **nach** dem Laden der Feed-Liste | wird geschrieben, `lastSuccessAt` bleibt erhalten | bleibt unverändert |
+| Bisheriger Feed-Status nicht lesbar | bleibt unverändert | normal |
+| Bisheriger Kern-Publish nicht lesbar, Lauf **ohne** Artikel | normal | bleibt unverändert |
+| Bisheriger Kern-Publish nicht lesbar, Lauf **mit** Artikeln | normal | wird geschrieben |
+
+Die ersten beiden Zeilen sind bewusst getrennt: ein Abbruch vor der Feed-Liste
+sagt **nichts** über die Feeds aus, eine erfolgreich geladene leere Liste dagegen
+sehr wohl – nur dort dürfen gelöschte Feeds aus dem Status verschwinden.
+
+Die beiden Reads laufen unabhängig voneinander. Ein kaputter oder unlesbarer
+Publish-Datensatz führt nicht dazu, dass auch der Feed-Status als unbekannt gilt,
+und umgekehrt.
 
 ## Antwort von `/api/get-health-data`
 
@@ -151,9 +211,9 @@ Die Antwort enthält zusätzlich zu `healthStatus` und `sourcesInCache` das Feld
     "now": "2026-07-28T12:00:00.000Z",
     "staleAfterMs": 3000000,
     "isStale": false,
-    "run": { "at": "…", "ageMs": 629000, "isStale": false, "runId": "…", "result": "success", "…": null },
-    "corePublish": { "at": "…", "ageMs": 630000, "isStale": false, "articleCount": 4213 },
-    "content": { "at": "…", "ageMs": 630000, "isStale": false, "newestArticleAt": "…" }
+    "run": { "at": "…", "ageMs": 629000, "isFuture": false, "isStale": false, "runId": "…", "result": "success" },
+    "corePublish": { "at": "…", "ageMs": 630000, "isFuture": false, "isStale": false, "articleCount": 4213 },
+    "content": { "at": "…", "ageMs": 630000, "isFuture": false, "isStale": false, "newestArticleAt": "…" }
   }
 }
 ```
@@ -177,10 +237,22 @@ zusätzlichen Felder in `feed_health_status`.
 **Überlappende Läufe:** Der Workflow verwendet eine `concurrency`-Gruppe ohne
 Abbruch, geplante Läufe warten also aufeinander. Ein **lokaler** Lauf parallel zu
 einem Actions-Lauf kann die Heartbeat-Schlüssel dagegen sehr wohl in falscher
-Reihenfolge schreiben. Die Auswirkung ist konservativ – der ältere Lauf trägt
-einen älteren `lastContentUpdateAt` ein und die Anzeige meldet eher zu viel
-Alter – aber sie ist real. Monotone Aktivierung beziehungsweise Lease/CAS gehört
-zu O3b und D2.
+Reihenfolge schreiben.
+
+Die Auswirkung ist **nicht** garantiert konservativ. Sie geht in beide
+Richtungen:
+
+- Ein älterer Lauf, der zuletzt schreibt, kann `lastContentUpdateAt`
+  zurücksetzen – die Anzeige meldet dann zu viel Alter.
+- Ein Lauf, der seinen Vorzustand vor dem parallelen Lauf gelesen hat, kann
+  einen **zu neuen** `lastCorePublishAt` setzen, obwohl der zuletzt tatsächlich
+  veröffentlichte Snapshot von einem anderen Lauf stammt. Ebenso setzt jeder
+  startende Lauf `feed_run_status` auf `running` und lässt den Heartbeat damit
+  frisch aussehen, auch wenn der parallele Lauf scheitert.
+
+Der Heartbeat kann Frische in diesem Fall also auch zu **positiv** darstellen.
+Monotone Aktivierung beziehungsweise Lease/CAS gehört zu O3b und D2; bis dahin
+sollten lokale Schreibläufe nicht parallel zum Cron gestartet werden.
 
 **Was hier bewusst noch nicht drin ist:**
 

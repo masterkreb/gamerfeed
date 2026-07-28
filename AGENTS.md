@@ -87,7 +87,8 @@
 ├── scripts/
 │   ├── fetch-feeds.js      # Cron-Job Script (GitHub Actions)
 │   ├── feed-fetch-utils.js # Getesteter Feed-Abruf mit Retry/Proxy-Fallback
-│   └── feed-image-utils.js # Bildauswahl und -validierung für Artikel
+│   ├── feed-image-utils.js # Bildauswahl und -validierung für Artikel
+│   └── feed-run-recorder.js # Reihenfolge und Schreibregeln des Heartbeats
 │
 ├── server/                 # Getestete Backend-Hilfslogik
 │   ├── health-data-handler.ts  # Feed-Status und Frischebericht für das Admin
@@ -237,17 +238,27 @@ Cron-Skript, Health-API und Admin-Panel gemeinsam beantworten:
 
 - **Läuft der Workflow?** `feed_run_status` – veränderlicher Versuch mit `runId`,
   `startedAt`, `finishedAt`, Ergebnis, bereinigtem Fatalfehler, Feed-Zählern und
-  Phasendauern. Wird beim Start und am Ende geschrieben.
+  Phasendauern. Bleibt `running`, bis **alle** Phasen durch sind; `finishedAt`
+  fällt erst nach der Trendphase.
 - **Wurde veröffentlicht?** `feed_publish_status.lastCorePublishAt` – nur nach
   erfolgreich geschriebenen News-Caches. Ein gescheiterter Versuch lässt den
   Schlüssel unangetastet.
-- **Ist der Inhalt neu?** `feed_publish_status.lastContentUpdateAt` – steigt nur,
-  wenn mindestens ein Feed Artikel geliefert hat.
+- **Wann kam zuletzt etwas an?** `feed_publish_status.lastContentUpdateAt` –
+  steigt nur, wenn mindestens ein Feed Artikel geliefert hat. Das belegt
+  **nicht**, dass die Artikel neu waren; eine Novelty-Erkennung gehört nicht zu
+  O1.
 
 Als **veraltet** gilt ein Alter **über** `FEED_STALE_AFTER_MS` (fest 50 Minuten);
-genau auf der Schwelle noch nicht, ein fehlender Zeitstempel immer. `lastSuccessAt`
-je Feed kann nur vorwärts laufen. Fatalfehler werden vor dem Speichern von
+genau auf der Schwelle noch nicht, ein fehlender Zeitstempel immer. Ein
+Zeitstempel weiter als `FEED_CLOCK_SKEW_TOLERANCE_MS` (2 Minuten) in der Zukunft
+gilt als ungültig und nie als frisch. `lastSuccessAt` je Feed kann nur vorwärts
+laufen. Fatalfehler und Feed-Meldungen werden vor dem Speichern von
 Secret-Werten, URL-Zugangsdaten und Querystrings befreit.
+
+`scripts/feed-run-recorder.js` entscheidet, **ob** überhaupt geschrieben werden
+darf: einen nicht sicher gelesenen historischen Stand nie mit Ersatzwerten
+überschreiben, und einen Abbruch vor der Feed-Liste von einer geladenen, aber
+leeren Liste unterscheiden.
 
 Einzelheiten, Datenformate und Grenzen: `docs/deployment/feed-heartbeat.md`.
 

@@ -248,10 +248,19 @@ Feed-Verwaltung und Ankündigungen benötigen daher serverseitige Verträge.
 **Status:** erledigt. `shared/feed-health-model.js` führt den veränderlichen
 Attempt-Status (`feed_run_status`) getrennt vom letzten Kern-Publish
 (`feed_publish_status`); `feed_health_status` schreibt `lastSuccessAt` je Feed
-fort und wird von einem gescheiterten Versuch nicht zurückgesetzt. Health-API
-und Admin zeigen Lauf, Kern-Publish und Inhaltsfrische getrennt und ab
-`FEED_STALE_AFTER_MS` (50 Minuten) als „veraltet“. Der Workflow startet zu den
-Minuten 7/27/47 statt zur Minute 0. Einzelheiten:
+fort und wird von einem gescheiterten Versuch nicht zurückgesetzt.
+`scripts/feed-run-recorder.js` entscheidet über Reihenfolge und Zulässigkeit der
+Schreibvorgänge: der Versuch bleibt bis nach der Trendphase `running`, ein nicht
+sicher gelesener historischer Stand wird nie mit Ersatzwerten überschrieben, und
+ein Abbruch vor der Feed-Liste wird von einer geladenen, aber leeren Liste
+unterschieden. Health-API und Admin zeigen Lauf, Kern-Publish und Inhaltsfrische
+getrennt und ab `FEED_STALE_AFTER_MS` (50 Minuten) als „veraltet“; Zeitstempel
+jenseits von `FEED_CLOCK_SKEW_TOLERANCE_MS` in der Zukunft gelten als ungültig.
+Der Workflow startet zu den Minuten 7/27/47 statt zur Minute 0.
+
+Bewusst nicht enthalten: die Inhaltsfrische belegt nur, dass eine Quelle
+überhaupt Artikel geliefert hat, nicht dass darunter neue waren – eine
+Novelty-Erkennung ist kein Bestandteil von O1. Einzelheiten:
 [`docs/deployment/feed-heartbeat.md`](../deployment/feed-heartbeat.md).
 
 **Warum:** Ein alter grüner `feed_health_status` bleibt momentan grün, auch
