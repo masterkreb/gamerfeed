@@ -17,6 +17,7 @@
 import { BlockList, isIP } from 'node:net';
 import { lookup as systemLookup } from 'node:dns/promises';
 import { Agent, fetch as undiciFetch } from 'undici';
+import { BLOCKED_IP_RANGES } from '../shared/ip-ranges.js';
 import { parseAllowedUrl, UrlPolicyError } from '../shared/url-policy.js';
 
 export { UrlPolicyError };
@@ -33,37 +34,21 @@ export class OutboundPolicyError extends Error {
     }
 }
 
-// BlockList deckt IPv4-mapped IPv6 (::ffff:127.0.0.1) ueber die IPv4-Regeln mit
-// ab - das ist geprueft und in den Tests festgehalten.
+// Die Bereiche stammen aus shared/ip-ranges.js, damit Cron und Feed-Verwaltung
+// nicht mit zwei auseinanderlaufenden Listen arbeiten. BlockList deckt
+// IPv4-mapped IPv6 (::ffff:127.0.0.1) ueber die IPv4-Regeln mit ab.
 const blockedRanges = new BlockList();
 
-// IPv4
-blockedRanges.addSubnet('0.0.0.0', 8, 'ipv4');          // "this network"
-blockedRanges.addSubnet('10.0.0.0', 8, 'ipv4');         // privat
-blockedRanges.addSubnet('100.64.0.0', 10, 'ipv4');      // Carrier-Grade NAT
-blockedRanges.addSubnet('127.0.0.0', 8, 'ipv4');        // Loopback
-blockedRanges.addSubnet('169.254.0.0', 16, 'ipv4');     // Link-local, inkl. Cloud-Metadaten
-blockedRanges.addSubnet('172.16.0.0', 12, 'ipv4');      // privat
-blockedRanges.addSubnet('192.0.0.0', 24, 'ipv4');       // IETF-Zuweisungen
-blockedRanges.addSubnet('192.0.2.0', 24, 'ipv4');       // TEST-NET-1
-blockedRanges.addSubnet('192.88.99.0', 24, 'ipv4');     // 6to4-Relay-Anycast
-blockedRanges.addSubnet('192.168.0.0', 16, 'ipv4');     // privat
-blockedRanges.addSubnet('198.18.0.0', 15, 'ipv4');      // Benchmarking
-blockedRanges.addSubnet('198.51.100.0', 24, 'ipv4');    // TEST-NET-2
-blockedRanges.addSubnet('203.0.113.0', 24, 'ipv4');     // TEST-NET-3
-blockedRanges.addSubnet('224.0.0.0', 4, 'ipv4');        // Multicast
-blockedRanges.addSubnet('240.0.0.0', 4, 'ipv4');        // reserviert, inkl. 255.255.255.255
+for (const range of BLOCKED_IP_RANGES) {
+    const family = range.family === 4 ? 'ipv4' : 'ipv6';
+    const maxPrefix = range.family === 4 ? 32 : 128;
 
-// IPv6
-blockedRanges.addAddress('::', 'ipv6');                 // unspezifiziert
-blockedRanges.addAddress('::1', 'ipv6');                // Loopback
-blockedRanges.addSubnet('100::', 64, 'ipv6');           // Discard-Only
-blockedRanges.addSubnet('64:ff9b::', 96, 'ipv6');       // NAT64
-blockedRanges.addSubnet('2001:db8::', 32, 'ipv6');      // Dokumentation
-blockedRanges.addSubnet('2002::', 16, 'ipv6');          // 6to4
-blockedRanges.addSubnet('fc00::', 7, 'ipv6');           // Unique Local
-blockedRanges.addSubnet('fe80::', 10, 'ipv6');          // Link-local
-blockedRanges.addSubnet('ff00::', 8, 'ipv6');           // Multicast
+    if (range.prefix === maxPrefix) {
+        blockedRanges.addAddress(range.address, family);
+    } else {
+        blockedRanges.addSubnet(range.address, range.prefix, family);
+    }
+}
 
 /**
  * Prueft eine einzelne IP-Adresse gegen die gesperrten Bereiche.
