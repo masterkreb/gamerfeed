@@ -132,8 +132,8 @@ async function fetchTextWithRetry({
     createSignal,
     feedName,
     fetchImpl,
+    hasTimeFor,
     headers,
-    isBudgetExhausted,
     logger,
     lookup,
     maxBytes,
@@ -149,7 +149,9 @@ async function fetchTextWithRetry({
 
     // Ist das Gesamtbudget des Laufs aufgebraucht, ist Wiederholen keine
     // Belastbarkeit mehr, sondern nur noch Zeit, die woanders fehlt. Die Frage
-    // wird deshalb vor jedem Versuch und vor jeder Wartezeit gestellt.
+    // wird deshalb vor jedem Versuch und vor jeder Wartezeit gestellt - vor der
+    // Wartezeit mit ihrer tatsaechlichen Dauer, denn eine Pause, die ueber die
+    // Deadline hinausreicht, kostet nur und bringt nichts.
     const budgetExhausted = () => ({
         error: `${requestLabel} skipped: run budget exhausted`,
         budgetExhausted: true,
@@ -158,7 +160,7 @@ async function fetchTextWithRetry({
     });
 
     for (let attempt = 1; attempt <= attempts; attempt++) {
-        if (isBudgetExhausted()) return budgetExhausted();
+        if (!hasTimeFor()) return budgetExhausted();
 
         // Das Signal verbindet Einzeltimeout und Gesamtbudget: eine bereits
         // laufende Anfrage wird beim Erreichen der Deadline mit abgebrochen.
@@ -177,7 +179,9 @@ async function fetchTextWithRetry({
                 const retryDelay = getRetryDelayMs(response, retryDelayMs);
                 await response.body?.cancel().catch(() => {});
                 if (attempt < attempts && isRetryableHttpStatus(response.status, retryableStatuses)) {
-                    if (isBudgetExhausted()) return budgetExhausted();
+                    // Auch ein `Retry-After` der Gegenstelle darf die Deadline
+                    // nicht ueberschreiten.
+                    if (!hasTimeFor(retryDelay)) return budgetExhausted();
                     logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                     await sleep(retryDelay);
                     continue;
@@ -192,7 +196,7 @@ async function fetchTextWithRetry({
                 lastError = `${requestLabel} response could not be read: ${getErrorMessage(error)}`;
                 await response.body?.cancel().catch(() => {});
                 if (!(error instanceof ResponseTooLargeError) && attempt < attempts) {
-                    if (isBudgetExhausted()) return budgetExhausted();
+                    if (!hasTimeFor(retryDelayMs)) return budgetExhausted();
                     logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                     await sleep(retryDelayMs);
                     continue;
@@ -205,8 +209,9 @@ async function fetchTextWithRetry({
                 return { error: lastError, policyRejected: true, status: null, text: null };
             }
             // Der Abbruch kann vom Gesamtbudget kommen; dann war das hier der
-            // letzte Versuch dieser Quelle.
-            if (isBudgetExhausted()) return budgetExhausted();
+            // letzte Versuch dieser Quelle. Und selbst wenn nicht: reicht die
+            // Restzeit nicht einmal fuer die Pause, endet es hier ebenfalls.
+            if (!hasTimeFor(retryDelayMs)) return budgetExhausted();
             if (attempt < attempts) {
                 logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                 await sleep(retryDelayMs);
@@ -232,9 +237,11 @@ export async function fetchFeedXml({
     feedName,
     feedProxyUrl,
     feedUrl,
-    // Meldet, dass das Gesamtbudget des Laufs aufgebraucht ist. Ohne Angabe
-    // gilt das bisherige Verhalten: es gibt kein Gesamtbudget.
-    isBudgetExhausted = () => false,
+    // Meldet, ob der Lauf noch mehr als `ms` Millisekunden Gesamtbudget hat -
+    // gefragt vor jedem Versuch (`ms = 0`) und vor jeder Wiederholungspause mit
+    // deren tatsaechlicher Dauer. Ohne Angabe gilt das bisherige Verhalten: es
+    // gibt kein Gesamtbudget.
+    hasTimeFor = () => true,
     // Bewusst **ohne** Vorgabe: nur ein ausdruecklich injiziertes fetchImpl
     // (Tests) ersetzt den Transport. Bleibt es undefined, verwendet
     // fetchWithOutboundPolicy seinen an die geprueften Adressen gebundenen
@@ -257,8 +264,8 @@ export async function fetchFeedXml({
         createSignal,
         feedName,
         fetchImpl,
+        hasTimeFor,
         headers: BROWSER_LIKE_HEADERS,
-        isBudgetExhausted,
         logger,
         lookup,
         maxBytes: maxResponseBytes,
@@ -328,8 +335,8 @@ export async function fetchFeedXml({
         createSignal,
         feedName,
         fetchImpl,
+        hasTimeFor,
         headers: undefined,
-        isBudgetExhausted,
         logger,
         lookup,
         maxBytes: maxResponseBytes,

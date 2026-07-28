@@ -222,6 +222,24 @@ export function createRunBudget({
             return remainingMs() === 0;
         },
 
+        /**
+         * Bleibt nach `ms` noch Zeit uebrig?
+         *
+         * Gedacht fuer **Wartezeiten**: Wiederholungspausen und die
+         * Hoeflichkeitspausen zwischen Abrufen. Eine Pause, die ueber die
+         * Deadline hinausreicht, ist der schlechteste Zeitverbrauch von allen -
+         * sie tut nichts und nimmt dem Laufabschluss trotzdem die Zeit weg.
+         *
+         * Bewusst **strikt groesser**: nach der Pause muss noch etwas moeglich
+         * sein, sonst haette man sie sich sparen koennen.
+         *
+         * @param {number} [ms]
+         * @returns {boolean}
+         */
+        hasTimeFor(ms = 0) {
+            return remainingMs() > (toPositiveInteger(ms) ?? 0);
+        },
+
         /** Reicht die Restzeit noch fuer eine optionale Phase? */
         canRunOptionalPhase() {
             return remainingMs() >= optionalPhaseMinRemainingMs;

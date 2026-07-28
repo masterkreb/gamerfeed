@@ -993,6 +993,10 @@ export async function main({
     // ins Timeout, obwohl sie erreichbar waren.
     const FEED_FETCH_TIMEOUT_MS = 15000;
     const FEED_PROXY_TIMEOUT_MS = 20000;
+    // Hoeflichkeitspausen gegenueber fremden Servern. Sie laufen nur, wenn sie
+    // vollstaendig in die Restzeit des Laufs passen.
+    const FEED_COURTESY_PAUSE_MS = 200;
+    const SCRAPE_COURTESY_PAUSE_MS = 500;
     // Endpunkt von tools/feed-proxy.php auf dem externen Hosting. Ohne dieses
     // Secret laeuft der Abruf ohne Fallback, statt fehlzuschlagen; eine
     // unbrauchbare Adresse wurde oben bereits verworfen.
@@ -1005,7 +1009,9 @@ export async function main({
         scrapeLimit: configuration.scrapeLimit,
     });
     const requestSignal = timeoutMs => runBudget.requestSignal(timeoutMs);
-    const isBudgetExhausted = () => runBudget.isDeadlineReached();
+    // Wartezeiten fragen mit ihrer tatsaechlichen Dauer: eine Pause, die ueber
+    // die Deadline hinausreicht, kostet nur und bringt nichts.
+    const hasTimeFor = ms => runBudget.hasTimeFor(ms);
 
     const runStartMs = Date.now();
     const durations = {};
@@ -1122,7 +1128,7 @@ export async function main({
                 // Nur ausdrücklich vorgesehene Quellen dürfen über den Proxy.
                 allowProxy: isProxyEligibleSource(feed),
                 createSignal: requestSignal,
-                isBudgetExhausted,
+                hasTimeFor,
                 directTimeoutMs: FEED_FETCH_TIMEOUT_MS,
                 feedName: feed.name,
                 feedProxyUrl,
@@ -1214,8 +1220,9 @@ export async function main({
                 };
             }
 
-            // Die Höflichkeitspause entfällt, sobald die Zeit ohnehin um ist.
-            if (!runBudget.isDeadlineReached()) await sleep(200);
+            // Die Höflichkeitspause entfällt, sobald sie nicht mehr vollständig
+            // in die Restzeit passt - sie darf die Deadline nicht überschreiten.
+            if (hasTimeFor(FEED_COURTESY_PAUSE_MS)) await sleep(FEED_COURTESY_PAUSE_MS);
         }
 
         durations.feedFetchMs = Date.now() - feedFetchStartMs;
@@ -1309,7 +1316,7 @@ export async function main({
                         scrapeStats.missing++;
                         logger.log(`      ⚠️  No image found, using placeholder (${formatDuration(articleScrapeDuration)})`);
                     }
-                    if (!runBudget.isDeadlineReached()) await sleep(500);
+                    if (hasTimeFor(SCRAPE_COURTESY_PAUSE_MS)) await sleep(SCRAPE_COURTESY_PAUSE_MS);
                 } catch (error) {
                     const articleScrapeDuration = Date.now() - articleScrapeStart;
                     scrapeStats.totalMs += articleScrapeDuration;
@@ -1390,7 +1397,7 @@ export async function main({
                         backfillStats.missing++;
                         logger.log(`      ⚠️  Still no image found (${formatDuration(articleBackfillDuration)})`);
                     }
-                    if (!runBudget.isDeadlineReached()) await sleep(500);
+                    if (hasTimeFor(SCRAPE_COURTESY_PAUSE_MS)) await sleep(SCRAPE_COURTESY_PAUSE_MS);
                 } catch (error) {
                     const articleBackfillDuration = Date.now() - articleBackfillStart;
                     backfillStats.totalMs += articleBackfillDuration;

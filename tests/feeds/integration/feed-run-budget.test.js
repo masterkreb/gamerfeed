@@ -202,6 +202,124 @@ test('auch ein abgebrochener letzter Scrape ergibt degraded, nicht success', asy
     assert.match(spies.kvStore.feed_run_status.degradedReason, /Zeitbudget/);
 });
 
+// === Wartezeiten ===
+
+test('eine Wiederholungspause laeuft nie ueber die Deadline hinaus', async () => {
+    // Codex' Fall: Deadline 100 ms, Wiederholungspause 1000 ms. Vor der
+    // Änderung wurde nur geprüft, *ob* die Deadline schon erreicht ist - die
+    // Pause lief anschließend darüber hinaus.
+    const spies = createSpies({ feeds: [FEED_ROW] });
+    const uhr = createControlledClock();
+    const { budget } = createTestBudget(uhr, { deadlineMs: 100 });
+    const { pausen, sleep } = createSchlaf();
+
+    let feedabrufe = 0;
+    await runMain(spies, {
+        budget,
+        // Die gestellte Uhr läuft bei jeder Pause um deren volle Dauer weiter -
+        // so fällt eine zu lange Pause sofort auf.
+        sleep: async ms => {
+            await sleep(ms);
+            uhr.vor(ms);
+        },
+        fetchImpl: spies.makeFetchImpl(async () => {
+            feedabrufe += 1;
+            return new Response('kaputt', { status: 500 });
+        }),
+        groqFetch: spies.makeGroqFetch(GROQ_LEER),
+    });
+
+    assert.equal(feedabrufe, 1, 'kein zweiter Versuch nach erschöpfter Restzeit');
+    assert.deepEqual(pausen, [], 'gar keine Pause statt einer zu langen');
+    assert.ok(
+        budget.elapsedMs() <= budget.deadlineMs,
+        `die Deadline wird nicht überschritten (${budget.elapsedMs()} ms von ${budget.deadlineMs} ms)`,
+    );
+});
+
+test('eine Wiederholungspause laeuft, solange sie vollstaendig hineinpasst', async () => {
+    // Gegenprobe: mit reichlich Restzeit bleibt die Wiederholung aus O2a
+    // unverändert erhalten.
+    const spies = createSpies({ feeds: [FEED_ROW] });
+    const uhr = createControlledClock();
+    const { budget } = createTestBudget(uhr, { deadlineMs: 60_000 });
+    const { pausen, sleep } = createSchlaf();
+
+    let feedabrufe = 0;
+    await runMain(spies, {
+        budget,
+        sleep: async ms => {
+            await sleep(ms);
+            uhr.vor(ms);
+        },
+        fetchImpl: spies.makeFetchImpl(async () => {
+            feedabrufe += 1;
+            return new Response('kaputt', { status: 500 });
+        }),
+        groqFetch: spies.makeGroqFetch(GROQ_LEER),
+    });
+
+    assert.equal(feedabrufe, 2, 'der zweite Versuch findet statt');
+    assert.ok(pausen.includes(1000), 'die Wiederholungspause läuft');
+    assert.ok(budget.elapsedMs() <= budget.deadlineMs);
+});
+
+test('die Hoeflichkeitspause zwischen Quellen bleibt in der Restzeit', async () => {
+    const spies = createSpies({ feeds: [FEED_ROW, SCRAPE_FEED] });
+    const uhr = createControlledClock();
+    // Genug für den Abruf, aber nicht mehr für die 200-ms-Pause danach.
+    const { budget } = createTestBudget(uhr, { deadlineMs: 150 });
+    const { pausen, sleep } = createSchlaf();
+
+    await runMain(spies, {
+        budget,
+        sleep: async ms => {
+            await sleep(ms);
+            uhr.vor(ms);
+        },
+        fetchImpl: spies.makeFetchImpl(async url => {
+            if (!url.includes('feed.xml')) {
+                return new Response(ARTIKELSEITE, { status: 200, headers: { 'content-type': 'text/html' } });
+            }
+            return new Response(rssOhneBilder(FEED_ROW, 1), { status: 200 });
+        }),
+        groqFetch: spies.makeGroqFetch(GROQ_LEER),
+    });
+
+    assert.deepEqual(pausen.filter(ms => ms === 200), [], 'die 200-ms-Pause entfällt');
+    assert.ok(
+        budget.elapsedMs() <= budget.deadlineMs,
+        `die Deadline wird nicht überschritten (${budget.elapsedMs()} ms)`,
+    );
+});
+
+test('die Pause zwischen Bild-Scrapes bleibt ebenfalls in der Restzeit', async () => {
+    const spies = createSpies({ feeds: [SCRAPE_FEED] });
+    const uhr = createControlledClock();
+    const { budget } = createTestBudget(uhr, { deadlineMs: 400 });
+    const { pausen, sleep } = createSchlaf();
+
+    const { fetchImpl } = createNetz(spies, {
+        feedAntwort: async () => new Response(rssOhneBilder(SCRAPE_FEED, 3), { status: 200 }),
+    });
+
+    await runMain(spies, {
+        budget,
+        sleep: async ms => {
+            await sleep(ms);
+            uhr.vor(ms);
+        },
+        fetchImpl,
+        groqFetch: spies.makeGroqFetch(GROQ_LEER),
+    });
+
+    assert.deepEqual(pausen.filter(ms => ms === 500), [], 'die 500-ms-Pause passt nicht mehr');
+    assert.ok(
+        budget.elapsedMs() <= budget.deadlineMs,
+        `die Deadline wird nicht überschritten (${budget.elapsedMs()} ms)`,
+    );
+});
+
 // === Scrape-Budget ===
 
 test('die Zahl der Artikel-Seitenabrufe ueberschreitet das Limit nie', async () => {

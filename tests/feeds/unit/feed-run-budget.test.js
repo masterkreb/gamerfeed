@@ -278,3 +278,43 @@ test('dispose gibt den Deadline-Timer frei', () => {
     assert.equal(budget.signal.aborted, false, 'ein freigegebener Timer feuert nicht mehr');
     budget.dispose();
 });
+
+// === Wartezeiten muessen in die Restzeit passen ===
+
+test('eine Pause laeuft nur, wenn danach noch Zeit uebrig bleibt', () => {
+    const uhr = createUhr();
+    const { budget } = createBudget(uhr, { deadlineMs: 10_000 });
+
+    assert.equal(budget.hasTimeFor(1_000), true, 'reichlich Restzeit');
+
+    uhr.vor(8_999);
+    assert.equal(budget.hasTimeFor(1_000), true, '1001 ms Rest: die Pause passt noch');
+
+    uhr.vor(1);
+    assert.equal(budget.hasTimeFor(1_000), false, 'genau 1000 ms Rest: danach bliebe nichts');
+
+    uhr.vor(1);
+    assert.equal(budget.hasTimeFor(1_000), false, 'darunter erst recht nicht');
+});
+
+test('hasTimeFor ohne Angabe entspricht der erreichten Deadline', () => {
+    const uhr = createUhr();
+    const { budget } = createBudget(uhr, { deadlineMs: 10_000 });
+
+    assert.equal(budget.hasTimeFor(), true);
+    assert.equal(budget.isDeadlineReached(), false);
+
+    uhr.vor(10_000);
+
+    assert.equal(budget.hasTimeFor(), false);
+    assert.equal(budget.isDeadlineReached(), true);
+});
+
+test('eine unbrauchbare Pausendauer wird wie null behandelt', () => {
+    const uhr = createUhr();
+    const { budget } = createBudget(uhr, { deadlineMs: 10_000 });
+
+    for (const wert of ['keine-zahl', -5, null, undefined, NaN]) {
+        assert.equal(budget.hasTimeFor(wert), true, String(wert));
+    }
+});
