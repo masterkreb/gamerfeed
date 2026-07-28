@@ -1,4 +1,5 @@
 import { DOMParser } from 'linkedom';
+import { readLimitedResponseText, ResponseTooLargeError } from './limited-response.js';
 import {
     fetchWithOutboundPolicy,
     OutboundPolicyError,
@@ -23,6 +24,37 @@ export const BROWSER_LIKE_HEADERS = Object.freeze({
 
 export const MAX_FEED_RESPONSE_BYTES = 5 * 1024 * 1024;
 
+/**
+ * Quellen, fuer die der externe PHP-Proxy ueberhaupt versucht werden darf.
+ *
+ * GamePro beantwortet Anfragen aus dem GitHub-Actions-Netz mit HTTP 403 - dafuer
+ * gibt es den Proxy. Alle anderen Quellen sind direkt erreichbar; ein
+ * gewoehnlicher Timeout ist dort ein voruebergehendes Problem der Quelle und
+ * kein Grund, den Umweg ueber fremdes Hosting zu nehmen.
+ *
+ * Die Liste steht bewusst hier und nicht im PHP-Skript: die Entscheidung gehoert
+ * auf diese Seite und darf nicht von der Gegenstelle abhaengen. Die exakte
+ * Allowlist des Proxys bleibt davon unberuehrt und zusaetzlich wirksam.
+ */
+export const PROXY_ELIGIBLE_SOURCES = Object.freeze(['gamepro']);
+
+/**
+ * Darf fuer diese Quelle der Proxy versucht werden?
+ *
+ * @param {{ id?: unknown, name?: unknown } | string | null | undefined} feed
+ * @returns {boolean}
+ */
+export function isProxyEligibleSource(feed) {
+    const identifiers = typeof feed === 'string'
+        ? [feed]
+        : [feed?.id, feed?.name];
+
+    return identifiers.some(identifier => (
+        typeof identifier === 'string'
+        && PROXY_ELIGIBLE_SOURCES.includes(identifier.trim().toLowerCase())
+    ));
+}
+
 const RETRYABLE_HTTP_STATUSES = new Set([408, 425, 429]);
 
 // Der Hosting-Edge vor tools/feed-proxy.php weist Anfragen sporadisch mit 415 ab,
@@ -31,8 +63,6 @@ const RETRYABLE_HTTP_STATUSES = new Set([408, 425, 429]);
 // 405, 422, 413, 500, 502 oder dem Status der Quelle. Auf dem Proxy-Weg gilt 415
 // deshalb als voruebergehend, beim Direktabruf einer Quelle weiterhin nicht.
 const PROXY_RETRYABLE_HTTP_STATUSES = new Set([...RETRYABLE_HTTP_STATUSES, 415]);
-
-class ResponseTooLargeError extends Error {}
 
 function getErrorMessage(error) {
     return error instanceof Error ? error.message : String(error);
@@ -57,44 +87,6 @@ function getRetryDelayMs(response, fallbackDelayMs) {
     }
 
     return fallbackDelayMs;
-}
-
-async function readLimitedResponseText(response, maxBytes) {
-    const contentLength = Number(response.headers?.get?.('content-length'));
-    if (Number.isFinite(contentLength) && contentLength > maxBytes) {
-        throw new ResponseTooLargeError(`response exceeds the ${maxBytes} byte limit`);
-    }
-
-    if (!response.body || typeof response.body.getReader !== 'function') {
-        const text = await response.text();
-        if (new TextEncoder().encode(text).byteLength > maxBytes) {
-            throw new ResponseTooLargeError(`response exceeds the ${maxBytes} byte limit`);
-        }
-        return text;
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let totalBytes = 0;
-    let text = '';
-
-    try {
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            totalBytes += value.byteLength;
-            if (totalBytes > maxBytes) {
-                await reader.cancel();
-                throw new ResponseTooLargeError(`response exceeds the ${maxBytes} byte limit`);
-            }
-            text += decoder.decode(value, { stream: true });
-        }
-
-        return text + decoder.decode();
-    } finally {
-        reader.releaseLock();
-    }
 }
 
 export function isFeedXml(value) {
@@ -143,6 +135,7 @@ async function fetchTextWithRetry({
     logger,
     lookup,
     maxBytes,
+    redact,
     requestLabel,
     requestUrl,
     retryableStatuses = RETRYABLE_HTTP_STATUSES,
@@ -166,7 +159,7 @@ async function fetchTextWithRetry({
                 const retryDelay = getRetryDelayMs(response, retryDelayMs);
                 await response.body?.cancel().catch(() => {});
                 if (attempt < attempts && isRetryableHttpStatus(response.status, retryableStatuses)) {
-                    logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${lastError}). Retrying once...`);
+                    logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                     await sleep(retryDelay);
                     continue;
                 }
@@ -180,7 +173,7 @@ async function fetchTextWithRetry({
                 lastError = `${requestLabel} response could not be read: ${getErrorMessage(error)}`;
                 await response.body?.cancel().catch(() => {});
                 if (!(error instanceof ResponseTooLargeError) && attempt < attempts) {
-                    logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${lastError}). Retrying once...`);
+                    logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                     await sleep(retryDelayMs);
                     continue;
                 }
@@ -192,7 +185,7 @@ async function fetchTextWithRetry({
                 return { error: lastError, policyRejected: true, status: null, text: null };
             }
             if (attempt < attempts) {
-                logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${lastError}). Retrying once...`);
+                logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                 await sleep(retryDelayMs);
                 continue;
             }
@@ -203,17 +196,28 @@ async function fetchTextWithRetry({
 }
 
 export async function fetchFeedXml({
+    // Der Proxy ist die Ausnahme, nicht die Regel: ohne ausdrueckliche Freigabe
+    // der Quelle wird er selbst bei einem Direktfehler nicht versucht.
+    allowProxy = false,
     directAttempts = 2,
     directTimeoutMs = 15000,
     feedName,
     feedProxyUrl,
     feedUrl,
-    fetchImpl = globalThis.fetch,
+    // Bewusst **ohne** Vorgabe: nur ein ausdruecklich injiziertes fetchImpl
+    // (Tests) ersetzt den Transport. Bleibt es undefined, verwendet
+    // fetchWithOutboundPolicy seinen an die geprueften Adressen gebundenen
+    // Standardtransport - genau der schuetzt vor DNS-Rebinding.
+    fetchImpl,
     logger = console,
     lookup,
     maxResponseBytes = MAX_FEED_RESPONSE_BYTES,
     proxyAttempts = 2,
     proxyTimeoutMs = 20000,
+    // Fehlertexte einer Gegenstelle koennen Verbindungsdaten enthalten. Der
+    // Aufrufer kennt die konfigurierten Secrets und reicht die Bereinigung
+    // herein; ohne sie bleibt der Text unveraendert.
+    redact = message => String(message),
     retryDelayMs = 1000,
     sleep = delay => new Promise(resolve => setTimeout(resolve, delay)),
 }) {
@@ -225,6 +229,7 @@ export async function fetchFeedXml({
         logger,
         lookup,
         maxBytes: maxResponseBytes,
+        redact,
         requestLabel: 'Direct fetch',
         requestUrl: feedUrl,
         retryDelayMs,
@@ -251,7 +256,11 @@ export async function fetchFeedXml({
     // stellvertretend über den Proxy abgerufen werden. Die exakte Allowlist des
     // PHP-Proxys würde es zwar ebenfalls zurückweisen, aber die Entscheidung
     // gehört auf diese Seite und darf nicht von der Gegenstelle abhängen.
-    if (!feedProxyUrl?.trim() || directResult.policyRejected) {
+    //
+    // `allowProxy` kommt aus der Quellenliste: nur wer den Umweg wirklich
+    // braucht, bekommt ihn. Sonst würde jeder gewöhnliche Timeout einer
+    // beliebigen Quelle fremdes Hosting belasten.
+    if (!allowProxy || !feedProxyUrl?.trim() || directResult.policyRejected) {
         return {
             directError,
             lastError: directError,
@@ -261,7 +270,7 @@ export async function fetchFeedXml({
         };
     }
 
-    logger?.log?.(`   ⚠️  Direct fetch failed for ${feedName} (${directError}). Trying feed proxy...`);
+    logger?.log?.(`   ⚠️  Direct fetch failed for ${feedName} (${redact(directError)}). Trying feed proxy...`);
 
     let proxyRequestUrl;
     try {
@@ -285,6 +294,7 @@ export async function fetchFeedXml({
         logger,
         lookup,
         maxBytes: maxResponseBytes,
+        redact,
         requestLabel: 'Feed proxy',
         requestUrl: proxyRequestUrl,
         retryableStatuses: PROXY_RETRYABLE_HTTP_STATUSES,

@@ -72,6 +72,8 @@ export interface BackendHealthEntry {
     lastSuccessAt?: string | null;
     durationMs?: number | null;
     articleCount?: number | null;
+    /** Beim Parsen übersprungene Einzelelemente dieses Feeds. */
+    skippedItemCount?: number | null;
 }
 
 export type BackendHealthStatus = Record<string, BackendHealthEntry>;

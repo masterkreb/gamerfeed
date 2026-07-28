@@ -125,7 +125,7 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
         *   `daily_trends` & `weekly_trends`: KI-generierte Trend-Analysen
     4.  Anschliessend schreibt das Skript diese Datensätze in den **Vercel KV Store**.
 *   **WICHTIG:** Der Workflow committet **keine Dateien** mehr in das Git-Repository. Der Prozess ist vollständig vom Code der Webseite getrennt.
-*   **Robustheit:** Der Prozess ist robust gestaltet und verhindert zuverlässig den Verlust von bestehenden Artikeldaten durch fehlerhafte Abrufe.
+*   **Robustheit:** Der Prozess verhindert zuverlässig den Verlust bestehender Artikeldaten durch fehlerhafte Abrufe. Ein einzelnes kaputtes Feed-Element (etwa mit unlesbarem Datum) kostet nur dieses Element, nicht die ganze Quelle; jeder externe Abruf hat Timeout und Byte-Limit; die Pflichtkonfiguration wird geprüft, bevor die erste Verbindung aufgebaut wird. Einzelheiten: [Belastbarkeit des Cron-Laufs](docs/deployment/feed-run-resilience.md).
 
 #### 2. Der Datenabruf (Frontend-Anwendung)
 
