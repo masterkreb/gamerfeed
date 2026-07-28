@@ -4,17 +4,19 @@
 // Link keine Anfrage in interne Netze ausloest - weder direkt noch ueber DNS
 // noch ueber eine Weiterleitung.
 //
-// Bewusste Grenze dieser Umsetzung: Node stellt `undici` nicht als Modul
-// bereit, deshalb laesst sich beim globalen `fetch` die Verbindung nicht an die
-// zuvor geprueften Adressen binden. Zwischen Pruefung und Verbindungsaufbau
-// bleibt damit ein TOCTOU-Fenster (DNS-Rebinding): ein Angreifer mit Kontrolle
-// ueber eine sehr kurze TTL koennte zwischen beiden Schritten auf eine private
-// Adresse umschwenken. Wir arbeiten deshalb fail-closed - jede Unsicherheit
-// fuehrt zur Ablehnung - und pruefen jeden Weiterleitungsschritt erneut.
-// Siehe docs/deployment/outbound-policy.md.
+// Der Transport ist an die geprueften Adressen gebunden: undici loest den Host
+// ueber unseren eigenen Lookup auf, und genau die dort zurueckgegebene Adresse
+// wird fuer die Verbindung verwendet. Damit gibt es zwischen Pruefung und
+// Verbindungsaufbau kein Zeitfenster mehr, in dem ein DNS-Wechsel auf eine
+// private Adresse greifen koennte.
+//
+// Die Vorabpruefung bleibt zusaetzlich bestehen: sie lehnt ab, bevor ueberhaupt
+// eine Verbindung aufgebaut wird. Jeder Weiterleitungsschritt wird erneut
+// vollstaendig geprueft. Siehe docs/deployment/outbound-policy.md.
 
 import { BlockList, isIP } from 'node:net';
 import { lookup as systemLookup } from 'node:dns/promises';
+import { Agent, fetch as undiciFetch } from 'undici';
 import { parseAllowedUrl, UrlPolicyError } from '../shared/url-policy.js';
 
 export { UrlPolicyError };
@@ -142,12 +144,76 @@ function isRedirectResponse(response) {
 }
 
 /**
+ * Erzeugt einen DNS-Lookup im Node-Callback-Stil, der ausschliesslich gepruefte
+ * Adressen herausgibt. undici verbindet sich genau mit dem, was hier
+ * zurueckkommt - dadurch ist die Verbindung an das gepruefte Ziel gebunden.
+ *
+ * @param {Function} lookup
+ */
+export function createPinnedLookup(lookup = systemLookup) {
+    return (hostname, options, callback) => {
+        const done = typeof options === 'function' ? options : callback;
+        const wantsAll = typeof options === 'object' && options !== null && options.all === true;
+
+        Promise.resolve()
+            .then(() => lookup(hostname, { all: true, verbatim: true }))
+            .then(records => {
+                if (!Array.isArray(records) || records.length === 0) {
+                    throw new OutboundPolicyError(
+                        `Der Host "${hostname}" lieferte keine Adressen.`,
+                        'dns_empty',
+                    );
+                }
+
+                const blocked = records.filter(record => isBlockedIpAddress(record?.address));
+                if (blocked.length > 0) {
+                    throw new OutboundPolicyError(
+                        `Der Host "${hostname}" löst auf eine gesperrte Adresse auf (${blocked[0].address}).`,
+                        'blocked_address',
+                    );
+                }
+
+                if (wantsAll) {
+                    done(null, records);
+                    return;
+                }
+                done(null, records[0].address, records[0].family);
+            })
+            .catch(error => done(error));
+    };
+}
+
+/**
+ * Dispatcher, dessen Verbindungsaufbau nur gepruefte Adressen verwendet.
+ *
+ * @param {{ lookup?: Function }} [options]
+ */
+export function createPinnedDispatcher({ lookup = systemLookup } = {}) {
+    return new Agent({ connect: { lookup: createPinnedLookup(lookup) } });
+}
+
+let defaultPinnedDispatcher = null;
+
+function getDefaultPinnedFetch(lookup) {
+    // Fuer den Regelfall genuegt ein einziger Agent mit dem System-Resolver.
+    if (lookup === systemLookup) {
+        defaultPinnedDispatcher ??= createPinnedDispatcher({ lookup: systemLookup });
+        return (url, init) => undiciFetch(url, { ...init, dispatcher: defaultPinnedDispatcher });
+    }
+
+    const dispatcher = createPinnedDispatcher({ lookup });
+    return (url, init) => undiciFetch(url, { ...init, dispatcher });
+}
+
+/**
  * Fuehrt einen Abruf durch, bei dem jedes Ziel und jeder Weiterleitungsschritt
  * einzeln gegen die Policy geprueft wird.
  *
  * Automatische Weiterleitungen sind abgeschaltet, damit kein ungeprueftes Ziel
  * kontaktiert wird. Ein abgelehntes Ziel erreicht das Netzwerk nicht: die
- * Pruefung laeuft vollstaendig vor dem Aufruf von `fetchImpl`.
+ * Vorabpruefung laeuft vollstaendig vor dem Verbindungsaufbau. Ohne eigenes
+ * `fetchImpl` wird zusaetzlich der an die geprueften Adressen gebundene
+ * Transport verwendet.
  *
  * @param {unknown} rawUrl
  * @param {{
@@ -158,11 +224,13 @@ function isRedirectResponse(response) {
  * @returns {Promise<Response>}
  */
 export async function fetchWithOutboundPolicy(rawUrl, {
-    fetchImpl = globalThis.fetch,
+    fetchImpl,
     lookup = systemLookup,
     maxRedirects = MAX_OUTBOUND_REDIRECTS,
     ...requestInit
 } = {}) {
+    // Ohne eigenes fetchImpl wird der gebundene Transport verwendet.
+    const performFetch = fetchImpl ?? getDefaultPinnedFetch(lookup);
     const visited = new Set();
     let currentUrl = rawUrl;
 
@@ -175,7 +243,7 @@ export async function fetchWithOutboundPolicy(rawUrl, {
         }
         visited.add(visitKey);
 
-        const response = await fetchImpl(url, { ...requestInit, redirect: 'manual' });
+        const response = await performFetch(url, { ...requestInit, redirect: 'manual' });
 
         if (!isRedirectResponse(response)) {
             return response;

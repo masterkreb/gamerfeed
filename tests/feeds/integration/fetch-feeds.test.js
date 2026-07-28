@@ -68,13 +68,10 @@ test('ungültiges Destructoid-Enclosure blockiert kein echtes Inhaltsbild', () =
     assert.equal(article.needsScraping, false);
 });
 
-test('OG-Scraper überspringt ein Icon-Metafeld und nutzt den nächsten gültigen Kandidaten', async t => {
-    const originalFetch = globalThis.fetch;
-    t.after(() => {
-        globalThis.fetch = originalFetch;
-    });
-
-    globalThis.fetch = async () => ({
+test('OG-Scraper überspringt ein Icon-Metafeld und nutzt den nächsten gültigen Kandidaten', async () => {
+    // Der Abruf läuft über den gebundenen Transport; das fetchImpl wird deshalb
+    // ausdrücklich übergeben statt globalThis.fetch zu ersetzen.
+    const fetchImpl = async () => ({
         ok: true,
         status: 200,
         text: async () => `
@@ -91,7 +88,7 @@ test('OG-Scraper überspringt ein Icon-Metafeld und nutzt den nächsten gültige
         'https://www.destructoid.com/test-article/',
         'Destructoid',
         // Gestellter Resolver: der Test soll ohne echtes DNS auskommen.
-        { lookup: async () => [{ address: '93.184.216.34', family: 4 }] },
+        { fetchImpl, lookup: async () => [{ address: '93.184.216.34', family: 4 }] },
     );
 
     assert.equal(imageUrl, `https://www.destructoid.com${UPLOAD_IMAGE}`);
@@ -228,14 +225,9 @@ test('lässt gültige absolute Artikel- und Bildadressen unverändert', () => {
     assert.equal(article.imageUrl, 'https://bilder.example/titel.jpg');
 });
 
-test('OG-Scraper kontaktiert keine internen Artikeladressen', async t => {
-    const originalFetch = globalThis.fetch;
+test('OG-Scraper kontaktiert keine internen Artikeladressen', async () => {
     let fetchCalls = 0;
-    t.after(() => {
-        globalThis.fetch = originalFetch;
-    });
-
-    globalThis.fetch = async () => {
+    const fetchImpl = async () => {
         fetchCalls += 1;
         return { ok: true, status: 200, text: async () => '<html></html>' };
     };
@@ -246,6 +238,7 @@ test('OG-Scraper kontaktiert keine internen Artikeladressen', async t => {
         'https://intern.example/artikel',
     ]) {
         const imageUrl = await getOgImageFromUrl(articleUrl, 'Beispiel', {
+            fetchImpl,
             lookup: async () => [{ address: '10.0.0.5', family: 4 }],
         });
         assert.equal(imageUrl, null, `${articleUrl} lieferte ein Bild`);

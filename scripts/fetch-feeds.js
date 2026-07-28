@@ -76,7 +76,7 @@ function getFetchUrlForFeed(feed) {
     return feed.url;
 }
 
-export async function getOgImageFromUrl(url, sourceName, { lookup } = {}) {
+export async function getOgImageFromUrl(url, sourceName, { fetchImpl, lookup } = {}) {
     const fetchAttempts = [
         {
             name: 'direct',
@@ -94,6 +94,7 @@ export async function getOgImageFromUrl(url, sourceName, { lookup } = {}) {
             // Eingaben: derselbe Schutz wie beim Feed-Abruf selbst.
             const response = await fetchWithOutboundPolicy(attempt.requestUrl, {
                 ...attempt.options,
+                fetchImpl,
                 lookup,
                 signal: AbortSignal.timeout(5000),
             });

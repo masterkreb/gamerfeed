@@ -312,3 +312,39 @@ test('charakterisiert die aktuell verwendeten öffentlichen Feed-Adressen', asyn
         assert.equal(result.url.protocol, 'https:', `${rawUrl} wurde verändert`);
     }
 });
+
+test('der gebundene Lookup gibt nur geprüfte Adressen an den Transport', async () => {
+    const { createPinnedLookup } = await import('../../../scripts/outbound-policy.js');
+
+    const call = (lookup, hostname, options) => new Promise((resolve, reject) => {
+        lookup(hostname, options, (error, ...result) => {
+            if (error) reject(error);
+            else resolve(result);
+        });
+    });
+
+    // Erlaubtes Ziel: die geprüfte Adresse wird durchgereicht.
+    const allowed = createPinnedLookup(createLookup({ 'gut.example': [PUBLIC_V4] }));
+    assert.deepEqual(await call(allowed, 'gut.example', {}), ['93.184.216.34', 4]);
+    assert.deepEqual(await call(allowed, 'gut.example', { all: true }), [[PUBLIC_V4]]);
+
+    // Gesperrtes Ziel: der Transport bekommt gar keine Adresse, sondern einen
+    // Fehler - damit entsteht zwischen Prüfung und Verbindung kein Zeitfenster.
+    const blocked = createPinnedLookup(createLookup({
+        'rebind.example': [{ address: '127.0.0.1', family: 4 }],
+        'gemischt.example': [PUBLIC_V4, { address: '169.254.169.254', family: 4 }],
+        'leer.example': [],
+    }));
+
+    for (const [hostname, code] of [
+        ['rebind.example', 'blocked_address'],
+        ['gemischt.example', 'blocked_address'],
+        ['leer.example', 'dns_empty'],
+    ]) {
+        await assert.rejects(
+            call(blocked, hostname, {}),
+            error => error.code === code,
+            `${hostname} hätte mit "${code}" scheitern müssen`,
+        );
+    }
+});
