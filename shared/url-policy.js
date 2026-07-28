@@ -79,6 +79,70 @@ export function isAllowedUrl(rawUrl, options) {
     return toAllowedUrl(rawUrl, options) !== null;
 }
 
+// Ohne DNS erkennbare lokale und private Ziele. Bewusst nur die eindeutigen
+// Faelle: die vollstaendige Adresspruefung leistet scripts/outbound-policy.js
+// mit Aufloesung, was in der Edge-Runtime nicht moeglich ist.
+const IPV4_LITERAL = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+
+const PRIVATE_IPV4_PATTERNS = [
+    /^0\./,
+    /^10\./,
+    /^127\./,
+    /^169\.254\./,
+    /^192\.168\./,
+    /^172\.(1[6-9]|2\d|3[01])\./,
+];
+
+/**
+ * Erkennt Hostnamen, die ohne Namensaufloesung eindeutig lokal oder privat sind.
+ *
+ * Der URL-Parser hat numerische Schreibweisen bereits normalisiert, hier steht
+ * also die kanonische Form.
+ *
+ * @param {string} hostname
+ * @returns {boolean}
+ */
+export function isObviouslyPrivateHostname(hostname) {
+    if (typeof hostname !== 'string' || hostname === '') return false;
+
+    const host = hostname.toLowerCase();
+
+    if (host === 'localhost' || host.endsWith('.localhost')) return true;
+
+    // IPv6-Literale stehen in der URL in eckigen Klammern.
+    const literal = host.startsWith('[') && host.endsWith(']')
+        ? host.slice(1, -1)
+        : host;
+
+    // Nur echte IPv4-Literale pruefen - sonst gaelte "10.example.com" als privat.
+    if (IPV4_LITERAL.test(literal)) {
+        return PRIVATE_IPV4_PATTERNS.some(pattern => pattern.test(literal));
+    }
+
+    if (!literal.includes(':')) return false;
+
+    if (literal === '::1' || literal === '::') return true;
+    // Unique Local (fc00::/7) und Link-local (fe80::/10).
+    if (/^f[cd]/.test(literal) || /^fe[89ab]/.test(literal)) return true;
+
+    // IPv4-mapped IPv6. Der URL-Parser schreibt die eingebettete Adresse
+    // hexadezimal (::ffff:7f00:1), deshalb wird sie hier zurueckgerechnet.
+    const mapped = /^::ffff:(.+)$/.exec(literal);
+    if (mapped) {
+        const tail = mapped[1];
+        if (IPV4_LITERAL.test(tail)) return isObviouslyPrivateHostname(tail);
+
+        const groups = tail.split(':');
+        if (groups.length === 2 && groups.every(group => /^[0-9a-f]{1,4}$/.test(group))) {
+            const [high, low] = groups.map(group => Number.parseInt(group, 16));
+            const dotted = [high >> 8, high & 0xff, low >> 8, low & 0xff].join('.');
+            return isObviouslyPrivateHostname(dotted);
+        }
+    }
+
+    return false;
+}
+
 /**
  * Normalisiert eine aus Feed-Inhalten stammende Artikel- oder Bild-URL.
  *
