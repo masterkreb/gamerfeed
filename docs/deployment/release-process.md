@@ -146,7 +146,7 @@ Aktuelle Anbieteranleitungen:
 R1 gilt erst als erledigt, wenn diese externen Zustände geprüft wurden:
 
 - [x] GitHub-Ruleset für `main` aktiv
-- [ ] Pull Request mit den drei erforderlichen Checks nachgewiesen
+- [x] Pull Request #1 mit den drei erforderlichen Checks nachgewiesen
 - [x] Vercel Production Branch ist `main`
 - [x] produktive Schreib-Secrets gelten nicht für Preview
 - [x] vorheriges Production-Deployment als Rollback-Ziel identifiziert
