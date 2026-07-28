@@ -2,8 +2,11 @@ name: Update RSS Feeds Cache
 
 on:
   schedule:
-    # Run every 20 minutes
-    - cron: '*/20 * * * *'
+    # Every 20 minutes, deliberately offset from minute 0. GitHub queues
+    # scheduled workflows globally and minute 0 is the most contended slot;
+    # the offset keeps the run inside the 50 minute staleness threshold
+    # documented in shared/feed-health-model.js.
+    - cron: '7,27,47 * * * *'
   workflow_dispatch:
 
 concurrency:
