@@ -1,12 +1,25 @@
-import type { FeedSource } from '../types';
-import { requireAdminAuth, requireAdminMutation } from './admin-auth.js';
+import { requireAdminApiAuth, requireAdminApiMutation } from './admin-auth.js';
+import {
+    adminEmptyResponse,
+    adminErrorResponse,
+    adminJsonResponse,
+    internalErrorResponse,
+    methodNotAllowedResponse,
+    readAdminJsonObject,
+    validationErrorResponse,
+} from './admin-api.js';
 import {
     mapNewFeedToDatabaseRow,
     mapFeedRow,
     mapFeedRows,
     mapFeedUpdateToDatabaseRow,
 } from './feed-mapper.js';
-import { validateFeedPayload } from './feed-validation.js';
+import {
+    parseFeedCreatePayload,
+    parseFeedDeletePayload,
+    parseFeedUpdatePayload,
+} from './feed-validation.js';
+import { API_ERROR_CODES } from '../shared/api-errors.js';
 
 /**
  * Tagged-Template-Funktion im Stil von `@vercel/postgres`.
@@ -29,6 +42,8 @@ interface FeedsHandlerOptions {
     logger?: Pick<Console, 'error'>;
 }
 
+const ALLOWED_METHODS = 'GET, POST, PUT, DELETE';
+
 // A helper function to create a new, URL-safe feed ID from its name
 function createFeedId(name: string, now: Date): string {
     const sanitizedName = name
@@ -49,8 +64,8 @@ export function createFeedsHandler({
 }: FeedsHandlerOptions) {
     return async function handler(req: Request): Promise<Response> {
         const authResponse = ['POST', 'PUT', 'DELETE'].includes(req.method)
-            ? requireAdminMutation(req, env)
-            : requireAdminAuth(req, env);
+            ? requireAdminApiMutation(req, env)
+            : requireAdminApiAuth(req, env);
         if (authResponse) {
             return authResponse;
         }
@@ -58,27 +73,26 @@ export function createFeedsHandler({
         try {
             // --- GET all feeds ---
             if (req.method === 'GET') {
-                const { rows: feeds } = await sql`SELECT * FROM feeds ORDER BY name;`;
-                return new Response(JSON.stringify(mapFeedRows(feeds)), {
-                    status: 200,
-                    headers: { 'Content-Type': 'application/json' },
-                });
+                const { rows } = await sql`SELECT * FROM feeds ORDER BY name;`;
+                return adminJsonResponse(mapFeedRows(rows));
             }
 
             // --- POST (create) a new feed ---
             if (req.method === 'POST') {
-                const payload = await req.json() as Omit<FeedSource, 'id'>;
-
-                const { error: validationError } = validateFeedPayload(payload);
-                if (validationError) {
-                    return new Response(JSON.stringify({ error: validationError }), {
-                        status: 400,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
+                const { value: body, error: bodyError } = await readAdminJsonObject(req);
+                if (bodyError) {
+                    return bodyError;
                 }
 
-                const newId = createFeedId(payload.name, now());
-                const feedRow = mapNewFeedToDatabaseRow(payload, newId);
+                const parsed = parseFeedCreatePayload(body);
+                if (!parsed.value) {
+                    return validationErrorResponse(parsed);
+                }
+
+                const feedRow = mapNewFeedToDatabaseRow(
+                    parsed.value,
+                    createFeedId(parsed.value.name, now()),
+                );
 
                 const result = await sql`
                     INSERT INTO feeds (id, name, url, language, priority, needs_scraping, update_interval)
@@ -86,27 +100,22 @@ export function createFeedsHandler({
                     RETURNING *;
                 `;
 
-                return new Response(JSON.stringify(mapFeedRow(result.rows[0])), {
-                    status: 201,
-                    headers: { 'Content-Type': 'application/json' },
-                });
+                return adminJsonResponse(mapFeedRow(result.rows[0]), 201);
             }
 
             // --- PUT (update) an existing feed ---
             if (req.method === 'PUT') {
-                const payload = await req.json() as FeedSource;
-                const feedRow = mapFeedUpdateToDatabaseRow(payload);
-                if (!feedRow.id) {
-                    return new Response(JSON.stringify({ error: 'Feed ID is required for updates' }), { status: 400 });
+                const { value: body, error: bodyError } = await readAdminJsonObject(req);
+                if (bodyError) {
+                    return bodyError;
                 }
 
-                const { error: validationError } = validateFeedPayload(payload);
-                if (validationError) {
-                    return new Response(JSON.stringify({ error: validationError }), {
-                        status: 400,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
+                const parsed = parseFeedUpdatePayload(body);
+                if (!parsed.value) {
+                    return validationErrorResponse(parsed);
                 }
+
+                const feedRow = mapFeedUpdateToDatabaseRow(parsed.value);
 
                 const result = await sql`
                     UPDATE feeds
@@ -116,41 +125,41 @@ export function createFeedsHandler({
                 `;
 
                 if (!result.rows[0]) {
-                    return new Response(JSON.stringify({ error: 'Feed not found' }), {
-                        status: 404,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
+                    return adminErrorResponse(
+                        404,
+                        API_ERROR_CODES.NOT_FOUND,
+                        'Es gibt keinen Feed mit dieser ID.',
+                    );
                 }
 
-                return new Response(JSON.stringify(mapFeedRow(result.rows[0])), {
-                    status: 200,
-                    headers: { 'Content-Type': 'application/json' },
-                });
+                return adminJsonResponse(mapFeedRow(result.rows[0]));
             }
 
             // --- DELETE a feed ---
             if (req.method === 'DELETE') {
-                const { id } = await req.json() as { id: string };
-                if (!id) {
-                    return new Response(JSON.stringify({ error: 'Feed ID is required for deletion' }), { status: 400 });
+                const { value: body, error: bodyError } = await readAdminJsonObject(req);
+                if (bodyError) {
+                    return bodyError;
                 }
-                await sql`DELETE FROM feeds WHERE id = ${id};`;
-                return new Response(null, { status: 204 }); // 204 No Content for successful delete
+
+                const parsed = parseFeedDeletePayload(body);
+                if (!parsed.value) {
+                    return validationErrorResponse(parsed);
+                }
+
+                // Bewusst idempotent: ein zweiter Löschversuch ist kein Fehler
+                // und soll im Admin keine Fehlermeldung erzeugen.
+                await sql`DELETE FROM feeds WHERE id = ${parsed.value.id};`;
+                return adminEmptyResponse(204);
             }
 
-            // --- Handle other methods ---
-            return new Response(JSON.stringify({ error: `Method ${req.method} Not Allowed` }), {
-                status: 405,
-                headers: { 'Allow': 'GET, POST, PUT, DELETE' },
-            });
+            return methodNotAllowedResponse(req.method, ALLOWED_METHODS);
 
         } catch (error) {
+            // Der Originaltext bleibt im Log: er trägt Verbindungsdaten,
+            // Tabellennamen und Stacktraces.
             logger.error('API Error in /api/feeds:', error);
-            const message = error instanceof Error ? error.message : 'An unknown server error occurred.';
-            return new Response(JSON.stringify({ error: message }), {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' },
-            });
+            return internalErrorResponse();
         }
     };
 }

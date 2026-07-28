@@ -222,3 +222,181 @@ test('DELETE ohne ID wird abgelehnt, bevor SQL läuft', async () => {
     assert.equal(response.status, 400);
     assert.equal(calls.length, 0);
 });
+
+// === Laufzeitverträge (S2) ===
+
+test('kaputtes JSON ergibt eine kontrollierte 400 statt eines Serverfehlers', async () => {
+    for (const method of ['POST', 'PUT', 'DELETE']) {
+        const { handler, calls } = createHandler();
+        const response = await handler(adminRequest('/api/feeds', {
+            method,
+            rawBody: '{"name": ',
+        }));
+        const body = await readJson(response);
+
+        assert.equal(response.status, 400, method);
+        assert.equal(body.code, 'invalid_json', method);
+        assert.equal(calls.length, 0, `${method} hat trotzdem SQL abgesetzt`);
+    }
+});
+
+test('JSON, das kein Objekt ist, bekommt einen eigenen Code', async () => {
+    for (const rawBody of ['[]', '"feed"', '42', 'null']) {
+        const { handler } = createHandler();
+        const response = await handler(adminRequest('/api/feeds', { method: 'POST', rawBody }));
+
+        assert.equal(response.status, 400, rawBody);
+        assert.equal((await readJson(response)).code, 'invalid_payload', rawBody);
+    }
+});
+
+test('Feldfehler nennen Code und betroffenes Feld', async () => {
+    const cases = [
+        [{ ...VALID_FEED, name: 42 }, 'name'],
+        [{ ...VALID_FEED, name: '' }, 'name'],
+        [{ ...VALID_FEED, url: 'javascript:alert(1)' }, 'url'],
+        [{ ...VALID_FEED, url: 'http://127.0.0.1/feed' }, 'url'],
+        [{ ...VALID_FEED, language: 'fr' }, 'language'],
+        [{ ...VALID_FEED, priority: 'wichtig' }, 'priority'],
+        [{ ...VALID_FEED, needsScraping: 'ja' }, 'needsScraping'],
+    ];
+
+    for (const [payload, field] of cases) {
+        const { handler, calls } = createHandler();
+        const response = await handler(adminRequest('/api/feeds', { method: 'POST', body: payload }));
+        const body = await readJson(response);
+
+        assert.equal(response.status, 400, field);
+        assert.equal(body.code, 'validation_failed', field);
+        assert.equal(body.field, field);
+        assert.equal(typeof body.error, 'string');
+        assert.equal(calls.length, 0);
+    }
+});
+
+test('eine überlange Feed-ID erreicht die Datenbank nicht', async () => {
+    for (const method of ['PUT', 'DELETE']) {
+        const { handler, calls } = createHandler();
+        const response = await handler(adminRequest('/api/feeds', {
+            method,
+            body: { ...VALID_FEED, id: 'x'.repeat(161) },
+        }));
+        const body = await readJson(response);
+
+        assert.equal(response.status, 400, method);
+        assert.equal(body.field, 'id', method);
+        assert.equal(calls.length, 0, method);
+    }
+});
+
+test('needsScraping landet nur als echtes Boolean in der Datenbank', async () => {
+    const { handler, calls } = createHandler([{ rows: [FEED_ROW] }]);
+
+    await handler(adminRequest('/api/feeds', {
+        method: 'POST',
+        body: { ...VALID_FEED, needsScraping: true },
+    }));
+
+    assert.equal(calls[0].values[5], true);
+});
+
+test('unbekannte Zusatzfelder werden ignoriert statt abgelehnt', async () => {
+    const { handler, calls } = createHandler([{ rows: [FEED_ROW] }]);
+
+    const response = await handler(adminRequest('/api/feeds', {
+        method: 'POST',
+        body: { ...VALID_FEED, updateInterval: 5, unbekannt: 'egal' },
+    }));
+
+    assert.equal(response.status, 201);
+    assert.equal(calls[0].values[6], 20, 'update_interval bleibt serverseitig gesetzt');
+});
+
+test('der Name wird für ID und Datenbank normalisiert', async () => {
+    const { handler, calls } = createHandler([{ rows: [FEED_ROW] }]);
+
+    await handler(adminRequest('/api/feeds', {
+        method: 'POST',
+        body: { ...VALID_FEED, name: '  GameStar  ' },
+    }));
+
+    assert.equal(calls[0].values[0], 'gamestar-1785240000000');
+    assert.equal(calls[0].values[1], 'GameStar');
+});
+
+// === Interne Fehler ===
+
+test('ein SQL-Fehler wird protokolliert, aber nie ausgeliefert', async () => {
+    const dbError = new Error('connect ECONNREFUSED postgres://nutzer:geheim@db.example/main');
+
+    for (const method of ['GET', 'POST', 'PUT', 'DELETE']) {
+        const { handler, errors } = createHandler([dbError]);
+        const response = await handler(adminRequest('/api/feeds', {
+            method,
+            body: method === 'GET' ? undefined : { ...VALID_FEED, id: FEED_ROW.id },
+        }));
+        const body = await readJson(response);
+
+        assert.equal(response.status, 500, method);
+        assert.equal(body.code, 'internal_error', method);
+        assert.equal(body.error, 'Es ist ein interner Serverfehler aufgetreten.', method);
+        assert.doesNotMatch(JSON.stringify(body), /ECONNREFUSED|postgres|geheim/, method);
+        assert.equal(errors.length, 1, `${method}: der Originaltext gehört ins Log`);
+    }
+});
+
+// === Cache-Schutz ===
+
+test('jede Antwort des geschützten Endpunkts ist unspeicherbar', async () => {
+    const faelle = [
+        ['GET', {}, [{ rows: [] }]],
+        ['POST', { body: VALID_FEED }, [{ rows: [FEED_ROW] }]],
+        ['PUT', { body: { ...VALID_FEED, id: FEED_ROW.id } }, [{ rows: [FEED_ROW] }]],
+        ['PUT', { body: { ...VALID_FEED, id: 'weg' } }, [{ rows: [] }]],
+        ['DELETE', { body: { id: FEED_ROW.id } }, [{ rows: [] }]],
+        ['POST', { body: { ...VALID_FEED, language: 'fr' } }, []],
+        ['POST', { rawBody: '{' }, []],
+        ['PATCH', {}, []],
+        ['GET', { authenticated: false }, []],
+        ['POST', { origin: 'https://boese.example', body: VALID_FEED }, []],
+        ['GET', {}, [new Error('kaputt')]],
+    ];
+
+    for (const [method, options, responses] of faelle) {
+        const { handler } = createHandler(responses);
+        const response = await handler(adminRequest('/api/feeds', { method, ...options }));
+
+        assert.equal(
+            response.headers.get('cache-control'),
+            'private, no-store',
+            `${method} ${response.status}`,
+        );
+    }
+});
+
+test('405 und 404 tragen stabile Codes', async () => {
+    const { handler: methodHandler } = createHandler();
+    const methodResponse = await methodHandler(adminRequest('/api/feeds', { method: 'PATCH' }));
+    assert.equal((await readJson(methodResponse)).code, 'method_not_allowed');
+    assert.equal(methodResponse.headers.get('allow'), 'GET, POST, PUT, DELETE');
+
+    const { handler: notFoundHandler } = createHandler([{ rows: [] }]);
+    const notFoundResponse = await notFoundHandler(adminRequest('/api/feeds', {
+        method: 'PUT',
+        body: { ...VALID_FEED, id: 'gibt-es-nicht' },
+    }));
+    assert.equal((await readJson(notFoundResponse)).code, 'not_found');
+});
+
+test('das Löschen bleibt idempotent und meldet keinen Fehler', async () => {
+    // Bewusst so: ein zweiter Löschversuch soll im Admin keine Fehlermeldung
+    // erzeugen. Nur PUT unterscheidet zwischen vorhanden und nicht vorhanden.
+    const { handler } = createHandler([{ rows: [] }]);
+
+    const response = await handler(adminRequest('/api/feeds', {
+        method: 'DELETE',
+        body: { id: 'schon-weg' },
+    }));
+
+    assert.equal(response.status, 204);
+});
