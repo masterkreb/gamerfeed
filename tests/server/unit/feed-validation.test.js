@@ -52,3 +52,39 @@ test('lehnt unbekannte Sprachen und Prioritäten ab', () => {
     assert.notEqual(validateFeedPayload({ ...VALID_PAYLOAD, priority: 'wichtig' }).error, null);
     assert.notEqual(validateFeedPayload({ ...VALID_PAYLOAD, priority: undefined }).error, null);
 });
+
+test('lehnt ohne DNS erkennbare lokale und private Ziele beim Speichern ab', () => {
+    for (const url of [
+        'http://127.0.0.1/feed',
+        'http://127.0.0.1:8080/feed',
+        'http://localhost/feed',
+        'http://intern.localhost/feed',
+        'http://[::1]/feed',
+        'http://169.254.169.254/latest/meta-data/',
+        'http://10.0.0.5/feed',
+        'http://192.168.1.1/feed',
+        'http://172.16.0.1/feed',
+        'http://172.31.255.255/feed',
+        'http://2130706433/feed',
+        'http://0177.0.0.1/feed',
+        'http://[::ffff:127.0.0.1]/feed',
+        'http://[fd00::1]/feed',
+        'http://[fe80::1]/feed',
+    ]) {
+        const { error } = validateFeedPayload({ ...VALID_PAYLOAD, url });
+        assert.notEqual(error, null, `${url} wurde akzeptiert`);
+        assert.match(error, /lokales oder privates Ziel/);
+    }
+});
+
+test('lässt öffentliche Adressen weiterhin zu', () => {
+    for (const url of [
+        'https://www.gamepro.de/rss/gamepro.rss',
+        'https://172.32.0.1/feed',
+        'https://10.example.com/feed',
+        'https://localhost.example.com/feed',
+        'https://[2606:4700:4700::1111]/feed',
+    ]) {
+        assert.equal(validateFeedPayload({ ...VALID_PAYLOAD, url }).error, null, `${url} wurde abgelehnt`);
+    }
+});

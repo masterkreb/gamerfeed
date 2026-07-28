@@ -2,7 +2,7 @@
 // nur syntaktische Prüfungen über shared/url-policy.js - die Auflösung der
 // Zieladressen passiert im Node-Cron über scripts/outbound-policy.js.
 
-import { parseAllowedUrl, UrlPolicyError } from '../shared/url-policy.js';
+import { isObviouslyPrivateHostname, parseAllowedUrl, UrlPolicyError } from '../shared/url-policy.js';
 
 export const FEED_LANGUAGES = Object.freeze(['de', 'en']);
 export const FEED_PRIORITIES = Object.freeze(['primary', 'secondary']);
@@ -29,13 +29,23 @@ export function validateFeedPayload(payload) {
         return { error: `Der Name darf höchstens ${FEED_NAME_MAX_LENGTH} Zeichen lang sein.` };
     }
 
+    let parsedUrl;
     try {
-        parseAllowedUrl(url);
+        parsedUrl = parseAllowedUrl(url);
     } catch (error) {
         const reason = error instanceof UrlPolicyError
             ? error.message
             : 'Die Feed-Adresse ist ungültig.';
         return { error: `Die Feed-Adresse wurde abgelehnt: ${reason}` };
+    }
+
+    // Ohne DNS erkennbare interne Ziele werden schon beim Speichern abgewiesen.
+    // Der Cron würde sie später ohnehin ablehnen, aber dann stünde bereits eine
+    // unbrauchbare Konfiguration in der Datenbank.
+    if (isObviouslyPrivateHostname(parsedUrl.hostname)) {
+        return {
+            error: `Die Feed-Adresse wurde abgelehnt: "${parsedUrl.hostname}" ist ein lokales oder privates Ziel.`,
+        };
     }
 
     if (!FEED_LANGUAGES.includes(language)) {
