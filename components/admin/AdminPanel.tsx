@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next';
 import { useFeeds } from '../../hooks/useFeeds';
 import { useDialogFocus } from '../../hooks/useDialogFocus';
-import type { FeedSource, BackendHealthStatus } from '../../types';
+import type { FeedSource, FeedHeartbeat, HealthDataResponse } from '../../types';
 import {
     ArrowLeftIcon,
     NewspaperIcon,
@@ -104,6 +104,7 @@ export const AdminPanel: React.FC = () => {
     const deleteCancelButtonRef = useRef<HTMLButtonElement>(null);
     const addFeedButtonRef = useRef<HTMLButtonElement>(null);
     const [feedHealth, setFeedHealth] = useState<FeedHealth>({});
+    const [heartbeat, setHeartbeat] = useState<FeedHeartbeat | null>(null);
     const [activeTab, setActiveTab] = useState<AdminTab>('management');
     const [isCheckingAll, setIsCheckingAll] = useState(false);
 
@@ -191,9 +192,14 @@ export const AdminPanel: React.FC = () => {
                 throw new Error(errorData.error);
             }
 
-            const { healthStatus: backendHealth, sourcesInCache: sourcesInCacheArray } = await response.json() as { healthStatus: BackendHealthStatus, sourcesInCache: string[]};
+            const {
+                healthStatus: backendHealth,
+                sourcesInCache: sourcesInCacheArray,
+                heartbeat: backendHeartbeat,
+            } = await response.json() as HealthDataResponse;
 
             const sourcesInCache = new Set(sourcesInCacheArray);
+            setHeartbeat(backendHeartbeat ?? null);
 
             // Debug logging to help identify naming mismatches
             console.log('🔍 Health Check Debug Info:');
@@ -213,7 +219,17 @@ export const AdminPanel: React.FC = () => {
                     return;
                 }
 
-                // Case 2: Backend reported an error
+                // Case 2: Feed steht im Status, wurde aber nicht verarbeitet –
+                // etwa weil der Lauf vorher abgebrochen ist.
+                if (backendStatus.status === 'unknown') {
+                    newHealthState[feed.id] = {
+                        status: 'unknown',
+                        detail: t('admin.health.detailNotProcessed')
+                    };
+                    return;
+                }
+
+                // Case 3: Backend reported an error
                 if (backendStatus.status === 'error') {
                     newHealthState[feed.id] = {
                         status: 'error',
@@ -222,7 +238,7 @@ export const AdminPanel: React.FC = () => {
                     return;
                 }
 
-                // Case 3: Backend was successful or has warning
+                // Case 4: Backend was successful or has warning
                 if (backendStatus.status === 'success' || backendStatus.status === 'warning') {
                     // First try exact match
                     let isInCache = sourcesInCache.has(feed.name);
@@ -259,6 +275,9 @@ export const AdminPanel: React.FC = () => {
         } catch (error) {
             const message = error instanceof Error ? error.message : "An unknown error occurred";
             console.error("❌ Error refreshing health status:", error);
+
+            // Ohne frische Antwort ist auch der Heartbeat nicht mehr belegt.
+            setHeartbeat(null);
 
             const errorState: FeedHealth = {};
             feeds.forEach(feed => {
@@ -394,6 +413,7 @@ export const AdminPanel: React.FC = () => {
                         <HealthCenterTab
                             feeds={feeds}
                             feedHealth={feedHealth}
+                            heartbeat={heartbeat}
                             onCheckAll={refreshHealthStatus}
                             isCheckingAll={isCheckingAll}
                         />
