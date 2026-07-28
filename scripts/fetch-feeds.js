@@ -1197,11 +1197,19 @@ async function main() {
 
         // Ein gescheiterter Versuch fasst den gespeicherten Kern-Publish nie an
         // und schreibt den Feed-Status nur, wenn die Feed-Liste geladen war.
-        await recorder.recordFatal({
-            error,
-            feedHealth: feedHealthStatus,
-            durations: { ...durations, totalMs: Date.now() - runStartMs },
-        });
+        // Scheitert auch das Festhalten des Abbruchs, bleibt es beim
+        // urspruenglichen Fehler: der Exit-Code ist wichtiger als das Protokoll.
+        try {
+            await recorder.recordFatal({
+                error,
+                feedHealth: feedHealthStatus,
+                durations: { ...durations, totalMs: Date.now() - runStartMs },
+            });
+        } catch (recorderError) {
+            console.error(`   ⚠️  Abbruch konnte nicht festgehalten werden: ${redactMessage(
+                recorderError instanceof Error ? recorderError.message : String(recorderError),
+            )}`);
+        }
         process.exit(1);
     }
 }

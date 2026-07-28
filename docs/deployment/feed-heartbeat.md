@@ -175,6 +175,29 @@ weiter.
 - Ein fehlgeschlagener Versuch übernimmt den gespeicherten `lastSuccessAt`
   unverändert. Er kann nur vorwärts laufen.
 
+## Nicht jeder Schlüssel ist gleich wichtig
+
+| Schlüssel | Schreibfehler im Normalablauf |
+|---|---|
+| `news_cache`, `news_cache_16`, `news_cache_64` | fatal, Exit-Code ≠ 0 |
+| `feed_health_status` | **fatal, Exit-Code ≠ 0** |
+| `feed_run_status`, `feed_publish_status` | best effort, nur Warnung |
+
+`feed_health_status` gab es schon vor O1, und ein Schreibfehler war dort immer
+fatal: es ist der Datensatz, auf dem die Feed-Tabelle im Admin steht. Bliebe er
+folgenlos, meldete der Cron-Lauf Erfolg, obwohl das Admin-Panel auf altem Stand
+steht – genau die Sorte stiller Ausfall, gegen die O1 antritt. Solange es den
+Ergebniszustand `degraded` aus O2b nicht gibt, ist „fatal“ die einzige ehrliche
+Antwort.
+
+Die **mit O1 hinzugekommenen** Metadaten sind dagegen best effort. Ihr Verlust
+kostet Beobachtbarkeit, aber keine Daten, und darf einen ansonsten gesunden
+Kern-Publish nicht zu Fall bringen.
+
+Im Abbruchpfad ist auch der `feed_health_status`-Write best effort: der Lauf ist
+dort bereits gescheitert und endet ohnehin mit Exit-Code ≠ 0. Ein zweiter Fehler
+beim Festhalten des Abbruchs darf den ursprünglichen Fehler nicht überdecken.
+
 ## Wann ein Lauf lieber gar nichts schreibt
 
 Ein Schreibvorgang mit unvollständigen Ersatzwerten ist schlechter als keiner.

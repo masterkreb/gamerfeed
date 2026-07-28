@@ -18,6 +18,12 @@
 //    aus; eine erfolgreich geladene, aber leere Liste dagegen sehr wohl. Nur im
 //    zweiten Fall darf der gespeicherte Feed-Status geleert werden, damit
 //    geloeschte Feeds verschwinden.
+// 4. Nicht jeder Schluessel ist gleich wichtig. `feed_health_status` gab es
+//    schon vor O1 und sein Schreibfehler war immer fatal – das bleibt so, sonst
+//    meldet ein Lauf Erfolg, obwohl das Admin-Panel auf altem Stand steht. Die
+//    mit O1 hinzugekommenen Metadaten `feed_run_status` und
+//    `feed_publish_status` sind dagegen best effort: ihr Verlust kostet
+//    Beobachtbarkeit, aber keine Daten.
 
 import {
     FEED_HEALTH_STATUS_KEY,
@@ -65,8 +71,10 @@ export function createFeedRunRecorder({
         logger.warn?.(`   ⚠️  ${message}`);
     }
 
-    // Ein fehlgeschlagener Heartbeat-Write darf einen sonst gesunden Lauf nicht
-    // abbrechen: der Kern-Publish ist wichtiger als seine Beobachtung.
+    // Nur fuer die neu eingefuehrten Heartbeat-Metadaten (`feed_run_status`,
+    // `feed_publish_status`): ihr Verlust kostet Beobachtbarkeit, nicht Daten.
+    // Der bestehende `feed_health_status`-Write laeuft ausdruecklich NICHT
+    // hierueber – siehe writeFeedHealth().
     async function saveSafely(key, value) {
         try {
             await store.set(key, value);
@@ -76,6 +84,41 @@ export function createFeedRunRecorder({
             warn(`Heartbeat '${key}' konnte nicht gespeichert werden: ${redact(message)}`);
             return false;
         }
+    }
+
+    /**
+     * Gemeinsame Vorpruefung und Zusammenfuehrung des Feed-Status.
+     *
+     * `critical: true` reicht einen Schreibfehler weiter. Das ist das Verhalten
+     * von vor O1: `feed_health_status` ist kein Diagnosebeiwerk, sondern der
+     * Datensatz, auf dem das Admin-Panel steht. Faellt er aus, muss der
+     * Actions-Lauf fehlschlagen, statt einen gesunden Lauf vorzutaeuschen.
+     * Solange es `degraded` aus O2b nicht gibt, ist „fatal“ die einzige
+     * ehrliche Antwort.
+     */
+    async function writeFeedHealth(feedHealth, { critical }) {
+        if (!feedListLoaded) {
+            warn('Feed-Status wird nicht geschrieben: die Feed-Liste wurde nie geladen.');
+            return null;
+        }
+
+        if (!previousHealthKnown) {
+            warn('Feed-Status wird nicht geschrieben: der bisherige Stand ist unbekannt.');
+            return null;
+        }
+
+        // Eine geladene, aber leere Feed-Liste ist eine echte Aussage: es gibt
+        // keine Feeds mehr. Der gespeicherte Status wird dann geleert.
+        const merged = mergeFeedHealth(previousHealth, feedHealth);
+
+        if (critical) {
+            await store.set(FEED_HEALTH_STATUS_KEY, merged);
+        } else if (!await saveSafely(FEED_HEALTH_STATUS_KEY, merged)) {
+            return null;
+        }
+
+        previousHealth = merged;
+        return merged;
     }
 
     // Die beiden Reads sind bewusst getrennt: ein kaputter Publish-Datensatz
@@ -179,32 +222,14 @@ export function createFeedRunRecorder({
         /**
          * Schreibt den Feed-Status, sofern das keinen Verlust bedeutet.
          *
-         * Schlaegt der Schreibvorgang fehl, bleibt der Lauf trotzdem gueltig:
-         * der Kern-Publish ist bereits erfolgt und wiegt schwerer als seine
-         * Beobachtung. Ein eigener Ergebniszustand dafuer kommt mit O2b.
+         * Ein Schreibfehler wird **weitergereicht**. Der Aufrufer landet damit
+         * im Abbruchpfad und beendet den Prozess mit Exit-Code ungleich 0.
          *
          * @returns {Promise<object|null>} geschriebener Stand oder null
+         * @throws wenn der Speichervorgang scheitert
          */
         async saveFeedHealth(feedHealth) {
-            if (!feedListLoaded) {
-                warn('Feed-Status wird nicht geschrieben: die Feed-Liste wurde nie geladen.');
-                return null;
-            }
-
-            if (!previousHealthKnown) {
-                warn('Feed-Status wird nicht geschrieben: der bisherige Stand ist unbekannt.');
-                return null;
-            }
-
-            // Eine geladene, aber leere Feed-Liste ist eine echte Aussage: es
-            // gibt keine Feeds mehr. Der gespeicherte Status wird dann geleert.
-            const merged = mergeFeedHealth(previousHealth, feedHealth);
-            if (!await saveSafely(FEED_HEALTH_STATUS_KEY, merged)) {
-                return null;
-            }
-
-            previousHealth = merged;
-            return merged;
+            return writeFeedHealth(feedHealth, { critical: true });
         },
 
         /** Der Lauf ist wirklich durch – erst hier faellt `finishedAt`. */
@@ -223,9 +248,14 @@ export function createFeedRunRecorder({
         /**
          * Fataler Abbruch. Der Kern-Publish wird nie angefasst, der Feed-Status
          * nur, wenn die Feed-Liste vorher geladen wurde.
+         *
+         * Hier ist der Feed-Status-Write ausdruecklich best effort: der Lauf
+         * ist bereits gescheitert und der Aufrufer beendet den Prozess ohnehin
+         * mit Exit-Code ungleich 0. Ein zweiter Fehler beim Festhalten des
+         * Abbruchs darf den urspruenglichen Fehler nicht ueberdecken.
          */
         async recordFatal({ error, feedHealth, durations }) {
-            const health = await this.saveFeedHealth(feedHealth);
+            const health = await writeFeedHealth(feedHealth, { critical: false });
 
             const failed = finishRunStatus(runStatus, {
                 finishedAt: now(),

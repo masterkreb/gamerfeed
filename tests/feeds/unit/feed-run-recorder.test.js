@@ -443,6 +443,84 @@ test('ein Fatalabbruch nach der Feed-Liste schreibt den Status und bewahrt lastS
 
 // === Robustheit der Schreibvorgänge ===
 
+test('ein fehlgeschlagener Feed-Status-Write kann nie zu einem erfolgreichen Lauf werden', async () => {
+    // feed_health_status gab es schon vor O1 und sein Schreibfehler war immer
+    // fatal. Der Heartbeat darf daraus keinen gruenen Lauf machen.
+    const harness = createStore({
+        initial: {
+            feed_health_status: storedHealth('2026-07-28T10:40:00.000Z'),
+            feed_publish_status: storedPublish('2026-07-28T10:40:00.000Z'),
+        },
+        failSet: ['feed_health_status'],
+    });
+    const clock = createClock();
+    const recorder = createRecorder(harness, clock);
+    const feedHealth = successfulFeedHealth('2026-07-28T11:01:30.000Z');
+
+    await recorder.begin();
+    await recorder.loadPreviousState();
+    recorder.markFeedListLoaded();
+    clock.advance(120_000);
+
+    // Derselbe Ablauf wie in scripts/fetch-feeds.js: Kern-Publish, dann finish,
+    // und im Fehlerfall der Abbruchpfad.
+    let caught = null;
+    try {
+        await recorder.recordCorePublish({
+            feedHealth,
+            articleCount: 1200,
+            newestArticleAt: '2026-07-28T10:58:00.000Z',
+            durations: {},
+        });
+        await recorder.finish({ feedHealth, durations: {} });
+    } catch (error) {
+        caught = error;
+        await recorder.recordFatal({ error, feedHealth, durations: {} });
+    }
+
+    assert.ok(caught, 'der Schreibfehler wird weitergereicht');
+    assert.match(caught.message, /set feed_health_status nicht möglich/);
+
+    const runResults = harness.writes
+        .filter(write => write.key === 'feed_run_status')
+        .map(write => write.value.result);
+    assert.ok(!runResults.includes('success'), `kein success im Verlauf: ${runResults.join(', ')}`);
+    assert.equal(harness.lastWrite('feed_run_status').result, 'fatal');
+
+    // Der Kern-Publish wurde nie verbucht, weil der Lauf davor abgebrochen ist.
+    assert.ok(!harness.writtenKeys().includes('feed_publish_status'));
+    assert.equal(harness.values.feed_publish_status.lastCorePublishAt, '2026-07-28T10:40:00.000Z');
+});
+
+test('recordFatal überdeckt den ursprünglichen Fehler nicht, wenn auch der Status-Write scheitert', async () => {
+    const harness = createStore({
+        initial: {
+            feed_health_status: storedHealth('2026-07-28T10:40:00.000Z'),
+            feed_publish_status: storedPublish('2026-07-28T10:40:00.000Z'),
+        },
+        failSet: ['feed_health_status'],
+    });
+    const clock = createClock();
+    const { logger, warnings } = silentLogger();
+    const recorder = createRecorder(harness, clock, logger);
+
+    await recorder.begin();
+    await recorder.loadPreviousState();
+    recorder.markFeedListLoaded();
+    clock.advance(60_000);
+
+    await assert.doesNotReject(() => recorder.recordFatal({
+        error: new Error('set feed_health_status nicht möglich'),
+        feedHealth: failedFeedHealth('2026-07-28T11:00:45.000Z', null),
+        durations: {},
+    }));
+
+    const failed = harness.lastWrite('feed_run_status');
+    assert.equal(failed.result, 'fatal');
+    assert.equal(failed.fatalError, 'set feed_health_status nicht möglich', 'der Originalfehler bleibt stehen');
+    assert.ok(warnings.some(message => message.includes("Heartbeat 'feed_health_status'")));
+});
+
 test('ein fehlgeschlagener Heartbeat-Write bricht den Lauf nicht ab', async () => {
     const harness = createStore({
         initial: {

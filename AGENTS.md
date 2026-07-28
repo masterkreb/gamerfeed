@@ -260,6 +260,11 @@ darf: einen nicht sicher gelesenen historischen Stand nie mit Ersatzwerten
 überschreiben, und einen Abbruch vor der Feed-Liste von einer geladenen, aber
 leeren Liste unterscheiden.
 
+Ein Schreibfehler bei `feed_health_status` bleibt **fatal** (Exit-Code ≠ 0), wie
+schon vor O1 – sonst meldet ein Lauf Erfolg, obwohl das Admin auf altem Stand
+steht. Nur die neuen Metadaten `feed_run_status` und `feed_publish_status` sind
+best effort.
+
 Einzelheiten, Datenformate und Grenzen: `docs/deployment/feed-heartbeat.md`.
 
 ---
