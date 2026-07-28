@@ -92,7 +92,7 @@ test('liefert Feed-Status, Quellen und Heartbeat eines frischen Laufs', async ()
 
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('content-type'), 'application/json');
-    assert.equal(response.headers.get('cache-control'), 'no-cache');
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
 
     assert.deepEqual(body.sourcesInCache, ['GameStar']);
     assert.equal(body.healthStatus.gamestar.status, 'success');
@@ -181,11 +181,12 @@ test('fehlender Feed-Status oder News-Cache ergibt weiterhin 404', async () => {
     delete withoutCache.news_cache;
     const second = await createHandler(withoutCache).handler(new Request('https://example.com/x'));
     assert.equal(second.status, 404);
-    assert.equal(second.headers.get('cache-control'), 'no-cache');
+    assert.equal(second.headers.get('cache-control'), 'private, no-store');
+    assert.equal((await second.json()).code, 'not_found');
 });
 
-test('ein KV-Fehler wird protokolliert und als 500 beantwortet', async () => {
-    const cache = createCache({}, new Error('KV offline'));
+test('ein KV-Fehler wird protokolliert, aber nicht ausgeliefert', async () => {
+    const cache = createCache({}, new Error('KV offline: https://kv.example/pipeline?token=geheim'));
     const { logger, calls } = createLogger();
     const handler = createHealthDataHandler(cache.client, { now: () => new Date(NOW) }, logger);
 
@@ -193,8 +194,11 @@ test('ein KV-Fehler wird protokolliert und als 500 beantwortet', async () => {
     const body = await response.json();
 
     assert.equal(response.status, 500);
-    assert.equal(body.error, 'KV offline');
-    assert.equal(calls.length, 1);
+    assert.equal(body.code, 'internal_error');
+    assert.equal(body.error, 'Es ist ein interner Serverfehler aufgetreten.');
+    assert.doesNotMatch(JSON.stringify(body), /KV offline|geheim/);
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
+    assert.equal(calls.length, 1, 'der Originaltext landet ausschliesslich im Log');
 });
 
 test('es werden nur die vier erwarteten KV-Schluessel gelesen', async () => {
