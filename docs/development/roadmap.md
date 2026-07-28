@@ -90,7 +90,7 @@ und externe Aufrufe sind unbegrenzt – dort setzt O2a an.
 abgeschlossen. Ein kaputtes Einzelelement kostet nicht mehr die ganze Quelle,
 jeder externe Aufruf hat Timeout und Byte-Limit, der Proxy wird nur noch für
 GamePro versucht, und ein fehlender Core-Wert beendet den Lauf vor dem ersten
-externen Zugriff. 416 zentrale Tests und 9 Browser-Abnahmen laufen erfolgreich.
+externen Zugriff. 427 zentrale Tests und 9 Browser-Abnahmen laufen erfolgreich.
 Offen bleibt die **Summe** aller Aufrufe gegen das 30-Minuten-Hardlimit des
 Workflows – dort setzt O2b an.
 

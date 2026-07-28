@@ -213,15 +213,31 @@ function getFirstElementByLocalName(root, localName) {
 }
 
 /**
- * Zerlegt einen Feed und meldet zusaetzlich, was dabei verworfen wurde.
+ * Zerlegt einen Feed und meldet zusaetzlich, was dabei nicht geklappt hat.
  *
  * Ein einzelnes kaputtes Element darf den Feed nicht mitreissen: fruehere
  * Laeufe haben an einem ungueltigen `pubDate` die komplette Quelle verloren,
  * weil `new Date(...).toISOString()` aus der Schleife heraus geworfen hat.
  *
+ * Die beiden Zaehler sind bewusst getrennt:
+ *
+ * - `skipped`  – das Element wurde **nicht** uebernommen. Gruende: `incomplete`,
+ *                `invalid_date`, `invalid_link`, `item_error`.
+ * - `warnings` – das Element **ist** im Ergebnis, aber ein Feld war unbrauchbar.
+ *                Bislang einzig `invalid_image`; der Artikel bekommt spaeter
+ *                einen Platzhalter.
+ *
+ * Beide enthalten nur Grund und Anzahl - niemals Titel, Adressen oder Inhalte.
+ *
  * @param {string} xmlString
  * @param {object} feed
- * @returns {{ articles: object[], skipped: { total: number, reasons: Record<string, number> } }}
+ * @param {{ logger?: { log?: Function, warn?: Function, error?: Function } }} [options]
+ *   `logger` nimmt die Meldungen entgegen; ohne Angabe `console`.
+ * @returns {{
+ *   articles: object[],
+ *   skipped: { total: number, reasons: Record<string, number> },
+ *   warnings: { total: number, reasons: Record<string, number> },
+ * }}
  */
 export function parseFeedItems(xmlString, feed, { logger = console } = {}) {
     if (!isFeedXml(xmlString)) {
@@ -514,11 +530,12 @@ export function parseFeedItems(xmlString, feed, { logger = console } = {}) {
 /**
  * Rueckwaertskompatible Fassung: liefert nur die Artikel.
  *
- * Bestehende Aufrufer und Tests arbeiten unveraendert weiter; wer den
- * Skip-Zaehler braucht, nimmt `parseFeedItems`.
+ * Bestehende Aufrufer und Tests arbeiten unveraendert weiter; wer die Zaehler
+ * `skipped` und `warnings` braucht, nimmt `parseFeedItems`.
  *
  * @param {string} xmlString
  * @param {object} feed
+ * @param {{ logger?: { log?: Function, warn?: Function, error?: Function } }} [options]
  * @returns {object[]}
  */
 export function parseRssXml(xmlString, feed, options) {
@@ -970,6 +987,10 @@ export async function main({
         store,
         runId: createRunId(),
         startedAt: new Date(),
+        // Ohne diese Zeile faellt der Recorder auf `console` zurueck und seine
+        // Warnungen ("Feed-Status wird nicht geschrieben ...") laufen an der
+        // Injektion vorbei - genau daran scheitert jede Secret-Pruefung.
+        logger,
         redact: redactMessage,
     });
 

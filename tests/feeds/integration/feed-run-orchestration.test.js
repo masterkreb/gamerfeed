@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { main } from '../../../scripts/fetch-feeds.js';
+import { createFeedRunRecorder } from '../../../scripts/feed-run-recorder.js';
 
 // Der komplette Lauf gegen Attrappen: keine Datenbank, kein KV, kein Netz.
 // Geprüft wird vor allem die Reihenfolge - insbesondere, dass eine
@@ -495,6 +496,47 @@ test('ein Trendfehler landet in keiner Ausgabe und bleibt folgenlos', async () =
     assert.deepEqual(spies.exitCodes, [], 'der Kernlauf bleibt erfolgreich');
     assert.equal(spies.kvStore.feed_run_status.result, 'success');
     assertKeineSecrets(spies, 'Trendfehler');
+});
+
+test('auch Warnungen des echten Recorders landen nur im injizierten Logger', async () => {
+    // Bewusst der echte createFeedRunRecorder statt der Attrappe: nur er zeigt,
+    // ob main() ihm den Logger überhaupt mitgibt. Ohne Weitergabe fällt er auf
+    // `console` zurück und seine Warnungen laufen an der Injektion vorbei.
+    const spies = createSpies();
+
+    // Nur der Feed-Status ist unlesbar. Der Recorder gilt seinen Vorzustand
+    // damit als unbekannt und warnt beim Schreiben - der reproduzierte Fall.
+    const echterGet = spies.store.get;
+    spies.store.get = async key => {
+        if (key === 'feed_health_status') {
+            throw new Error('KV offline für kv-token-geheim');
+        }
+        return echterGet(key);
+    };
+
+    const original = { log: console.log, warn: console.warn, error: console.error };
+    const globaleAusgaben = [];
+    console.log = (...args) => globaleAusgaben.push(args.map(String).join(' '));
+    console.warn = console.log;
+    console.error = console.log;
+
+    try {
+        await runMain(spies, {
+            createRecorder: createFeedRunRecorder,
+            fetchImpl: feedFetch(spies),
+        });
+    } finally {
+        console.log = original.log;
+        console.warn = original.warn;
+        console.error = original.error;
+    }
+
+    assert.ok(
+        spies.logLines.some(line => line.includes('Feed-Status wird nicht geschrieben')),
+        'die Recorder-Warnung muss im injizierten Logger auftauchen',
+    );
+    assert.deepEqual(globaleAusgaben, [], 'der Recorder schreibt nicht an der Injektion vorbei');
+    assertKeineSecrets(spies, 'echter Recorder');
 });
 
 test('die Ausgabe des Laufs geht ausschließlich über den injizierten Logger', async () => {
