@@ -112,6 +112,44 @@ test('verwendet bei ungültigem Fehlertext eine stabile Ersatzmeldung', async ()
             assert.ok(error instanceof FeedsApiError);
             assert.equal(error.message, 'Failed to add feed (503)');
             assert.equal(error.status, 503);
+            assert.equal(error.code, null, 'ohne JSON gibt es keinen Code');
+            return true;
+        },
+    );
+});
+
+test('übernimmt den stabilen Fehlercode und das betroffene Feld', async () => {
+    const fetcher = async () => jsonResponse(
+        {
+            error: 'Die Sprache muss de oder en sein.',
+            code: 'validation_failed',
+            field: 'language',
+        },
+        { status: 400 },
+    );
+
+    await assert.rejects(
+        createFeed(existingFeed, fetcher),
+        error => {
+            assert.ok(error instanceof FeedsApiError);
+            assert.equal(error.status, 400);
+            assert.equal(error.message, 'Die Sprache muss de oder en sein.');
+            assert.equal(error.code, 'validation_failed');
+            assert.equal(error.field, 'language');
+            return true;
+        },
+    );
+});
+
+test('kommt mit Fehlerantworten ohne Code weiterhin zurecht', async () => {
+    const fetcher = async () => jsonResponse({ error: 'Alt und ohne Code' }, { status: 500 });
+
+    await assert.rejects(
+        saveFeed(existingFeed, fetcher),
+        error => {
+            assert.equal(error.message, 'Alt und ohne Code');
+            assert.equal(error.code, null);
+            assert.equal(error.field, null);
             return true;
         },
     );
