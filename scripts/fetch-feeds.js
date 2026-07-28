@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { normalizeContentUrl } from '../shared/url-policy.js';
 import { sanitizeErrorMessage } from '../shared/feed-health-model.js';
 import { createFeedRunRecorder } from './feed-run-recorder.js';
+import { parseGroqJsonContent, requestGroqCompletion } from './groq-client.js';
 import { readLimitedResponseText } from './limited-response.js';
 import { fetchWithOutboundPolicy } from './outbound-policy.js';
 import {
@@ -526,7 +527,7 @@ function normalizeTitle(title) {
 }
 
 // Generate daily trends using AI (sends titles to Groq)
-async function generateDailyTrendsWithGroq(articles) {
+async function generateDailyTrendsWithGroq(articles, { groqFetch } = {}) {
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
     if (!GROQ_API_KEY) {
         console.log('   ⚠️  GROQ_API_KEY not found. Skipping trend generation.');
@@ -601,57 +602,35 @@ Antworte NUR im JSON-Format, keine Erklärungen:
   {"topic": "Steam Sale", "summary": "Herbst-Sale mit großen Rabatten gestartet", "articleCount": 3}
 ]`;
 
-    try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${GROQ_API_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: 'llama-3.1-8b-instant',
-                messages: [
-                    { role: 'system', content: 'Du bist ein Gaming-News-Analyst. Antworte immer nur mit validem JSON, ohne Markdown-Formatierung oder Erklärungen.' },
-                    { role: 'user', content: prompt }
-                ],
-                temperature: 0.3,
-                max_tokens: 1500,
-            }),
-        });
+    const { content } = await requestGroqCompletion({
+        apiKey: GROQ_API_KEY,
+        fetchImpl: groqFetch,
+        messages: [
+            { role: 'system', content: 'Du bist ein Gaming-News-Analyst. Antworte immer nur mit validem JSON, ohne Markdown-Formatierung oder Erklärungen.' },
+            { role: 'user', content: prompt },
+        ],
+        maxTokens: 1500,
+        redact: redactMessage,
+    });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`   ❌ Groq API error: ${response.status} - ${errorText}`);
-            return null;
-        }
-
-        const data = await response.json();
-        const content = data.choices?.[0]?.message?.content;
-
-        if (!content) {
-            console.error('   ❌ No content in Groq response');
-            return null;
-        }
-
-        let jsonString = content.trim();
-        if (jsonString.startsWith('```')) {
-            jsonString = jsonString.replace(/```json?\n?/g, '').replace(/```/g, '');
-        }
-
-        const trends = JSON.parse(jsonString);
-        // Sort by articleCount descending (highest first)
-        return trends
-            .slice(0, 5)
-            .sort((a, b) => b.articleCount - a.articleCount);
-
-    } catch (error) {
-        console.error(`   ❌ Error calling Groq API:`, error.message);
+    if (content === null) {
         return null;
     }
+
+    const trends = parseGroqJsonContent(content);
+    if (!Array.isArray(trends)) {
+        console.error('   ❌ Groq daily trends are not a JSON array. Skipping.');
+        return null;
+    }
+
+    // Sort by articleCount descending (highest first)
+    return trends
+        .slice(0, 5)
+        .sort((a, b) => b.articleCount - a.articleCount);
 }
 
 // Generate weekly trends by aggregating 7 days of archived daily trends
-async function generateWeeklyTrendsFromArchive() {
+async function generateWeeklyTrendsFromArchive({ groqFetch } = {}) {
     console.log('   🔄 Generating weekly trends from 7-day archive...');
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
@@ -733,59 +712,36 @@ Antworte NUR im JSON-Format:
   ]
 }`;
 
-    try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${GROQ_API_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: 'llama-3.1-8b-instant',
-                messages: [
-                    { role: 'system', content: 'Du bist ein Gaming-News-Analyst. Analysiere die Trends dieser Woche (NICHT kumulativ). Gib nur valides JSON zurück.' },
-                    { role: 'user', content: prompt }
-                ],
-                temperature: 0.3,
-                max_tokens: 2000,
-            }),
-        });
+    const { content } = await requestGroqCompletion({
+        apiKey: GROQ_API_KEY,
+        fetchImpl: groqFetch,
+        messages: [
+            { role: 'system', content: 'Du bist ein Gaming-News-Analyst. Analysiere die Trends dieser Woche (NICHT kumulativ). Gib nur valides JSON zurück.' },
+            { role: 'user', content: prompt },
+        ],
+        maxTokens: 2000,
+        redact: redactMessage,
+    });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`   ❌ Groq API error during Weekly Aggregation: ${response.status} - ${errorText}`);
-            return null;
-        }
-
-        const data = await response.json();
-        const content = data.choices?.[0]?.message?.content;
-
-        if (!content) {
-            console.error('   ❌ No content in Groq response for weekly trends');
-            return null;
-        }
-
-        let jsonString = content.trim();
-        if (jsonString.startsWith('```')) {
-            jsonString = jsonString.replace(/```json?\n?/g, '').replace(/```/g, '');
-        }
-
-        const weeklyData = JSON.parse(jsonString);
-
-        // Return the full object with overallSummary, trends, and dateRange
-        return {
-            overallSummary: weeklyData.overallSummary || '',
-            trends: (weeklyData.trends || []).slice(0, 5),
-            dateRange
-        };
-
-    } catch (error) {
-        console.error(`   ❌ Error calling Groq API for Weekly Aggregation:`, error.message);
+    if (content === null) {
         return null;
     }
+
+    const weeklyData = parseGroqJsonContent(content);
+    if (!weeklyData || typeof weeklyData !== 'object' || Array.isArray(weeklyData)) {
+        console.error('   ❌ Groq weekly trends are not a JSON object. Skipping.');
+        return null;
+    }
+
+    // Return the full object with overallSummary, trends, and dateRange
+    return {
+        overallSummary: typeof weeklyData.overallSummary === 'string' ? weeklyData.overallSummary : '',
+        trends: Array.isArray(weeklyData.trends) ? weeklyData.trends.slice(0, 5) : [],
+        dateRange
+    };
 }
 
-async function generateAndSaveTrends(articles) {
+async function generateAndSaveTrends(articles, { groqFetch } = {}) {
     console.log('\n🧠 Starting Groq AI Trend Analysis...');
 
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
@@ -821,7 +777,7 @@ async function generateAndSaveTrends(articles) {
 
         if (shouldRegenerate) {
             console.log('   🔄 Daily trends cache expired or missing. Regenerating...');
-            dailyTrends = await generateDailyTrendsWithGroq(articles);
+            dailyTrends = await generateDailyTrendsWithGroq(articles, { groqFetch });
             dailyUpdatedAt = now.toISOString();
 
             if (dailyTrends) {
@@ -858,7 +814,7 @@ async function generateAndSaveTrends(articles) {
 
         if (shouldRegenerateWeekly) {
             console.log('   🔄 Weekly trends cache expired or missing. Regenerating from archive...');
-            const weeklyData = await generateWeeklyTrendsFromArchive();
+            const weeklyData = await generateWeeklyTrendsFromArchive({ groqFetch });
 
             if (weeklyData && weeklyData.trends) {
                 await kv.set('weekly_trends', {
@@ -909,7 +865,7 @@ function redactMessage(message) {
 }
 
 // === MAIN SCRIPT LOGIC ===
-async function main() {
+async function main({ groqFetch } = {}) {
     const feedHealthStatus = {};
     const ARTICLE_RETENTION_DAYS = 60; // Artikel werden 60 Tage gespeichert
     const MAX_ARTICLES = 10000; // Maximale Anzahl Artikel (verhindert KV Limit-Überschreitung)
@@ -1261,9 +1217,20 @@ async function main() {
             );
         }
 
-        // Generate trends with Groq AI (respects cache TTL)
+        // Generate trends with Groq AI (respects cache TTL).
+        //
+        // Trends sind eine optionale Zusatzfunktion und laufen nach dem
+        // Kern-Publish. Ein Providerfehler darf einen bereits veroeffentlichten
+        // Lauf nicht nachtraeglich zu `fatal` machen - deshalb endet die Phase
+        // hier und nicht im aeusseren catch.
         const trendsStartMs = Date.now();
-        await generateAndSaveTrends(sortedArticles);
+        try {
+            await generateAndSaveTrends(sortedArticles, { groqFetch });
+        } catch (trendsError) {
+            console.warn(`   ⚠️  Trendphase übersprungen: ${redactMessage(
+                trendsError instanceof Error ? trendsError.message : String(trendsError),
+            )}`);
+        }
         durations.trendsMs = Date.now() - trendsStartMs;
 
         // Erst jetzt ist der Lauf wirklich durch und bekommt sein `finishedAt`.
