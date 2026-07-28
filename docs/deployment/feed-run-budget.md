@@ -37,9 +37,29 @@ Posten:
   20 s) und der abschließende Heartbeat liegen **nach** der Deadline;
 - der Rest ist bewusst ungenutzter Puffer für einen langsamen Runner.
 
-Die 18 Minuten passen zugleich zu den Einzelgrenzen aus O2a: 16 Feeds mit je
-zwei Versuchen à 15 s ergeben schlimmstenfalls rund 8 Minuten, 80 Seitenabrufe
-mit je 5 s Timeout und 0,5 s Pause rund 7,3 Minuten.
+**Der Worst Case passt ausdrücklich nicht in die 18 Minuten – und das ist
+Absicht.** Bei aktuell **40 konfigurierten Quellen** ergeben zwei Versuche à
+15 s allein schon rund 20 Minuten; dazu kämen bis zu 80 Seitenabrufe mit je 5 s
+Timeout und 0,5 s Pause, also weitere rund 7,3 Minuten. Eine Deadline, die das
+abdeckt, gäbe es unterhalb des 30-Minuten-Hardlimits schlicht nicht.
+
+Die Deadline ist deshalb **keine Kapazitätsplanung, sondern eine Zusage**: der
+Lauf erreicht seinen Kern-Publish und seinen Heartbeat *immer* vor dem
+Hardlimit.
+
+- Im Normalfall antworten die meisten Quellen in deutlich unter einer Sekunde –
+  die 18 Minuten sind dann bei Weitem nicht ausgeschöpft.
+- Sind ungewöhnlich viele Quellen langsam oder tot, werden die restlichen
+  Quellen und Bild-Scrapes bewusst zurückgestellt und der Lauf endet
+  `degraded`.
+
+Genau darum geht es: **zurückgestellt und gemeldet statt hart abgeschnitten und
+stumm.** Ein zurückgestellter Lauf veröffentlicht, was er hat, benennt den
+Grund und versucht den Rest im nächsten Lauf 20 Minuten später erneut.
+
+Häufen sich degradierte Läufe, ist das ein Messwert und keine Fehlkonfiguration:
+dann gehört geprüft, welche Quellen die Zeit verbrauchen — die Beobachtbarkeit
+dafür (Historie, Alarm) ist O4.
 
 ### Warum ein gemeinsames Seitenbudget
 

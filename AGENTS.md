@@ -387,7 +387,10 @@ Fehlerpfad und hinterlässt einen halben Heartbeat.
 - **`CORE_DEADLINE_MS` (18 Minuten ab Skriptstart)** begrenzt die Kernphasen und
   lässt 12 Minuten Sicherheitsreserve. Konfigurierbar über
   `FEED_CORE_DEADLINE_MS`; ein unbrauchbarer Wert fällt auf die Vorgabe zurück,
-  statt die Grenze abzuschalten.
+  statt die Grenze abzuschalten. **Der Worst Case passt bewusst nicht hinein:**
+  40 Quellen mit je zwei Versuchen à 15 s wären allein rund 20 Minuten. Die
+  Deadline ist keine Kapazitätsplanung, sondern die Zusage, dass Kern-Publish
+  und Heartbeat immer vor dem Hardlimit fallen – der Rest wird zurückgestellt.
 - **80 Artikel-Seitenabrufe pro Lauf** (`FEED_SCRAPE_LIMIT`) gelten **gemeinsam**
   für neue OG-Scrapes und den Backfill – sonst umginge der eine Weg die Grenze
   des anderen.

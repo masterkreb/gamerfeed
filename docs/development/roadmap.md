@@ -98,7 +98,7 @@ Workflows – dort setzt O2b an.
 abgeschlossen. Der Lauf hat jetzt eine Deadline von 18 Minuten mit 12 Minuten
 Reserve vor dem 30-Minuten-Hardlimit, ein gemeinsames Budget von 80
 Artikel-Seitenabrufen und drei klar getrennte Ergebniszustände. Zurückgestellte
-Arbeit ergibt `degraded` statt stillschweigend `success`. 483 zentrale Tests und
+Arbeit ergibt `degraded` statt stillschweigend `success`. 497 zentrale Tests und
 9 Browser-Abnahmen laufen erfolgreich. Das nächste Hauptrisiko liegt bei den
 zeitversetzt gecachten News-Endpunkten, die trotz Pointer verschiedene
 Generationen liefern können – dort setzt O3a an.
@@ -376,7 +376,10 @@ unterschiedlich behandelt und externe Aufrufe einzeln begrenzt werden.
 `FEED_CORE_DEADLINE_MS`, 12 Minuten Sicherheitsreserve vor dem
 30-Minuten-Hardlimit) und höchstens 80 Artikel-Seitenabrufe pro Lauf
 (`FEED_SCRAPE_LIMIT`) – gemeinsam für neue OG-Scrapes und den Backfill, damit
-der eine Weg die Grenze des anderen nicht umgeht. Die Restzeit wird vor jeder
+der eine Weg die Grenze des anderen nicht umgeht. Der Worst Case passt bewusst
+nicht in die Deadline: 40 Quellen mit je zwei Versuchen à 15 s wären allein rund
+20 Minuten. Sie ist keine Kapazitätsplanung, sondern die Zusage, dass
+Kern-Publish und Heartbeat immer vor dem Hardlimit fallen. Die Restzeit wird vor jeder
 Quelle und jedem Seitenabruf geprüft **und** ein Timer bricht beim Erreichen der
 Deadline eine bereits laufende Anfrage über einen gemeinsamen
 `AbortController` ab; `requestSignal` kürzt zusätzlich jedes Einzeltimeout auf

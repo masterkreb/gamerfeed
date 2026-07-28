@@ -31,9 +31,19 @@ export const WORKFLOW_HARD_LIMIT_MS = 30 * 60 * 1000;
  * gehen Checkout, `npm ci` und `npm run test:feeds` ab (in der Praxis 2-4
  * Minuten); der Rest deckt Kern-Publish, Trendphase und Heartbeat ab.
  *
- * Die Zahl passt zu den Einzelgrenzen aus O2a: 16 Feeds mit je zwei Versuchen
- * a 15 s ergeben schlimmstenfalls rund 8 Minuten, die 80 erlaubten
- * Seitenabrufe mit je 5 s Timeout und 0,5 s Pause rund 7,3 Minuten.
+ * **Der Worst Case passt ausdruecklich nicht hinein, und das ist Absicht.**
+ * Bei aktuell 40 konfigurierten Quellen ergeben zwei Versuche a 15 s allein
+ * schon rund 20 Minuten, dazu kaemen bis zu 80 Seitenabrufe mit je 5 s Timeout
+ * und 0,5 s Pause (rund 7,3 Minuten). Eine Deadline, die *das* abdeckt, gaebe
+ * es unterhalb des 30-Minuten-Hardlimits nicht.
+ *
+ * Die Deadline ist deshalb keine Kapazitaetsplanung, sondern eine Zusage: der
+ * Lauf erreicht seinen Kern-Publish und seinen Heartbeat **immer** vor dem
+ * Hardlimit. Im Normalfall - die meisten Quellen antworten in deutlich unter
+ * einer Sekunde - bleibt reichlich Luft. Sind ungewoehnlich viele Quellen
+ * langsam, stellt der Lauf den Rest bewusst zurueck und endet `degraded`. Das
+ * ist der Unterschied, um den es geht: zurueckgestellt und gemeldet statt hart
+ * abgeschnitten und stumm.
  */
 export const CORE_DEADLINE_MS = 18 * 60 * 1000;
 
