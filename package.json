@@ -13,7 +13,7 @@
     "test": "node --disable-warning=ExperimentalWarning --experimental-strip-types --test \"tests/**/*.test.js\"",
     "test:feeds": "node --test \"tests/feeds/**/*.test.js\"",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test"
+    "test:e2e": "npm run build && playwright test"
   },
   "dependencies": {
     "@vercel/kv": "^2.0.0",

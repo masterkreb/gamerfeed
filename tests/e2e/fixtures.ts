@@ -89,6 +89,21 @@ export async function blockExternalRequests(page: Page, onBlocked?: (url: string
     });
 }
 
+/**
+ * CookieConsent blendet sich bei `navigator.webdriver === true` absichtlich aus
+ * (`hideFromBots`). Playwright setzt genau das. Fuer die Consent-Abnahmen wird
+ * die Kennzeichnung deshalb vor dem Seitenaufbau neutralisiert - nur im Test,
+ * die Anwendung bleibt unveraendert.
+ */
+export async function disableBotDetection(page: Page) {
+    await page.addInitScript(() => {
+        Object.defineProperty(navigator, 'webdriver', {
+            configurable: true,
+            get: () => false,
+        });
+    });
+}
+
 export const test = base.extend<{ page: Page }>({
     page: async ({ page }, use) => {
         await installApiMocks(page);
