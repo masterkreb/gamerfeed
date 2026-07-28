@@ -63,16 +63,24 @@ Die wichtigsten verbleibenden Risiken liegen an Daten- und Netzwerkgrenzen,
 bei der Erkennung veralteter Cron-Daten sowie in einigen noch ungetesteten
 Browser- und Request-Abläufen.
 
+**Stand 28. Juli 2026 (Branch `claude/roadmap-batch-1`):** S1a, S1b, T0 und F2
+sind abgeschlossen. Serverseitige Abrufe laufen über einen an die geprüften
+Adressen gebundenen Transport, Artikel- und Bildadressen unterliegen einer
+gemeinsamen Ausgabe-Policy, es gibt ein Chromium-Grundgerüst mit eigenem
+CI-Schritt, und der Consent-Lebenszyklus deckt Widerruf und erneute Zustimmung
+ab. 178 zentrale Tests und 9 Browser-Abnahmen laufen erfolgreich. Damit
+verschiebt sich das Hauptrisiko auf den Cron-Betrieb selbst – dort setzt O1 an.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
 |---|---|---|---|
 | R1 | P1 | Entscheidung nötig | Release-Gate und Preview-Zugriffe festlegen |
-| S1a | P1 | **bereit** | Serverziele und Redirects gegen SSRF absichern |
-| S1b | P1 | geplant | Artikel-, Bild- und Ausgabe-URLs sicher behandeln |
-| T0 | P1 | geplant | Kleines Chromium-E2E-Grundgerüst bereitstellen |
-| F2 | P1 | geplant | Consent-Widerruf und Cookie-Einstellungen vervollständigen |
-| O1 | P1 | geplant | Cron-Heartbeat und veraltete Health-Daten sichtbar machen |
+| S1a | P1 | erledigt | Serverziele und Redirects gegen SSRF absichern |
+| S1b | P1 | erledigt | Artikel-, Bild- und Ausgabe-URLs sicher behandeln |
+| T0 | P1 | erledigt | Kleines Chromium-E2E-Grundgerüst bereitstellen |
+| F2 | P1 | erledigt | Consent-Widerruf und Cookie-Einstellungen vervollständigen |
+| O1 | P1 | **bereit** | Cron-Heartbeat und veraltete Health-Daten sichtbar machen |
 | S2 | P1 | geplant | Admin-API-Payloads validieren und Fehlerausgaben härten |
 | O2a | P1 | geplant | Einzelitem-Fehler, Secrets und Provider-Timeouts absichern |
 | O2b | P1 | geplant | Feed-Kernlauf mit Deadline und Scrape-Budget begrenzen |
@@ -134,6 +142,10 @@ Production-Rollout muss R1 entschieden sein.
 
 ### S1a – Serverziele und Redirects absichern
 
+**Status:** erledigt. Der Transport ist über `undici` mit eigenem
+`connect.lookup` an die geprüften Adressen gebunden; das Release-Gate wurde am
+28. Juli 2026 mit 40/40 passierenden Feed-Adressen abgeschlossen.
+
 **Warum:** Feed- und Artikelziele werden serverseitig abgerufen. Eine reine
 Syntax- oder Hostname-Prüfung reicht nicht gegen DNS-Auflösungen auf private
 Netze, Redirects oder DNS-Rebinding.
@@ -164,6 +176,8 @@ Netze, Redirects oder DNS-Rebinding.
 - kein abgewiesener Request erreicht das Netzwerk.
 
 ### S1b – Artikel-, Bild- und Ausgabe-URLs absichern
+
+**Status:** erledigt.
 
 **Warum:** RSS-Inhalte werden in der SPA und unter `/gaming-news` ausgegeben und
 für Bilder teilweise serverseitig nachgeladen. Dafür gilt zusätzlich zur
@@ -213,6 +227,8 @@ Feed-Verwaltung und Ankündigungen benötigen daher serverseitige Verträge.
 ## Meilenstein 2: Feed- und Cache-Betrieb
 
 ### O1 – Heartbeat und Frische
+
+**Status:** bereit – nächstes Code-Arbeitspaket.
 
 **Warum:** Ein alter grüner `feed_health_status` bleibt momentan grün, auch
 wenn der geplante Workflow nicht mehr läuft.
@@ -394,6 +410,8 @@ unterschiedliche Generationen enthalten.
 
 ### T0 – Chromium-E2E-Grundgerüst
 
+**Status:** erledigt.
+
 **Warum:** Linkedom prüft weder echte Browser-Navigation und Cookies noch
 Netzwerk- und Fokusverhalten. F2 und spätere Browser-Abnahmen benötigen zuerst
 eine kleine, neutrale Infrastruktur.
@@ -443,6 +461,8 @@ Medium, wird Full nicht mehr versucht.
 - ein Chromium-Smoke ergänzt T0 für den vollständigen Stufenablauf.
 
 ### F2 – Consent-Lifecycle vervollständigen
+
+**Status:** erledigt.
 
 **Warum:** Analytics wird nach Zustimmung initialisiert, ein späterer Widerruf
 stoppt den bereits geladenen Analytics-Lifecycle jedoch nicht vollständig.
