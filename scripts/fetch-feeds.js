@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { normalizeContentUrl } from '../shared/url-policy.js';
 import { sanitizeErrorMessage } from '../shared/feed-health-model.js';
 import { createFeedRunRecorder } from './feed-run-recorder.js';
+import { readFeedRunConfiguration } from './feed-run-config.js';
 import { parseGroqJsonContent, requestGroqCompletion } from './groq-client.js';
 import { readLimitedResponseText } from './limited-response.js';
 import { fetchWithOutboundPolicy } from './outbound-policy.js';
@@ -528,8 +529,10 @@ function normalizeTitle(title) {
 }
 
 // Generate daily trends using AI (sends titles to Groq)
-async function generateDailyTrendsWithGroq(articles, { groqFetch } = {}) {
-    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+async function generateDailyTrendsWithGroq(articles, { groqApiKey, groqFetch } = {}) {
+    // Der Schluessel kommt aus der Vorpruefung, nicht mehr direkt aus der
+    // Umgebung: dort ist bereits entschieden, ob er brauchbar ist.
+    const GROQ_API_KEY = groqApiKey;
     if (!GROQ_API_KEY) {
         console.log('   ⚠️  GROQ_API_KEY not found. Skipping trend generation.');
         return null;
@@ -631,9 +634,9 @@ Antworte NUR im JSON-Format, keine Erklärungen:
 }
 
 // Generate weekly trends by aggregating 7 days of archived daily trends
-async function generateWeeklyTrendsFromArchive({ groqFetch } = {}) {
+async function generateWeeklyTrendsFromArchive({ groqApiKey, groqFetch, store } = {}) {
     console.log('   🔄 Generating weekly trends from 7-day archive...');
-    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+    const GROQ_API_KEY = groqApiKey;
 
     if (!GROQ_API_KEY) {
         console.log('   ⚠️  GROQ_API_KEY not found. Skipping weekly trend aggregation.');
@@ -645,7 +648,7 @@ async function generateWeeklyTrendsFromArchive({ groqFetch } = {}) {
     const datesFound = [];
     for (let i = 0; i < 7; i++) {
         const dateKey = getDateKey(i);
-        const cachedDay = await kv.get(`daily_trends_archive:${dateKey}`);
+        const cachedDay = await store.get(`daily_trends_archive:${dateKey}`);
 
         if (cachedDay && cachedDay.trends && cachedDay.trends.length > 0) {
             datesFound.push(dateKey);
@@ -742,11 +745,13 @@ Antworte NUR im JSON-Format:
     };
 }
 
-async function generateAndSaveTrends(articles, { groqFetch } = {}) {
+async function generateAndSaveTrends(articles, { groqApiKey, groqFetch, store } = {}) {
     console.log('\n🧠 Starting Groq AI Trend Analysis...');
 
-    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+    const GROQ_API_KEY = groqApiKey;
     if (!GROQ_API_KEY) {
+        // Kein Schluessel heisst: keine Trends. Der Kernlauf ist davon
+        // unberuehrt und bleibt erfolgreich.
         console.log('   ⚠️  GROQ_API_KEY not configured. Skipping trend generation.');
         return;
     }
@@ -761,8 +766,8 @@ async function generateAndSaveTrends(articles, { groqFetch } = {}) {
     let dailyUpdatedAt = '';
 
     try {
-        const cachedDaily = await kv.get('daily_trends');
-        const cachedArchive = await kv.get(`daily_trends_archive:${todayKey}`);
+        const cachedDaily = await store.get('daily_trends');
+        const cachedArchive = await store.get(`daily_trends_archive:${todayKey}`);
 
         let shouldRegenerate = true;
 
@@ -778,19 +783,19 @@ async function generateAndSaveTrends(articles, { groqFetch } = {}) {
 
         if (shouldRegenerate) {
             console.log('   🔄 Daily trends cache expired or missing. Regenerating...');
-            dailyTrends = await generateDailyTrendsWithGroq(articles, { groqFetch });
+            dailyTrends = await generateDailyTrendsWithGroq(articles, { groqApiKey, groqFetch });
             dailyUpdatedAt = now.toISOString();
 
             if (dailyTrends) {
                 // Save to LIVE cache
-                await kv.set('daily_trends', { trends: dailyTrends, updatedAt: dailyUpdatedAt });
+                await store.set('daily_trends', { trends: dailyTrends, updatedAt: dailyUpdatedAt });
                 console.log('   ✅ Daily trends saved to LIVE cache.');
             }
         }
 
         // Archive today's trends (only once per day)
         if (dailyTrends && dailyTrends.length > 0 && !cachedArchive) {
-            await kv.set(`daily_trends_archive:${todayKey}`, { trends: dailyTrends, updatedAt: dailyUpdatedAt });
+            await store.set(`daily_trends_archive:${todayKey}`, { trends: dailyTrends, updatedAt: dailyUpdatedAt });
             console.log(`   📁 Daily trends archived: daily_trends_archive:${todayKey}`);
         } else if (cachedArchive) {
             console.log(`   📦 Archive for ${todayKey} already exists. Skipping archive.`);
@@ -802,7 +807,7 @@ async function generateAndSaveTrends(articles, { groqFetch } = {}) {
 
     // --- WEEKLY TRENDS (from archive aggregation) ---
     try {
-        const cachedWeekly = await kv.get('weekly_trends');
+        const cachedWeekly = await store.get('weekly_trends');
         let shouldRegenerateWeekly = true;
 
         if (cachedWeekly && cachedWeekly.updatedAt) {
@@ -815,10 +820,10 @@ async function generateAndSaveTrends(articles, { groqFetch } = {}) {
 
         if (shouldRegenerateWeekly) {
             console.log('   🔄 Weekly trends cache expired or missing. Regenerating from archive...');
-            const weeklyData = await generateWeeklyTrendsFromArchive({ groqFetch });
+            const weeklyData = await generateWeeklyTrendsFromArchive({ groqApiKey, groqFetch, store });
 
             if (weeklyData && weeklyData.trends) {
-                await kv.set('weekly_trends', {
+                await store.set('weekly_trends', {
                     trends: weeklyData.trends,
                     overallSummary: weeklyData.overallSummary || '',
                     dateRange: weeklyData.dateRange || null,
@@ -850,23 +855,67 @@ function createRunId() {
     return `local-${randomUUID()}`;
 }
 
+// Quelle der zu bereinigenden Werte.
+//
+// `redactMessage` wird an vielen Stellen als fertige Funktion weitergereicht
+// (unter anderem an den Recorder und den Groq-Client) und kann die Umgebung
+// deshalb nicht als Parameter bekommen. `main()` setzt sie stattdessen einmal
+// zu Beginn - so wirkt die Bereinigung auch auf eine injizierte Umgebung.
+let secretEnv = process.env;
+
 // Fehlermeldungen von Postgres, KV, Groq oder dem Feed-Proxy tragen die
-// Zieladresse oft im Klartext. Alles, was im Admin-Panel landet, wird deshalb
-// vorher um die konfigurierten Werte bereinigt.
+// Zieladresse oft im Klartext. Alles, was im Admin-Panel oder im Log landet,
+// wird deshalb vorher um die konfigurierten Werte bereinigt.
 function redactMessage(message) {
     const secrets = [
-        process.env.POSTGRES_URL,
-        process.env.KV_REST_API_URL,
-        process.env.KV_REST_API_TOKEN,
-        process.env.GROQ_API_KEY,
-        process.env.FEED_PROXY_URL,
+        secretEnv.POSTGRES_URL,
+        secretEnv.KV_REST_API_URL,
+        secretEnv.KV_REST_API_TOKEN,
+        secretEnv.GROQ_API_KEY,
+        secretEnv.FEED_PROXY_URL,
     ].filter(value => typeof value === 'string' && value !== '');
 
     return sanitizeErrorMessage(message, { secrets }) ?? '';
 }
 
 // === MAIN SCRIPT LOGIC ===
-async function main({ groqFetch } = {}) {
+/**
+ * Fuehrt einen vollstaendigen Cron-Lauf aus.
+ *
+ * Alle aeusseren Abhaengigkeiten sind injizierbar, damit die Orchestrierung
+ * pruefbar ist - insbesondere die Zusage, dass vor einer gescheiterten
+ * Konfigurationspruefung **kein** SQL-, KV-, Recorder- oder HTTP-Zugriff
+ * stattfindet.
+ */
+export async function main({
+    env = process.env,
+    store = kv,
+    database = sql,
+    createRecorder = createFeedRunRecorder,
+    // Ohne eigenes fetchImpl/lookup gilt der an geprüfte Adressen gebundene
+    // Transport aus scripts/outbound-policy.js.
+    fetchImpl,
+    lookup,
+    groqFetch,
+    exit = code => process.exit(code),
+    logger = console,
+} = {}) {
+    // === Vorpruefung: laeuft vor jeder Verbindung ===
+    //
+    // Bewusst als Allererstes, noch vor dem Heartbeat. Ein Lauf ohne
+    // Core-Konfiguration soll gar nicht erst anfangen: er koennte weder lesen
+    // noch speichern und wuerde nur einen halben Zustand hinterlassen.
+    secretEnv = env;
+    const configuration = readFeedRunConfiguration(env);
+    if (!configuration.ok) {
+        logger.error(`\n❌ ${configuration.fatalMessage}`);
+        return exit(1);
+    }
+
+    for (const skipReason of configuration.skipped) {
+        logger.log(`   ⚠️  Optionale Funktion übersprungen: ${skipReason}`);
+    }
+
     const feedHealthStatus = {};
     const ARTICLE_RETENTION_DAYS = 60; // Artikel werden 60 Tage gespeichert
     const MAX_ARTICLES = 10000; // Maximale Anzahl Artikel (verhindert KV Limit-Überschreitung)
@@ -877,19 +926,20 @@ async function main({ groqFetch } = {}) {
     const FEED_FETCH_TIMEOUT_MS = 15000;
     const FEED_PROXY_TIMEOUT_MS = 20000;
     // Endpunkt von tools/feed-proxy.php auf dem externen Hosting. Ohne dieses
-    // Secret laeuft der Abruf ohne Fallback, statt fehlzuschlagen.
-    const feedProxyUrl = process.env.FEED_PROXY_URL;
+    // Secret laeuft der Abruf ohne Fallback, statt fehlzuschlagen; eine
+    // unbrauchbare Adresse wurde oben bereits verworfen.
+    const feedProxyUrl = configuration.feedProxyUrl;
 
     const runStartMs = Date.now();
     const durations = {};
-    const recorder = createFeedRunRecorder({
-        store: kv,
+    const recorder = createRecorder({
+        store,
         runId: createRunId(),
         startedAt: new Date(),
         redact: redactMessage,
     });
 
-    console.log(`\n🫀 Lauf ${recorder.runId} gestartet um ${recorder.startedAt}`);
+    logger.log(`\n🫀 Lauf ${recorder.runId} gestartet um ${recorder.startedAt}`);
     await recorder.begin();
 
     try {
@@ -900,7 +950,7 @@ async function main({ groqFetch } = {}) {
 
         let oldArticles = [];
         try {
-            const cachedData = await kv.get('news_cache');
+            const cachedData = await store.get('news_cache');
 
             // If cache exists and is a valid array, use it.
             if (cachedData && Array.isArray(cachedData)) {
@@ -937,7 +987,7 @@ async function main({ groqFetch } = {}) {
             throw e;
         }
 
-        const { rows: feeds } = await sql`SELECT * FROM feeds;`;
+        const { rows: feeds } = await database`SELECT * FROM feeds;`;
         console.log(`\n🔍 Found ${feeds.length} feeds in database\n`);
         // Ab hier gilt die Feed-Liste als bekannt: eine leere Liste darf den
         // gespeicherten Status jetzt leeren, ein Abbruch davor nicht.
@@ -971,6 +1021,8 @@ async function main({ groqFetch } = {}) {
                 feedName: feed.name,
                 feedProxyUrl,
                 feedUrl,
+                fetchImpl,
+                lookup,
                 proxyTimeoutMs: FEED_PROXY_TIMEOUT_MS,
             });
 
@@ -1076,7 +1128,7 @@ async function main({ groqFetch } = {}) {
                 const articleScrapeStart = Date.now();
                 try {
                     console.log(`   🖼️  Scraping: ${article.source} - ${article.title.substring(0, 40)}...`);
-                    const scrapedImage = await getOgImageFromUrl(article.link, article.source);
+                    const scrapedImage = await getOgImageFromUrl(article.link, article.source, { fetchImpl, lookup });
                     const articleScrapeDuration = Date.now() - articleScrapeStart;
                     scrapeStats.totalMs += articleScrapeDuration;
                     if (scrapedImage) {
@@ -1127,7 +1179,7 @@ async function main({ groqFetch } = {}) {
                 const articleBackfillStart = Date.now();
                 try {
                     console.log(`   🖼️  Backfill: ${article.source} - ${article.title.substring(0, 40)}...`);
-                    const scrapedImage = await getOgImageFromUrl(article.link, article.source);
+                    const scrapedImage = await getOgImageFromUrl(article.link, article.source, { fetchImpl, lookup });
                     const articleBackfillDuration = Date.now() - articleBackfillStart;
                     backfillStats.totalMs += articleBackfillDuration;
                     if (scrapedImage) {
@@ -1190,14 +1242,14 @@ async function main({ groqFetch } = {}) {
         const publishStartMs = Date.now();
 
         // Save full cache
-        await kv.set('news_cache', sortedArticles);
+        await store.set('news_cache', sortedArticles);
         console.log(`   ✅ Saved ${sortedArticles.length} articles to KV key 'news_cache'`);
 
         // Save progressive loading caches for faster page load
-        await kv.set('news_cache_16', sortedArticles.slice(0, 16));
+        await store.set('news_cache_16', sortedArticles.slice(0, 16));
         console.log(`   ⚡ Saved 16 preview articles to KV key 'news_cache_16'`);
 
-        await kv.set('news_cache_64', sortedArticles.slice(0, 64));
+        await store.set('news_cache_64', sortedArticles.slice(0, 64));
         console.log(`   ⚡ Saved 64 medium articles to KV key 'news_cache_64'`);
 
         durations.publishMs = Date.now() - publishStartMs;
@@ -1228,7 +1280,7 @@ async function main({ groqFetch } = {}) {
         // hier und nicht im aeusseren catch.
         const trendsStartMs = Date.now();
         try {
-            await generateAndSaveTrends(sortedArticles, { groqFetch });
+            await generateAndSaveTrends(sortedArticles, { groqApiKey: configuration.groqApiKey, groqFetch, store });
         } catch (trendsError) {
             console.warn(`   ⚠️  Trendphase übersprungen: ${redactMessage(
                 trendsError instanceof Error ? trendsError.message : String(trendsError),
@@ -1243,7 +1295,7 @@ async function main({ groqFetch } = {}) {
         });
 
     } catch (error) {
-        console.error('\n❌ Fatal error in fetch script:', error);
+        logger.error('\n❌ Fatal error in fetch script:', error);
 
         // Ein gescheiterter Versuch fasst den gespeicherten Kern-Publish nie an
         // und schreibt den Feed-Status nur, wenn die Feed-Liste geladen war.
@@ -1256,11 +1308,11 @@ async function main({ groqFetch } = {}) {
                 durations: { ...durations, totalMs: Date.now() - runStartMs },
             });
         } catch (recorderError) {
-            console.error(`   ⚠️  Abbruch konnte nicht festgehalten werden: ${redactMessage(
+            logger.error(`   ⚠️  Abbruch konnte nicht festgehalten werden: ${redactMessage(
                 recorderError instanceof Error ? recorderError.message : String(recorderError),
             )}`);
         }
-        process.exit(1);
+        return exit(1);
     }
 }
 
