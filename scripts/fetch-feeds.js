@@ -9,18 +9,8 @@ import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeContentUrl } from '../shared/url-policy.js';
-import {
-    FEED_HEALTH_STATUS_KEY,
-    FEED_PUBLISH_STATUS_KEY,
-    FEED_RUN_STATUS_KEY,
-    buildRunRecords,
-    createRunStatus,
-    finishRunStatus,
-    normalizeFeedHealth,
-    normalizePublishStatus,
-    sanitizeErrorMessage,
-    summarizeFeedHealth,
-} from '../shared/feed-health-model.js';
+import { sanitizeErrorMessage } from '../shared/feed-health-model.js';
+import { createFeedRunRecorder } from './feed-run-recorder.js';
 import { fetchWithOutboundPolicy } from './outbound-policy.js';
 import {
     chooseMergedImageUrl,
@@ -848,22 +838,6 @@ function redactMessage(message) {
     return sanitizeErrorMessage(message, { secrets }) ?? '';
 }
 
-function describeFatalError(error) {
-    return redactMessage(error instanceof Error ? error.message : String(error));
-}
-
-// Ein fehlgeschlagener Heartbeat-Write darf einen sonst gesunden Lauf nicht
-// abbrechen: der Kern-Publish ist wichtiger als seine Beobachtung.
-async function saveHeartbeat(key, value) {
-    try {
-        await kv.set(key, value);
-        return true;
-    } catch (error) {
-        console.warn(`   ⚠️  Heartbeat '${key}' konnte nicht gespeichert werden: ${describeFatalError(error)}`);
-        return false;
-    }
-}
-
 // === MAIN SCRIPT LOGIC ===
 async function main() {
     const feedHealthStatus = {};
@@ -879,29 +853,23 @@ async function main() {
     // Secret laeuft der Abruf ohne Fallback, statt fehlzuschlagen.
     const feedProxyUrl = process.env.FEED_PROXY_URL;
 
-    const runStartedAt = new Date();
     const runStartMs = Date.now();
-    const runStatus = createRunStatus({ runId: createRunId(), startedAt: runStartedAt });
     const durations = {};
-    let previousHealth = {};
-    let previousPublish = null;
+    const recorder = createFeedRunRecorder({
+        store: kv,
+        runId: createRunId(),
+        startedAt: new Date(),
+        redact: redactMessage,
+    });
 
-    console.log(`\n🫀 Lauf ${runStatus.runId} gestartet um ${runStatus.startedAt}`);
-    await saveHeartbeat(FEED_RUN_STATUS_KEY, runStatus);
+    console.log(`\n🫀 Lauf ${recorder.runId} gestartet um ${recorder.startedAt}`);
+    await recorder.begin();
 
     try {
-        // Diagnosedaten: ein Lesefehler darf den Kernlauf nicht verhindern, er
-        // kostet nur die Fortschreibung von lastSuccessAt und lastContentUpdateAt.
-        try {
-            const [storedHealth, storedPublish] = await Promise.all([
-                kv.get(FEED_HEALTH_STATUS_KEY),
-                kv.get(FEED_PUBLISH_STATUS_KEY),
-            ]);
-            previousHealth = normalizeFeedHealth(storedHealth);
-            previousPublish = normalizePublishStatus(storedPublish);
-        } catch (error) {
-            console.warn(`   ⚠️  Bisheriger Heartbeat-Stand nicht lesbar: ${describeFatalError(error)}`);
-        }
+        // Diagnosedaten: ein Lesefehler darf den Kernlauf nicht verhindern. Er
+        // verhindert nur, dass ein nicht sicher gelesener historischer Stand
+        // spaeter mit Ersatzwerten ueberschrieben wird.
+        await recorder.loadPreviousState();
 
         let oldArticles = [];
         try {
@@ -944,12 +912,15 @@ async function main() {
 
         const { rows: feeds } = await sql`SELECT * FROM feeds;`;
         console.log(`\n🔍 Found ${feeds.length} feeds in database\n`);
+        // Ab hier gilt die Feed-Liste als bekannt: eine leere Liste darf den
+        // gespeicherten Status jetzt leeren, ein Abbruch davor nicht.
+        recorder.markFeedListLoaded();
         feeds.forEach(feed => {
             feedHealthStatus[feed.id] = {
                 status: 'unknown',
                 message: 'Not processed yet.',
                 lastAttemptAt: null,
-                lastSuccessAt: previousHealth[feed.id]?.lastSuccessAt ?? null,
+                lastSuccessAt: recorder.lastSuccessAtFor(feed.id),
                 durationMs: null,
                 articleCount: null,
             };
@@ -980,7 +951,7 @@ async function main() {
             const feedDurationMs = Date.now() - feedStartMs;
             const baseEntry = {
                 lastAttemptAt: attemptAt,
-                lastSuccessAt: previousHealth[feed.id]?.lastSuccessAt ?? null,
+                lastSuccessAt: recorder.lastSuccessAtFor(feed.id),
                 durationMs: feedDurationMs,
                 articleCount: null,
             };
@@ -1193,77 +1164,44 @@ async function main() {
         durations.publishMs = Date.now() - publishStartMs;
         durations.totalMs = Date.now() - runStartMs;
 
-        // Erst ab hier gilt der Kern-Publish als erfolgt. `feedCounters` trennt
-        // dabei den technisch beendeten Lauf von tatsaechlich neuem Inhalt.
-        const publishedAt = new Date();
-        const feedCounters = summarizeFeedHealth(feedHealthStatus);
-        const publishRecords = buildRunRecords({
-            previous: { health: previousHealth, publish: previousPublish },
-            run: finishRunStatus(runStatus, {
-                finishedAt: publishedAt,
-                result: 'success',
-                feeds: feedCounters,
-                durations,
-            }),
+        // Erst ab hier gilt der Kern-Publish als erfolgt. Der Versuch bleibt
+        // trotzdem `running`, weil die Trendphase noch aussteht.
+        const publish = await recorder.recordCorePublish({
             feedHealth: feedHealthStatus,
-            publish: {
-                runId: runStatus.runId,
-                publishedAt,
-                articleCount: sortedArticles.length,
-                newestArticleAt: sortedArticles[0]?.publicationDate ?? null,
-                feeds: feedCounters,
-                durations,
-            },
+            articleCount: sortedArticles.length,
+            newestArticleAt: sortedArticles[0]?.publicationDate ?? null,
+            durations,
         });
 
-        await kv.set(FEED_HEALTH_STATUS_KEY, publishRecords.health);
-        console.log(`   📊 Saved health status for ${Object.keys(publishRecords.health).length} feeds to KV key '${FEED_HEALTH_STATUS_KEY}'`);
-
-        await saveHeartbeat(FEED_PUBLISH_STATUS_KEY, publishRecords.publish);
-        await saveHeartbeat(FEED_RUN_STATUS_KEY, publishRecords.run);
-        console.log(
-            `   🫀 Kern-Publish ${publishRecords.publish.lastCorePublishAt}, `
-            + `Inhaltsstand ${publishRecords.publish.lastContentUpdateAt ?? 'unbekannt'}, `
-            + `Feeds ${feedCounters.success}/${feedCounters.total} erfolgreich`,
-        );
+        if (publish) {
+            console.log(
+                `   🫀 Kern-Publish ${publish.lastCorePublishAt}, `
+                + `Inhaltsstand ${publish.lastContentUpdateAt ?? 'unbekannt'}, `
+                + `Feeds ${publish.feeds.success}/${publish.feeds.total} mit Artikeln`,
+            );
+        }
 
         // Generate trends with Groq AI (respects cache TTL)
         const trendsStartMs = Date.now();
         await generateAndSaveTrends(sortedArticles);
         durations.trendsMs = Date.now() - trendsStartMs;
 
-        // Trends sind optional und laufen nach dem Kern-Publish. Ihre Dauer
-        // wird nachgetragen, ohne den Publish-Datensatz erneut zu bewegen.
-        await saveHeartbeat(FEED_RUN_STATUS_KEY, finishRunStatus(runStatus, {
-            finishedAt: new Date(),
-            result: 'success',
-            feeds: feedCounters,
+        // Erst jetzt ist der Lauf wirklich durch und bekommt sein `finishedAt`.
+        await recorder.finish({
+            feedHealth: feedHealthStatus,
             durations: { ...durations, totalMs: Date.now() - runStartMs },
-        }));
+        });
 
     } catch (error) {
         console.error('\n❌ Fatal error in fetch script:', error);
 
-        // Ein gescheiterter Versuch darf weder den letzten Kern-Publish noch
-        // ein bereits erreichtes lastSuccessAt ueberschreiben.
-        const failedRecords = buildRunRecords({
-            previous: { health: previousHealth, publish: previousPublish },
-            run: finishRunStatus(runStatus, {
-                finishedAt: new Date(),
-                result: 'fatal',
-                fatalError: describeFatalError(error),
-                feeds: summarizeFeedHealth(feedHealthStatus),
-                durations: { ...durations, totalMs: Date.now() - runStartMs },
-            }),
+        // Ein gescheiterter Versuch fasst den gespeicherten Kern-Publish nie an
+        // und schreibt den Feed-Status nur, wenn die Feed-Liste geladen war.
+        await recorder.recordFatal({
+            error,
             feedHealth: feedHealthStatus,
-            publish: null,
+            durations: { ...durations, totalMs: Date.now() - runStartMs },
         });
-
-        if (Object.keys(failedRecords.health).length > 0) {
-            await saveHeartbeat(FEED_HEALTH_STATUS_KEY, failedRecords.health);
-            console.log(`\n📊 Saved partial health status to Vercel KV before exiting.\n`);
-        }
-        await saveHeartbeat(FEED_RUN_STATUS_KEY, failedRecords.run);
         process.exit(1);
     }
 }
