@@ -76,7 +76,7 @@ Datensatz.
 | `url` | String, höchstens 2048 Zeichen, danach `shared/url-policy.js`; keine privaten oder lokalen Ziele |
 | `language` | `de` oder `en` |
 | `priority` | `primary` oder `secondary` |
-| `needsScraping` | optional; wenn gesetzt, echtes Boolean. Fehlt es, gilt `false` |
+| `needsScraping` | optional; wenn gesetzt, echtes Boolean. Nur ein **fehlendes** Feld gilt als `false`, ein ausdrückliches `null` wird abgelehnt |
 
 `id` und `update_interval` vergibt ausschließlich der Server.
 
@@ -98,7 +98,7 @@ Fehlermeldung erzeugen, obwohl das Ziel erreicht ist.
 |---|---|
 | `message` | String, nach `trim` nicht leer, höchstens 500 Zeichen; wird getrimmt gespeichert |
 | `type` | `info`, `warning`, `maintenance` oder `celebration` |
-| `isActive` | optional; wenn gesetzt, echtes Boolean. Fehlt es, gilt `true` |
+| `isActive` | optional; wenn gesetzt, echtes Boolean. Nur ein **fehlendes** Feld gilt als `true`, ein ausdrückliches `null` wird abgelehnt |
 
 `id` und `createdAt` vergibt ausschließlich der Server; mitgeschickte Werte
 werden verworfen. Die Grenzen stehen in
@@ -107,6 +107,13 @@ begrenzen auch das Textfeld im Admin-Panel.
 
 **Unbekannte Zusatzfelder werden ignoriert, nicht abgelehnt.** Ein Client, der
 ein Feld mehr schickt, soll nicht ohne Not scheitern.
+
+**Optional heißt „darf fehlen", nicht „darf `null` sein".** Bei `needsScraping`
+und `isActive` führt nur ein wirklich fehlendes Feld zum dokumentierten Default.
+Ein ausdrückliches `null` ergibt 400 mit `validation_failed` und dem passenden
+`field` – der Absender meint damit etwas, und ein stiller Default würde diese
+Absicht überschreiben. Bei `isActive` wäre das besonders folgenreich: aus `null`
+würde „aktiv", die Ankündigung ginge also live, ohne dass es jemand verlangt hat.
 
 ## Inaktive Ankündigungen
 

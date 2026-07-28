@@ -48,7 +48,19 @@ test('needsScraping muss ein Boolean sein', () => {
     }
 
     assert.equal(parseFeedCreatePayload({ ...VALID_CREATE, needsScraping: true }).value.needsScraping, true);
-    assert.equal(parseFeedCreatePayload({ ...VALID_CREATE, needsScraping: null }).value.needsScraping, false);
+    assert.equal(parseFeedCreatePayload({ ...VALID_CREATE, needsScraping: false }).value.needsScraping, false);
+});
+
+test('ein ausdrückliches null bei needsScraping wird abgelehnt', () => {
+    // Nur ein fehlendes Feld darf zum Default führen. Wer null schickt, meint
+    // etwas damit; ein stiller Default würde diese Absicht überschreiben.
+    for (const parse of [parseFeedCreatePayload, parseFeedUpdatePayload]) {
+        const { value, error, field } = parse({ ...VALID_UPDATE, needsScraping: null });
+
+        assert.equal(value, null);
+        assert.notEqual(error, null);
+        assert.equal(field, 'needsScraping');
+    }
 });
 
 test('lehnt falsche Grundtypen in den Pflichtfeldern ab', () => {

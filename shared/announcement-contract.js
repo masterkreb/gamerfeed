@@ -57,10 +57,11 @@ export function parseAnnouncementPayload(payload) {
         };
     }
 
-    // Ein weggelassenes Feld bedeutet "aktiv" – das war schon vor S2 so. Ein
-    // gesetztes Feld muss aber wirklich ein Boolean sein: sonst würde etwa der
-    // String "false" die Ankündigung veröffentlichen.
-    if (isActive !== undefined && isActive !== null && typeof isActive !== 'boolean') {
+    // Nur ein wirklich fehlendes Feld bedeutet "aktiv" – das war schon vor S2
+    // so. Ein gesetztes Feld muss ein Boolean sein: sonst würde etwa der String
+    // "false" die Ankündigung veröffentlichen. Auch ein ausdrückliches null
+    // wird abgelehnt, statt still auf "aktiv" zu fallen.
+    if (isActive !== undefined && typeof isActive !== 'boolean') {
         return { value: null, error: '„isActive" muss true oder false sein.', field: 'isActive' };
     }
 
@@ -68,7 +69,7 @@ export function parseAnnouncementPayload(payload) {
         value: {
             message: message.trim(),
             type,
-            isActive: isActive ?? true,
+            isActive: isActive === undefined ? true : isActive,
         },
         error: null,
         field: null,

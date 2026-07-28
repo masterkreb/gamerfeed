@@ -116,6 +116,23 @@ test('POST ohne isActive legt die Ankündigung aktiv an', async () => {
     assert.equal((await readJson(response)).isActive, true);
 });
 
+test('isActive: null wird abgelehnt und erreicht den KV-Speicher nicht', async () => {
+    // Ein stiller Default würde aus null ein "aktiv" machen und die
+    // Ankündigung veröffentlichen, obwohl das niemand verlangt hat.
+    const { handler, calls } = createHandler();
+
+    const response = await handler(adminRequest('/api/announcement', {
+        method: 'POST',
+        body: { message: 'Hinweis', type: 'info', isActive: null },
+    }));
+    const body = await readJson(response);
+
+    assert.equal(response.status, 400);
+    assert.equal(body.code, 'validation_failed');
+    assert.equal(body.field, 'isActive');
+    assert.equal(calls.length, 0, 'es darf nichts gespeichert werden');
+});
+
 test('POST kann eine Ankündigung ausdrücklich inaktiv speichern', async () => {
     const { handler, store } = createHandler();
 

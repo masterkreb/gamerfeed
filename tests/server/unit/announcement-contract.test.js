@@ -39,6 +39,20 @@ test('ohne isActive gilt die Ankündigung als aktiv', () => {
     assert.equal(value.isActive, true);
 });
 
+test('ein ausdrückliches null bei isActive wird abgelehnt', () => {
+    // Nur ein fehlendes Feld darf zum Default führen. Ein stiller Default würde
+    // aus null ein "aktiv" machen und die Ankündigung veröffentlichen.
+    const { value, error, field } = parseAnnouncementPayload({
+        message: 'Hinweis',
+        type: 'info',
+        isActive: null,
+    });
+
+    assert.equal(value, null);
+    assert.notEqual(error, null);
+    assert.equal(field, 'isActive');
+});
+
 test('isActive false bleibt erhalten', () => {
     const { value } = parseAnnouncementPayload({ ...VALID, isActive: false });
 
@@ -79,7 +93,7 @@ test('lehnt unbekannte Typen ab', () => {
 });
 
 test('lehnt isActive-Werte ab, die kein Boolean sind', () => {
-    for (const isActive of ['false', 'true', 0, 1, {}, []]) {
+    for (const isActive of ['false', 'true', 0, 1, {}, [], null]) {
         const { error, field } = parseAnnouncementPayload({ ...VALID, isActive });
         assert.notEqual(error, null, JSON.stringify(isActive));
         assert.equal(field, 'isActive');

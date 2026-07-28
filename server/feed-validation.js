@@ -89,10 +89,12 @@ export function validateFeedPayload(payload) {
         return fail(`Die Priorität muss ${FEED_PRIORITIES.join(' oder ')} sein.`, 'priority');
     }
 
-    // Ein weggelassenes Feld bedeutet "aus". Ein gesetztes muss aber wirklich
-    // ein Boolean sein - sonst landet ein "false"-String als true in der
-    // Datenbank und der Cron scrapt Seiten, die niemand freigegeben hat.
-    if (needsScraping !== undefined && needsScraping !== null && typeof needsScraping !== 'boolean') {
+    // Nur ein wirklich fehlendes Feld bedeutet "aus". Ein gesetztes muss ein
+    // Boolean sein - sonst landet ein "false"-String als true in der Datenbank
+    // und der Cron scrapt Seiten, die niemand freigegeben hat. Auch ein
+    // ausdrückliches null wird abgelehnt: der Absender meint damit etwas, und
+    // ein stiller Default würde diese Absicht überschreiben.
+    if (needsScraping !== undefined && typeof needsScraping !== 'boolean') {
         return fail('„needsScraping" muss true oder false sein.', 'needsScraping');
     }
 

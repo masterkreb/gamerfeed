@@ -300,6 +300,34 @@ test('needsScraping landet nur als echtes Boolean in der Datenbank', async () =>
     assert.equal(calls[0].values[5], true);
 });
 
+test('needsScraping: null wird abgelehnt und erreicht die Datenbank nicht', async () => {
+    // Nur ein fehlendes Feld darf zum Default werden; ein ausdrückliches null
+    // ist eine Aussage des Absenders und wird nicht stillschweigend ersetzt.
+    for (const method of ['POST', 'PUT']) {
+        const { handler, calls } = createHandler();
+        const response = await handler(adminRequest('/api/feeds', {
+            method,
+            body: { ...VALID_FEED, id: FEED_ROW.id, needsScraping: null },
+        }));
+        const body = await readJson(response);
+
+        assert.equal(response.status, 400, method);
+        assert.equal(body.code, 'validation_failed', method);
+        assert.equal(body.field, 'needsScraping', method);
+        assert.equal(calls.length, 0, `${method} hat trotzdem SQL abgesetzt`);
+    }
+});
+
+test('ein fehlendes needsScraping bleibt der dokumentierte Default', async () => {
+    const { handler, calls } = createHandler([{ rows: [FEED_ROW] }]);
+    const { needsScraping: _weg, ...ohneFeld } = VALID_FEED;
+
+    const response = await handler(adminRequest('/api/feeds', { method: 'POST', body: ohneFeld }));
+
+    assert.equal(response.status, 201);
+    assert.equal(calls[0].values[5], false);
+});
+
 test('unbekannte Zusatzfelder werden ignoriert statt abgelehnt', async () => {
     const { handler, calls } = createHandler([{ rows: [FEED_ROW] }]);
 
