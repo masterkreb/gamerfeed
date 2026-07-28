@@ -94,6 +94,15 @@ externen Zugriff. 427 zentrale Tests und 9 Browser-Abnahmen laufen erfolgreich.
 Offen bleibt die **Summe** aller Aufrufe gegen das 30-Minuten-Hardlimit des
 Workflows – dort setzt O2b an.
 
+**Stand 28. Juli 2026 (Branch `claude/o2b-deadline-budget`):** O2b ist
+abgeschlossen. Der Lauf hat jetzt eine Deadline von 18 Minuten mit 12 Minuten
+Reserve vor dem 30-Minuten-Hardlimit, ein gemeinsames Budget von 80
+Artikel-Seitenabrufen und drei klar getrennte Ergebniszustände. Zurückgestellte
+Arbeit ergibt `degraded` statt stillschweigend `success`. 482 zentrale Tests und
+9 Browser-Abnahmen laufen erfolgreich. Das nächste Hauptrisiko liegt bei den
+zeitversetzt gecachten News-Endpunkten, die trotz Pointer verschiedene
+Generationen liefern können – dort setzt O3a an.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -106,8 +115,8 @@ Workflows – dort setzt O2b an.
 | O1 | P1 | erledigt | Cron-Heartbeat und veraltete Health-Daten sichtbar machen |
 | S2 | P1 | erledigt | Admin-API-Payloads validieren und Fehlerausgaben härten |
 | O2a | P1 | erledigt | Einzelitem-Fehler, Secrets und Provider-Timeouts absichern |
-| O2b | P1 | **bereit** | Feed-Kernlauf mit Deadline und Scrape-Budget begrenzen |
-| O3a | P1 | geplant | Generationsgebundenes Leseprotokoll und Migration vorbereiten |
+| O2b | P1 | erledigt | Feed-Kernlauf mit Deadline und Scrape-Budget begrenzen |
+| O3a | P1 | **bereit** | Generationsgebundenes Leseprotokoll und Migration vorbereiten |
 | F1 | P1 | geplant | Progressive News-Ladekette gegen veraltete Antworten absichern |
 | O3b | P1 | geplant | News-Caches größenbegrenzt und konsistent veröffentlichen |
 | F3a | P2 | geplant | Zentrale Tastatur- und DOM-Probleme im Frontend beheben |
@@ -362,9 +371,28 @@ unterschiedlich behandelt und externe Aufrufe einzeln begrenzt werden.
 
 ### O2b – Deadline und Scrape-Budget
 
-**Status:** bereit – nächstes Code-Arbeitspaket. O2a hat jeden **einzelnen**
-Aufruf begrenzt; ihre Summe ist weiterhin nicht gegen das 30-Minuten-Hardlimit
-gedeckelt.
+**Status:** erledigt. `scripts/feed-run-budget.js` führt ein globales Budget:
+`CORE_DEADLINE_MS` (18 Minuten ab Skriptstart, konfigurierbar über
+`FEED_CORE_DEADLINE_MS`, 12 Minuten Sicherheitsreserve vor dem
+30-Minuten-Hardlimit) und höchstens 80 Artikel-Seitenabrufe pro Lauf
+(`FEED_SCRAPE_LIMIT`) – gemeinsam für neue OG-Scrapes und den Backfill, damit
+der eine Weg die Grenze des anderen nicht umgeht. Die Restzeit wird vor jeder
+Quelle und jedem Seitenabruf geprüft **und** ein Timer bricht beim Erreichen der
+Deadline eine bereits laufende Anfrage über einen gemeinsamen
+`AbortController` ab; `requestSignal` kürzt zusätzlich jedes Einzeltimeout auf
+die Restzeit. Eine zurückgestellte Quelle bekommt `warning` statt `error` und
+behält `lastSuccessAt` samt ihren alten Artikeln; offene Bild-Scrapes werden über
+`distributeBySourceFairly` reihum auf die Quellen verteilt, bekommen einen
+Platzhalter und sind im nächsten Lauf wieder Kandidaten. Die Trendphase entfällt
+früh, wenn die Restzeit drei Minuten unterschreitet. Ergebniszustände: `success`
+nur bei vollständigem Kernlauf **ohne** zurückgestellte Arbeit, `degraded` bei
+sicherem Kern-Publish mit zurückgestellter Arbeit (Exit-Code 0), `fatal`
+unverändert ohne vertrauenswürdigen Kernabschluss; die Entscheidung trifft
+ausschließlich `resolveRunResult`, der Grund steht bereinigt als
+`degradedReason` im Heartbeat und im Admin. Die Feed-Parallelität bleibt
+bewusst unverändert bei genau einem offenen Request – es gibt keine Messdaten,
+die mehr rechtfertigen. Einzelheiten:
+[`docs/deployment/feed-run-budget.md`](../deployment/feed-run-budget.md).
 
 **Warum:** Feed-, Proxy- und Bildabrufe können zusammen das
 30-Minuten-Hardlimit des Workflows erreichen. Ein harter Actions-Abbruch führt
@@ -395,6 +423,8 @@ nicht zuverlässig durch den normalen Fehlerpfad.
 - kontrollierte Parallelität überschreitet nie das definierte Request-Limit.
 
 ### O3a – Generationsgebundenes Leseprotokoll und Migration
+
+**Status:** bereit – nächstes Code-Arbeitspaket.
 
 **Warum:** Ein einzelner Active-Pointer reicht bei drei zeitversetzten,
 unabhängig am Edge gecachten Endpunkten nicht aus. Preview, Medium und Full

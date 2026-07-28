@@ -169,13 +169,12 @@ kontaktiert einen echten Feed, Groq, das Hosting, PostgreSQL oder KV.
 
 O2a begrenzt **einzelne** Aufrufe. Nicht Bestandteil sind:
 
-- globale Laufdeadline und Scrape-Budget sowie der Ergebniszustand `degraded`
-  (O2b);
 - generationsgebundener oder atomarer Cache-Publish (O3a/O3b);
 - Historie und Alarmierung (O4);
 - neue Parallelisierung, Abhängigkeits-Upgrades, Plattform- oder
   Hosting-Änderungen.
 
-Die Summe aller Einzelgrenzen ist damit weiterhin nicht gegen das
-30-Minuten-Hardlimit des Workflows gedeckelt – das ist genau die Lücke, die O2b
-schließt.
+Die **Summe** aller Einzelgrenzen war hier zunächst weiterhin nicht gegen das
+30-Minuten-Hardlimit des Workflows gedeckelt. Diese Lücke schließt O2b mit einer
+Laufdeadline, einem Scrape-Budget und dem Ergebniszustand `degraded`:
+[`feed-run-budget.md`](feed-run-budget.md).

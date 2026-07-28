@@ -88,6 +88,7 @@
 │   ├── fetch-feeds.js      # Cron-Job Script (GitHub Actions)
 │   ├── feed-fetch-utils.js # Getesteter Feed-Abruf mit Retry/Proxy-Fallback
 │   ├── feed-image-utils.js # Bildauswahl und -validierung für Artikel
+│   ├── feed-run-budget.js  # Zeit- und Scrape-Budget eines Laufs
 │   ├── feed-run-config.js  # Core- und optionale Konfiguration des Laufs
 │   ├── feed-run-recorder.js # Reihenfolge und Schreibregeln des Heartbeats
 │   ├── groq-client.js      # Begrenzter Zugang zur Groq-API
@@ -197,6 +198,7 @@ läuft).
 - ✅ Validierter Feed-Abruf mit Retry und optionalem PHP-Proxy-Fallback
 - ✅ Einzelne fehlerhafte Feed-Items werden übersprungen, nicht der ganze Feed
 - ✅ Alle externen Abrufe mit Abort-Timeout und Byte-Limit
+- ✅ Globale Laufdeadline und Scrape-Budget mit den Zuständen `success`, `degraded`, `fatal`
 - ✅ KI-Trend-Analyse (täglich + wöchentlich)
 - ✅ Deduplizierung nach Verlagsgruppen (SOURCE_GROUPS)
 
@@ -376,6 +378,45 @@ Der Lauf spricht mit Systemen, die er nicht kontrolliert. Die Regeln dafür:
 
 Einzelheiten und die bewussten Grenzen: `docs/deployment/feed-run-resilience.md`.
 
+## ⏱️ Laufdeadline, Scrape-Budget und Ergebniszustände
+
+O2a hat jeden **einzelnen** Aufruf begrenzt, O2b ihre **Summe**. Der Workflow
+hat `timeout-minutes: 30`; ein harter Actions-Abbruch läuft nicht durch den
+Fehlerpfad und hinterlässt einen halben Heartbeat.
+
+- **`CORE_DEADLINE_MS` (18 Minuten ab Skriptstart)** begrenzt die Kernphasen und
+  lässt 12 Minuten Sicherheitsreserve. Konfigurierbar über
+  `FEED_CORE_DEADLINE_MS`; ein unbrauchbarer Wert fällt auf die Vorgabe zurück,
+  statt die Grenze abzuschalten.
+- **80 Artikel-Seitenabrufe pro Lauf** (`FEED_SCRAPE_LIMIT`) gelten **gemeinsam**
+  für neue OG-Scrapes und den Backfill – sonst umginge der eine Weg die Grenze
+  des anderen.
+- **Zwei Mechanismen, nicht einer:** vor jeder Quelle und jedem Seitenabruf wird
+  die Restzeit geprüft, *und* ein Timer bricht beim Erreichen der Deadline eine
+  bereits laufende Anfrage über einen gemeinsamen `AbortController` ab.
+  `requestSignal` kürzt zusätzlich jedes Einzeltimeout auf die Restzeit.
+- **Zurückgestellt ist nicht gescheitert.** Eine Quelle, die nicht mehr drankam,
+  bekommt `warning` statt `error`, behält ihr `lastSuccessAt` und ihre alten
+  Artikel. Offene Bild-Scrapes werden über `distributeBySourceFairly` reihum auf
+  die Quellen verteilt, bekommen einen Platzhalter und sind im nächsten Lauf
+  wieder Kandidaten.
+- **Ergebniszustände:** `success` = vollständiger Kernlauf **ohne**
+  zurückgestellte Arbeit; `degraded` = sicherer Kern-Publish, aber Arbeit wurde
+  wegen Deadline oder Budget zurückgestellt (Exit-Code 0); `fatal` = kein
+  vertrauenswürdiger Kernabschluss. Die Entscheidung trifft ausschließlich
+  `resolveRunResult`; der Grund steht bereinigt als `degradedReason` im
+  Heartbeat und im Admin.
+- **Optionale Phasen entfallen früh**: unterschreitet die Restzeit drei Minuten,
+  wird die Trendphase gar nicht erst begonnen – das zählt als Zurückstellung.
+  Ein fehlender `GROQ_API_KEY` dagegen nicht.
+- **Die Feed-Parallelität bleibt unverändert** bei genau einem offenen Request;
+  ein Regressionstest misst das.
+- `createRunBudget` nimmt `now`, `setTimer`, `clearTimer` und
+  `createTimeoutSignal`, `main()` zusätzlich `budget` und `sleep`. Die
+  Grenzfälle vor, auf und nach der Deadline laufen deshalb ohne echte Wartezeit.
+
+Einzelheiten: `docs/deployment/feed-run-budget.md`.
+
 ## 🔌 Feed-Proxy
 
 Einzelne Quellen – aktuell GamePro – beantworten Anfragen aus dem
@@ -437,14 +478,16 @@ Alle Tests liegen zentral unter `tests/`, nie neben den Produktivdateien:
 
 ```text
 tests/
-├── feeds/{unit,integration}
+├── feeds/{unit,integration,helpers}
 ├── frontend/{unit,helpers}
 └── server/{unit,helpers}
 ```
 
 Die Helfer unter `tests/server/helpers/` stellen SQL-, KV- und Logger-Attrappen
-sowie eine feste Uhr bereit. Kein Test berührt eine echte Datenbank oder einen
-echten KV-Speicher.
+sowie eine feste Uhr bereit; `tests/feeds/helpers/` bündelt zusätzlich alle
+Außenkanten des Cron-Laufs samt kontrollierter Uhr und gestellten Timern. Kein
+Test berührt eine echte Datenbank, einen echten KV-Speicher oder eine echte
+Wartezeit.
 
 Grundlage sind `node:test`, `node:assert`, Linkedom und React über Vite SSR.
 
@@ -485,6 +528,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - `npm run dev` nutzt für `/api` den Proxy zur produktiven GamerFeed-API
 - Für lokale Änderungen an Serverless Functions: `vercel dev` nutzen
 - GitHub Actions braucht die Core-Secrets `POSTGRES_URL`, `KV_REST_API_URL` und `KV_REST_API_TOKEN`; ohne sie endet der Lauf sofort. `GROQ_API_KEY` und `FEED_PROXY_URL` sind optional und schalten nur ihre Zusatzfunktion ab
+- `FEED_CORE_DEADLINE_MS` und `FEED_SCRAPE_LIMIT` sind optionale Grenzen; ohne sie gelten 18 Minuten und 80 Seitenabrufe
 - Der PHP-Feed-Proxy wird separat und manuell betrieben: `docs/deployment/feed-proxy.md`
 
 ---
@@ -505,6 +549,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Einstellungsdialog mit echten ARIA-Tabs, angekündigten Formularmeldungen und jederzeit möglichem Schließen
 - **Juli 2026:** Cron-Heartbeat (O1): Attempt-Status, Kern-Publish und Inhaltsfrische getrennt geführt, veraltete Daten ab 50 Minuten sichtbar; Workflow startet zu Minute 7/27/47
 - **Juli 2026:** Admin-APIs (S2): Laufzeitverträge statt TypeScript-Casts, stabile Fehlercodes, keine internen Fehlertexte mehr im Client, `private, no-store` auf allen geschützten Antworten, inaktive Ankündigungen im Admin wieder bearbeitbar
+- **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 
 ---
