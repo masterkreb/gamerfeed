@@ -35,9 +35,14 @@ export default defineConfig({
     ],
 
     // Getestet wird der Produktions-Build, nicht der Dev-Server: dessen
-    // /api-Proxy zeigt auf die produktive API.
+    // /api-Proxy zeigt auf die produktive API. Der Build laeuft im
+    // test:e2e-Script davor, nicht hier.
+    //
+    // Vite wird direkt als Node-Prozess gestartet und nicht ueber npm oder npx.
+    // Unter Windows ueberlebten die Enkelprozesse dieser Wrapper das Testende,
+    // sodass sich `npm run test:e2e` nicht mehr selbst beendete.
     webServer: {
-        command: `npm run build && npx vite preview --port ${PREVIEW_PORT} --strictPort`,
+        command: `node ./node_modules/vite/bin/vite.js preview --port ${PREVIEW_PORT} --strictPort`,
         url: PREVIEW_URL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,

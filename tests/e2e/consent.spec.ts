@@ -1,64 +1,141 @@
-import { expect, test } from './fixtures';
+import { disableBotDetection, expect, test } from './fixtures';
 
 // Browser-Abnahme des Consent-Lebenszyklus. Netzwerk und Cookies lassen sich
 // nur hier echt prüfen - Linkedom kann weder das eine noch das andere.
 //
-// ACHTUNG: Der Consent-Banner rendert im Produktions-Build derzeit nicht
-// (`#cc-main` ist nicht vorhanden, ohne Konsolenfehler). Das ist ein
-// bestehender Fehler und war schon vor dem F2-Arbeitspaket so - nachgewiesen
-// gegen den Stand vor den Änderungen. Solange er besteht, wird nie eine
-// Zustimmung eingeholt und Analytics folglich nie geladen.
-//
-// Die Abnahmen, die eine Bedienung des Banners voraussetzen, lassen sich
-// deshalb noch nicht schreiben. Was hier steht, prüft den Zustand vor jeder
-// Zustimmung - und genau der ist derzeit der Dauerzustand.
+// CookieConsent versteckt sich bei navigator.webdriver === true. Die Fixture
+// neutralisiert das ausschliesslich im Test.
 
 const ANALYTICS_HOSTS = ['googletagmanager.com', 'google-analytics.com', 'analytics.google.com'];
 
-test('stellt ohne Zustimmung keine Analytics-Anfrage', async ({ page }) => {
-    const analyticsRequests: string[] = [];
+const acceptAll = /Accept All|Alle akzeptieren/i;
+const rejectAll = /Necessary Only|Nur notwendige/i;
+const cookieSettings = /Cookie Settings|Cookie-Einstellungen/i;
+
+/** Der sichtbare Teil des Consent-Dialogs; #cc-main selbst hat keine Groesse. */
+const consentDialog = (page: import('@playwright/test').Page) => page.locator('#cc-main .cm, #cc-main .pm');
+
+/**
+ * Der dauerhafte Zugang: Einstellungsdialog, Reiter "Rechtliches", Knopf zu den
+ * Cookie-Einstellungen. Der Knopf im Banner verschwindet nach der Zustimmung.
+ */
+async function openCookiePreferences(page: import('@playwright/test').Page) {
+    await page.getByRole('button', { name: /Settings|Einstellungen/i }).first().click();
+    await page.getByRole('tab', { name: /Legal|Rechtliches/i }).click();
+    await page.getByRole('button', { name: cookieSettings }).first().click();
+}
+
+function trackAnalyticsRequests(page: import('@playwright/test').Page) {
+    const requests: string[] = [];
     page.on('request', request => {
         if (ANALYTICS_HOSTS.some(host => request.url().includes(host))) {
-            analyticsRequests.push(request.url());
+            requests.push(request.url());
         }
     });
+    return requests;
+}
+
+/** Liest die an den Lebenszyklus gemeldeten Consent-Signale aus. */
+async function consentSignals(page: import('@playwright/test').Page) {
+    return page.evaluate(() => {
+        const layer = (window as unknown as { dataLayer?: unknown[] }).dataLayer ?? [];
+        return layer
+            .map(entry => Array.from(entry as ArrayLike<unknown>))
+            .filter(entry => entry[0] === 'consent')
+            .map(entry => [entry[1], (entry[2] as Record<string, string>)?.analytics_storage].join(':'));
+    });
+}
+
+test.beforeEach(async ({ page }) => {
+    await disableBotDetection(page);
+});
+
+test('stellt vor der Zustimmung keine Analytics-Anfrage', async ({ page, context }) => {
+    const analyticsRequests = trackAnalyticsRequests(page);
 
     await page.goto('/');
+    await expect(consentDialog(page).first()).toBeVisible();
     await page.waitForLoadState('networkidle');
 
     expect(analyticsRequests, `unerwartete Anfragen: ${analyticsRequests.join(', ')}`).toEqual([]);
-});
-
-test('setzt ohne Zustimmung keine Analytics-Cookies', async ({ page, context }) => {
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
-    const analyticsCookies = (await context.cookies())
-        .filter(cookie => /^(_ga|_gid|_gat)/.test(cookie.name))
-        .map(cookie => cookie.name);
-
-    expect(analyticsCookies).toEqual([]);
-});
-
-test('lädt ohne Zustimmung kein Analytics-Skript', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
-    // Das Lebenszyklus-Modul markiert sein Skript; ohne Zustimmung darf es
-    // keines geben.
     await expect(page.locator('script[data-analytics-lifecycle]')).toHaveCount(0);
+
+    const analyticsCookies = (await context.cookies()).filter(cookie => /^(_ga|_gid|_gat)/.test(cookie.name));
+    expect(analyticsCookies.map(cookie => cookie.name)).toEqual([]);
 });
 
-// Belegt den offenen Fehler, statt ihn zu übergehen: Sobald der Banner wieder
-// erscheint, schlägt dieser Test fehl und die eigentlichen Abnahmen
-// (Zustimmung, Widerruf, erneute Zustimmung, dauerhafter Einstellungs-Link)
-// können ergänzt werden.
-test('bekannter Fehler: der Consent-Banner erscheint nicht', async ({ page }) => {
+test('initialisiert nach der Zustimmung genau einmal', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.getByRole('button', { name: acceptAll }).click();
 
-    await expect(
-        page.locator('#cc-main'),
-        'Der Banner erscheint wieder - die offenen F2-Abnahmen sind jetzt schreibbar.',
-    ).toHaveCount(0);
+    await expect(page.locator('script[data-analytics-lifecycle]')).toHaveCount(1);
+    // Erst der Standard denied, dann genau eine Zustimmung.
+    expect(await consentSignals(page)).toEqual(['default:denied', 'update:granted']);
+});
+
+test('aktiviert Analytics auch für einen wiederkehrenden Nutzer nach dem Reload', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: acceptAll }).click();
+    await expect(page.locator('script[data-analytics-lifecycle]')).toHaveCount(1);
+
+    await page.reload();
+
+    // Die gespeicherte Zustimmung muss erneut angewendet werden - dafür reicht
+    // onFirstConsent nicht aus.
+    await expect(page.locator('script[data-analytics-lifecycle]')).toHaveCount(1);
+    expect(await consentSignals(page)).toEqual(['default:denied', 'update:granted']);
+});
+
+test('wendet den Widerruf an und entfernt die Analytics-Cookies', async ({ page, context }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: acceptAll }).click();
+    await expect(page.locator('script[data-analytics-lifecycle]')).toHaveCount(1);
+
+    // Ein Analytics-Cookie stellen, das der Widerruf entfernen muss.
+    await context.addCookies([{
+        name: '_ga',
+        value: 'GA1.1.testwert',
+        domain: '127.0.0.1',
+        path: '/',
+    }]);
+
+    await openCookiePreferences(page);
+    await page.getByRole('button', { name: rejectAll }).first().click();
+
+    expect(await consentSignals(page)).toEqual(['default:denied', 'update:granted', 'update:denied']);
+
+    const analyticsCookies = (await context.cookies()).filter(cookie => /^(_ga|_gid|_gat)/.test(cookie.name));
+    expect(analyticsCookies.map(cookie => cookie.name)).toEqual([]);
+});
+
+test('erlaubt erneute Zustimmung ohne zweites Skript', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: acceptAll }).click();
+
+    await openCookiePreferences(page);
+    await page.getByRole('button', { name: rejectAll }).first().click();
+
+    await openCookiePreferences(page);
+    await page.getByRole('button', { name: acceptAll }).first().click();
+
+    await expect(page.locator('script[data-analytics-lifecycle]')).toHaveCount(1);
+    expect(await consentSignals(page)).toEqual([
+        'default:denied', 'update:granted', 'update:denied', 'update:granted',
+    ]);
+});
+
+test('schließt den Einstellungsdialog, bevor der Consent-Dialog öffnet', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: acceptAll }).click();
+
+    await page.getByRole('button', { name: /Settings|Einstellungen/i }).first().click();
+    const settingsDialog = page.getByRole('dialog').filter({ hasText: /Sources|Quellen/i });
+    await expect(settingsDialog).toBeVisible();
+
+    await page.getByRole('tab', { name: /Legal|Rechtliches/i }).click();
+    await page.getByRole('button', { name: cookieSettings }).first().click();
+
+    // Zwei dokumentweite Fokusfallen duerfen nicht gleichzeitig aktiv sein.
+    await expect(settingsDialog).toHaveCount(0);
+    await expect(consentDialog(page).first()).toBeVisible();
 });
