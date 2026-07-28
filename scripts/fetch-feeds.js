@@ -1479,7 +1479,14 @@ export async function main({
         // Lauf nicht nachtraeglich zu `fatal` machen - deshalb endet die Phase
         // hier und nicht im aeusseren catch.
         const trendsStartMs = Date.now();
-        if (!runBudget.canRunOptionalPhase()) {
+        // Ohne Schlüssel gibt es gar keine Trendphase, die man zurückstellen
+        // könnte - sie wäre auch mit beliebig viel Restzeit nicht gelaufen. Ein
+        // fehlender optionaler Wert überspringt seine Zusatzfunktion, das ist
+        // die Zusage aus O2a und **keine** Zurückstellung. Ohne diese
+        // Unterscheidung meldete ein sonst vollständiger Lauf `degraded`, weil
+        // die Uhr knapp war - obwohl kein einziger Groq-Aufruf ausgefallen ist.
+        const trendsConfigured = configuration.groqApiKey !== null;
+        if (trendsConfigured && !runBudget.canRunOptionalPhase()) {
             // Frühzeitig verzichten statt anfangen und mittendrin abgeschnitten
             // werden: die Trends sind verzichtbar, der saubere Laufabschluss
             // nicht.

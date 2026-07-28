@@ -7,6 +7,7 @@ import { needsStoredImageRepair } from '../../../scripts/feed-image-utils.js';
 import {
     ALLE_SECRETS,
     FEED_ROW,
+    VOLLSTAENDIGE_ENV,
     createControlledClock,
     createSpies,
     feedFetch,
@@ -340,6 +341,67 @@ test('eine zurueckgestellte Trendphase macht den Lauf degraded', async () => {
     assert.equal(spies.groqCalls.length, 0, 'Groq wird nicht mehr kontaktiert');
     assert.equal(spies.kvStore.feed_run_status.result, 'degraded');
     assert.ok(spies.kvSets.some(entry => entry.key === 'news_cache'), 'der Kern-Publish bleibt');
+});
+
+test('ein fehlender GROQ_API_KEY erzeugt bei knapper Restzeit kein degraded', async () => {
+    // Ohne Schlüssel gäbe es gar keine Trendphase, die zurückgestellt werden
+    // könnte. Sie wäre auch mit beliebig viel Restzeit nicht gelaufen - das ist
+    // die Zusage aus O2a und darf den Ergebniszustand nicht verfälschen.
+    const spies = createSpies();
+    const uhr = createControlledClock();
+    const { budget } = createTestBudget(uhr, {
+        deadlineMs: 60_000,
+        optionalPhaseMinRemainingMs: 30_000,
+    });
+    const { sleep } = createSchlaf();
+
+    const env = { ...VOLLSTAENDIGE_ENV };
+    delete env.GROQ_API_KEY;
+
+    await runMain(spies, {
+        env,
+        budget,
+        sleep,
+        fetchImpl: spies.makeFetchImpl(async () => {
+            // Der Kernlauf unterschreitet die Reserve für optionale Phasen,
+            // bleibt aber vor der Deadline.
+            uhr.vor(40_000);
+            return new Response(rssOhneBilder(FEED_ROW, 1), { status: 200 });
+        }),
+        groqFetch: spies.makeGroqFetch(),
+    });
+
+    assert.deepEqual(spies.exitCodes, []);
+    assert.equal(spies.groqCalls.length, 0, 'ohne Schlüssel wird Groq nicht kontaktiert');
+    assert.ok(spies.kvSets.some(entry => entry.key === 'news_cache'), 'der Kern-Publish findet statt');
+    assert.equal(spies.kvStore.feed_run_status.result, 'success');
+    assert.equal(spies.kvStore.feed_run_status.degradedReason, null);
+});
+
+test('ein vorhandener GROQ_API_KEY ergibt bei knapper Restzeit weiterhin degraded', async () => {
+    // Gegenprobe zum Test darüber: nur wenn die Phase tatsächlich möglich wäre,
+    // ist knappe Restzeit ein Grund für `degraded`.
+    const spies = createSpies();
+    const uhr = createControlledClock();
+    const { budget } = createTestBudget(uhr, {
+        deadlineMs: 60_000,
+        optionalPhaseMinRemainingMs: 30_000,
+    });
+    const { sleep } = createSchlaf();
+
+    await runMain(spies, {
+        budget,
+        sleep,
+        fetchImpl: spies.makeFetchImpl(async () => {
+            uhr.vor(40_000);
+            return new Response(rssOhneBilder(FEED_ROW, 1), { status: 200 });
+        }),
+        groqFetch: spies.makeGroqFetch(GROQ_LEER),
+    });
+
+    assert.equal(spies.groqCalls.length, 0);
+    assert.equal(spies.kvStore.feed_run_status.result, 'degraded');
+    assert.match(spies.kvStore.feed_run_status.degradedReason, /Trendphase/);
 });
 
 test('ein nicht mehr sicher abschliessbarer Kernlauf ergibt fatal', async () => {
