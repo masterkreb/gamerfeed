@@ -5,9 +5,22 @@ import { kv } from '@vercel/kv';
 import { sql } from '@vercel/postgres';
 import { DOMParser } from 'linkedom';
 import { escape } from 'html-escaper';
+import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeContentUrl } from '../shared/url-policy.js';
+import {
+    FEED_HEALTH_STATUS_KEY,
+    FEED_PUBLISH_STATUS_KEY,
+    FEED_RUN_STATUS_KEY,
+    buildRunRecords,
+    createRunStatus,
+    finishRunStatus,
+    normalizeFeedHealth,
+    normalizePublishStatus,
+    sanitizeErrorMessage,
+    summarizeFeedHealth,
+} from '../shared/feed-health-model.js';
 import { fetchWithOutboundPolicy } from './outbound-policy.js';
 import {
     chooseMergedImageUrl,
@@ -807,6 +820,50 @@ async function generateAndSaveTrends(articles) {
     console.log('   🧠 Trend analysis complete!\n');
 }
 
+// === HEARTBEAT (Roadmap O1) ===
+
+// Die Actions-Run-ID ist nicht geheim und laesst einen Lauf im Admin direkt dem
+// Workflow-Protokoll zuordnen. Lokale Laeufe bekommen eine eigene Kennung.
+function createRunId() {
+    const actionsRunId = process.env.GITHUB_RUN_ID;
+    if (actionsRunId) {
+        const attempt = process.env.GITHUB_RUN_ATTEMPT;
+        return `gha-${actionsRunId}${attempt ? `-${attempt}` : ''}`;
+    }
+    return `local-${randomUUID()}`;
+}
+
+// Fehlermeldungen von Postgres, KV, Groq oder dem Feed-Proxy tragen die
+// Zieladresse oft im Klartext. Alles, was im Admin-Panel landet, wird deshalb
+// vorher um die konfigurierten Werte bereinigt.
+function redactMessage(message) {
+    const secrets = [
+        process.env.POSTGRES_URL,
+        process.env.KV_REST_API_URL,
+        process.env.KV_REST_API_TOKEN,
+        process.env.GROQ_API_KEY,
+        process.env.FEED_PROXY_URL,
+    ].filter(value => typeof value === 'string' && value !== '');
+
+    return sanitizeErrorMessage(message, { secrets }) ?? '';
+}
+
+function describeFatalError(error) {
+    return redactMessage(error instanceof Error ? error.message : String(error));
+}
+
+// Ein fehlgeschlagener Heartbeat-Write darf einen sonst gesunden Lauf nicht
+// abbrechen: der Kern-Publish ist wichtiger als seine Beobachtung.
+async function saveHeartbeat(key, value) {
+    try {
+        await kv.set(key, value);
+        return true;
+    } catch (error) {
+        console.warn(`   ⚠️  Heartbeat '${key}' konnte nicht gespeichert werden: ${describeFatalError(error)}`);
+        return false;
+    }
+}
+
 // === MAIN SCRIPT LOGIC ===
 async function main() {
     const feedHealthStatus = {};
@@ -822,7 +879,30 @@ async function main() {
     // Secret laeuft der Abruf ohne Fallback, statt fehlzuschlagen.
     const feedProxyUrl = process.env.FEED_PROXY_URL;
 
+    const runStartedAt = new Date();
+    const runStartMs = Date.now();
+    const runStatus = createRunStatus({ runId: createRunId(), startedAt: runStartedAt });
+    const durations = {};
+    let previousHealth = {};
+    let previousPublish = null;
+
+    console.log(`\n🫀 Lauf ${runStatus.runId} gestartet um ${runStatus.startedAt}`);
+    await saveHeartbeat(FEED_RUN_STATUS_KEY, runStatus);
+
     try {
+        // Diagnosedaten: ein Lesefehler darf den Kernlauf nicht verhindern, er
+        // kostet nur die Fortschreibung von lastSuccessAt und lastContentUpdateAt.
+        try {
+            const [storedHealth, storedPublish] = await Promise.all([
+                kv.get(FEED_HEALTH_STATUS_KEY),
+                kv.get(FEED_PUBLISH_STATUS_KEY),
+            ]);
+            previousHealth = normalizeFeedHealth(storedHealth);
+            previousPublish = normalizePublishStatus(storedPublish);
+        } catch (error) {
+            console.warn(`   ⚠️  Bisheriger Heartbeat-Stand nicht lesbar: ${describeFatalError(error)}`);
+        }
+
         let oldArticles = [];
         try {
             const cachedData = await kv.get('news_cache');
@@ -865,10 +945,18 @@ async function main() {
         const { rows: feeds } = await sql`SELECT * FROM feeds;`;
         console.log(`\n🔍 Found ${feeds.length} feeds in database\n`);
         feeds.forEach(feed => {
-            feedHealthStatus[feed.id] = { status: 'unknown', message: 'Not processed yet.' };
+            feedHealthStatus[feed.id] = {
+                status: 'unknown',
+                message: 'Not processed yet.',
+                lastAttemptAt: null,
+                lastSuccessAt: previousHealth[feed.id]?.lastSuccessAt ?? null,
+                durationMs: null,
+                articleCount: null,
+            };
         });
 
         let newlyFetchedArticles = [];
+        const feedFetchStartMs = Date.now();
 
         for (const feed of feeds) {
             const feedUrl = getFetchUrlForFeed(feed);
@@ -877,6 +965,7 @@ async function main() {
                 console.log(`   ℹ️  Using normalized feed URL for ${feed.name}: ${feedUrl}`);
             }
 
+            const feedStartMs = Date.now();
             const { xmlString, lastError } = await fetchFeedXml({
                 directTimeoutMs: FEED_FETCH_TIMEOUT_MS,
                 feedName: feed.name,
@@ -885,26 +974,60 @@ async function main() {
                 proxyTimeoutMs: FEED_PROXY_TIMEOUT_MS,
             });
 
+            // Minimale Feed-Dauer: sie beantwortet spaeter, welche Quelle das
+            // Zeitbudget aufbraucht (O2b), ohne heute schon zu regeln.
+            const attemptAt = new Date().toISOString();
+            const feedDurationMs = Date.now() - feedStartMs;
+            const baseEntry = {
+                lastAttemptAt: attemptAt,
+                lastSuccessAt: previousHealth[feed.id]?.lastSuccessAt ?? null,
+                durationMs: feedDurationMs,
+                articleCount: null,
+            };
+
             if (xmlString) {
                 try {
                     const feedArticles = parseRssXml(xmlString, feed);
-                    if (feedArticles.length === 0) { feedHealthStatus[feed.id] = { status: 'warning', message: 'Feed fetched successfully, but no articles were found.' };
-                    } else { feedHealthStatus[feed.id] = { status: 'success', message: `Successfully fetched and parsed ${feedArticles.length} articles.` }; }
+                    if (feedArticles.length === 0) {
+                        feedHealthStatus[feed.id] = {
+                            ...baseEntry,
+                            status: 'warning',
+                            message: 'Feed fetched successfully, but no articles were found.',
+                            articleCount: 0,
+                        };
+                    } else {
+                        feedHealthStatus[feed.id] = {
+                            ...baseEntry,
+                            status: 'success',
+                            message: `Successfully fetched and parsed ${feedArticles.length} articles.`,
+                            lastSuccessAt: attemptAt,
+                            articleCount: feedArticles.length,
+                        };
+                    }
                     newlyFetchedArticles.push(...feedArticles);
-                    console.log(`   ✅ Parsed ${feedArticles.length} articles from ${feed.name}`);
+                    console.log(`   ✅ Parsed ${feedArticles.length} articles from ${feed.name} (${formatDuration(feedDurationMs)})`);
                 } catch (parseError) {
                     const message = parseError instanceof Error ? parseError.message : 'Unknown parse error';
                     console.error(`   ❌ Error parsing ${feed.name}: ${message}`);
-                    feedHealthStatus[feed.id] = { status: 'error', message: `Failed during parse. Error: ${message}` };
+                    feedHealthStatus[feed.id] = {
+                        ...baseEntry,
+                        status: 'error',
+                        message: redactMessage(`Failed during parse. Error: ${message}`),
+                    };
                 }
             } else {
                 console.error(`   ❌ Fetch failed for ${feed.name}. Error: ${lastError}`);
-                feedHealthStatus[feed.id] = { status: 'error', message: `Fetch failed. Error: ${lastError}` };
+                feedHealthStatus[feed.id] = {
+                    ...baseEntry,
+                    status: 'error',
+                    message: redactMessage(`Fetch failed. Error: ${lastError}`),
+                };
             }
             await new Promise(r => setTimeout(r, 200));
         }
 
-        console.log(`\n📰 Total new articles fetched: ${newlyFetchedArticles.length}`);
+        durations.feedFetchMs = Date.now() - feedFetchStartMs;
+        console.log(`\n📰 Total new articles fetched: ${newlyFetchedArticles.length} (${formatDuration(durations.feedFetchMs)})`);
 
         const cachedArticlesByIdentity = new Map();
         oldArticles.forEach(article => {
@@ -935,6 +1058,7 @@ async function main() {
         }
 
         const articlesNeedingScraping = newlyFetchedArticles.filter(a => a.needsScraping);
+        const imageScrapeStartMs = Date.now();
         if (articlesNeedingScraping.length > 0) {
             console.log(`\n🔎 Scraping images for ${articlesNeedingScraping.length} articles...\n`);
             const scrapeStats = { found: 0, missing: 0, failed: 0, totalMs: 0 };
@@ -964,6 +1088,7 @@ async function main() {
             }
             console.log(`\n🔎 Image scraping summary: ${scrapeStats.found} found, ${scrapeStats.missing} placeholders, ${scrapeStats.failed} failed in ${formatDuration(scrapeStats.totalMs)} active scraping time.\n`);
         }
+        durations.imageScrapeMs = Date.now() - imageScrapeStartMs;
 
         newlyFetchedArticles = newlyFetchedArticles.map(article => {
             if (!article.imageUrl) article.imageUrl = getPlaceholderImageUrl(article.source);
@@ -984,6 +1109,7 @@ async function main() {
             })
             .slice(0, IMAGE_BACKFILL_LIMIT);
 
+        const imageBackfillStartMs = Date.now();
         if (imageBackfillArticles.length > 0) {
             console.log(`\n🧩 Backfilling images for ${imageBackfillArticles.length} old articles with missing or invalid images...\n`);
             const backfillStats = { found: 0, missing: 0, failed: 0, totalMs: 0 };
@@ -1014,6 +1140,7 @@ async function main() {
         } else {
             console.log(`\n🧩 No old articles need image backfill.\n`);
         }
+        durations.imageBackfillMs = Date.now() - imageBackfillStartMs;
 
         console.log('\n🔄 Merging, pruning, and sorting articles...');
         const uniqueArticlesMap = new Map();
@@ -1050,6 +1177,7 @@ async function main() {
         }
 
         console.log('\n💾 Saving data to Vercel KV...');
+        const publishStartMs = Date.now();
 
         // Save full cache
         await kv.set('news_cache', sortedArticles);
@@ -1062,17 +1190,80 @@ async function main() {
         await kv.set('news_cache_64', sortedArticles.slice(0, 64));
         console.log(`   ⚡ Saved 64 medium articles to KV key 'news_cache_64'`);
 
-        await kv.set('feed_health_status', feedHealthStatus);
-        console.log(`   📊 Saved health status for ${Object.keys(feedHealthStatus).length} feeds to KV key 'feed_health_status'`);
+        durations.publishMs = Date.now() - publishStartMs;
+        durations.totalMs = Date.now() - runStartMs;
+
+        // Erst ab hier gilt der Kern-Publish als erfolgt. `feedCounters` trennt
+        // dabei den technisch beendeten Lauf von tatsaechlich neuem Inhalt.
+        const publishedAt = new Date();
+        const feedCounters = summarizeFeedHealth(feedHealthStatus);
+        const publishRecords = buildRunRecords({
+            previous: { health: previousHealth, publish: previousPublish },
+            run: finishRunStatus(runStatus, {
+                finishedAt: publishedAt,
+                result: 'success',
+                feeds: feedCounters,
+                durations,
+            }),
+            feedHealth: feedHealthStatus,
+            publish: {
+                runId: runStatus.runId,
+                publishedAt,
+                articleCount: sortedArticles.length,
+                newestArticleAt: sortedArticles[0]?.publicationDate ?? null,
+                feeds: feedCounters,
+                durations,
+            },
+        });
+
+        await kv.set(FEED_HEALTH_STATUS_KEY, publishRecords.health);
+        console.log(`   📊 Saved health status for ${Object.keys(publishRecords.health).length} feeds to KV key '${FEED_HEALTH_STATUS_KEY}'`);
+
+        await saveHeartbeat(FEED_PUBLISH_STATUS_KEY, publishRecords.publish);
+        await saveHeartbeat(FEED_RUN_STATUS_KEY, publishRecords.run);
+        console.log(
+            `   🫀 Kern-Publish ${publishRecords.publish.lastCorePublishAt}, `
+            + `Inhaltsstand ${publishRecords.publish.lastContentUpdateAt ?? 'unbekannt'}, `
+            + `Feeds ${feedCounters.success}/${feedCounters.total} erfolgreich`,
+        );
 
         // Generate trends with Groq AI (respects cache TTL)
+        const trendsStartMs = Date.now();
         await generateAndSaveTrends(sortedArticles);
+        durations.trendsMs = Date.now() - trendsStartMs;
+
+        // Trends sind optional und laufen nach dem Kern-Publish. Ihre Dauer
+        // wird nachgetragen, ohne den Publish-Datensatz erneut zu bewegen.
+        await saveHeartbeat(FEED_RUN_STATUS_KEY, finishRunStatus(runStatus, {
+            finishedAt: new Date(),
+            result: 'success',
+            feeds: feedCounters,
+            durations: { ...durations, totalMs: Date.now() - runStartMs },
+        }));
 
     } catch (error) {
         console.error('\n❌ Fatal error in fetch script:', error);
-        // Still try to save the partial health status on error
-        await kv.set('feed_health_status', feedHealthStatus);
-        console.log(`\n📊 Saved partial health status to Vercel KV before exiting.\n`);
+
+        // Ein gescheiterter Versuch darf weder den letzten Kern-Publish noch
+        // ein bereits erreichtes lastSuccessAt ueberschreiben.
+        const failedRecords = buildRunRecords({
+            previous: { health: previousHealth, publish: previousPublish },
+            run: finishRunStatus(runStatus, {
+                finishedAt: new Date(),
+                result: 'fatal',
+                fatalError: describeFatalError(error),
+                feeds: summarizeFeedHealth(feedHealthStatus),
+                durations: { ...durations, totalMs: Date.now() - runStartMs },
+            }),
+            feedHealth: feedHealthStatus,
+            publish: null,
+        });
+
+        if (Object.keys(failedRecords.health).length > 0) {
+            await saveHeartbeat(FEED_HEALTH_STATUS_KEY, failedRecords.health);
+            console.log(`\n📊 Saved partial health status to Vercel KV before exiting.\n`);
+        }
+        await saveHeartbeat(FEED_RUN_STATUS_KEY, failedRecords.run);
         process.exit(1);
     }
 }
