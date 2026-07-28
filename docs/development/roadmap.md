@@ -1,6 +1,6 @@
 # GamerFeed – Projekt-Roadmap
 
-Stand: 27. Juli 2026
+Stand: 28. Juli 2026
 
 Diese Roadmap ordnet die technische Weiterentwicklung von GamerFeed. Sie ist
 kein fester Veröffentlichungskalender und keine automatische Freigabe, alle
@@ -12,6 +12,8 @@ Produktions-Deployments bleiben bewusste Entscheidungen des Projektinhabers.
 Status:
 
 - **bereit**: das nächste klar abgegrenzte Arbeitspaket
+- **in Verifikation**: umgesetzt, aber ein externer Abnahmenachweis steht noch
+  aus
 - **geplant**: fachlich eingeordnet, aber noch nicht beginnen
 - **Entscheidung nötig**: benötigt vor der Umsetzung eine Produkt- oder
   Plattformentscheidung
@@ -75,7 +77,7 @@ verschiebt sich das Hauptrisiko auf den Cron-Betrieb selbst – dort setzt O1 an
 
 | ID | Priorität | Status | Ergebnis |
 |---|---|---|---|
-| R1 | P1 | Entscheidung nötig | Release-Gate und Preview-Zugriffe festlegen |
+| R1 | P1 | in Verifikation | Release-Gate und Preview-Zugriffe absichern |
 | S1a | P1 | erledigt | Serverziele und Redirects gegen SSRF absichern |
 | S1b | P1 | erledigt | Artikel-, Bild- und Ausgabe-URLs sicher behandeln |
 | T0 | P1 | erledigt | Kleines Chromium-E2E-Grundgerüst bereitstellen |
@@ -106,6 +108,13 @@ verschiebt sich das Hauptrisiko auf den Cron-Betrieb selbst – dort setzt O1 an
 ## Vorbedingung: Release-Entscheidung
 
 ### R1 – Release-Gate und Preview-Zugriffe
+
+**Entscheidung vom 28. Juli 2026:** GamerFeed verwendet die sichere
+Pull-Request-Variante mit verpflichtenden CI-/Vercel-Checks, geschütztem
+`main`, Production-Secrets ausschließlich in Production und dokumentiertem
+Rollback. Ruleset, Vercel-Umgebungen und Rücksprungziel sind verifiziert; offen
+ist nur noch ein echter Pull Request mit allen drei grünen Checks. Einzelheiten:
+[`docs/deployment/release-process.md`](../deployment/release-process.md).
 
 **Warum:** CI prüft einen direkten Push erst nachträglich. Ohne geschützten
 Branch oder Deployment-Gate kann Vercel einen fehlerhaften Commit bereits in

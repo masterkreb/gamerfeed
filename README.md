@@ -288,6 +288,9 @@ node scripts/fetch-feeds.js
 Für einen späteren Wechsel auf eine eigene Domain gibt es eine vollständige
 [Custom-Domain-Checkliste](docs/deployment/custom-domain.md).
 
+Produktive Änderungen laufen ausschließlich über den dokumentierten
+[Pull-Request- und Release-Prozess](docs/deployment/release-process.md).
+
 ### 4. GitHub Actions einrichten
 
 Der automatische Abruf der Nachrichten (`fetch-feeds.js`) wird von GitHub Actions ausgeführt, nicht von Vercel. Daher muss GitHub Zugriff auf die Vercel-Datenbanken haben. Dies geschieht über "Secrets".

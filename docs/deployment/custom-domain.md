@@ -84,7 +84,8 @@ ausdrücklich die neue Produktionsdomain abbilden sollen.
 
 ## 6. Deployment und Abnahme
 
-1. Codeänderungen committen und nach `main` pushen.
+1. Codeänderungen auf einem eigenen Branch committen und über den
+   [Release-Prozess](release-process.md) als Pull Request nach `main` mergen.
 2. Nach Änderungen an Vercel-Variablen ein neues Production Deployment
    auslösen.
 3. Beide Domainvarianten öffnen und die Weiterleitung kontrollieren.
