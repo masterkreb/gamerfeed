@@ -1,4 +1,5 @@
 import { DOMParser } from 'linkedom';
+import { readLimitedResponseText, ResponseTooLargeError } from './limited-response.js';
 import {
     fetchWithOutboundPolicy,
     OutboundPolicyError,
@@ -32,8 +33,6 @@ const RETRYABLE_HTTP_STATUSES = new Set([408, 425, 429]);
 // deshalb als voruebergehend, beim Direktabruf einer Quelle weiterhin nicht.
 const PROXY_RETRYABLE_HTTP_STATUSES = new Set([...RETRYABLE_HTTP_STATUSES, 415]);
 
-class ResponseTooLargeError extends Error {}
-
 function getErrorMessage(error) {
     return error instanceof Error ? error.message : String(error);
 }
@@ -57,44 +56,6 @@ function getRetryDelayMs(response, fallbackDelayMs) {
     }
 
     return fallbackDelayMs;
-}
-
-async function readLimitedResponseText(response, maxBytes) {
-    const contentLength = Number(response.headers?.get?.('content-length'));
-    if (Number.isFinite(contentLength) && contentLength > maxBytes) {
-        throw new ResponseTooLargeError(`response exceeds the ${maxBytes} byte limit`);
-    }
-
-    if (!response.body || typeof response.body.getReader !== 'function') {
-        const text = await response.text();
-        if (new TextEncoder().encode(text).byteLength > maxBytes) {
-            throw new ResponseTooLargeError(`response exceeds the ${maxBytes} byte limit`);
-        }
-        return text;
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let totalBytes = 0;
-    let text = '';
-
-    try {
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            totalBytes += value.byteLength;
-            if (totalBytes > maxBytes) {
-                await reader.cancel();
-                throw new ResponseTooLargeError(`response exceeds the ${maxBytes} byte limit`);
-            }
-            text += decoder.decode(value, { stream: true });
-        }
-
-        return text + decoder.decode();
-    } finally {
-        reader.releaseLock();
-    }
 }
 
 export function isFeedXml(value) {
