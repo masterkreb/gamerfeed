@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Announcement, AnnouncementType } from '../../types';
+import { ANNOUNCEMENT_MESSAGE_MAX_LENGTH } from '../../shared/announcement-contract.js';
+
+// Geschützter Abruf: nur so bekommt der Admin eine abgeschaltete Ankündigung
+// zu sehen. Der öffentliche Endpunkt liefert sie weiterhin nicht aus.
+const ADMIN_ANNOUNCEMENT_ENDPOINT = '/api/announcement?admin=1';
 
 const typeStyles: Record<AnnouncementType, { bg: string; border: string; text: string; label: string }> = {
     info: {
@@ -44,7 +49,7 @@ export const AnnouncementTab: React.FC = () => {
     useEffect(() => {
         const fetchAnnouncement = async () => {
             try {
-                const response = await fetch('/api/announcement');
+                const response = await fetch(ADMIN_ANNOUNCEMENT_ENDPOINT);
                 if (response.ok) {
                     const data = await response.json();
                     if (data) {
@@ -146,6 +151,8 @@ export const AnnouncementTab: React.FC = () => {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder={t('admin.announcement.messagePlaceholder')}
+                        // Dieselbe Grenze, die der Server durchsetzt.
+                        maxLength={ANNOUNCEMENT_MESSAGE_MAX_LENGTH}
                         className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
                         rows={3}
                     />

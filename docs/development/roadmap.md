@@ -78,6 +78,14 @@ erkennbar, statt als alter grüner Status weiterzulaufen. 236 zentrale Tests und
 Laufzeit-Validierung der Admin-Payloads – dort setzt S2 an. Beobachtbarkeit über
 den letzten Lauf hinaus (Historie, Alarm) bleibt O4 vorbehalten.
 
+**Stand 28. Juli 2026 (Branch `claude/s2-api-validation`):** S2 ist
+abgeschlossen. Die Admin-APIs prüfen eingehendes JSON zur Laufzeit, antworten
+mit stabilen Fehlercodes und geben keine internen Datenbank- oder KV-Meldungen
+mehr an den Client. 343 zentrale Tests und 9 Browser-Abnahmen laufen
+erfolgreich. Damit verschiebt sich das Hauptrisiko zurück auf den Feed-Lauf
+selbst: einzelne fehlerhafte Items können weiterhin einen ganzen Feed verwerfen
+und externe Aufrufe sind unbegrenzt – dort setzt O2a an.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -88,8 +96,8 @@ den letzten Lauf hinaus (Historie, Alarm) bleibt O4 vorbehalten.
 | T0 | P1 | erledigt | Kleines Chromium-E2E-Grundgerüst bereitstellen |
 | F2 | P1 | erledigt | Consent-Widerruf und Cookie-Einstellungen vervollständigen |
 | O1 | P1 | erledigt | Cron-Heartbeat und veraltete Health-Daten sichtbar machen |
-| S2 | P1 | **bereit** | Admin-API-Payloads validieren und Fehlerausgaben härten |
-| O2a | P1 | geplant | Einzelitem-Fehler, Secrets und Provider-Timeouts absichern |
+| S2 | P1 | erledigt | Admin-API-Payloads validieren und Fehlerausgaben härten |
+| O2a | P1 | **bereit** | Einzelitem-Fehler, Secrets und Provider-Timeouts absichern |
 | O2b | P1 | geplant | Feed-Kernlauf mit Deadline und Scrape-Budget begrenzen |
 | O3a | P1 | geplant | Generationsgebundenes Leseprotokoll und Migration vorbereiten |
 | F1 | P1 | geplant | Progressive News-Ladekette gegen veraltete Antworten absichern |
@@ -217,7 +225,20 @@ Outbound-Policy eine syntaktische Ausgabe-Policy.
 
 ### S2 – Runtime-Validierung und sichere API-Fehler
 
-**Status:** bereit – nächstes Code-Arbeitspaket.
+**Status:** erledigt. Feed- und Announcement-Payloads laufen über gemeinsame,
+Edge-kompatible Parser (`server/feed-validation.js`,
+`shared/announcement-contract.js`), die Objekttyp, Pflichtfelder, Stringlängen,
+IDs, Enums, URLs und Booleans zur Laufzeit prüfen; die bestehende
+`shared/url-policy.js` wird weiterverwendet. Fehler antworten einheitlich als
+`{ error, code, field? }` mit stabilen Codes aus `shared/api-errors.js`;
+interne SQL-, KV- und Providermeldungen erscheinen nicht mehr in
+Client-Antworten. Alle geschützten Admin-Antworten tragen `private, no-store`,
+der öffentliche Announcement-Abruf behält seine Cache-Semantik. Eine inaktive
+Ankündigung ist über den geschützten Abruf `?admin=1` wieder ladbar,
+bearbeitbar, aktivierbar und löschbar, bleibt öffentlich aber unsichtbar. Die
+Handler liegen testbar unter `server/` mit injizierbarem SQL, KV, Uhr und
+Zugangsdaten. Einzelheiten:
+[`docs/deployment/admin-api.md`](../deployment/admin-api.md).
 
 **Warum:** TypeScript-Casts prüfen eingehendes JSON nicht zur Laufzeit.
 Feed-Verwaltung und Ankündigungen benötigen daher serverseitige Verträge.
@@ -293,6 +314,8 @@ wenn der geplante Workflow nicht mehr läuft.
 - Tests verwenden eine injizierbare Uhr und benötigen keine echte Wartezeit.
 
 ### O2a – Einzelitem-Fehler, Secrets und Provider-Timeouts
+
+**Status:** bereit – nächstes Code-Arbeitspaket.
 
 **Warum:** Ein einzelnes ungültiges Datum kann derzeit einen ganzen Feed
 verwerfen. Core- und optionale Provider-Konfiguration müssen außerdem

@@ -1,4 +1,6 @@
 import type { Article, BackendHealthStatus, FeedHeartbeat } from '../types';
+import { adminErrorResponse, adminJsonResponse, internalErrorResponse } from './admin-api.js';
+import { API_ERROR_CODES } from '../shared/api-errors.js';
 import {
     FEED_HEALTH_STATUS_KEY,
     FEED_PUBLISH_STATUS_KEY,
@@ -17,19 +19,10 @@ interface HealthHandlerOptions {
     staleAfterMs?: number;
 }
 
-const ERROR_CACHE_CONTROL = 'no-cache';
-const MISSING_DATA_MESSAGE = 'Health data or news cache not available in KV store.';
-const UNKNOWN_ERROR_MESSAGE = 'An unknown server error occurred.';
-
-function jsonResponse(body: unknown, status: number, cacheControl: string): Response {
-    return new Response(JSON.stringify(body), {
-        status,
-        headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': cacheControl,
-        },
-    });
-}
+// Neutral formuliert: die Meldung geht an den Client und soll weder den
+// Provider noch die Namen der Speicherschlüssel verraten. Woran es genau fehlt,
+// steht im Log und im Heartbeat.
+const MISSING_DATA_MESSAGE = 'Health-Daten sind derzeit nicht verfügbar.';
 
 /**
  * Liefert den gespeicherten Feed-Status zusammen mit dem Frischebericht.
@@ -53,7 +46,7 @@ export function createHealthDataHandler(
             ]);
 
             if (!healthStatus || !articles) {
-                return jsonResponse({ error: MISSING_DATA_MESSAGE }, 404, ERROR_CACHE_CONTROL);
+                return adminErrorResponse(404, API_ERROR_CODES.NOT_FOUND, MISSING_DATA_MESSAGE);
             }
 
             // We only need the unique sources from the articles for the health
@@ -67,15 +60,13 @@ export function createHealthDataHandler(
                 staleAfterMs,
             });
 
-            return jsonResponse(
-                { healthStatus, sourcesInCache, heartbeat },
-                200,
-                ERROR_CACHE_CONTROL, // Always fetch the latest health status
-            );
+            // Immer der aktuelle Stand und niemals zwischengespeichert: der
+            // Frischebericht wäre sonst genau das, was er melden soll – alt.
+            return adminJsonResponse({ healthStatus, sourcesInCache, heartbeat });
         } catch (error) {
+            // Der KV-Originaltext bleibt im Log.
             logger.error('API Error in /api/get-health-data:', error);
-            const message = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
-            return jsonResponse({ error: message }, 500, ERROR_CACHE_CONTROL);
+            return internalErrorResponse();
         }
     };
 }

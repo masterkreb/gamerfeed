@@ -92,7 +92,7 @@ test('liefert Feed-Status, Quellen und Heartbeat eines frischen Laufs', async ()
 
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('content-type'), 'application/json');
-    assert.equal(response.headers.get('cache-control'), 'no-cache');
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
 
     assert.deepEqual(body.sourcesInCache, ['GameStar']);
     assert.equal(body.healthStatus.gamestar.status, 'success');
@@ -175,17 +175,49 @@ test('fehlender Feed-Status oder News-Cache ergibt weiterhin 404', async () => {
     const withoutHealth = healthyStore();
     delete withoutHealth.feed_health_status;
     const first = await (await createHandler(withoutHealth).handler(new Request('https://example.com/x'))).json();
-    assert.equal(first.error, 'Health data or news cache not available in KV store.');
+    assert.equal(first.error, 'Health-Daten sind derzeit nicht verfügbar.');
 
     const withoutCache = healthyStore();
     delete withoutCache.news_cache;
     const second = await createHandler(withoutCache).handler(new Request('https://example.com/x'));
     assert.equal(second.status, 404);
-    assert.equal(second.headers.get('cache-control'), 'no-cache');
+    assert.equal(second.headers.get('cache-control'), 'private, no-store');
+    assert.equal((await second.json()).code, 'not_found');
 });
 
-test('ein KV-Fehler wird protokolliert und als 500 beantwortet', async () => {
-    const cache = createCache({}, new Error('KV offline'));
+test('die 404 verrät weder Provider noch Cache- oder Schlüsselnamen', async () => {
+    const verboten = [
+        /kv/i,
+        /vercel/i,
+        /redis/i,
+        /postgres/i,
+        /cache/i,
+        /store/i,
+        /feed_health_status/,
+        /news_cache/,
+        /feed_run_status/,
+        /feed_publish_status/,
+    ];
+
+    for (const fehlend of ['feed_health_status', 'news_cache']) {
+        const store = healthyStore();
+        delete store[fehlend];
+
+        const response = await createHandler(store).handler(new Request('https://example.com/x'));
+        const rohtext = await response.text();
+
+        assert.equal(response.status, 404, fehlend);
+        assert.equal(JSON.parse(rohtext).code, 'not_found', fehlend);
+        assert.equal(response.headers.get('cache-control'), 'private, no-store', fehlend);
+
+        for (const muster of verboten) {
+            assert.doesNotMatch(rohtext, muster, `${fehlend}: ${muster} steht in der Antwort`);
+        }
+    }
+});
+
+test('ein KV-Fehler wird protokolliert, aber nicht ausgeliefert', async () => {
+    const cache = createCache({}, new Error('KV offline: https://kv.example/pipeline?token=geheim'));
     const { logger, calls } = createLogger();
     const handler = createHealthDataHandler(cache.client, { now: () => new Date(NOW) }, logger);
 
@@ -193,8 +225,11 @@ test('ein KV-Fehler wird protokolliert und als 500 beantwortet', async () => {
     const body = await response.json();
 
     assert.equal(response.status, 500);
-    assert.equal(body.error, 'KV offline');
-    assert.equal(calls.length, 1);
+    assert.equal(body.code, 'internal_error');
+    assert.equal(body.error, 'Es ist ein interner Serverfehler aufgetreten.');
+    assert.doesNotMatch(JSON.stringify(body), /KV offline|geheim/);
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
+    assert.equal(calls.length, 1, 'der Originaltext landet ausschliesslich im Log');
 });
 
 test('es werden nur die vier erwarteten KV-Schluessel gelesen', async () => {

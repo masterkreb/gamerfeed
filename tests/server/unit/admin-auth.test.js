@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { requireAdminAuth, requireAdminMutation } from '../../../server/admin-auth.js';
+import {
+    requireAdminApiAuth,
+    requireAdminApiMutation,
+    requireAdminAuth,
+    requireAdminMutation,
+} from '../../../server/admin-auth.js';
 
 const ENV = {
     ADMIN_USERNAME: 'admin',
@@ -66,7 +71,7 @@ test('lehnt fehlende, falsche und fehlerhafte Credentials ab', async t => {
             const response = requireAdminAuth(createRequest({ authorization }), ENV);
 
             assert.equal(response?.status, 401);
-            assert.equal(response?.headers.get('cache-control'), 'no-store');
+            assert.equal(response?.headers.get('cache-control'), 'private, no-store');
             assert.equal(
                 response?.headers.get('www-authenticate'),
                 'Basic realm="GamerFeed Admin", charset="UTF-8"',
@@ -94,7 +99,7 @@ test('schlägt bei fehlender oder ungültiger Server-Konfiguration geschlossen f
             const response = requireAdminAuth(request, env);
 
             assert.equal(response?.status, 503);
-            assert.equal(response?.headers.get('cache-control'), 'no-store');
+            assert.equal(response?.headers.get('cache-control'), 'private, no-store');
             assert.equal(response?.headers.has('www-authenticate'), false);
         });
     }
@@ -128,7 +133,7 @@ test('lehnt Mutationen ohne oder mit fremder Origin ab', async t => {
             }), ENV);
 
             assert.equal(response?.status, 403);
-            assert.equal(response?.headers.get('cache-control'), 'no-store');
+            assert.equal(response?.headers.get('cache-control'), 'private, no-store');
         });
     }
 });
@@ -140,4 +145,59 @@ test('prüft bei Mutationen zuerst die Authentifizierung', () => {
     }), ENV);
 
     assert.equal(response?.status, 401);
+});
+
+// === API-Variante: dieselbe Entscheidung, aber JSON mit stabilem Code ===
+
+test('die API-Variante urteilt genauso wie die Middleware-Variante', () => {
+    const gueltig = createRequest({ authorization: encodeBasicCredentials('admin', 'sehr:sicher') });
+
+    assert.equal(requireAdminApiAuth(gueltig, ENV), null);
+    assert.equal(requireAdminApiAuth(createRequest({}), ENV)?.status, 401);
+    assert.equal(requireAdminApiAuth(gueltig, {})?.status, 503);
+});
+
+test('die API-Variante antwortet als JSON mit stabilem Fehlercode', async t => {
+    const cases = [
+        ['ohne Zugangsdaten', createRequest({}), ENV, 401, 'unauthorized'],
+        [
+            'ohne Server-Konfiguration',
+            createRequest({ authorization: encodeBasicCredentials('admin', 'sehr:sicher') }),
+            {},
+            503,
+            'auth_unavailable',
+        ],
+    ];
+
+    for (const [name, request, env, status, code] of cases) {
+        await t.test(name, async () => {
+            const response = requireAdminApiAuth(request, env);
+
+            assert.equal(response?.status, status);
+            assert.equal(response?.headers.get('content-type'), 'application/json');
+            assert.equal(response?.headers.get('cache-control'), 'private, no-store');
+            assert.equal((await response?.json()).code, code);
+        });
+    }
+});
+
+test('die API-Variante nennt bei fremder Origin den Forbidden-Code', async () => {
+    const response = requireAdminApiMutation(createRequest({
+        authorization: encodeBasicCredentials('admin', 'sehr:sicher'),
+        origin: 'https://boese.example',
+        method: 'POST',
+    }), ENV);
+
+    assert.equal(response?.status, 403);
+    assert.equal(response?.headers.get('cache-control'), 'private, no-store');
+    assert.equal((await response?.json()).code, 'forbidden');
+});
+
+test('die 401 der API-Variante behält den WWW-Authenticate-Header', () => {
+    const response = requireAdminApiAuth(createRequest({}), ENV);
+
+    assert.equal(
+        response?.headers.get('www-authenticate'),
+        'Basic realm="GamerFeed Admin", charset="UTF-8"',
+    );
 });

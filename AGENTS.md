@@ -91,10 +91,15 @@
 │   └── feed-run-recorder.js # Reihenfolge und Schreibregeln des Heartbeats
 │
 ├── server/                 # Getestete Backend-Hilfslogik
+│   ├── admin-api.js            # Antwortbau und Rumpflesen der Admin-APIs
+│   ├── announcement-handler.ts # Ankündigungen inkl. geschütztem Admin-Abruf
+│   ├── feeds-handler.ts        # Feed-CRUD mit injizierbarem SQL
 │   ├── health-data-handler.ts  # Feed-Status und Frischebericht für das Admin
 │   └── news-cache-handler.ts   # Gemeinsame Logik der News-Endpunkte
 ├── shared/                 # Gemeinsame Frontend-/Backend-Verträge
-│   └── feed-health-model.js    # Cron-Heartbeat, Frische, FEED_STALE_AFTER_MS
+│   ├── announcement-contract.js # Typen, Längengrenze und Parser
+│   ├── api-errors.js            # Stabile Fehlercodes und Cache-Vorgabe
+│   └── feed-health-model.js     # Cron-Heartbeat, Frische, FEED_STALE_AFTER_MS
 ├── tests/                  # Zentrale Tests nach Fachbereich und Testart
 ├── docs/
 │   ├── deployment/        # Betrieb, Release, Rollback und Domain-Anleitungen
@@ -277,11 +282,37 @@ Die Admin-Absicherung liegt zentral in `server/admin-auth.js`.
 - Die Admin-APIs prüfen die Authentifizierung **zusätzlich selbst** und
   verlassen sich nicht auf die Middleware
 - `api/feeds` und `api/get-health-data` sind vollständig geschützt;
-  `api/announcement` erlaubt öffentliches GET, aber geschützte Mutationen
+  `api/announcement` erlaubt öffentliches GET, aber geschützte Mutationen und
+  einen geschützten Admin-Abruf (`?admin=1`)
 - Mutationen verlangen zusätzlich eine exakt übereinstimmende Origin (CSRF)
 - Fehlende `ADMIN_USERNAME`/`ADMIN_PASSWORD` führen zu 503 – es gibt keine
   Standardzugangsdaten
 - `ADMIN_USERNAME` darf keinen Doppelpunkt enthalten, das Passwort schon
+- `requireAdminAuth`/`requireAdminMutation` liefern Text (für die Middleware),
+  `requireAdminApiAuth`/`requireAdminApiMutation` JSON mit stabilem Fehlercode
+
+## 📜 Verträge und Fehler der Admin-APIs
+
+Eingehendes JSON wird zur Laufzeit geprüft, nicht per TypeScript-Cast:
+
+- `server/feed-validation.js` – `parseFeedCreatePayload`,
+  `parseFeedUpdatePayload`, `parseFeedDeletePayload`; nutzt die bestehende
+  `shared/url-policy.js` weiter
+- `shared/announcement-contract.js` – Typenliste, Längengrenze und Parser;
+  begrenzt auch das Textfeld im Admin-Panel
+- `server/admin-api.js` – Antwortbau und Rumpflesen
+
+Jeder Fehler antwortet als `{ error, code, field? }` mit einem stabilen Code aus
+`shared/api-errors.js`. **Interne Datenbank-, KV- und Providerfehler erscheinen
+nie in Client-Antworten** – eine 500 liefert immer dieselbe generische Meldung
+und `code: "internal_error"`, der Originaltext geht ausschließlich ins Log.
+
+Alle geschützten Admin-Antworten tragen `Cache-Control: private, no-store`, auch
+204, Fehler und Auth-Grenzen. Nur der öffentliche `GET /api/announcement` behält
+`s-maxage=60, stale-while-revalidate=120`.
+
+Fehlercodes, Feldregeln, der Admin-Abruf für inaktive Ankündigungen und die
+bewussten Grenzen stehen in `docs/deployment/admin-api.md`.
 
 Das Kontaktformular prüft serverseitig Typen, Pflichtfelder, Feldlängen und
 E-Mail-Format, schützt vor Steuerzeichen und Header-Injection und schreibt keine
@@ -373,8 +404,12 @@ Alle Tests liegen zentral unter `tests/`, nie neben den Produktivdateien:
 tests/
 ├── feeds/{unit,integration}
 ├── frontend/{unit,helpers}
-└── server/unit
+└── server/{unit,helpers}
 ```
+
+Die Helfer unter `tests/server/helpers/` stellen SQL-, KV- und Logger-Attrappen
+sowie eine feste Uhr bereit. Kein Test berührt eine echte Datenbank oder einen
+echten KV-Speicher.
 
 Grundlage sind `node:test`, `node:assert`, Linkedom und React über Vite SSR.
 
@@ -434,6 +469,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Feed-Abruf nach `scripts/feed-fetch-utils.js` extrahiert – Wiederholungen, Größenbegrenzung, Feed-Validierung, getrennte Direkt- und Proxy-Fehler
 - **Juli 2026:** Einstellungsdialog mit echten ARIA-Tabs, angekündigten Formularmeldungen und jederzeit möglichem Schließen
 - **Juli 2026:** Cron-Heartbeat (O1): Attempt-Status, Kern-Publish und Inhaltsfrische getrennt geführt, veraltete Daten ab 50 Minuten sichtbar; Workflow startet zu Minute 7/27/47
+- **Juli 2026:** Admin-APIs (S2): Laufzeitverträge statt TypeScript-Casts, stabile Fehlercodes, keine internen Fehlertexte mehr im Client, `private, no-store` auf allen geschützten Antworten, inaktive Ankündigungen im Admin wieder bearbeitbar
 
 ---
 
