@@ -344,14 +344,20 @@ export function normalizeRunStatus(raw) {
     const finishedAt = toIsoTimestamp(raw.finishedAt);
     if (startedAt === null && finishedAt === null) return null;
 
+    const result = FEED_RUN_RESULTS.includes(raw.result) ? raw.result : 'running';
+
     return {
         schemaVersion: FEED_HEALTH_SCHEMA_VERSION,
         runId: typeof raw.runId === 'string' && raw.runId !== '' ? raw.runId : null,
         startedAt,
         finishedAt,
-        result: FEED_RUN_RESULTS.includes(raw.result) ? raw.result : 'running',
+        result,
         fatalError: sanitizeErrorMessage(raw.fatalError),
-        degradedReason: sanitizeErrorMessage(raw.degradedReason),
+        // Auch beim Lesen gilt: nur ein degradierter Lauf traegt einen Grund.
+        // Ein aelterer oder manipulierter Datensatz mit `success` und
+        // Begruendung wuerde im Admin sonst einen Widerspruch anzeigen –
+        // „abgeschlossen“ neben „zurückgestellt: …“.
+        degradedReason: result === 'degraded' ? sanitizeErrorMessage(raw.degradedReason) : null,
         feeds: normalizeCounters(raw.feeds),
         durations: normalizeDurations(raw.durations),
     };

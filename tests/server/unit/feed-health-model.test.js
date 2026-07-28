@@ -499,3 +499,49 @@ test('ein Lauf ohne Grund liefert null statt eines leeren Textes', () => {
 
     assert.equal(bericht.run.degradedReason, null);
 });
+
+test('ein gespeichertes success mit Begruendung zeigt keinen Widerspruch', () => {
+    // Ein älterer oder manipulierter Datensatz darf im Admin nicht
+    // „abgeschlossen" neben „zurückgestellt: …" anzeigen.
+    for (const result of ['success', 'fatal', 'running']) {
+        const gelesen = normalizeRunStatus({
+            runId: 'r1',
+            startedAt: '2026-07-28T12:00:00.000Z',
+            finishedAt: '2026-07-28T12:10:00.000Z',
+            result,
+            degradedReason: 'Zeitbudget erschöpft: 2 Quelle(n) zurückgestellt',
+        });
+
+        assert.equal(gelesen.degradedReason, null, `${result}: kein Grund`);
+    }
+});
+
+test('ein unbekanntes gespeichertes Ergebnis gilt als running, nicht als success', () => {
+    const gelesen = normalizeRunStatus({
+        runId: 'r1',
+        startedAt: '2026-07-28T12:00:00.000Z',
+        finishedAt: '2026-07-28T12:10:00.000Z',
+        result: 'irgendwas',
+        degradedReason: 'darf nicht durchkommen',
+    });
+
+    assert.equal(gelesen.result, 'running');
+    assert.equal(gelesen.degradedReason, null);
+});
+
+test('der Frischebericht reicht einen widerspruechlichen Grund nicht durch', () => {
+    const bericht = buildFreshnessReport({
+        run: {
+            runId: 'r1',
+            startedAt: '2026-07-28T12:00:00.000Z',
+            finishedAt: '2026-07-28T12:10:00.000Z',
+            result: 'success',
+            degradedReason: 'Zeitbudget erschöpft: 2 Quelle(n) zurückgestellt',
+        },
+        publish: null,
+        now: '2026-07-28T12:15:00.000Z',
+    });
+
+    assert.equal(bericht.run.result, 'success');
+    assert.equal(bericht.run.degradedReason, null);
+});
