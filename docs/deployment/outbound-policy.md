@@ -15,6 +15,13 @@ Die Policy liegt in zwei Schichten:
 Die syntaktische Schicht ist bewusst frei von `node:`-Importen, damit die
 Edge-Function `api/feeds.ts` sie mitbenutzen kann.
 
+Die gesperrten Bereiche stehen **einmal** in `shared/ip-ranges.js`. Der Cron
+baut daraus eine `net.BlockList`, die Edge-Seite prüft IP-Literale mit einer
+reinen JavaScript-Umsetzung gegen dieselbe Liste. Ein Kreuztest hält beide
+Umsetzungen deckungsgleich – ohne ihn würden die Listen mit der Zeit
+auseinanderlaufen, und die Feed-Verwaltung akzeptierte Adressen, die der Cron
+anschließend ablehnt.
+
 ## Was abgelehnt wird
 
 **Syntaktisch:** alles außer `http:` und `https:` (also auch `javascript:`,

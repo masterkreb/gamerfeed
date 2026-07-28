@@ -77,6 +77,54 @@ test('lehnt ohne DNS erkennbare lokale und private Ziele beim Speichern ab', () 
     }
 });
 
+test('lehnt auch die vom Cron blockierten Sonderbereiche ab', () => {
+    // Diese Adressen wurden früher beim Speichern akzeptiert, obwohl der Cron
+    // sie garantiert ablehnt.
+    for (const url of [
+        'http://100.64.0.1/feed',
+        'http://192.0.2.1/feed',
+        'http://192.0.0.1/feed',
+        'http://192.88.99.1/feed',
+        'http://198.18.0.1/feed',
+        'http://198.51.100.1/feed',
+        'http://203.0.113.1/feed',
+        'http://224.0.0.1/feed',
+        'http://240.0.0.1/feed',
+        'http://255.255.255.255/feed',
+        'http://0.0.0.1/feed',
+        'http://[2001:db8::1]/feed',
+        'http://[ff00::1]/feed',
+        'http://[64:ff9b::7f00:1]/feed',
+        'http://[2002::1]/feed',
+        'http://[100::1]/feed',
+    ]) {
+        const { error } = validateFeedPayload({ ...VALID_PAYLOAD, url });
+        assert.notEqual(error, null, `${url} wurde akzeptiert`);
+    }
+});
+
+test('lässt die Adressen direkt neben den gesperrten Bereichen zu', () => {
+    // Grenztests: eine Adresse zu früh oder zu spät darf nicht mitgesperrt werden.
+    for (const url of [
+        'https://11.0.0.0/feed',
+        'https://100.128.0.1/feed',
+        'https://128.0.0.1/feed',
+        'https://169.255.0.1/feed',
+        'https://172.32.0.1/feed',
+        'https://192.0.1.1/feed',
+        'https://192.0.3.1/feed',
+        'https://192.169.0.1/feed',
+        'https://198.20.0.1/feed',
+        'https://223.255.255.255/feed',
+        'https://[2001:db9::1]/feed',
+        'https://[2003::1]/feed',
+        'https://[fbff::1]/feed',
+        'https://[fec0::1]/feed',
+    ]) {
+        assert.equal(validateFeedPayload({ ...VALID_PAYLOAD, url }).error, null, `${url} wurde abgelehnt`);
+    }
+});
+
 test('lässt öffentliche Adressen weiterhin zu', () => {
     for (const url of [
         'https://www.gamepro.de/rss/gamepro.rss',
