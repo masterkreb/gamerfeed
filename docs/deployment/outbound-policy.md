@@ -118,11 +118,15 @@ Es braucht `POSTGRES_URL` und beendet sich mit Code 1, sobald mindestens eine
 Adresse abgelehnt würde. Eine Ablehnung ist immer zuerst zu klären: Entweder ist
 die Adresse falsch, oder die Policy ist für diesen Fall zu eng.
 
-> **Offenes Release-Gate:** Dieser Lauf hat noch **nicht** stattgefunden – dafür
-> fehlen die Zugangsdaten zur produktiven Datenbank. Die neun Adressen in
-> `tests/feeds/unit/outbound-policy.test.js` sind eine Regressionssicherung
-> gegen eine zu enge Policy, **kein** Ersatz für die Prüfung des tatsächlichen
-> Bestands. Vor dem Produktivgang muss der Lauf einmal grün gewesen sein.
+> **Release-Gate abgeschlossen:** Am 28. Juli 2026 gegen den produktiven
+> Bestand ausgeführt – **40 von 40 Feed-Adressen** passieren die Policy, keine
+> Ablehnung. Damit ist belegt, dass die Policy den tatsächlichen Bestand nicht
+> zu eng fasst.
+>
+> Die Adressen in `tests/feeds/unit/outbound-policy.test.js` bleiben eine
+> Regressionssicherung und ersetzen diesen Lauf nicht. Er ist zu wiederholen,
+> wenn Feeds hinzukommen oder die gesperrten Bereiche in `shared/ip-ranges.js`
+> erweitert werden.
 
 ## Verhalten in der Feed-Verwaltung
 
