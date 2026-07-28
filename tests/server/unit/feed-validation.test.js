@@ -10,10 +10,12 @@ const VALID_PAYLOAD = Object.freeze({
 });
 
 test('lässt vollständige und gültige Feed-Daten durch', () => {
-    assert.deepEqual(validateFeedPayload(VALID_PAYLOAD), { error: null });
+    // Seit S2 nennt das Ergebnis zusätzlich das betroffene Feld; bei Erfolg ist
+    // es null.
+    assert.deepEqual(validateFeedPayload(VALID_PAYLOAD), { error: null, field: null });
     assert.deepEqual(
         validateFeedPayload({ ...VALID_PAYLOAD, language: 'en', priority: 'secondary' }),
-        { error: null },
+        { error: null, field: null },
     );
 });
 
