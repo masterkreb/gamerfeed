@@ -175,7 +175,7 @@ test('fehlender Feed-Status oder News-Cache ergibt weiterhin 404', async () => {
     const withoutHealth = healthyStore();
     delete withoutHealth.feed_health_status;
     const first = await (await createHandler(withoutHealth).handler(new Request('https://example.com/x'))).json();
-    assert.equal(first.error, 'Health data or news cache not available in KV store.');
+    assert.equal(first.error, 'Health-Daten sind derzeit nicht verfügbar.');
 
     const withoutCache = healthyStore();
     delete withoutCache.news_cache;
@@ -183,6 +183,37 @@ test('fehlender Feed-Status oder News-Cache ergibt weiterhin 404', async () => {
     assert.equal(second.status, 404);
     assert.equal(second.headers.get('cache-control'), 'private, no-store');
     assert.equal((await second.json()).code, 'not_found');
+});
+
+test('die 404 verrät weder Provider noch Cache- oder Schlüsselnamen', async () => {
+    const verboten = [
+        /kv/i,
+        /vercel/i,
+        /redis/i,
+        /postgres/i,
+        /cache/i,
+        /store/i,
+        /feed_health_status/,
+        /news_cache/,
+        /feed_run_status/,
+        /feed_publish_status/,
+    ];
+
+    for (const fehlend of ['feed_health_status', 'news_cache']) {
+        const store = healthyStore();
+        delete store[fehlend];
+
+        const response = await createHandler(store).handler(new Request('https://example.com/x'));
+        const rohtext = await response.text();
+
+        assert.equal(response.status, 404, fehlend);
+        assert.equal(JSON.parse(rohtext).code, 'not_found', fehlend);
+        assert.equal(response.headers.get('cache-control'), 'private, no-store', fehlend);
+
+        for (const muster of verboten) {
+            assert.doesNotMatch(rohtext, muster, `${fehlend}: ${muster} steht in der Antwort`);
+        }
+    }
 });
 
 test('ein KV-Fehler wird protokolliert, aber nicht ausgeliefert', async () => {

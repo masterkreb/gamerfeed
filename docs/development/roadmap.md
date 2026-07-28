@@ -81,7 +81,7 @@ den letzten Lauf hinaus (Historie, Alarm) bleibt O4 vorbehalten.
 **Stand 28. Juli 2026 (Branch `claude/s2-api-validation`):** S2 ist
 abgeschlossen. Die Admin-APIs prüfen eingehendes JSON zur Laufzeit, antworten
 mit stabilen Fehlercodes und geben keine internen Datenbank- oder KV-Meldungen
-mehr an den Client. 337 zentrale Tests und 9 Browser-Abnahmen laufen
+mehr an den Client. 343 zentrale Tests und 9 Browser-Abnahmen laufen
 erfolgreich. Damit verschiebt sich das Hauptrisiko zurück auf den Feed-Lauf
 selbst: einzelne fehlerhafte Items können weiterhin einen ganzen Feed verwerfen
 und externe Aufrufe sind unbegrenzt – dort setzt O2a an.

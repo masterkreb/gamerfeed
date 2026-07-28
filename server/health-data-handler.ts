@@ -19,7 +19,10 @@ interface HealthHandlerOptions {
     staleAfterMs?: number;
 }
 
-const MISSING_DATA_MESSAGE = 'Health data or news cache not available in KV store.';
+// Neutral formuliert: die Meldung geht an den Client und soll weder den
+// Provider noch die Namen der Speicherschlüssel verraten. Woran es genau fehlt,
+// steht im Log und im Heartbeat.
+const MISSING_DATA_MESSAGE = 'Health-Daten sind derzeit nicht verfügbar.';
 
 /**
  * Liefert den gespeicherten Feed-Status zusammen mit dem Frischebericht.
