@@ -135,6 +135,7 @@ async function fetchTextWithRetry({
     logger,
     lookup,
     maxBytes,
+    redact,
     requestLabel,
     requestUrl,
     retryableStatuses = RETRYABLE_HTTP_STATUSES,
@@ -158,7 +159,7 @@ async function fetchTextWithRetry({
                 const retryDelay = getRetryDelayMs(response, retryDelayMs);
                 await response.body?.cancel().catch(() => {});
                 if (attempt < attempts && isRetryableHttpStatus(response.status, retryableStatuses)) {
-                    logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${lastError}). Retrying once...`);
+                    logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                     await sleep(retryDelay);
                     continue;
                 }
@@ -172,7 +173,7 @@ async function fetchTextWithRetry({
                 lastError = `${requestLabel} response could not be read: ${getErrorMessage(error)}`;
                 await response.body?.cancel().catch(() => {});
                 if (!(error instanceof ResponseTooLargeError) && attempt < attempts) {
-                    logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${lastError}). Retrying once...`);
+                    logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                     await sleep(retryDelayMs);
                     continue;
                 }
@@ -184,7 +185,7 @@ async function fetchTextWithRetry({
                 return { error: lastError, policyRejected: true, status: null, text: null };
             }
             if (attempt < attempts) {
-                logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${lastError}). Retrying once...`);
+                logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                 await sleep(retryDelayMs);
                 continue;
             }
@@ -203,12 +204,20 @@ export async function fetchFeedXml({
     feedName,
     feedProxyUrl,
     feedUrl,
-    fetchImpl = globalThis.fetch,
+    // Bewusst **ohne** Vorgabe: nur ein ausdruecklich injiziertes fetchImpl
+    // (Tests) ersetzt den Transport. Bleibt es undefined, verwendet
+    // fetchWithOutboundPolicy seinen an die geprueften Adressen gebundenen
+    // Standardtransport - genau der schuetzt vor DNS-Rebinding.
+    fetchImpl,
     logger = console,
     lookup,
     maxResponseBytes = MAX_FEED_RESPONSE_BYTES,
     proxyAttempts = 2,
     proxyTimeoutMs = 20000,
+    // Fehlertexte einer Gegenstelle koennen Verbindungsdaten enthalten. Der
+    // Aufrufer kennt die konfigurierten Secrets und reicht die Bereinigung
+    // herein; ohne sie bleibt der Text unveraendert.
+    redact = message => String(message),
     retryDelayMs = 1000,
     sleep = delay => new Promise(resolve => setTimeout(resolve, delay)),
 }) {
@@ -220,6 +229,7 @@ export async function fetchFeedXml({
         logger,
         lookup,
         maxBytes: maxResponseBytes,
+        redact,
         requestLabel: 'Direct fetch',
         requestUrl: feedUrl,
         retryDelayMs,
@@ -260,7 +270,7 @@ export async function fetchFeedXml({
         };
     }
 
-    logger?.log?.(`   ⚠️  Direct fetch failed for ${feedName} (${directError}). Trying feed proxy...`);
+    logger?.log?.(`   ⚠️  Direct fetch failed for ${feedName} (${redact(directError)}). Trying feed proxy...`);
 
     let proxyRequestUrl;
     try {
@@ -284,6 +294,7 @@ export async function fetchFeedXml({
         logger,
         lookup,
         maxBytes: maxResponseBytes,
+        redact,
         requestLabel: 'Feed proxy',
         requestUrl: proxyRequestUrl,
         retryableStatuses: PROXY_RETRYABLE_HTTP_STATUSES,

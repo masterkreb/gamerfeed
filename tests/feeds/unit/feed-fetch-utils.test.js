@@ -436,3 +436,61 @@ test('ohne konfigurierte Proxy-Adresse bleibt es beim Direktabruf', async () => 
     assert.equal(result.proxyError, null);
     assert.equal(fetcher.calls.length, 1);
 });
+
+// === Gebundener Transport (O2a-Review) ===
+
+test('ohne injiziertes fetchImpl bleibt der gebundene Standardtransport zuständig', async () => {
+    // Eine Vorgabe wie `fetchImpl = globalThis.fetch` würde immer ein fetchImpl
+    // an fetchWithOutboundPolicy übergeben und dessen DNS-gebundenen Transport
+    // stilllegen - genau den Schutz gegen DNS-Rebinding.
+    const originalFetch = globalThis.fetch;
+    let globaleAufrufe = 0;
+    globalThis.fetch = async () => {
+        globaleAufrufe += 1;
+        throw new Error('globalThis.fetch darf hier nicht verwendet werden');
+    };
+
+    try {
+        const aufgeloesteHosts = [];
+        const result = await fetchFeedXml({
+            feedName: 'Example',
+            feedUrl: FEED_URL,
+            logger: null,
+            // Der Resolver meldet ein gesperrtes Ziel: die Policy lehnt ab,
+            // bevor überhaupt eine Verbindung aufgebaut wird.
+            lookup: async hostname => {
+                aufgeloesteHosts.push(hostname);
+                return [{ address: '10.0.0.5', family: 4 }];
+            },
+            retryDelayMs: 1,
+            sleep: async () => {},
+        });
+
+        assert.equal(globaleAufrufe, 0, 'globalThis.fetch wurde verwendet');
+        assert.ok(aufgeloesteHosts.length > 0, 'der eigene Resolver wird befragt');
+        assert.equal(result.xmlString, null);
+        assert.match(result.lastError, /gesperrte Adresse/);
+    } finally {
+        globalThis.fetch = originalFetch;
+    }
+});
+
+test('ein injiziertes fetchImpl wird weiterhin verwendet', async () => {
+    const originalFetch = globalThis.fetch;
+    let globaleAufrufe = 0;
+    globalThis.fetch = async () => {
+        globaleAufrufe += 1;
+        throw new Error('globalThis.fetch darf hier nicht verwendet werden');
+    };
+
+    try {
+        const fetcher = createFetchSequence(response(RSS_XML));
+        const result = await fetchTestFeed({ fetchImpl: fetcher.fetchImpl });
+
+        assert.equal(result.xmlString, RSS_XML);
+        assert.equal(fetcher.calls.length, 1);
+        assert.equal(globaleAufrufe, 0);
+    } finally {
+        globalThis.fetch = originalFetch;
+    }
+});
