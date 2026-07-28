@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { normalizeContentUrl } from '../shared/url-policy.js';
 import { sanitizeErrorMessage } from '../shared/feed-health-model.js';
 import { createFeedRunRecorder } from './feed-run-recorder.js';
+import { readLimitedResponseText } from './limited-response.js';
 import { fetchWithOutboundPolicy } from './outbound-policy.js';
 import {
     chooseMergedImageUrl,
@@ -79,7 +80,18 @@ function getFetchUrlForFeed(feed) {
     return feed.url;
 }
 
-export async function getOgImageFromUrl(url, sourceName, { fetchImpl, lookup } = {}) {
+// Eine Artikelseite ist HTML mit ein paar Meta-Tags. Alles darueber hinaus ist
+// fuer die Bildsuche wertlos und nur ein Speicherrisiko.
+export const HTML_SCRAPE_TIMEOUT_MS = 5000;
+export const MAX_HTML_RESPONSE_BYTES = 2 * 1024 * 1024;
+
+export async function getOgImageFromUrl(url, sourceName, {
+    fetchImpl,
+    lookup,
+    logger = console,
+    maxBytes = MAX_HTML_RESPONSE_BYTES,
+    timeoutMs = HTML_SCRAPE_TIMEOUT_MS,
+} = {}) {
     const fetchAttempts = [
         {
             name: 'direct',
@@ -91,21 +103,28 @@ export async function getOgImageFromUrl(url, sourceName, { fetchImpl, lookup } =
     const scrapeStart = Date.now();
     for (const attempt of fetchAttempts) {
         const attemptStart = Date.now();
+        let response = null;
         try {
-            console.log(`      -> Trying image fetch: ${attempt.name}`);
+            logger.log(`      -> Trying image fetch: ${attempt.name}`);
             // Artikelseiten stammen aus Feed-Inhalten und sind damit fremde
-            // Eingaben: derselbe Schutz wie beim Feed-Abruf selbst.
-            const response = await fetchWithOutboundPolicy(attempt.requestUrl, {
+            // Eingaben: derselbe Schutz wie beim Feed-Abruf selbst. Der
+            // Abort-Timeout begrenzt zusaetzlich eine haengende Gegenstelle.
+            response = await fetchWithOutboundPolicy(attempt.requestUrl, {
                 ...attempt.options,
                 fetchImpl,
                 lookup,
-                signal: AbortSignal.timeout(5000),
+                signal: AbortSignal.timeout(timeoutMs),
             });
             const attemptDuration = Date.now() - attemptStart;
-            console.log(`         ${attempt.name} responded with ${response.status} in ${formatDuration(attemptDuration)}`);
-            if (!response.ok) continue;
+            logger.log(`         ${attempt.name} responded with ${response.status} in ${formatDuration(attemptDuration)}`);
+            if (!response.ok) {
+                await response.body?.cancel?.().catch(() => {});
+                continue;
+            }
 
-            const html = await response.text();
+            // Begrenzt gelesen: eine Seite ohne Content-Length koennte sonst
+            // beliebig lange streamen.
+            const html = await readLimitedResponseText(response, maxBytes);
             const doc = new DOMParser().parseFromString(html, 'text/html');
 
             let imageUrl = null;
@@ -128,7 +147,7 @@ export async function getOgImageFromUrl(url, sourceName, { fetchImpl, lookup } =
             }
 
             if (imageUrl) {
-                console.log(`         ✅ Found meta image via ${attempt.name} in ${formatDuration(Date.now() - scrapeStart)}`);
+                logger.log(`         ✅ Found meta image via ${attempt.name} in ${formatDuration(Date.now() - scrapeStart)}`);
                 // Auch gescrapte Adressen unterliegen der Ausgabe-Policy.
                 return normalizeContentUrl(imageUrl, { base: url });
             }
@@ -140,7 +159,7 @@ export async function getOgImageFromUrl(url, sourceName, { fetchImpl, lookup } =
                 if (src) {
                     const videoIdMatch = src.match(/embed\/([^/?]+)/);
                     if (videoIdMatch && videoIdMatch[1]) {
-                        console.log(`         ✅ Found YouTube iframe image via ${attempt.name} in ${formatDuration(Date.now() - scrapeStart)}`);
+                        logger.log(`         ✅ Found YouTube iframe image via ${attempt.name} in ${formatDuration(Date.now() - scrapeStart)}`);
                         return `https://img.youtube.com/vi/${videoIdMatch[1]}/hqdefault.jpg`;
                     }
                 }
@@ -153,17 +172,20 @@ export async function getOgImageFromUrl(url, sourceName, { fetchImpl, lookup } =
                 if (href) {
                     const videoIdMatch = href.match(/[?&]v=([^&]+)/);
                     if (videoIdMatch && videoIdMatch[1]) {
-                        console.log(`         ✅ Found YouTube link image via ${attempt.name} in ${formatDuration(Date.now() - scrapeStart)}`);
+                        logger.log(`         ✅ Found YouTube link image via ${attempt.name} in ${formatDuration(Date.now() - scrapeStart)}`);
                         return `https://img.youtube.com/vi/${videoIdMatch[1]}/hqdefault.jpg`;
                     }
                 }
             }
-            console.log(`         ⚠️  No image candidate via ${attempt.name}`);
-        } catch (e) {
-            console.log(`         ❌ ${attempt.name} failed after ${formatDuration(Date.now() - attemptStart)}: ${e.message}`);
+            logger.log(`         ⚠️  No image candidate via ${attempt.name}`);
+        } catch (error) {
+            // Auch hier gilt: der Rumpf wird geschlossen, damit eine
+            // abgebrochene Antwort keine offene Verbindung hinterlaesst.
+            await response?.body?.cancel?.().catch(() => {});
+            logger.log(`         ❌ ${attempt.name} failed after ${formatDuration(Date.now() - attemptStart)}: ${redactMessage(error?.message ?? String(error))}`);
         }
     }
-    console.log(`      -> No image found after ${formatDuration(Date.now() - scrapeStart)} across all image fetch attempts`);
+    logger.log(`      -> No image found after ${formatDuration(Date.now() - scrapeStart)} across all image fetch attempts`);
     return null;
 }
 
