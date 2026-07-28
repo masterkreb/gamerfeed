@@ -950,6 +950,9 @@ export async function main({
     groqFetch,
     exit = code => process.exit(code),
     logger = console,
+    // Die Hoeflichkeitspausen zwischen Abrufen sind injizierbar, damit Tests den
+    // gesamten Lauf ohne echte Wartezeit durchspielen koennen.
+    sleep = ms => new Promise(resolve => setTimeout(resolve, ms)),
 } = {}) {
     // === Vorpruefung: laeuft vor jeder Verbindung ===
     //
@@ -1081,6 +1084,7 @@ export async function main({
                 lookup,
                 proxyTimeoutMs: FEED_PROXY_TIMEOUT_MS,
                 redact: redactMessage,
+                sleep,
             });
 
             // Minimale Feed-Dauer: sie beantwortet spaeter, welche Quelle das
@@ -1148,7 +1152,7 @@ export async function main({
                     message: redactMessage(`Fetch failed. Error: ${lastError}`),
                 };
             }
-            await new Promise(r => setTimeout(r, 200));
+            await sleep(200);
         }
 
         durations.feedFetchMs = Date.now() - feedFetchStartMs;
@@ -1203,7 +1207,7 @@ export async function main({
                         scrapeStats.missing++;
                         logger.log(`      ⚠️  No image found, using placeholder (${formatDuration(articleScrapeDuration)})`);
                     }
-                    await new Promise(r => setTimeout(r, 500));
+                    await sleep(500);
                 } catch (error) {
                     const articleScrapeDuration = Date.now() - articleScrapeStart;
                     scrapeStats.totalMs += articleScrapeDuration;
@@ -1253,7 +1257,7 @@ export async function main({
                         backfillStats.missing++;
                         logger.log(`      ⚠️  Still no image found (${formatDuration(articleBackfillDuration)})`);
                     }
-                    await new Promise(r => setTimeout(r, 500));
+                    await sleep(500);
                 } catch (error) {
                     const articleBackfillDuration = Date.now() - articleBackfillStart;
                     backfillStats.totalMs += articleBackfillDuration;
