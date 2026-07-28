@@ -21,7 +21,9 @@ npx playwright install chromium
 
 | Pfad | Zweck |
 |---|---|
-| `playwright.config.ts` | Runner, Preview-Server, Artefakt-Regeln |
+| `playwright.config.ts` | Runner und Artefakt-Regeln |
+| `tests/e2e/global-setup.ts` | startet den Preview-Server |
+| `tests/e2e/global-teardown.ts` | schließt ihn wieder |
 | `tests/e2e/fixtures.ts` | API-Mocks und Netzwerkschutz |
 | `tests/e2e/*.spec.ts` | die Abnahmen selbst |
 
@@ -31,10 +33,20 @@ startet `npm test` den Browser nicht versehentlich mit.
 
 ## Prozessende unter Windows
 
-Der Build läuft im `test:e2e`-Script, **nicht** in `webServer.command`, und Vite
-wird direkt als Node-Prozess gestartet statt über `npm` oder `npx`. Diese
-Wrapper hinterließen unter Windows Enkelprozesse, die das Testende überlebten –
-`npm run test:e2e` beendete sich dann nicht mehr selbst.
+Der Preview-Server wird **programmgesteuert** in `globalSetup` gestartet und in
+`globalTeardown` geschlossen, beides im Playwright-Hauptprozess. `webServer`
+wird nicht verwendet.
+
+Der Grund: Über `webServer.command` gestartete Prozesse überlebten unter Windows
+das Testende, sodass `npm run test:e2e` nicht zurückkehrte. Ein direkter
+Node-Aufruf statt `npm`/`npx` allein genügte dafür nicht – der Vite-Prozess
+blieb weiterhin aktiv. Erst der Start im selben Prozess löst das zuverlässig,
+weil `server.close()` keinen Kindprozess zurücklassen kann.
+
+Der Produktions-Build läuft im `test:e2e`-Script davor, nicht im Setup.
+
+Nachgemessen: drei aufeinanderfolgende Läufe, jeweils Exit 0 nach 11–13
+Sekunden und kein zurückbleibender `node.exe`-Prozess.
 
 ## Consent-Tests und Bot-Erkennung
 
