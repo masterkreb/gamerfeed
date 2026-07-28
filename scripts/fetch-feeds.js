@@ -43,7 +43,7 @@ function decodeHtmlEntities(text) {
     return decoded;
 }
 
-function stripHtmlAndTruncate(html, length = 150) {
+function stripHtmlAndTruncate(html, length = 150, { logger = console } = {}) {
     if (!html) return '';
     try {
         let text = decodeHtmlEntities(html)
@@ -58,8 +58,12 @@ function stripHtmlAndTruncate(html, length = 150) {
             return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
         }
         return stripped;
-    } catch (e) {
-        console.warn('Error stripping HTML:', e);
+    } catch (error) {
+        // Niemals das rohe Fehlerobjekt: sein Text kann den Artikelinhalt
+        // enthalten, der hier gerade verarbeitet wird.
+        logger.warn(`   ⚠️  Zusammenfassung konnte nicht gekürzt werden: ${redactMessage(
+            error instanceof Error ? error.message : String(error),
+        )}`);
         const basicStripped = (html.replace(/<[^>]+>/g, '') || '').substring(0, length);
         return basicStripped + (basicStripped.length === length ? '...' : '');
     }
@@ -219,7 +223,7 @@ function getFirstElementByLocalName(root, localName) {
  * @param {object} feed
  * @returns {{ articles: object[], skipped: { total: number, reasons: Record<string, number> } }}
  */
-export function parseFeedItems(xmlString, feed) {
+export function parseFeedItems(xmlString, feed, { logger = console } = {}) {
     if (!isFeedXml(xmlString)) {
         throw new Error(`Response is not a valid RSS or Atom feed: ${feed.url}`);
     }
@@ -228,17 +232,31 @@ export function parseFeedItems(xmlString, feed) {
     const doc = parser.parseFromString(xmlString, "text/xml");
     const errorNode = doc.querySelector("parsererror");
     if (errorNode) {
-        console.error(`XML Parsing Error for ${feed.url}:`, errorNode.textContent);
+        // Der Parserfehler kann Feedinhalte mitfuehren; nur der Name der Quelle
+        // ist hier von Nutzen.
+        logger.error(`   ❌ XML Parsing Error für ${feed?.name ?? 'Feed'}`);
         throw new Error(`Failed to parse XML for feed: ${feed.url}`);
     }
 
     const articles = [];
-    // Abgelehnte Items werden gesammelt und einmal gebuendelt gemeldet, statt
-    // pro Item eine Zeile ins Log zu schreiben. Gespeichert wird nur der Grund -
-    // Titel, Adressen und Inhalte gehoeren nicht in eine Fehlerauswertung.
+    // Zwei getrennte Zaehler, weil es zwei verschiedene Aussagen sind:
+    //
+    // - `skipped`  = das Element wurde **nicht** uebernommen;
+    // - `warnings` = das Element ist drin, aber ein Feld war unbrauchbar
+    //                (bisher einzig: eine abgelehnte Bildadresse).
+    //
+    // Vorher liefen beide in einen Zaehler. Der meldete dann „verworfen" fuer
+    // Artikel, die sehr wohl im Cache landeten.
+    //
+    // Gespeichert wird nur der Grund - Titel, Adressen und Inhalte gehoeren
+    // nicht in eine Fehlerauswertung.
     const skippedReasons = {};
+    const warningReasons = {};
     const skip = reason => {
         skippedReasons[reason] = (skippedReasons[reason] ?? 0) + 1;
+    };
+    const warn = reason => {
+        warningReasons[reason] = (warningReasons[reason] ?? 0) + 1;
     };
     const isAtom = getElementLocalName(doc.documentElement) === 'feed';
     const itemNodes = getElementsByLocalName(doc, isAtom ? 'entry' : 'item');
@@ -291,7 +309,7 @@ export function parseFeedItems(xmlString, feed) {
         const description = getFirstElementByLocalName(node, 'description')?.textContent
             || getFirstElementByLocalName(node, 'summary')?.textContent
             || '';
-        const summary = stripHtmlAndTruncate(description);
+        const summary = stripHtmlAndTruncate(description, 150, { logger });
 
 
         // --- More robust Image and Content Extraction ---
@@ -405,7 +423,9 @@ export function parseFeedItems(xmlString, feed) {
         // laesst den Artikel bestehen; er bekommt spaeter einen Platzhalter.
         const normalizedImageUrl = normalizeContentUrl(imageUrl, { base: link });
         if (imageUrl && !normalizedImageUrl) {
-            skip('invalid_image');
+            // Der Artikel bleibt erhalten und bekommt spaeter einen Platzhalter -
+            // das ist keine Verwerfung.
+            warn('invalid_image');
         }
         if (normalizedImageUrl && !isKnownNonArticleImageUrl(normalizedImageUrl, feed)) {
             try {
@@ -422,7 +442,7 @@ export function parseFeedItems(xmlString, feed) {
                         url.searchParams.delete('h');
                         processedUrl = url.toString();
                     } catch (e) {
-                        console.warn(`Could not parse image URL for optimization: ${processedUrl}`);
+                        logger.warn(`Could not parse image URL for optimization: ${processedUrl}`);
                     }
                 }
                 else if (feedName === 'GameStar' && hostname.includes('cgames.de')) {
@@ -444,7 +464,7 @@ export function parseFeedItems(xmlString, feed) {
                 // Die quellenspezifische Optimierung ist fehlgeschlagen; die
                 // bereits normalisierte Adresse bleibt gueltig.
                 finalImageUrl = normalizedImageUrl;
-                console.warn(`Could not process image URL '${normalizedImageUrl}': ${e.message}`);
+                logger.warn(`   ⚠️  Bildadresse konnte nicht optimiert werden: ${redactMessage(e?.message ?? String(e))}`);
             }
         }
 
@@ -468,15 +488,27 @@ export function parseFeedItems(xmlString, feed) {
       }
     });
 
-    const skippedTotal = Object.values(skippedReasons).reduce((sum, count) => sum + count, 0);
+    const countReasons = reasons => Object.values(reasons).reduce((sum, count) => sum + count, 0);
+    const describeReasons = reasons => Object.entries(reasons)
+        .map(([reason, count]) => `${reason}: ${count}`)
+        .join(', ');
+
+    const skippedTotal = countReasons(skippedReasons);
+    const warningTotal = countReasons(warningReasons);
+    const feedLabel = feed?.name ?? 'Feed';
+
     if (skippedTotal > 0) {
-        const summary = Object.entries(skippedReasons)
-            .map(([reason, count]) => `${reason}: ${count}`)
-            .join(', ');
-        console.warn(`   ⚠️  ${skippedTotal} Element(e) aus ${feed?.name ?? 'Feed'} verworfen (${summary})`);
+        logger.warn(`   ⚠️  ${skippedTotal} Element(e) aus ${feedLabel} verworfen (${describeReasons(skippedReasons)})`);
+    }
+    if (warningTotal > 0) {
+        logger.warn(`   ⚠️  ${warningTotal} Element(e) aus ${feedLabel} mit Feldwarnung übernommen (${describeReasons(warningReasons)})`);
     }
 
-    return { articles, skipped: { total: skippedTotal, reasons: skippedReasons } };
+    return {
+        articles,
+        skipped: { total: skippedTotal, reasons: skippedReasons },
+        warnings: { total: warningTotal, reasons: warningReasons },
+    };
 }
 
 /**
@@ -489,8 +521,8 @@ export function parseFeedItems(xmlString, feed) {
  * @param {object} feed
  * @returns {object[]}
  */
-export function parseRssXml(xmlString, feed) {
-    return parseFeedItems(xmlString, feed).articles;
+export function parseRssXml(xmlString, feed, options) {
+    return parseFeedItems(xmlString, feed, options).articles;
 }
 
 
@@ -529,12 +561,12 @@ function normalizeTitle(title) {
 }
 
 // Generate daily trends using AI (sends titles to Groq)
-async function generateDailyTrendsWithGroq(articles, { groqApiKey, groqFetch } = {}) {
+async function generateDailyTrendsWithGroq(articles, { groqApiKey, groqFetch, logger = console } = {}) {
     // Der Schluessel kommt aus der Vorpruefung, nicht mehr direkt aus der
     // Umgebung: dort ist bereits entschieden, ob er brauchbar ist.
     const GROQ_API_KEY = groqApiKey;
     if (!GROQ_API_KEY) {
-        console.log('   ⚠️  GROQ_API_KEY not found. Skipping trend generation.');
+        logger.log('   ⚠️  GROQ_API_KEY not found. Skipping trend generation.');
         return null;
     }
 
@@ -571,17 +603,17 @@ async function generateDailyTrendsWithGroq(articles, { groqApiKey, groqFetch } =
     }
 
     if (duplicatesRemoved > 0) {
-        console.log(`   🔄 Removed ${duplicatesRemoved} duplicate articles from same publisher groups for trend analysis`);
+        logger.log(`   🔄 Removed ${duplicatesRemoved} duplicate articles from same publisher groups for trend analysis`);
     }
 
     // WICHTIG: Limit auf 80 Titel, um das 6k Token Limit von Groq zu vermeiden
     const MAX_TITLES = 80;
     const titles = deduplicatedArticles.map(a => a.title).slice(0, MAX_TITLES);
 
-    console.log(`   📊 Analyzing ${titles.length} unique titles (from ${filteredArticles.length} articles) for daily trends...`);
+    logger.log(`   📊 Analyzing ${titles.length} unique titles (from ${filteredArticles.length} articles) for daily trends...`);
 
     if (titles.length === 0) {
-        console.log('   ⚠️  No articles found for daily trends.');
+        logger.log('   ⚠️  No articles found for daily trends.');
         return [];
     }
 
@@ -614,6 +646,7 @@ Antworte NUR im JSON-Format, keine Erklärungen:
             { role: 'user', content: prompt },
         ],
         maxTokens: 1500,
+        logger,
         redact: redactMessage,
     });
 
@@ -623,7 +656,7 @@ Antworte NUR im JSON-Format, keine Erklärungen:
 
     const trends = parseGroqJsonContent(content);
     if (!Array.isArray(trends)) {
-        console.error('   ❌ Groq daily trends are not a JSON array. Skipping.');
+        logger.error('   ❌ Groq daily trends are not a JSON array. Skipping.');
         return null;
     }
 
@@ -634,12 +667,12 @@ Antworte NUR im JSON-Format, keine Erklärungen:
 }
 
 // Generate weekly trends by aggregating 7 days of archived daily trends
-async function generateWeeklyTrendsFromArchive({ groqApiKey, groqFetch, store } = {}) {
-    console.log('   🔄 Generating weekly trends from 7-day archive...');
+async function generateWeeklyTrendsFromArchive({ groqApiKey, groqFetch, logger = console, store } = {}) {
+    logger.log('   🔄 Generating weekly trends from 7-day archive...');
     const GROQ_API_KEY = groqApiKey;
 
     if (!GROQ_API_KEY) {
-        console.log('   ⚠️  GROQ_API_KEY not found. Skipping weekly trend aggregation.');
+        logger.log('   ⚠️  GROQ_API_KEY not found. Skipping weekly trend aggregation.');
         return null;
     }
 
@@ -660,11 +693,11 @@ async function generateWeeklyTrendsFromArchive({ groqApiKey, groqFetch, store } 
     }
 
     if (archiveData.length < 5) {
-        console.log(`   ⚠️  Not enough archive data found (${archiveData.length} entries). Need at least 5 days.`);
+        logger.log(`   ⚠️  Not enough archive data found (${archiveData.length} entries). Need at least 5 days.`);
         return null;
     }
 
-    console.log(`   📦 Loaded ${archiveData.length} trend entries from ${datesFound.length} days.`);
+    logger.log(`   📦 Loaded ${archiveData.length} trend entries from ${datesFound.length} days.`);
 
     // Calculate date range
     const dateRange = {
@@ -689,7 +722,7 @@ async function generateWeeklyTrendsFromArchive({ groqApiKey, groqFetch, store } 
         .sort((a, b) => b.articleCount - a.articleCount)
         .slice(0, 10); // Top 10 for Groq aggregation
 
-    console.log(`   📊 Aggregated ${Object.keys(aggregatedTrends).length} unique topics for this week.`);
+    logger.log(`   📊 Aggregated ${Object.keys(aggregatedTrends).length} unique topics for this week.`);
 
     // 3. Create prompt for Groq to generate summary of THIS WEEK's trends
     const trendsList = weeklyTrendsData.map((t, idx) => 
@@ -724,6 +757,7 @@ Antworte NUR im JSON-Format:
             { role: 'user', content: prompt },
         ],
         maxTokens: 2000,
+        logger,
         redact: redactMessage,
     });
 
@@ -733,7 +767,7 @@ Antworte NUR im JSON-Format:
 
     const weeklyData = parseGroqJsonContent(content);
     if (!weeklyData || typeof weeklyData !== 'object' || Array.isArray(weeklyData)) {
-        console.error('   ❌ Groq weekly trends are not a JSON object. Skipping.');
+        logger.error('   ❌ Groq weekly trends are not a JSON object. Skipping.');
         return null;
     }
 
@@ -745,14 +779,14 @@ Antworte NUR im JSON-Format:
     };
 }
 
-async function generateAndSaveTrends(articles, { groqApiKey, groqFetch, store } = {}) {
-    console.log('\n🧠 Starting Groq AI Trend Analysis...');
+async function generateAndSaveTrends(articles, { groqApiKey, groqFetch, logger = console, store } = {}) {
+    logger.log('\n🧠 Starting Groq AI Trend Analysis...');
 
     const GROQ_API_KEY = groqApiKey;
     if (!GROQ_API_KEY) {
         // Kein Schluessel heisst: keine Trends. Der Kernlauf ist davon
         // unberuehrt und bleibt erfolgreich.
-        console.log('   ⚠️  GROQ_API_KEY not configured. Skipping trend generation.');
+        logger.log('   ⚠️  GROQ_API_KEY not configured. Skipping trend generation.');
         return;
     }
 
@@ -774,7 +808,7 @@ async function generateAndSaveTrends(articles, { groqApiKey, groqFetch, store } 
         if (cachedDaily && cachedDaily.updatedAt) {
             const cacheAge = (now.getTime() - new Date(cachedDaily.updatedAt).getTime()) / 1000;
             if (cacheAge < DAILY_CACHE_TTL) {
-                console.log(`   📦 Daily trends cache still fresh (${Math.round(cacheAge / 60)} min old). Skipping.`);
+                logger.log(`   📦 Daily trends cache still fresh (${Math.round(cacheAge / 60)} min old). Skipping.`);
                 dailyTrends = cachedDaily.trends;
                 dailyUpdatedAt = cachedDaily.updatedAt;
                 shouldRegenerate = false;
@@ -782,27 +816,27 @@ async function generateAndSaveTrends(articles, { groqApiKey, groqFetch, store } 
         }
 
         if (shouldRegenerate) {
-            console.log('   🔄 Daily trends cache expired or missing. Regenerating...');
-            dailyTrends = await generateDailyTrendsWithGroq(articles, { groqApiKey, groqFetch });
+            logger.log('   🔄 Daily trends cache expired or missing. Regenerating...');
+            dailyTrends = await generateDailyTrendsWithGroq(articles, { groqApiKey, groqFetch, logger });
             dailyUpdatedAt = now.toISOString();
 
             if (dailyTrends) {
                 // Save to LIVE cache
                 await store.set('daily_trends', { trends: dailyTrends, updatedAt: dailyUpdatedAt });
-                console.log('   ✅ Daily trends saved to LIVE cache.');
+                logger.log('   ✅ Daily trends saved to LIVE cache.');
             }
         }
 
         // Archive today's trends (only once per day)
         if (dailyTrends && dailyTrends.length > 0 && !cachedArchive) {
             await store.set(`daily_trends_archive:${todayKey}`, { trends: dailyTrends, updatedAt: dailyUpdatedAt });
-            console.log(`   📁 Daily trends archived: daily_trends_archive:${todayKey}`);
+            logger.log(`   📁 Daily trends archived: daily_trends_archive:${todayKey}`);
         } else if (cachedArchive) {
-            console.log(`   📦 Archive for ${todayKey} already exists. Skipping archive.`);
+            logger.log(`   📦 Archive for ${todayKey} already exists. Skipping archive.`);
         }
 
     } catch (error) {
-        console.error('   ❌ Error processing daily trends:', error.message);
+        logger.error(`   ❌ Error processing daily trends: ${redactMessage(error?.message ?? String(error))}`);
     }
 
     // --- WEEKLY TRENDS (from archive aggregation) ---
@@ -813,14 +847,14 @@ async function generateAndSaveTrends(articles, { groqApiKey, groqFetch, store } 
         if (cachedWeekly && cachedWeekly.updatedAt) {
             const cacheAge = (now.getTime() - new Date(cachedWeekly.updatedAt).getTime()) / 1000;
             if (cacheAge < WEEKLY_CACHE_TTL) {
-                console.log(`   📦 Weekly trends cache still fresh (${Math.round(cacheAge / 60)} min old). Skipping.`);
+                logger.log(`   📦 Weekly trends cache still fresh (${Math.round(cacheAge / 60)} min old). Skipping.`);
                 shouldRegenerateWeekly = false;
             }
         }
 
         if (shouldRegenerateWeekly) {
-            console.log('   🔄 Weekly trends cache expired or missing. Regenerating from archive...');
-            const weeklyData = await generateWeeklyTrendsFromArchive({ groqApiKey, groqFetch, store });
+            logger.log('   🔄 Weekly trends cache expired or missing. Regenerating from archive...');
+            const weeklyData = await generateWeeklyTrendsFromArchive({ groqApiKey, groqFetch, logger, store });
 
             if (weeklyData && weeklyData.trends) {
                 await store.set('weekly_trends', {
@@ -829,17 +863,17 @@ async function generateAndSaveTrends(articles, { groqApiKey, groqFetch, store } 
                     dateRange: weeklyData.dateRange || null,
                     updatedAt: now.toISOString()
                 });
-                console.log('   ✅ Weekly trends with summary aggregated and saved to KV.');
+                logger.log('   ✅ Weekly trends with summary aggregated and saved to KV.');
             } else {
-                console.log('   ⚠️  Weekly trends could not be generated. Keeping old cache if exists.');
+                logger.log('   ⚠️  Weekly trends could not be generated. Keeping old cache if exists.');
             }
         }
 
     } catch (error) {
-        console.error('   ❌ Error processing weekly trends:', error.message);
+        logger.error(`   ❌ Error processing weekly trends: ${redactMessage(error?.message ?? String(error))}`);
     }
 
-    console.log('   🧠 Trend analysis complete!\n');
+    logger.log('   🧠 Trend analysis complete!\n');
 }
 
 // === HEARTBEAT (Roadmap O1) ===
@@ -965,14 +999,14 @@ export async function main({
                     }
                     return article;
                 });
-                console.log(`\n📦 Loaded ${oldArticles.length} articles from existing KV cache.`);
+                logger.log(`\n📦 Loaded ${oldArticles.length} articles from existing KV cache.`);
                 if (sanitizedImageCount > 0) {
-                    console.log(`   🧹 Replaced ${sanitizedImageCount} cached UI icon image(s) with placeholders.`);
+                    logger.log(`   🧹 Replaced ${sanitizedImageCount} cached UI icon image(s) with placeholders.`);
                 }
 
                 // If cache is empty (null or undefined), it's safe to start fresh.
             } else if (!cachedData) {
-                console.log(`ℹ️  No existing cache found in KV. Starting fresh.`);
+                logger.log(`ℹ️  No existing cache found in KV. Starting fresh.`);
 
                 // If cache exists but is NOT a valid array (corrupted), abort to prevent data loss.
             } else {
@@ -981,14 +1015,14 @@ export async function main({
         } catch (e) {
             // A failure to read the cache or finding a corrupted cache is a critical error.
             // Abort the script to prevent overwriting the existing cache with incomplete data.
-            console.error(`\n❌ CRITICAL: Failed to process Vercel KV cache. Aborting script to prevent data loss.`);
-            console.error(`   Error details: ${e.message}`);
+            logger.error(`\n❌ CRITICAL: Failed to process Vercel KV cache. Aborting script to prevent data loss.`);
+            logger.error(`   Error details: ${redactMessage(e?.message ?? String(e))}`);
             // Re-throw the error to ensure the GitHub Action fails and we get notified.
             throw e;
         }
 
         const { rows: feeds } = await database`SELECT * FROM feeds;`;
-        console.log(`\n🔍 Found ${feeds.length} feeds in database\n`);
+        logger.log(`\n🔍 Found ${feeds.length} feeds in database\n`);
         // Ab hier gilt die Feed-Liste als bekannt: eine leere Liste darf den
         // gespeicherten Status jetzt leeren, ein Abbruch davor nicht.
         recorder.markFeedListLoaded();
@@ -1008,9 +1042,9 @@ export async function main({
 
         for (const feed of feeds) {
             const feedUrl = getFetchUrlForFeed(feed);
-            console.log(`📡 Fetching: ${feed.name}...`);
+            logger.log(`📡 Fetching: ${feed.name}...`);
             if (feedUrl !== feed.url) {
-                console.log(`   ℹ️  Using normalized feed URL for ${feed.name}: ${feedUrl}`);
+                logger.log(`   ℹ️  Using normalized feed URL for ${feed.name}: ${feedUrl}`);
             }
 
             const feedStartMs = Date.now();
@@ -1022,8 +1056,10 @@ export async function main({
                 feedProxyUrl,
                 feedUrl,
                 fetchImpl,
+                logger,
                 lookup,
                 proxyTimeoutMs: FEED_PROXY_TIMEOUT_MS,
+                redact: redactMessage,
             });
 
             // Minimale Feed-Dauer: sie beantwortet spaeter, welche Quelle das
@@ -1040,19 +1076,25 @@ export async function main({
 
             if (xmlString) {
                 try {
-                    const { articles: feedArticles, skipped } = parseFeedItems(xmlString, feed);
+                    const { articles: feedArticles, skipped, warnings } = parseFeedItems(xmlString, feed, { logger });
                     // Nur Anzahl und Grund - keine Titel, Adressen oder Inhalte.
+                    // Verworfene Elemente und Feldwarnungen bleiben getrennt:
+                    // ein Artikel mit abgelehntem Bild ist im Cache, nur ohne Bild.
+                    const describeCounts = reasons => Object.entries(reasons)
+                        .map(([reason, count]) => `${reason}: ${count}`)
+                        .join(', ');
                     const skippedNote = skipped.total > 0
-                        ? ` ${skipped.total} item(s) skipped (${Object.entries(skipped.reasons)
-                            .map(([reason, count]) => `${reason}: ${count}`)
-                            .join(', ')}).`
+                        ? ` ${skipped.total} item(s) skipped (${describeCounts(skipped.reasons)}).`
+                        : '';
+                    const warningNote = warnings.total > 0
+                        ? ` ${warnings.total} item(s) kept with field warnings (${describeCounts(warnings.reasons)}).`
                         : '';
 
                     if (feedArticles.length === 0) {
                         feedHealthStatus[feed.id] = {
                             ...baseEntry,
                             status: 'warning',
-                            message: `Feed fetched successfully, but no articles were found.${skippedNote}`,
+                            message: `Feed fetched successfully, but no articles were found.${skippedNote}${warningNote}`,
                             articleCount: 0,
                             skippedItemCount: skipped.total,
                         };
@@ -1060,17 +1102,17 @@ export async function main({
                         feedHealthStatus[feed.id] = {
                             ...baseEntry,
                             status: 'success',
-                            message: `Successfully fetched and parsed ${feedArticles.length} articles.${skippedNote}`,
+                            message: `Successfully fetched and parsed ${feedArticles.length} articles.${skippedNote}${warningNote}`,
                             lastSuccessAt: attemptAt,
                             articleCount: feedArticles.length,
                             skippedItemCount: skipped.total,
                         };
                     }
                     newlyFetchedArticles.push(...feedArticles);
-                    console.log(`   ✅ Parsed ${feedArticles.length} articles from ${feed.name} (${formatDuration(feedDurationMs)})${skippedNote}`);
+                    logger.log(`   ✅ Parsed ${feedArticles.length} articles from ${feed.name} (${formatDuration(feedDurationMs)})${skippedNote}${warningNote}`);
                 } catch (parseError) {
                     const message = parseError instanceof Error ? parseError.message : 'Unknown parse error';
-                    console.error(`   ❌ Error parsing ${feed.name}: ${message}`);
+                    logger.error(`   ❌ Error parsing ${feed.name}: ${redactMessage(message)}`);
                     feedHealthStatus[feed.id] = {
                         ...baseEntry,
                         status: 'error',
@@ -1078,7 +1120,7 @@ export async function main({
                     };
                 }
             } else {
-                console.error(`   ❌ Fetch failed for ${feed.name}. Error: ${lastError}`);
+                logger.error(`   ❌ Fetch failed for ${feed.name}. Error: ${redactMessage(String(lastError))}`);
                 feedHealthStatus[feed.id] = {
                     ...baseEntry,
                     status: 'error',
@@ -1089,7 +1131,7 @@ export async function main({
         }
 
         durations.feedFetchMs = Date.now() - feedFetchStartMs;
-        console.log(`\n📰 Total new articles fetched: ${newlyFetchedArticles.length} (${formatDuration(durations.feedFetchMs)})`);
+        logger.log(`\n📰 Total new articles fetched: ${newlyFetchedArticles.length} (${formatDuration(durations.feedFetchMs)})`);
 
         const cachedArticlesByIdentity = new Map();
         oldArticles.forEach(article => {
@@ -1116,39 +1158,39 @@ export async function main({
             }
         });
         if (reusedCachedImageCount > 0) {
-            console.log(`\n♻️  Reused ${reusedCachedImageCount} valid cached image(s); skipped redundant page scraping.`);
+            logger.log(`\n♻️  Reused ${reusedCachedImageCount} valid cached image(s); skipped redundant page scraping.`);
         }
 
         const articlesNeedingScraping = newlyFetchedArticles.filter(a => a.needsScraping);
         const imageScrapeStartMs = Date.now();
         if (articlesNeedingScraping.length > 0) {
-            console.log(`\n🔎 Scraping images for ${articlesNeedingScraping.length} articles...\n`);
+            logger.log(`\n🔎 Scraping images for ${articlesNeedingScraping.length} articles...\n`);
             const scrapeStats = { found: 0, missing: 0, failed: 0, totalMs: 0 };
             for (const article of articlesNeedingScraping) {
                 const articleScrapeStart = Date.now();
                 try {
-                    console.log(`   🖼️  Scraping: ${article.source} - ${article.title.substring(0, 40)}...`);
-                    const scrapedImage = await getOgImageFromUrl(article.link, article.source, { fetchImpl, lookup });
+                    logger.log(`   🖼️  Scraping: ${article.source} - ${article.title.substring(0, 40)}...`);
+                    const scrapedImage = await getOgImageFromUrl(article.link, article.source, { fetchImpl, logger, lookup });
                     const articleScrapeDuration = Date.now() - articleScrapeStart;
                     scrapeStats.totalMs += articleScrapeDuration;
                     if (scrapedImage) {
                         article.imageUrl = scrapedImage;
                         article.needsScraping = false;
                         scrapeStats.found++;
-                        console.log(`      ✅ Found image (${formatDuration(articleScrapeDuration)})`);
+                        logger.log(`      ✅ Found image (${formatDuration(articleScrapeDuration)})`);
                     } else {
                         scrapeStats.missing++;
-                        console.log(`      ⚠️  No image found, using placeholder (${formatDuration(articleScrapeDuration)})`);
+                        logger.log(`      ⚠️  No image found, using placeholder (${formatDuration(articleScrapeDuration)})`);
                     }
                     await new Promise(r => setTimeout(r, 500));
                 } catch (error) {
                     const articleScrapeDuration = Date.now() - articleScrapeStart;
                     scrapeStats.totalMs += articleScrapeDuration;
                     scrapeStats.failed++;
-                    console.error(`      ❌ Scraping failed after ${formatDuration(articleScrapeDuration)}: ${error.message}`);
+                    logger.error(`      ❌ Scraping failed after ${formatDuration(articleScrapeDuration)}: ${redactMessage(error?.message ?? String(error))}`);
                 }
             }
-            console.log(`\n🔎 Image scraping summary: ${scrapeStats.found} found, ${scrapeStats.missing} placeholders, ${scrapeStats.failed} failed in ${formatDuration(scrapeStats.totalMs)} active scraping time.\n`);
+            logger.log(`\n🔎 Image scraping summary: ${scrapeStats.found} found, ${scrapeStats.missing} placeholders, ${scrapeStats.failed} failed in ${formatDuration(scrapeStats.totalMs)} active scraping time.\n`);
         }
         durations.imageScrapeMs = Date.now() - imageScrapeStartMs;
 
@@ -1173,38 +1215,38 @@ export async function main({
 
         const imageBackfillStartMs = Date.now();
         if (imageBackfillArticles.length > 0) {
-            console.log(`\n🧩 Backfilling images for ${imageBackfillArticles.length} old articles with missing or invalid images...\n`);
+            logger.log(`\n🧩 Backfilling images for ${imageBackfillArticles.length} old articles with missing or invalid images...\n`);
             const backfillStats = { found: 0, missing: 0, failed: 0, totalMs: 0 };
             for (const article of imageBackfillArticles) {
                 const articleBackfillStart = Date.now();
                 try {
-                    console.log(`   🖼️  Backfill: ${article.source} - ${article.title.substring(0, 40)}...`);
-                    const scrapedImage = await getOgImageFromUrl(article.link, article.source, { fetchImpl, lookup });
+                    logger.log(`   🖼️  Backfill: ${article.source} - ${article.title.substring(0, 40)}...`);
+                    const scrapedImage = await getOgImageFromUrl(article.link, article.source, { fetchImpl, logger, lookup });
                     const articleBackfillDuration = Date.now() - articleBackfillStart;
                     backfillStats.totalMs += articleBackfillDuration;
                     if (scrapedImage) {
                         article.imageUrl = scrapedImage;
                         backfillStats.found++;
-                        console.log(`      ✅ Backfilled image (${formatDuration(articleBackfillDuration)})`);
+                        logger.log(`      ✅ Backfilled image (${formatDuration(articleBackfillDuration)})`);
                     } else {
                         backfillStats.missing++;
-                        console.log(`      ⚠️  Still no image found (${formatDuration(articleBackfillDuration)})`);
+                        logger.log(`      ⚠️  Still no image found (${formatDuration(articleBackfillDuration)})`);
                     }
                     await new Promise(r => setTimeout(r, 500));
                 } catch (error) {
                     const articleBackfillDuration = Date.now() - articleBackfillStart;
                     backfillStats.totalMs += articleBackfillDuration;
                     backfillStats.failed++;
-                    console.error(`      ❌ Backfill failed after ${formatDuration(articleBackfillDuration)}: ${error.message}`);
+                    logger.error(`      ❌ Backfill failed after ${formatDuration(articleBackfillDuration)}: ${redactMessage(error?.message ?? String(error))}`);
                 }
             }
-            console.log(`\n🧩 Image backfill summary: ${backfillStats.found} found, ${backfillStats.missing} still missing, ${backfillStats.failed} failed in ${formatDuration(backfillStats.totalMs)} active backfill time.\n`);
+            logger.log(`\n🧩 Image backfill summary: ${backfillStats.found} found, ${backfillStats.missing} still missing, ${backfillStats.failed} failed in ${formatDuration(backfillStats.totalMs)} active backfill time.\n`);
         } else {
-            console.log(`\n🧩 No old articles need image backfill.\n`);
+            logger.log(`\n🧩 No old articles need image backfill.\n`);
         }
         durations.imageBackfillMs = Date.now() - imageBackfillStartMs;
 
-        console.log('\n🔄 Merging, pruning, and sorting articles...');
+        logger.log('\n🔄 Merging, pruning, and sorting articles...');
         const uniqueArticlesMap = new Map();
         [...oldArticles, ...newlyFetchedArticles].forEach(article => {
             if (article.id && article.title && article.publicationDate) {
@@ -1226,31 +1268,31 @@ export async function main({
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - ARTICLE_RETENTION_DAYS);
         const articlesToKeep = Array.from(uniqueArticlesMap.values()).filter(article => new Date(article.publicationDate) >= cutoffDate);
-        console.log(`   - Total unique articles: ${uniqueArticlesMap.size}`);
-        console.log(`   - Articles after pruning (older than ${ARTICLE_RETENTION_DAYS} days): ${articlesToKeep.length}`);
+        logger.log(`   - Total unique articles: ${uniqueArticlesMap.size}`);
+        logger.log(`   - Articles after pruning (older than ${ARTICLE_RETENTION_DAYS} days): ${articlesToKeep.length}`);
         
         // Sort by publication date (newest first)
         let sortedArticles = articlesToKeep.sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
         
         // Limit to MAX_ARTICLES to prevent Vercel KV size limit (10 MB)
         if (sortedArticles.length > MAX_ARTICLES) {
-            console.log(`   ⚠️  Limiting from ${sortedArticles.length} to ${MAX_ARTICLES} articles (KV size limit)`);
+            logger.log(`   ⚠️  Limiting from ${sortedArticles.length} to ${MAX_ARTICLES} articles (KV size limit)`);
             sortedArticles = sortedArticles.slice(0, MAX_ARTICLES);
         }
 
-        console.log('\n💾 Saving data to Vercel KV...');
+        logger.log('\n💾 Saving data to Vercel KV...');
         const publishStartMs = Date.now();
 
         // Save full cache
         await store.set('news_cache', sortedArticles);
-        console.log(`   ✅ Saved ${sortedArticles.length} articles to KV key 'news_cache'`);
+        logger.log(`   ✅ Saved ${sortedArticles.length} articles to KV key 'news_cache'`);
 
         // Save progressive loading caches for faster page load
         await store.set('news_cache_16', sortedArticles.slice(0, 16));
-        console.log(`   ⚡ Saved 16 preview articles to KV key 'news_cache_16'`);
+        logger.log(`   ⚡ Saved 16 preview articles to KV key 'news_cache_16'`);
 
         await store.set('news_cache_64', sortedArticles.slice(0, 64));
-        console.log(`   ⚡ Saved 64 medium articles to KV key 'news_cache_64'`);
+        logger.log(`   ⚡ Saved 64 medium articles to KV key 'news_cache_64'`);
 
         durations.publishMs = Date.now() - publishStartMs;
         durations.totalMs = Date.now() - runStartMs;
@@ -1265,7 +1307,7 @@ export async function main({
         });
 
         if (publish) {
-            console.log(
+            logger.log(
                 `   🫀 Kern-Publish ${publish.lastCorePublishAt}, `
                 + `Inhaltsstand ${publish.lastContentUpdateAt ?? 'unbekannt'}, `
                 + `Feeds ${publish.feeds.success}/${publish.feeds.total} mit Artikeln`,
@@ -1280,9 +1322,9 @@ export async function main({
         // hier und nicht im aeusseren catch.
         const trendsStartMs = Date.now();
         try {
-            await generateAndSaveTrends(sortedArticles, { groqApiKey: configuration.groqApiKey, groqFetch, store });
+            await generateAndSaveTrends(sortedArticles, { groqApiKey: configuration.groqApiKey, groqFetch, logger, store });
         } catch (trendsError) {
-            console.warn(`   ⚠️  Trendphase übersprungen: ${redactMessage(
+            logger.warn(`   ⚠️  Trendphase übersprungen: ${redactMessage(
                 trendsError instanceof Error ? trendsError.message : String(trendsError),
             )}`);
         }
@@ -1295,7 +1337,11 @@ export async function main({
         });
 
     } catch (error) {
-        logger.error('\n❌ Fatal error in fetch script:', error);
+        // Niemals das rohe Fehlerobjekt: ein SQL- oder KV-Fehler traegt
+        // Verbindungszeichenfolge samt Zugangsdaten im Text und im Stack.
+        logger.error(`\n❌ Fatal error in fetch script: ${redactMessage(
+            error instanceof Error ? error.message : String(error),
+        )}`);
 
         // Ein gescheiterter Versuch fasst den gespeicherten Kern-Publish nie an
         // und schreibt den Feed-Status nur, wenn die Feed-Liste geladen war.

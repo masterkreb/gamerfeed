@@ -11,7 +11,7 @@ const VOLLSTAENDIGE_ENV = Object.freeze({
     KV_REST_API_URL: 'https://kv.example',
     KV_REST_API_TOKEN: 'kv-token-geheim',
     GROQ_API_KEY: 'gsk-groq-geheim',
-    FEED_PROXY_URL: 'https://proxy.example/feed-proxy.php',
+    FEED_PROXY_URL: 'https://proxy.example/feed-proxy.php?key=proxy-geheim',
 });
 
 const FEED_ROW = Object.freeze({
@@ -387,6 +387,18 @@ test('ein SQL-Fehler beendet den Lauf fatal, ohne Secrets zu zeigen', async () =
 
 // === Secrets ===
 
+const ALLE_SECRETS = ['pg-geheim', 'kv-token-geheim', 'gsk-groq-geheim', 'proxy-geheim'];
+
+function assertKeineSecrets(spies, kontext) {
+    const gespeichert = JSON.stringify(spies.kvStore);
+    const protokoll = spies.logLines.join('\n');
+
+    for (const secret of ALLE_SECRETS) {
+        assert.doesNotMatch(gespeichert, new RegExp(secret), `${kontext}: ${secret} steht im Heartbeat`);
+        assert.doesNotMatch(protokoll, new RegExp(secret), `${kontext}: ${secret} steht im Log`);
+    }
+}
+
 test('kein Secret erscheint im gespeicherten Heartbeat oder im Log', async () => {
     const spies = createSpies();
 
@@ -401,13 +413,114 @@ test('kein Secret erscheint im gespeicherten Heartbeat oder im Log', async () =>
         }),
     });
 
-    const gespeichert = JSON.stringify(spies.kvStore);
-    const protokoll = spies.logLines.join('\n');
+    assertKeineSecrets(spies, 'Feed- und Groq-Fehler');
+});
 
-    for (const secret of ['pg-geheim', 'kv-token-geheim', 'gsk-groq-geheim']) {
-        assert.doesNotMatch(gespeichert, new RegExp(secret), `${secret} steht im Heartbeat`);
-        assert.doesNotMatch(protokoll, new RegExp(secret), `${secret} steht im Log`);
+test('ein SQL-Fehler mit Verbindungszeichenfolge landet in keiner Ausgabe', async () => {
+    // Der gefährlichste Fall: POSTGRES_URL steht vollständig im Fehlertext und
+    // wurde vorher als rohes Error-Objekt geloggt.
+    const spies = createSpies({
+        sqlError: new Error('connect ECONNREFUSED postgres://nutzer:pg-geheim@db.example/main'),
+    });
+
+    await runMain(spies, { fetchImpl: feedFetch(spies) });
+
+    assert.deepEqual(spies.exitCodes, [1]);
+    assertKeineSecrets(spies, 'SQL-Fehler');
+    assert.ok(
+        spies.logLines.some(line => line.includes('Fatal error in fetch script')),
+        'der Abbruch wird trotzdem gemeldet',
+    );
+});
+
+test('ein KV-Lesefehler landet in keiner Ausgabe', async () => {
+    const spies = createSpies();
+    spies.store.get = async () => {
+        throw new Error('KV offline: https://kv.example/pipeline?token=kv-token-geheim');
+    };
+
+    await runMain(spies, { fetchImpl: feedFetch(spies) });
+
+    assert.deepEqual(spies.exitCodes, [1]);
+    assertKeineSecrets(spies, 'KV-Lesefehler');
+});
+
+test('ein Proxyfehler einer freigegebenen Quelle landet in keiner Ausgabe', async () => {
+    // Der Retry-Pfad in feed-fetch-utils.js loggte den Fehlertext bisher roh.
+    const spies = createSpies({ feeds: [GAMEPRO_ROW] });
+
+    await runMain(spies, {
+        fetchImpl: spies.makeFetchImpl(async url => {
+            if (url.includes('proxy.example')) {
+                throw new Error('Proxy kaputt: https://proxy.example/x.php?key=proxy-geheim');
+            }
+            return new Response('Forbidden', { status: 403 });
+        }),
+    });
+
+    assertKeineSecrets(spies, 'Proxyfehler');
+});
+
+test('ein Scrape-Fehler landet in keiner Ausgabe', async () => {
+    const spies = createSpies();
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>Quelle</title>
+<item><title>Ohne Bild</title><link>https://www.gamestar.de/a1</link><pubDate>Sat, 25 Jul 2026 18:37:34 +0000</pubDate></item>
+</channel></rss>`;
+
+    await runMain(spies, {
+        // Der Feed liefert Artikel ohne Bild; der Scrape-Versuch scheitert mit
+        // einem Fehlertext, der ein Secret mitführt.
+        fetchImpl: spies.makeFetchImpl(async url => {
+            if (url.includes('/a1')) {
+                throw new Error('Scrape kaputt: kv-token-geheim');
+            }
+            return new Response(xml, { status: 200 });
+        }),
+    });
+
+    assertKeineSecrets(spies, 'Scrape-Fehler');
+});
+
+test('ein Trendfehler landet in keiner Ausgabe und bleibt folgenlos', async () => {
+    const spies = createSpies();
+
+    await runMain(spies, {
+        fetchImpl: feedFetch(spies),
+        groqFetch: spies.makeGroqFetch(async () => {
+            throw new Error('Groq abgelehnt: Bearer gsk-groq-geheim');
+        }),
+    });
+
+    assert.deepEqual(spies.exitCodes, [], 'der Kernlauf bleibt erfolgreich');
+    assert.equal(spies.kvStore.feed_run_status.result, 'success');
+    assertKeineSecrets(spies, 'Trendfehler');
+});
+
+test('die Ausgabe des Laufs geht ausschließlich über den injizierten Logger', async () => {
+    // Ohne diese Zusage würden globale console-Aufrufe an jedem Secret-Test
+    // vorbeilaufen - genau das war vorher der Fall.
+    const spies = createSpies();
+    const original = { log: console.log, warn: console.warn, error: console.error };
+    const globaleAusgaben = [];
+    console.log = (...args) => globaleAusgaben.push(args.map(String).join(' '));
+    console.warn = console.log;
+    console.error = console.log;
+
+    try {
+        await runMain(spies, {
+            fetchImpl: spies.makeFetchImpl(async () => {
+                throw new Error('kaputt: postgres://nutzer:pg-geheim@db.example/main');
+            }),
+        });
+    } finally {
+        console.log = original.log;
+        console.warn = original.warn;
+        console.error = original.error;
     }
+
+    assert.deepEqual(globaleAusgaben, [], 'der Lauf schreibt nicht an der Injektion vorbei');
+    assert.ok(spies.logLines.length > 0, 'stattdessen landet alles im injizierten Logger');
 });
 
 // === Reihenfolge ===

@@ -20,6 +20,13 @@ function rssItem({ title, link, pubDate, guid }) {
         </item>`;
 }
 
+/** Sammelt die Ausgabe, statt sie nach stdout zu schreiben. */
+function stillerLogger() {
+    const lines = [];
+    const record = (...args) => lines.push(args.map(String).join(' '));
+    return { lines, log: record, warn: record, error: record };
+}
+
 function rssFeed(items) {
     return `<?xml version="1.0" encoding="UTF-8"?>
         <rss version="2.0">
@@ -44,7 +51,7 @@ test('ein ungültiges Datum kostet nur dieses Element, nicht den Feed', () => {
         rssItem(GUELTIG_3),
     ]);
 
-    const { articles, skipped } = parseFeedItems(xml, FEED);
+    const { articles, skipped } = parseFeedItems(xml, FEED, { logger: stillerLogger() });
 
     assert.equal(articles.length, 3, 'alle gültigen Artikel bleiben erhalten');
     assert.deepEqual(articles.map(article => article.title), [
@@ -63,7 +70,7 @@ test('mehrere ungültige Daten werden einzeln gezählt', () => {
         rssItem({ ...GUELTIG_3, pubDate: '31.02.2026 kaputt' }),
     ]);
 
-    const { articles, skipped } = parseFeedItems(xml, FEED);
+    const { articles, skipped } = parseFeedItems(xml, FEED, { logger: stillerLogger() });
 
     assert.equal(articles.length, 1);
     assert.equal(articles[0].title, 'Zweiter Artikel');
@@ -76,7 +83,7 @@ test('gültige Datumsformate bleiben unverändert erhalten', () => {
         rssItem({ ...GUELTIG_2, pubDate: '2026-07-26T09:00:00Z' }),
     ]);
 
-    const { articles, skipped } = parseFeedItems(xml, FEED);
+    const { articles, skipped } = parseFeedItems(xml, FEED, { logger: stillerLogger() });
 
     assert.equal(skipped.total, 0);
     assert.equal(articles[0].publicationDate, '2026-07-25T18:37:34.000Z');
@@ -102,7 +109,7 @@ test('eine itembezogene Ausnahme beschädigt den restlichen Feed nicht', () => {
     };
 
     const xml = rssFeed([rssItem(GUELTIG_1), rssItem(GUELTIG_2), rssItem(GUELTIG_3)]);
-    const { articles, skipped } = parseFeedItems(xml, stolperFeed);
+    const { articles, skipped } = parseFeedItems(xml, stolperFeed, { logger: stillerLogger() });
 
     assert.equal(articles.length, 2, 'die übrigen Elemente überleben');
     assert.deepEqual(articles.map(article => article.title), ['Erster Artikel', 'Dritter Artikel']);
@@ -117,7 +124,7 @@ test('der Skip-Bericht enthält weder Titel noch Adressen noch Inhalte', () => {
         rssItem({ title: 'Anderer Titel', link: 'https://www.gamestar.de/a4', pubDate: 'kaputt' }),
     ]);
 
-    const { skipped } = parseFeedItems(xml, FEED);
+    const { skipped } = parseFeedItems(xml, FEED, { logger: stillerLogger() });
     const bericht = JSON.stringify(skipped);
 
     assert.equal(skipped.total, 2);
@@ -131,6 +138,47 @@ test('der Skip-Bericht enthält weder Titel noch Adressen noch Inhalte', () => {
     }
 });
 
+test('eine abgelehnte Bildadresse verwirft den Artikel nicht', () => {
+    // Der Artikel landet im Cache und bekommt einen Platzhalter. Ihn als
+    // „verworfen" zu zählen, widerspräche der Bedeutung von skippedItemCount.
+    const xml = rssFeed([
+        `<item>
+            <title>Mit kaputtem Bild</title>
+            <link>https://www.gamestar.de/a1</link>
+            <pubDate>${GUELTIG_1.pubDate}</pubDate>
+            <enclosure type="image/jpeg" url="javascript:alert(1)" />
+        </item>`,
+        rssItem(GUELTIG_2),
+    ]);
+
+    const { articles, skipped, warnings } = parseFeedItems(xml, FEED, { logger: stillerLogger() });
+
+    assert.equal(articles.length, 2, 'beide Artikel bleiben erhalten');
+    assert.equal(articles[0].imageUrl, null, 'nur das Bild fällt weg');
+    assert.deepEqual(skipped, { total: 0, reasons: {} }, 'nichts wurde verworfen');
+    assert.equal(warnings.total, 1);
+    assert.deepEqual(warnings.reasons, { invalid_image: 1 });
+});
+
+test('die Meldung unterscheidet verworfene Elemente von Feldwarnungen', () => {
+    const logger = stillerLogger();
+    const xml = rssFeed([
+        `<item>
+            <title>Mit kaputtem Bild</title>
+            <link>https://www.gamestar.de/a1</link>
+            <pubDate>${GUELTIG_1.pubDate}</pubDate>
+            <enclosure type="image/jpeg" url="javascript:alert(1)" />
+        </item>`,
+        rssItem({ ...GUELTIG_2, pubDate: 'kaputt' }),
+    ]);
+
+    parseFeedItems(xml, FEED, { logger });
+    const protokoll = logger.lines.join('\n');
+
+    assert.match(protokoll, /1 Element\(e\) aus GameStar verworfen \(invalid_date: 1\)/);
+    assert.match(protokoll, /1 Element\(e\) aus GameStar mit Feldwarnung übernommen \(invalid_image: 1\)/);
+});
+
 test('unvollständige und abgelehnte Elemente bekommen eigene Gründe', () => {
     const xml = rssFeed([
         rssItem(GUELTIG_1),
@@ -140,7 +188,7 @@ test('unvollständige und abgelehnte Elemente bekommen eigene Gründe', () => {
         rssItem({ title: 'Kaputtes Datum', link: 'https://www.gamestar.de/a9', pubDate: 'nope' }),
     ]);
 
-    const { articles, skipped } = parseFeedItems(xml, FEED);
+    const { articles, skipped } = parseFeedItems(xml, FEED, { logger: stillerLogger() });
 
     assert.equal(articles.length, 1);
     assert.equal(skipped.total, 4);
@@ -153,6 +201,7 @@ test('ein fehlerfreier Feed meldet keine übersprungenen Elemente', () => {
     const { articles, skipped } = parseFeedItems(
         rssFeed([rssItem(GUELTIG_1), rssItem(GUELTIG_2)]),
         FEED,
+        { logger: stillerLogger() },
     );
 
     assert.equal(articles.length, 2);
@@ -166,7 +215,7 @@ test('parseRssXml bleibt als reine Artikelliste erhalten', () => {
         rssItem({ ...GUELTIG_2, pubDate: 'kaputt' }),
     ]);
 
-    const articles = parseRssXml(xml, FEED);
+    const articles = parseRssXml(xml, FEED, { logger: stillerLogger() });
 
     assert.ok(Array.isArray(articles));
     assert.equal(articles.length, 1);
@@ -176,6 +225,6 @@ test('parseRssXml bleibt als reine Artikelliste erhalten', () => {
 test('ein nicht parsebarer Feed bleibt ein Feed-Fehler, kein Item-Fehler', () => {
     // Die Unterscheidung ist wichtig: hier ist wirklich die ganze Quelle
     // unbrauchbar, nicht nur ein Element.
-    assert.throws(() => parseFeedItems('<html><body>keine Feeds hier</body></html>', FEED));
-    assert.throws(() => parseFeedItems('', FEED));
+    assert.throws(() => parseFeedItems('<html><body>keine Feeds hier</body></html>', FEED, { logger: stillerLogger() }));
+    assert.throws(() => parseFeedItems('', FEED, { logger: stillerLogger() }));
 });

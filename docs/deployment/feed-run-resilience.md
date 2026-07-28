@@ -16,18 +16,33 @@ Feeds gingen verloren.
 `parseFeedItems` prüft das Datum jetzt ausdrücklich und klammert zusätzlich
 jedes Element in `try/catch`. Gezählt wird nach Grund:
 
+`parseFeedItems` liefert **zwei getrennte Zähler**, weil es zwei verschiedene
+Aussagen sind:
+
+`skipped` – das Element wurde **nicht** übernommen:
+
 | Grund | Bedeutung |
 |---|---|
 | `incomplete` | Titel, Link oder Datum fehlt |
 | `invalid_date` | Datum nicht lesbar |
 | `invalid_link` | Adresse von der Ausgabe-Policy abgelehnt |
-| `invalid_image` | Bildadresse abgelehnt – der Artikel bleibt, das Bild fällt weg |
 | `item_error` | unerwartete Ausnahme in genau diesem Element |
 
-Der Bericht enthält **nur Grund und Anzahl**. Titel, Adressen und Artikelinhalte
-tauchen nirgends auf – auch nicht der Text einer Ausnahme, die solche Daten
-mitführen könnte. Der Feed-Status trägt zusätzlich `skippedItemCount` und nennt
-die Gründe in `message`.
+`warnings` – das Element **ist** im Cache, aber ein Feld war unbrauchbar:
+
+| Grund | Bedeutung |
+|---|---|
+| `invalid_image` | Bildadresse abgelehnt; der Artikel bleibt und bekommt einen Platzhalter |
+
+Die Trennung ist keine Kosmetik: `skippedItemCount` im Feed-Status **zählt
+ausschließlich wirklich verworfene Artikel**. Liefe eine abgelehnte Bildadresse
+in denselben Zähler, meldete die Oberfläche „Element verworfen" für einen
+Artikel, der sehr wohl ausgeliefert wird.
+
+Beide Berichte enthalten **nur Grund und Anzahl**. Titel, Adressen und
+Artikelinhalte tauchen nirgends auf – auch nicht der Text einer Ausnahme, die
+solche Daten mitführen könnte. Die `message` des Feed-Status nennt beide Zähler
+getrennt („skipped" gegen „kept with field warnings").
 
 `parseRssXml` bleibt als reine Artikelliste erhalten, damit bestehende Aufrufer
 unverändert weiterarbeiten. Wer den Zähler braucht, nimmt `parseFeedItems`.
@@ -55,6 +70,33 @@ eine Gegenstelle beliebig lange senden. Bei Überschreitung wird der Stream übe
 Der SSRF- und Redirect-Schutz aus `scripts/outbound-policy.js` bleibt unverändert
 davor: ein abgelehntes Ziel erreicht das Netz nicht, jeder Weiterleitungsschritt
 wird erneut geprüft.
+
+**`fetchImpl` hat bewusst keine Vorgabe.** Eine Vorgabe wie
+`fetchImpl = globalThis.fetch` würde immer ein `fetchImpl` an
+`fetchWithOutboundPolicy` übergeben und dessen an die geprüften Adressen
+gebundenen Standardtransport stilllegen – also genau den Schutz gegen
+DNS-Rebinding. Nur ein ausdrücklich injizierter Test-Transport ersetzt ihn; ein
+Regressionstest hält fest, dass `globalThis.fetch` im Produktionspfad nicht
+verwendet wird.
+
+## Kein Fehlertext ohne Bereinigung
+
+Der Lauf schreibt **nichts** direkt nach `console`. Jede Ausgabe läuft über den
+injizierten Logger, und jeder Fehlertext vorher durch `redactMessage`.
+
+Das gilt ausdrücklich auch für den Abbruchpfad: dort wurde früher das **rohe
+Error-Objekt** geloggt. Ein Verbindungsfehler von Postgres trägt die
+vollständige `POSTGRES_URL` samt Zugangsdaten in Text und Stack – die stand
+damit im Actions-Protokoll.
+
+Dieselbe Bereinigung reicht `main()` als `redact` an `fetchFeedXml` und den
+Groq-Client weiter, denn deren Retry- und Fehlerpfade geben Texte der Gegenstelle
+aus.
+
+Die Tests prüfen das an den **tatsächlich verwendeten** Ausgabepfaden: SQL-,
+KV-, Feed-, Proxy-, Scrape- und Trendfehler. Ein eigener Test ersetzt zusätzlich
+`console.log/warn/error` global und stellt sicher, dass der Lauf gar nicht erst
+an der Injektion vorbeischreibt – sonst liefe jeder Secret-Test ins Leere.
 
 ## Trends sind optional
 
