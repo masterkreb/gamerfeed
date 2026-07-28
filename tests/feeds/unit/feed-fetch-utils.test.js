@@ -494,3 +494,86 @@ test('ein injiziertes fetchImpl wird weiterhin verwendet', async () => {
         globalThis.fetch = originalFetch;
     }
 });
+
+// === Gesamtbudget des Laufs (O2b) ===
+
+test('ohne Gesamtbudget verhält sich der Abruf unverändert', async () => {
+    // `hasTimeFor` hat bewusst eine Vorgabe: Aufrufer ohne Laufbudget - und
+    // alle bestehenden Tests - sehen exakt das Verhalten aus O2a.
+    const { calls, fetchImpl } = createFetchSequence(response(RSS_XML));
+    const result = await fetchTestFeed({ fetchImpl });
+
+    assert.equal(result.xmlString, RSS_XML);
+    assert.equal(result.budgetExhausted, undefined);
+    assert.equal(calls.length, 1);
+});
+
+test('ein erschöpftes Gesamtbudget verhindert schon den ersten Versuch', async () => {
+    const { calls, fetchImpl } = createFetchSequence(response(RSS_XML));
+    const result = await fetchTestFeed({ fetchImpl, hasTimeFor: () => false });
+
+    assert.equal(calls.length, 0, 'kein Netzzugriff mehr');
+    assert.equal(result.budgetExhausted, true);
+    assert.equal(result.xmlString, null);
+});
+
+test('eine Wiederholungspause, die nicht mehr hineinpasst, beendet die Quelle', async () => {
+    const sleepCalls = [];
+    const { calls, fetchImpl } = createFetchSequence(
+        response('kaputt', 500),
+        response(RSS_XML),
+    );
+
+    // Restzeit reicht für einen Versuch, aber nicht für die 1000-ms-Pause.
+    const result = await fetchTestFeed({
+        fetchImpl,
+        retryDelayMs: 1000,
+        sleep: async delay => sleepCalls.push(delay),
+        hasTimeFor: (ms = 0) => ms < 500,
+    });
+
+    assert.equal(calls.length, 1, 'kein zweiter Versuch');
+    assert.deepEqual(sleepCalls, [], 'und keine Pause');
+    assert.equal(result.budgetExhausted, true);
+});
+
+test('ein echter Fehler im letzten Versuch bleibt ein Fehler der Quelle', async () => {
+    // Der heikle Fall: nach dem letzten Versuch folgt gar keine Pause mehr.
+    // Würde die Pausenprüfung auch dort greifen, verdeckte knappe Restzeit eine
+    // kaputte Quelle als „zurückgestellt".
+    const sleepCalls = [];
+    const { calls, fetchImpl } = createFetchSequence(
+        new Error('Quelle nicht erreichbar'),
+        new Error('Quelle nicht erreichbar'),
+    );
+
+    // Erst reichlich Zeit, nach dem zweiten Versuch nur noch wenig.
+    let verbleibend = 5000;
+    const result = await fetchTestFeed({
+        fetchImpl,
+        retryDelayMs: 1000,
+        sleep: async delay => {
+            sleepCalls.push(delay);
+            verbleibend = 500;
+        },
+        hasTimeFor: (ms = 0) => verbleibend > ms,
+    });
+
+    assert.equal(calls.length, 2, 'beide Versuche laufen');
+    assert.deepEqual(sleepCalls, [1000], 'die erste Pause passte noch');
+    assert.equal(result.budgetExhausted, false, 'keine Zurückstellung');
+    assert.match(result.lastError, /Quelle nicht erreichbar/);
+});
+
+test('ein erschöpftes Gesamtbudget schließt den Proxy-Umweg aus', async () => {
+    const { calls, fetchImpl } = createFetchSequence(response(RSS_XML));
+    const result = await fetchTestFeed({
+        fetchImpl,
+        feedProxyUrl: 'https://proxy.example/feed-proxy.php',
+        hasTimeFor: () => false,
+    });
+
+    assert.equal(calls.length, 0);
+    assert.equal(result.usedProxy, false);
+    assert.equal(result.budgetExhausted, true);
+});

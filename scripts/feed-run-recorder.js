@@ -40,6 +40,14 @@ import {
 } from '../shared/feed-health-model.js';
 
 /**
+ * Ergebniszustaende, die ein **abgeschlossener** Kernlauf haben kann.
+ *
+ * `running` ist kein Abschluss, `fatal` gehoert in den Abbruchpfad und wird von
+ * `recordFatal` gesetzt.
+ */
+const FINISHABLE_RUN_RESULTS = Object.freeze(['success', 'degraded']);
+
+/**
  * @param {{
  *   store: { get(key: string): Promise<unknown>, set(key: string, value: unknown): Promise<unknown> },
  *   runId: string,
@@ -93,8 +101,11 @@ export function createFeedRunRecorder({
      * von vor O1: `feed_health_status` ist kein Diagnosebeiwerk, sondern der
      * Datensatz, auf dem das Admin-Panel steht. Faellt er aus, muss der
      * Actions-Lauf fehlschlagen, statt einen gesunden Lauf vorzutaeuschen.
-     * Solange es `degraded` aus O2b nicht gibt, ist „fatal“ die einzige
-     * ehrliche Antwort.
+     *
+     * Auch mit `degraded` aus O2b bleibt das so: `degraded` beschreibt
+     * *bewusst zurueckgestellte* Arbeit bei sonst vertrauenswuerdigem Stand.
+     * Ein nicht geschriebener Feed-Status ist dagegen ein **unbekannter**
+     * Stand – dafuer ist „fatal“ weiterhin die einzige ehrliche Antwort.
      */
     async function writeFeedHealth(feedHealth, { critical }) {
         if (!feedListLoaded) {
@@ -232,11 +243,37 @@ export function createFeedRunRecorder({
             return writeFeedHealth(feedHealth, { critical: true });
         },
 
-        /** Der Lauf ist wirklich durch – erst hier faellt `finishedAt`. */
-        async finish({ feedHealth, durations }) {
+        /**
+         * Der Lauf ist wirklich durch – erst hier faellt `finishedAt`.
+         *
+         * `result` unterscheidet `success` von `degraded` (O2b). Ein Lauf, der
+         * Arbeit wegen Deadline oder Scrape-Budget zurueckgestellt hat, darf
+         * **nicht** als `success` gespeichert werden: sonst meldete er einen
+         * vollstaendigen Stand, obwohl Quellen oder Bilder fehlen.
+         *
+         * Andere Werte werden **abgelehnt**, nicht auf `success` abgebildet.
+         * Ein unbekanntes Ergebnis heisst, dass der Aufrufer den Zustand des
+         * Laufs nicht kennt – daraus „vollstaendig“ zu machen waere die
+         * gefaehrlichste aller Antworten. Der Aufrufer landet stattdessen in
+         * seinem Abbruchpfad und der Lauf endet `fatal`; genau so behandelt
+         * auch `shared/feed-health-model.js` ein unbekanntes Ergebnis.
+         *
+         * @throws wenn `result` weder `success` noch `degraded` ist
+         */
+        async finish({ feedHealth, durations, result = 'success', degradedReason = null }) {
+            if (!FINISHABLE_RUN_RESULTS.includes(result)) {
+                // Bewusst ohne den Wert im Text: die Meldung landet ueber den
+                // Abbruchpfad im Heartbeat, und was hier ankommt, ist nicht
+                // zwingend eine harmlose Konstante.
+                throw new Error(
+                    'Unbekannter Ergebniszustand beim Laufabschluss; zulässig sind nur success und degraded.',
+                );
+            }
+
             const finished = finishRunStatus(runStatus, {
                 finishedAt: now(),
-                result: 'success',
+                result,
+                degradedReason,
                 feeds: summarizeFeedHealth(feedHealth),
                 durations,
             });

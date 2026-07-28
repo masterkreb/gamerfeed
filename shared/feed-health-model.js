@@ -42,7 +42,20 @@ export const FEED_HEALTH_STATUS_KEY = 'feed_health_status';
 export const FEED_RUN_STATUS_KEY = 'feed_run_status';
 export const FEED_PUBLISH_STATUS_KEY = 'feed_publish_status';
 
-/** Ergebniszustaende eines Versuchs. `degraded` folgt mit O2b. */
+/**
+ * Ergebniszustaende eines Versuchs (O2b).
+ *
+ * - `running`  – der Versuch laeuft noch; `finishedAt` ist leer.
+ * - `success`  – der Kernlauf ist vollstaendig **und** es wurde keine Arbeit
+ *                wegen des globalen Zeit- oder Scrape-Budgets zurueckgestellt.
+ * - `degraded` – der Kern-Publish war sicher moeglich, aber Arbeit wurde
+ *                kontrolliert zurueckgestellt (Deadline oder Budget). Der
+ *                Grund steht in `degradedReason`.
+ * - `fatal`    – ein vertrauenswuerdiger Kernabschluss war nicht moeglich.
+ *
+ * `degraded` ist ausdruecklich **kein** `success`: sonst meldete ein Lauf einen
+ * vollstaendigen Stand, obwohl Quellen oder Bilder fehlen.
+ */
 export const FEED_RUN_RESULTS = Object.freeze(['running', 'success', 'degraded', 'fatal']);
 
 const FEED_STATUSES = Object.freeze(['success', 'warning', 'error', 'unknown']);
@@ -256,21 +269,33 @@ export function createRunStatus({ runId, startedAt }) {
         finishedAt: null,
         result: 'running',
         fatalError: null,
+        degradedReason: null,
         feeds: emptyCounters(),
         durations: emptyDurations(),
     };
 }
 
-function buildRunStatus(run, { finishedAt, result, fatalError = null, feeds, durations }) {
+function buildRunStatus(run, {
+    finishedAt,
+    result,
+    fatalError = null,
+    degradedReason = null,
+    feeds,
+    durations,
+}) {
     const started = normalizeRunStatus(run);
+    const effectiveResult = FEED_RUN_RESULTS.includes(result) ? result : 'fatal';
 
     return {
         schemaVersion: FEED_HEALTH_SCHEMA_VERSION,
         runId: started?.runId ?? null,
         startedAt: started?.startedAt ?? null,
         finishedAt: toIsoTimestamp(finishedAt),
-        result: FEED_RUN_RESULTS.includes(result) ? result : 'fatal',
+        result: effectiveResult,
         fatalError: sanitizeErrorMessage(fatalError),
+        // Nur ein degradierter Lauf traegt einen Grund. Ein `success` mit
+        // Begruendung waere widerspruechlich, ein `fatal` hat `fatalError`.
+        degradedReason: effectiveResult === 'degraded' ? sanitizeErrorMessage(degradedReason) : null,
         feeds: normalizeCounters(feeds ?? run?.feeds),
         durations: normalizeDurations(durations ?? run?.durations),
     };
@@ -290,6 +315,19 @@ export function progressRunStatus(run, { feeds, durations } = {}) {
 }
 
 /**
+ * Ergebniszustand eines abgeschlossenen Kernlaufs.
+ *
+ * Bewusst eine eigene Funktion: die Antwort „war das ein `success`?" darf nicht
+ * an mehreren Stellen unabhaengig voneinander getroffen werden.
+ *
+ * @param {{ deferredWork?: boolean }} params
+ * @returns {'success'|'degraded'}
+ */
+export function resolveRunResult({ deferredWork = false } = {}) {
+    return deferredWork ? 'degraded' : 'success';
+}
+
+/**
  * Schliesst den Attempt-Status ab, ohne das Ausgangsobjekt zu veraendern.
  *
  * @param {ReturnType<typeof createRunStatus>} run
@@ -306,13 +344,20 @@ export function normalizeRunStatus(raw) {
     const finishedAt = toIsoTimestamp(raw.finishedAt);
     if (startedAt === null && finishedAt === null) return null;
 
+    const result = FEED_RUN_RESULTS.includes(raw.result) ? raw.result : 'running';
+
     return {
         schemaVersion: FEED_HEALTH_SCHEMA_VERSION,
         runId: typeof raw.runId === 'string' && raw.runId !== '' ? raw.runId : null,
         startedAt,
         finishedAt,
-        result: FEED_RUN_RESULTS.includes(raw.result) ? raw.result : 'running',
+        result,
         fatalError: sanitizeErrorMessage(raw.fatalError),
+        // Auch beim Lesen gilt: nur ein degradierter Lauf traegt einen Grund.
+        // Ein aelterer oder manipulierter Datensatz mit `success` und
+        // Begruendung wuerde im Admin sonst einen Widerspruch anzeigen –
+        // „abgeschlossen“ neben „zurückgestellt: …“.
+        degradedReason: result === 'degraded' ? sanitizeErrorMessage(raw.degradedReason) : null,
         feeds: normalizeCounters(raw.feeds),
         durations: normalizeDurations(raw.durations),
     };
@@ -446,6 +491,7 @@ export function buildFreshnessReport({ run, publish, now, staleAfterMs = FEED_ST
             finishedAt: runStatus?.finishedAt ?? null,
             result: runStatus?.result ?? null,
             fatalError: runStatus?.fatalError ?? null,
+            degradedReason: runStatus?.degradedReason ?? null,
             feeds: runStatus?.feeds ?? emptyCounters(),
             durations: runStatus?.durations ?? emptyDurations(),
         },

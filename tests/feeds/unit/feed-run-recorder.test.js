@@ -572,3 +572,133 @@ test('Fehlermeldungen laufen vor dem Speichern durch die Bereinigung', async () 
 
     assert.equal(harness.lastWrite('feed_run_status').fatalError, 'connect failed for [redacted]');
 });
+
+// === Ergebniszustand des abgeschlossenen Laufs (O2b) ===
+
+test('ein degradierter Lauf wird nicht als success gespeichert', async () => {
+    const harness = createStore({
+        initial: {
+            feed_health_status: storedHealth('2026-07-28T10:40:00.000Z'),
+            feed_publish_status: storedPublish('2026-07-28T10:40:00.000Z'),
+        },
+    });
+    const clock = createClock();
+    const recorder = createRecorder(harness, clock);
+
+    await recorder.begin();
+    await recorder.loadPreviousState();
+    recorder.markFeedListLoaded();
+    clock.advance(120_000);
+    await recorder.recordCorePublish({
+        feedHealth: successfulFeedHealth('2026-07-28T11:01:30.000Z'),
+        articleCount: 1200,
+        newestArticleAt: '2026-07-28T10:58:00.000Z',
+        durations: { publishMs: 800 },
+    });
+    clock.advance(30_000);
+    await recorder.finish({
+        feedHealth: successfulFeedHealth('2026-07-28T11:01:30.000Z'),
+        durations: { totalMs: 150_000 },
+        result: 'degraded',
+        degradedReason: 'Zeitbudget erschöpft: 2 Quelle(n) zurückgestellt',
+    });
+
+    const finished = harness.lastWrite('feed_run_status');
+    assert.equal(finished.result, 'degraded');
+    assert.match(finished.degradedReason, /2 Quelle/);
+    // Der Kern-Publish hat trotzdem stattgefunden - das ist der Unterschied zu
+    // `fatal`.
+    assert.equal(
+        harness.lastWrite('feed_publish_status').lastCorePublishAt,
+        '2026-07-28T11:02:00.000Z',
+    );
+});
+
+test('ein unbekannter Ergebniswert wird abgelehnt, nicht zu success gemacht', async () => {
+    // Fail-closed: „ich kenne den Zustand dieses Laufs nicht" darf niemals zu
+    // „vollständig abgeschlossen" werden. Der Aufrufer landet stattdessen in
+    // seinem Abbruchpfad.
+    // `undefined` steht bewusst nicht in der Liste: es greift die Vorgabe
+    // `success`, und die ist der Normalfall - siehe den Test darunter.
+    for (const wert of ['irgendwas', 'running', 'fatal', '', null, 42, {}]) {
+        const harness = createStore({
+            initial: {
+                feed_health_status: storedHealth('2026-07-28T10:40:00.000Z'),
+                feed_publish_status: storedPublish('2026-07-28T10:40:00.000Z'),
+            },
+        });
+        const clock = createClock();
+        const recorder = createRecorder(harness, clock);
+
+        await recorder.begin();
+        await recorder.loadPreviousState();
+        recorder.markFeedListLoaded();
+
+        await assert.rejects(
+            () => recorder.finish({
+                feedHealth: successfulFeedHealth('2026-07-28T11:01:30.000Z'),
+                durations: {},
+                result: wert,
+            }),
+            /Unbekannter Ergebniszustand/,
+            `${String(wert)}: wird abgelehnt`,
+        );
+
+        assert.notEqual(
+            harness.lastWrite('feed_run_status').result,
+            'success',
+            `${String(wert)}: kein success im Heartbeat`,
+        );
+    }
+});
+
+test('ohne Angabe bleibt der Abschluss success', async () => {
+    // Die Vorgabe ist der Normalfall und darf von der Ablehnung nicht
+    // mitgerissen werden.
+    const harness = createStore({
+        initial: {
+            feed_health_status: storedHealth('2026-07-28T10:40:00.000Z'),
+            feed_publish_status: storedPublish('2026-07-28T10:40:00.000Z'),
+        },
+    });
+    const clock = createClock();
+    const recorder = createRecorder(harness, clock);
+
+    await recorder.begin();
+    await recorder.loadPreviousState();
+    recorder.markFeedListLoaded();
+    await recorder.finish({
+        feedHealth: successfulFeedHealth('2026-07-28T11:01:30.000Z'),
+        durations: {},
+    });
+
+    assert.equal(harness.lastWrite('feed_run_status').result, 'success');
+});
+
+test('die Ablehnung nennt den unbrauchbaren Wert nicht', async () => {
+    // Die Meldung läuft über den Abbruchpfad in den Heartbeat. Was hier
+    // ankommt, ist nicht zwingend eine harmlose Konstante.
+    const harness = createStore({
+        initial: {
+            feed_health_status: storedHealth('2026-07-28T10:40:00.000Z'),
+            feed_publish_status: storedPublish('2026-07-28T10:40:00.000Z'),
+        },
+    });
+    const recorder = createRecorder(harness, createClock());
+
+    await recorder.begin();
+    await recorder.loadPreviousState();
+    recorder.markFeedListLoaded();
+
+    await assert.rejects(
+        () => recorder.finish({
+            feedHealth: successfulFeedHealth('2026-07-28T11:01:30.000Z'),
+            durations: {},
+            result: 'kv-token-geheim',
+        }),
+        error => {
+            assert.doesNotMatch(error.message, /kv-token-geheim/);
+            return true;
+        },
+    );
+});

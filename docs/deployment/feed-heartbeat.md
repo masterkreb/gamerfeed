@@ -92,6 +92,7 @@ damit nach `FEED_STALE_AFTER_MS` veraltet.
   "finishedAt": "2026-07-28T11:49:31.882Z",
   "result": "success",
   "fatalError": null,
+  "degradedReason": null,
   "feeds": { "total": 15, "success": 14, "warning": 0, "error": 1, "unknown": 0 },
   "durations": {
     "totalMs": 149778, "feedFetchMs": 61204, "imageScrapeMs": 52310,
@@ -102,8 +103,12 @@ damit nach `FEED_STALE_AFTER_MS` veraltet.
 
 - `runId` ist die GitHub-Actions-Run-ID (`gha-<run>-<attempt>`) oder bei lokalen
   Läufen `local-<uuid>`. Beide sind nicht geheim.
-- `result` kennt heute `running`, `success` und `fatal`. `degraded` ist im
-  Vertrag bereits vorgesehen, wird aber erst mit O2b vergeben.
+- `result` kennt `running`, `success`, `degraded` und `fatal`. Die genaue
+  Abgrenzung – insbesondere, warum `degraded` weder `success` noch `fatal` ist –
+  steht in [`feed-run-budget.md`](feed-run-budget.md).
+- `degradedReason` nennt bei `degraded`, **warum** Arbeit zurückgestellt wurde
+  (Zeit- oder Scrape-Budget). Ein `success` trägt hier immer `null`. Der Text
+  wird wie `fatalError` bereinigt.
 - `fatalError` wird vor dem Speichern bereinigt: konfigurierte Secret-Werte,
   Zugangsdaten in URLs und Querystrings werden entfernt, die Meldung auf 300
   Zeichen gekürzt.
@@ -186,9 +191,12 @@ weiter.
 `feed_health_status` gab es schon vor O1, und ein Schreibfehler war dort immer
 fatal: es ist der Datensatz, auf dem die Feed-Tabelle im Admin steht. Bliebe er
 folgenlos, meldete der Cron-Lauf Erfolg, obwohl das Admin-Panel auf altem Stand
-steht – genau die Sorte stiller Ausfall, gegen die O1 antritt. Solange es den
-Ergebniszustand `degraded` aus O2b nicht gibt, ist „fatal“ die einzige ehrliche
-Antwort.
+steht – genau die Sorte stiller Ausfall, gegen die O1 antritt.
+
+Auch mit `degraded` aus O2b bleibt das so: `degraded` beschreibt *bewusst
+zurückgestellte* Arbeit bei sonst vertrauenswürdigem Stand. Ein nicht
+geschriebener Feed-Status ist dagegen ein **unbekannter** Stand – dafür ist
+„fatal“ weiterhin die einzige ehrliche Antwort.
 
 Die **mit O1 hinzugekommenen** Metadaten sind dagegen best effort. Ihr Verlust
 kostet Beobachtbarkeit, aber keine Daten, und darf einen ansonsten gesunden
@@ -281,7 +289,6 @@ sollten lokale Schreibläufe nicht parallel zum Cron gestartet werden.
 
 - Keine Historie über den letzten Lauf hinaus und kein Alarmkanal – das ist O4.
   Der Heartbeat muss heute noch aktiv im Admin abgerufen werden.
-- Kein Zeitbudget und kein Ergebniszustand `degraded` – das ist O2b.
 - Die drei News-Caches werden weiterhin nacheinander geschrieben. Schlägt ein
   Schreibvorgang dazwischen fehl, wird der Kern-Publish **nicht** fortgeschrieben;
   der Heartbeat meldet dann eher zu viel Alter als zu wenig. Die atomare

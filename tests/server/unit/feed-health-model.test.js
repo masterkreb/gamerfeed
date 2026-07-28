@@ -11,6 +11,7 @@ import {
     normalizePublishStatus,
     normalizeRunStatus,
     progressRunStatus,
+    resolveRunResult,
     sanitizeErrorMessage,
     summarizeFeedHealth,
 } from '../../../shared/feed-health-model.js';
@@ -416,4 +417,131 @@ test('sanitizeErrorMessage kuerzt sehr lange Meldungen', () => {
 test('sanitizeErrorMessage liefert null statt leerer Meldungen', () => {
     assert.equal(sanitizeErrorMessage(null), null);
     assert.equal(sanitizeErrorMessage('   '), null);
+});
+
+// === Ergebniszustaende success / degraded / fatal (O2b) ===
+
+test('zurueckgestellte Arbeit ergibt degraded, sonst success', () => {
+    assert.equal(resolveRunResult({ deferredWork: false }), 'success');
+    assert.equal(resolveRunResult({}), 'success');
+    assert.equal(resolveRunResult({ deferredWork: true }), 'degraded');
+});
+
+test('ein degradierter Lauf traegt seinen Grund, ein erfolgreicher nicht', () => {
+    const run = createRunStatus({ runId: 'r1', startedAt: '2026-07-28T12:00:00.000Z' });
+
+    const degradiert = finishRunStatus(run, {
+        finishedAt: '2026-07-28T12:10:00.000Z',
+        result: 'degraded',
+        degradedReason: 'Zeitbudget erschöpft: 3 Quelle(n) zurückgestellt',
+    });
+    assert.equal(degradiert.result, 'degraded');
+    assert.match(degradiert.degradedReason, /3 Quelle/);
+
+    // Ein `success` mit Begruendung waere widerspruechlich: der Zustand sagt
+    // „vollstaendig", der Text „es fehlt etwas".
+    const erfolgreich = finishRunStatus(run, {
+        finishedAt: '2026-07-28T12:10:00.000Z',
+        result: 'success',
+        degradedReason: 'darf nicht durchkommen',
+    });
+    assert.equal(erfolgreich.degradedReason, null);
+});
+
+test('der Grund eines degradierten Laufs wird wie jede Meldung bereinigt', () => {
+    const run = createRunStatus({ runId: 'r1', startedAt: '2026-07-28T12:00:00.000Z' });
+
+    const degradiert = finishRunStatus(run, {
+        finishedAt: '2026-07-28T12:10:00.000Z',
+        result: 'degraded',
+        degradedReason: 'Abbruch bei https://nutzer:geheim@proxy.example/x.php?token=abc',
+    });
+
+    assert.doesNotMatch(degradiert.degradedReason, /geheim|token=abc/);
+});
+
+test('ein gespeicherter degradierter Lauf wird beim Lesen erkannt', () => {
+    const gelesen = normalizeRunStatus({
+        runId: 'r1',
+        startedAt: '2026-07-28T12:00:00.000Z',
+        finishedAt: '2026-07-28T12:10:00.000Z',
+        result: 'degraded',
+        degradedReason: 'Scrape-Budget erschöpft: 12 zurückgestellt',
+    });
+
+    assert.equal(gelesen.result, 'degraded');
+    assert.match(gelesen.degradedReason, /Scrape-Budget/);
+});
+
+test('der Frischebericht reicht den Grund an das Admin weiter', () => {
+    const bericht = buildFreshnessReport({
+        run: {
+            runId: 'r1',
+            startedAt: '2026-07-28T12:00:00.000Z',
+            finishedAt: '2026-07-28T12:10:00.000Z',
+            result: 'degraded',
+            degradedReason: 'Zeitbudget erschöpft: 2 Quelle(n) zurückgestellt',
+        },
+        publish: null,
+        now: '2026-07-28T12:15:00.000Z',
+    });
+
+    assert.equal(bericht.run.result, 'degraded');
+    assert.match(bericht.run.degradedReason, /2 Quelle/);
+});
+
+test('ein Lauf ohne Grund liefert null statt eines leeren Textes', () => {
+    const bericht = buildFreshnessReport({
+        run: { startedAt: '2026-07-28T12:00:00.000Z', result: 'success' },
+        publish: null,
+        now: '2026-07-28T12:05:00.000Z',
+    });
+
+    assert.equal(bericht.run.degradedReason, null);
+});
+
+test('ein gespeichertes success mit Begruendung zeigt keinen Widerspruch', () => {
+    // Ein älterer oder manipulierter Datensatz darf im Admin nicht
+    // „abgeschlossen" neben „zurückgestellt: …" anzeigen.
+    for (const result of ['success', 'fatal', 'running']) {
+        const gelesen = normalizeRunStatus({
+            runId: 'r1',
+            startedAt: '2026-07-28T12:00:00.000Z',
+            finishedAt: '2026-07-28T12:10:00.000Z',
+            result,
+            degradedReason: 'Zeitbudget erschöpft: 2 Quelle(n) zurückgestellt',
+        });
+
+        assert.equal(gelesen.degradedReason, null, `${result}: kein Grund`);
+    }
+});
+
+test('ein unbekanntes gespeichertes Ergebnis gilt als running, nicht als success', () => {
+    const gelesen = normalizeRunStatus({
+        runId: 'r1',
+        startedAt: '2026-07-28T12:00:00.000Z',
+        finishedAt: '2026-07-28T12:10:00.000Z',
+        result: 'irgendwas',
+        degradedReason: 'darf nicht durchkommen',
+    });
+
+    assert.equal(gelesen.result, 'running');
+    assert.equal(gelesen.degradedReason, null);
+});
+
+test('der Frischebericht reicht einen widerspruechlichen Grund nicht durch', () => {
+    const bericht = buildFreshnessReport({
+        run: {
+            runId: 'r1',
+            startedAt: '2026-07-28T12:00:00.000Z',
+            finishedAt: '2026-07-28T12:10:00.000Z',
+            result: 'success',
+            degradedReason: 'Zeitbudget erschöpft: 2 Quelle(n) zurückgestellt',
+        },
+        publish: null,
+        now: '2026-07-28T12:15:00.000Z',
+    });
+
+    assert.equal(bericht.run.result, 'success');
+    assert.equal(bericht.run.degradedReason, null);
 });

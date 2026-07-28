@@ -117,6 +117,8 @@ export interface FeedHeartbeat {
         finishedAt: string | null;
         result: FeedRunResult | null;
         fatalError: string | null;
+        /** Warum der Lauf `degraded` endete (Deadline oder Scrape-Budget). */
+        degradedReason: string | null;
         feeds: FeedRunCounters;
         durations: FeedRunDurations;
     };

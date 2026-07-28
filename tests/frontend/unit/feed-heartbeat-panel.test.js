@@ -29,7 +29,7 @@ function isoAgo(ageMs) {
 
 // Derselbe Frischebericht, den die Health-API liefert – die Oberfläche bekommt
 // also exakt den geprüften Vertrag zu sehen.
-function heartbeatFor({ runAgeMs, publishAgeMs, contentAgeMs, feeds, result = 'success', fatalError = null }) {
+function heartbeatFor({ runAgeMs, publishAgeMs, contentAgeMs, feeds, result = 'success', fatalError = null, degradedReason = null }) {
     return buildFreshnessReport({
         run: {
             runId: 'gha-4711-1',
@@ -37,6 +37,7 @@ function heartbeatFor({ runAgeMs, publishAgeMs, contentAgeMs, feeds, result = 's
             finishedAt: isoAgo(runAgeMs),
             result,
             fatalError,
+            degradedReason,
             feeds,
             durations: { totalMs: 90_000 },
         },
@@ -200,6 +201,43 @@ test('ein nie erfolgter Kern-Publish erscheint als unbekannt, nicht als aktuell'
         assert.equal(view.state('publish'), 'unknown');
         assert.equal(view.state('content'), 'unknown');
         assert.match(view.card('publish').textContent, /noch nie/);
+    } finally {
+        await view.testRoot.cleanup();
+    }
+});
+
+test('ein eingeschränkter Lauf nennt Zustand und Grund', async () => {
+    // Ohne den Grund wäre „eingeschränkt" nicht handhabbar: Zeitbudget und
+    // Scrape-Budget verlangen völlig verschiedene Reaktionen.
+    const view = await renderPanel(heartbeatFor({
+        runAgeMs: 3 * 60_000,
+        publishAgeMs: 3 * 60_000,
+        contentAgeMs: 3 * 60_000,
+        feeds: { total: 15, success: 13, warning: 2, error: 0, unknown: 0 },
+        result: 'degraded',
+        degradedReason: 'Zeitbudget erschöpft: 2 Quelle(n) zurückgestellt',
+    }));
+
+    try {
+        const run = view.card('run');
+        assert.match(run.textContent, /eingeschränkt/);
+        assert.match(run.textContent, /Zurückgestellt/);
+        assert.match(run.textContent, /2 Quelle/);
+    } finally {
+        await view.testRoot.cleanup();
+    }
+});
+
+test('ein erfolgreicher Lauf zeigt keine Zurückstellung an', async () => {
+    const view = await renderPanel(heartbeatFor({
+        runAgeMs: 3 * 60_000,
+        publishAgeMs: 3 * 60_000,
+        contentAgeMs: 3 * 60_000,
+        feeds: { total: 15, success: 15, warning: 0, error: 0, unknown: 0 },
+    }));
+
+    try {
+        assert.doesNotMatch(view.card('run').textContent, /Zurückgestellt/);
     } finally {
         await view.testRoot.cleanup();
     }

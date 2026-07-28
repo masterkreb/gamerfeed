@@ -129,8 +129,10 @@ function isPolicyRejection(error) {
 
 async function fetchTextWithRetry({
     attempts,
+    createSignal,
     feedName,
     fetchImpl,
+    hasTimeFor,
     headers,
     logger,
     lookup,
@@ -145,13 +147,31 @@ async function fetchTextWithRetry({
 }) {
     let lastError = `${requestLabel} failed`;
 
+    // Ist das Gesamtbudget des Laufs aufgebraucht, ist Wiederholen keine
+    // Belastbarkeit mehr, sondern nur noch Zeit, die woanders fehlt. Die Frage
+    // wird deshalb vor jedem Versuch und vor jeder Wartezeit gestellt - vor der
+    // Wartezeit mit ihrer tatsaechlichen Dauer, denn eine Pause, die ueber die
+    // Deadline hinausreicht, kostet nur und bringt nichts.
+    const budgetExhausted = () => ({
+        error: `${requestLabel} skipped: run budget exhausted`,
+        budgetExhausted: true,
+        status: null,
+        text: null,
+    });
+
     for (let attempt = 1; attempt <= attempts; attempt++) {
+        if (!hasTimeFor()) return budgetExhausted();
+
+        // Das Signal verbindet Einzeltimeout und Gesamtbudget: eine bereits
+        // laufende Anfrage wird beim Erreichen der Deadline mit abgebrochen.
+        const signal = createSignal(timeoutMs);
+
         try {
             const response = await fetchWithOutboundPolicy(requestUrl, {
                 fetchImpl,
                 headers,
                 lookup,
-                signal: AbortSignal.timeout(timeoutMs),
+                signal,
             });
 
             if (!response.ok) {
@@ -159,6 +179,9 @@ async function fetchTextWithRetry({
                 const retryDelay = getRetryDelayMs(response, retryDelayMs);
                 await response.body?.cancel().catch(() => {});
                 if (attempt < attempts && isRetryableHttpStatus(response.status, retryableStatuses)) {
+                    // Auch ein `Retry-After` der Gegenstelle darf die Deadline
+                    // nicht ueberschreiten.
+                    if (!hasTimeFor(retryDelay)) return budgetExhausted();
                     logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                     await sleep(retryDelay);
                     continue;
@@ -173,6 +196,7 @@ async function fetchTextWithRetry({
                 lastError = `${requestLabel} response could not be read: ${getErrorMessage(error)}`;
                 await response.body?.cancel().catch(() => {});
                 if (!(error instanceof ResponseTooLargeError) && attempt < attempts) {
+                    if (!hasTimeFor(retryDelayMs)) return budgetExhausted();
                     logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                     await sleep(retryDelayMs);
                     continue;
@@ -184,7 +208,17 @@ async function fetchTextWithRetry({
             if (isPolicyRejection(error)) {
                 return { error: lastError, policyRejected: true, status: null, text: null };
             }
+            // Der Abbruch kann vom Gesamtbudget kommen; dann war das hier der
+            // letzte Versuch dieser Quelle.
+            if (!hasTimeFor()) return budgetExhausted();
             if (attempt < attempts) {
+                // Eine Wiederholung, deren Pause nicht mehr hineinpasst, ist
+                // keine. Die Pruefung gehoert **in** diesen Zweig: nach dem
+                // letzten Versuch folgt gar keine Pause mehr, und ein echter
+                // Fehler der Quelle darf dort nicht als Zurueckstellung
+                // erscheinen - sonst verdeckt knappe Restzeit eine kaputte
+                // Quelle.
+                if (!hasTimeFor(retryDelayMs)) return budgetExhausted();
                 logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                 await sleep(retryDelayMs);
                 continue;
@@ -199,11 +233,21 @@ export async function fetchFeedXml({
     // Der Proxy ist die Ausnahme, nicht die Regel: ohne ausdrueckliche Freigabe
     // der Quelle wird er selbst bei einem Direktfehler nicht versucht.
     allowProxy = false,
+    // Baut das Abbruchsignal einer einzelnen Anfrage. Vorgabe ist das reine
+    // Einzeltimeout aus O2a; der Cron-Lauf reicht hier das Signal seines
+    // Gesamtbudgets herein, damit die Deadline auch eine bereits laufende
+    // Anfrage beendet (O2b).
+    createSignal = timeoutMs => AbortSignal.timeout(timeoutMs),
     directAttempts = 2,
     directTimeoutMs = 15000,
     feedName,
     feedProxyUrl,
     feedUrl,
+    // Meldet, ob der Lauf noch mehr als `ms` Millisekunden Gesamtbudget hat -
+    // gefragt vor jedem Versuch (`ms = 0`) und vor jeder Wiederholungspause mit
+    // deren tatsaechlicher Dauer. Ohne Angabe gilt das bisherige Verhalten: es
+    // gibt kein Gesamtbudget.
+    hasTimeFor = () => true,
     // Bewusst **ohne** Vorgabe: nur ein ausdruecklich injiziertes fetchImpl
     // (Tests) ersetzt den Transport. Bleibt es undefined, verwendet
     // fetchWithOutboundPolicy seinen an die geprueften Adressen gebundenen
@@ -223,8 +267,10 @@ export async function fetchFeedXml({
 }) {
     const directResult = await fetchTextWithRetry({
         attempts: directAttempts,
+        createSignal,
         feedName,
         fetchImpl,
+        hasTimeFor,
         headers: BROWSER_LIKE_HEADERS,
         logger,
         lookup,
@@ -260,8 +306,12 @@ export async function fetchFeedXml({
     // `allowProxy` kommt aus der Quellenliste: nur wer den Umweg wirklich
     // braucht, bekommt ihn. Sonst würde jeder gewöhnliche Timeout einer
     // beliebigen Quelle fremdes Hosting belasten.
-    if (!allowProxy || !feedProxyUrl?.trim() || directResult.policyRejected) {
+    // Ein aufgebrauchtes Gesamtbudget schliesst den Umweg ebenfalls aus: der
+    // Proxy waere der teuerste Weg zur selben Antwort und die Zeit fehlt
+    // anschliessend beim Kern-Publish.
+    if (!allowProxy || !feedProxyUrl?.trim() || directResult.policyRejected || directResult.budgetExhausted) {
         return {
+            budgetExhausted: directResult.budgetExhausted === true,
             directError,
             lastError: directError,
             proxyError: null,
@@ -288,8 +338,10 @@ export async function fetchFeedXml({
 
     const proxyResult = await fetchTextWithRetry({
         attempts: proxyAttempts,
+        createSignal,
         feedName,
         fetchImpl,
+        hasTimeFor,
         headers: undefined,
         logger,
         lookup,
@@ -324,6 +376,7 @@ export async function fetchFeedXml({
     }
 
     return {
+        budgetExhausted: proxyResult.budgetExhausted === true,
         directError,
         lastError: `${directError} / ${proxyError}`,
         proxyError,

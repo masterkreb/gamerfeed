@@ -126,6 +126,7 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
     4.  Anschliessend schreibt das Skript diese Datensätze in den **Vercel KV Store**.
 *   **WICHTIG:** Der Workflow committet **keine Dateien** mehr in das Git-Repository. Der Prozess ist vollständig vom Code der Webseite getrennt.
 *   **Robustheit:** Der Prozess verhindert zuverlässig den Verlust bestehender Artikeldaten durch fehlerhafte Abrufe. Ein einzelnes kaputtes Feed-Element (etwa mit unlesbarem Datum) kostet nur dieses Element, nicht die ganze Quelle; jeder externe Abruf hat Timeout und Byte-Limit; die Pflichtkonfiguration wird geprüft, bevor die erste Verbindung aufgebaut wird. Einzelheiten: [Belastbarkeit des Cron-Laufs](docs/deployment/feed-run-resilience.md).
+*   **Laufzeit:** Neben den Einzelgrenzen hat der Lauf ein **globales Budget**: eine Deadline von 18 Minuten (mit 12 Minuten Reserve vor dem 30-Minuten-Hardlimit des Workflows) und höchstens 80 Artikel-Seitenabrufe pro Lauf. Wird eine Grenze erreicht, wird die restliche Arbeit *zurückgestellt* statt abgeschnitten: die betroffenen Quellen behalten ihre alten Artikel, offene Bild-Scrapes werden fair über die Quellen verteilt und im nächsten Lauf erneut versucht. Ein solcher Lauf endet als `degraded`, nie stillschweigend als `success`. Einzelheiten: [Zeitbudget und Ergebniszustände](docs/deployment/feed-run-budget.md).
 
 #### 2. Der Datenabruf (Frontend-Anwendung)
 
@@ -160,7 +161,7 @@ Diese Feed-Tabelle beschreibt immer nur den **letzten** Lauf – auch wenn diese
 Lauf Stunden zurückliegt. Darüber steht deshalb der Heartbeat, der drei Fragen
 getrennt beantwortet:
 
-*   **Letzter Lauf**: Hat der Workflow überhaupt noch gestartet? (`feed_run_status`)
+*   **Letzter Lauf**: Hat der Workflow überhaupt noch gestartet, und mit welchem Ergebnis – `abgeschlossen`, `eingeschränkt` oder `abgebrochen`? (`feed_run_status`)
 *   **Letzter Kern-Publish**: Wurden die News-Caches wirklich geschrieben?
 *   **Inhaltsfrische**: Wann hat zuletzt mindestens ein Feed überhaupt Artikel geliefert?
 
@@ -172,6 +173,11 @@ Als **veraltet** gilt alles, was älter als 50 Minuten ist (`FEED_STALE_AFTER_MS
 in `shared/feed-health-model.js`); ein Zeitstempel mehr als 2 Minuten in der
 Zukunft gilt als ungültig und nie als frisch. Ein fehlgeschlagener Lauf
 überschreibt weder den letzten Kern-Publish noch das `lastSuccessAt` eines Feeds.
+
+Ein **eingeschränkter** Lauf (`degraded`) ist kein Fehler: der Kern-Publish hat
+stattgefunden, aber Arbeit wurde wegen der Laufdeadline oder des Scrape-Budgets
+zurückgestellt. Der Grund steht direkt darunter im Panel.
+
 Datenformate, Grenzfälle und Betriebshinweise stehen in der
 [Heartbeat-Dokumentation](docs/deployment/feed-heartbeat.md).
 
