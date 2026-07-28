@@ -73,7 +73,7 @@ verschiebt sich das Hauptrisiko auf den Cron-Betrieb selbst – dort setzt O1 an
 
 **Stand 28. Juli 2026 (Branch `claude/o1-cron-heartbeat`):** O1 ist
 abgeschlossen. Ein ausgefallener oder erfolgloser Cron-Lauf ist im Admin
-erkennbar, statt als alter grüner Status weiterzulaufen. 216 zentrale Tests und
+erkennbar, statt als alter grüner Status weiterzulaufen. 236 zentrale Tests und
 9 Browser-Abnahmen laufen erfolgreich. Das nächste Hauptrisiko ist die fehlende
 Laufzeit-Validierung der Admin-Payloads – dort setzt S2 an. Beobachtbarkeit über
 den letzten Lauf hinaus (Historie, Alarm) bleibt O4 vorbehalten.
