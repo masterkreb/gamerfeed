@@ -264,10 +264,11 @@ OG-Scraping, in der Artikelkarte und im statischen HTML unter `/gaming-news`.
 Ein abgelehnter Artikel wird isoliert übersprungen; an den Ausgabestellen
 entfallen `href` und `src`, statt eine unzulässige Adresse auszugeben.
 
-**Bekannte Grenze:** DNS-Rebinding ist nicht ausgeschlossen, weil sich die
-Verbindung beim globalen `fetch` nicht an die geprüften Adressen binden lässt.
-Einzelheiten, gesperrte Bereiche und die Bestandsprüfung
-`node scripts/check-feed-urls.js` stehen in `docs/deployment/outbound-policy.md`.
+Der Transport ist über `undici` mit eigenem `connect.lookup` an die geprüften
+Adressen gebunden, deshalb greift DNS-Rebinding zwischen Prüfung und Verbindung
+nicht. Gesperrte Bereiche, verbleibende Grenzen und die noch ausstehende
+Bestandsprüfung `node scripts/check-feed-urls.js` stehen in
+`docs/deployment/outbound-policy.md`.
 
 ## 🔌 Feed-Proxy
 

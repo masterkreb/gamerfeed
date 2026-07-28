@@ -72,28 +72,31 @@ Feed.
 Die Prüfung an den Ausgabestellen ist bewusst redundant zum Ingest: Ältere
 Cache-Einträge stammen aus der Zeit davor, und dem Cache wird nicht vertraut.
 
-## Bekannte Grenze: DNS-Rebinding
+## Gebundener Transport gegen DNS-Rebinding
 
-**Diese Umsetzung schließt DNS-Rebinding nicht aus.**
+Eine Vorabprüfung allein genügt nicht: `fetch()` löst den Host anschließend
+erneut auf, und zwischen Prüfung und Verbindung könnte ein Angreifer mit sehr
+kurzer TTL auf eine private Adresse wechseln.
 
-Node stellt `undici` nicht als importierbares Modul bereit, deshalb lässt sich
-beim globalen `fetch` die Verbindung nicht an die zuvor geprüften Adressen
-binden. Zwischen Prüfung und Verbindungsaufbau bleibt ein Zeitfenster: Wer eine
-Domain mit sehr kurzer TTL kontrolliert, kann dem Prüfschritt eine öffentliche
-Adresse zeigen und dem Verbindungsaufbau eine private (TOCTOU).
+Deshalb läuft der Abruf über `undici` mit einem eigenen `connect.lookup`. Dieser
+Lookup gibt ausschließlich geprüfte Adressen heraus; enthält die Antwort eine
+gesperrte Adresse, bekommt der Transport gar keine Adresse, sondern einen
+Fehler. Da undici sich genau mit dem verbindet, was der Lookup liefert, ist die
+Verbindung an das geprüfte Ziel gebunden – ein zweiter, ungeprüfter
+Auflösungsschritt findet nicht statt.
 
-Die Roadmap sieht dafür ausdrücklich den Fail-closed-Weg vor. Konkret heißt das
-hier:
+Die Vorabprüfung bleibt zusätzlich bestehen. Sie lehnt ab, bevor überhaupt ein
+Verbindungsaufbau beginnt, und erfüllt damit „kein abgewiesener Request erreicht
+das Netzwerk".
 
-- jede Unsicherheit führt zur Ablehnung, nicht zum Durchlassen;
-- eine Ablehnung wird **nicht** wiederholt, weil sie deterministisch ist;
-- jeder Weiterleitungsschritt wird erneut geprüft;
-- die Feed-Liste ist nicht öffentlich, sondern wird vom Admin gepflegt.
+Verbleibende Grenzen, bewusst benannt:
 
-Ein vollständiger Schutz bräuchte entweder eine Bindung an die geprüfte Adresse
-(zum Beispiel über `undici` als Abhängigkeit mit eigenem `connect`-Lookup) oder
-einen Egress-Proxy, der die Regeln außerhalb des Prozesses durchsetzt. Beides
-ist eine bewusste Erweiterung und kein stiller Nebeneffekt.
+- Der Schutz gilt für den Node-Cron. Die Edge-Runtime hat keinen DNS-Zugriff und
+  prüft deshalb nur syntaktisch.
+- `undici` ist damit eine bewusste Laufzeitabhängigkeit des Cron-Skripts.
+- Ein Ziel, das zum Zeitpunkt des Abrufs auf eine öffentliche Adresse zeigt,
+  bleibt erlaubt – die Policy schützt vor internen Zielen, nicht vor
+  unerwünschten öffentlichen.
 
 ## Vor dem Aktivieren: Bestand prüfen
 
@@ -107,6 +110,12 @@ node scripts/check-feed-urls.js
 Es braucht `POSTGRES_URL` und beendet sich mit Code 1, sobald mindestens eine
 Adresse abgelehnt würde. Eine Ablehnung ist immer zuerst zu klären: Entweder ist
 die Adresse falsch, oder die Policy ist für diesen Fall zu eng.
+
+> **Offenes Release-Gate:** Dieser Lauf hat noch **nicht** stattgefunden – dafür
+> fehlen die Zugangsdaten zur produktiven Datenbank. Die neun Adressen in
+> `tests/feeds/unit/outbound-policy.test.js` sind eine Regressionssicherung
+> gegen eine zu enge Policy, **kein** Ersatz für die Prüfung des tatsächlichen
+> Bestands. Vor dem Produktivgang muss der Lauf einmal grün gewesen sein.
 
 ## Verhalten in der Feed-Verwaltung
 

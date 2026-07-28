@@ -10,8 +10,8 @@ Chromium-Suite.
 npm run test:e2e
 ```
 
-Playwright erstellt dabei selbst den Produktions-Build und startet
-`vite preview`. Beim ersten Mal muss der Browser einmalig geladen werden:
+Das Script baut zuerst und startet dann `vite preview`. Beim ersten Mal muss der
+Browser einmalig geladen werden:
 
 ```bash
 npx playwright install chromium
@@ -28,6 +28,22 @@ npx playwright install chromium
 Die beiden Suites sind bewusst getrennt: `npm test` sucht
 `tests/**/*.test.js`, die Browser-Suite `tests/e2e/**/*.spec.ts`. Dadurch
 startet `npm test` den Browser nicht versehentlich mit.
+
+## Prozessende unter Windows
+
+Der Build läuft im `test:e2e`-Script, **nicht** in `webServer.command`, und Vite
+wird direkt als Node-Prozess gestartet statt über `npm` oder `npx`. Diese
+Wrapper hinterließen unter Windows Enkelprozesse, die das Testende überlebten –
+`npm run test:e2e` beendete sich dann nicht mehr selbst.
+
+## Consent-Tests und Bot-Erkennung
+
+CookieConsent blendet sich bei `navigator.webdriver === true` absichtlich aus
+(`hideFromBots`), und genau das setzt Playwright. Ohne Gegenmaßnahme fehlt der
+Banner im Testbrowser – das ist **kein** Produktionsfehler.
+
+`disableBotDetection` aus der Fixture neutralisiert die Kennzeichnung vor dem
+Seitenaufbau. Das gilt ausschließlich im Test; die Anwendung bleibt unverändert.
 
 ## Warum der Produktions-Build und nicht der Dev-Server
 
