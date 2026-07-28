@@ -93,7 +93,7 @@
 ├── shared/                 # Gemeinsame Frontend-/Backend-Verträge
 ├── tests/                  # Zentrale Tests nach Fachbereich und Testart
 ├── docs/
-│   ├── deployment/        # Betriebs- und Domain-Anleitungen
+│   ├── deployment/        # Betrieb, Release, Rollback und Domain-Anleitungen
 │   └── development/
 │       └── roadmap.md      # Priorisierte Arbeitspakete und Abnahmekriterien
 ├── tools/
@@ -404,3 +404,4 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 7. Bei einem Domainwechsel: `docs/deployment/custom-domain.md` vollständig abarbeiten
 8. Bei Roadmap-Arbeit `docs/development/roadmap.md` lesen und nur ein ausdrücklich beauftragtes Arbeitspaket bearbeiten; ausdrücklich beauftragte Hotfixes außerhalb der Roadmap bleiben möglich und werden danach eingeordnet
 9. Die Roadmap erlaubt keine ungefragten externen Deployments, Secret- oder Plattformänderungen
+10. Production-Änderungen folgen `docs/deployment/release-process.md`; kein direkter Push auf `main`
