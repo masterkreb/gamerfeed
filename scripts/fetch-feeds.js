@@ -183,7 +183,18 @@ function getFirstElementByLocalName(root, localName) {
     return getElementsByLocalName(root, localName)[0] || null;
 }
 
-export function parseRssXml(xmlString, feed) {
+/**
+ * Zerlegt einen Feed und meldet zusaetzlich, was dabei verworfen wurde.
+ *
+ * Ein einzelnes kaputtes Element darf den Feed nicht mitreissen: fruehere
+ * Laeufe haben an einem ungueltigen `pubDate` die komplette Quelle verloren,
+ * weil `new Date(...).toISOString()` aus der Schleife heraus geworfen hat.
+ *
+ * @param {string} xmlString
+ * @param {object} feed
+ * @returns {{ articles: object[], skipped: { total: number, reasons: Record<string, number> } }}
+ */
+export function parseFeedItems(xmlString, feed) {
     if (!isFeedXml(xmlString)) {
         throw new Error(`Response is not a valid RSS or Atom feed: ${feed.url}`);
     }
@@ -198,12 +209,19 @@ export function parseRssXml(xmlString, feed) {
 
     const articles = [];
     // Abgelehnte Items werden gesammelt und einmal gebuendelt gemeldet, statt
-    // pro Item eine Zeile ins Log zu schreiben.
-    const skippedItems = [];
+    // pro Item eine Zeile ins Log zu schreiben. Gespeichert wird nur der Grund -
+    // Titel, Adressen und Inhalte gehoeren nicht in eine Fehlerauswertung.
+    const skippedReasons = {};
+    const skip = reason => {
+        skippedReasons[reason] = (skippedReasons[reason] ?? 0) + 1;
+    };
     const isAtom = getElementLocalName(doc.documentElement) === 'feed';
     const itemNodes = getElementsByLocalName(doc, isAtom ? 'entry' : 'item');
 
     itemNodes.forEach(node => {
+      // Klammer um das gesamte Element: was hier drin schiefgeht, kostet genau
+      // dieses Element und nicht den Rest des Feeds.
+      try {
         const getText = (localName) => (
             getFirstElementByLocalName(node, localName)?.textContent?.trim() || ''
         );
@@ -221,7 +239,18 @@ export function parseRssXml(xmlString, feed) {
         const title = decodeHtmlEntities(getText('title'));
         const pubDate = getText(isAtom ? 'published' : 'pubDate') || getText('updated');
 
-        if (!title || !link || !pubDate) return;
+        if (!title || !link || !pubDate) {
+            skip('incomplete');
+            return;
+        }
+
+        // Ein unlesbares Datum ist der haeufigste Einzelfehler und war bisher
+        // der teuerste: er hat den ganzen Feed gekostet.
+        const publishedAt = new Date(pubDate);
+        if (Number.isNaN(publishedAt.getTime())) {
+            skip('invalid_date');
+            return;
+        }
 
         // Ausgabe-Policy: relative Angaben werden gegen die Feed-Adresse
         // aufgeloest, alles andere als http/https und URLs mit Zugangsdaten
@@ -229,7 +258,7 @@ export function parseRssXml(xmlString, feed) {
         // weder den Cache noch den restlichen Feed beschaedigt.
         const normalizedLink = normalizeContentUrl(link, { base: feed?.url });
         if (!normalizedLink) {
-            skippedItems.push({ reason: 'invalid_link', title, value: link });
+            skip('invalid_link');
             return;
         }
         link = normalizedLink;
@@ -351,7 +380,7 @@ export function parseRssXml(xmlString, feed) {
         // laesst den Artikel bestehen; er bekommt spaeter einen Platzhalter.
         const normalizedImageUrl = normalizeContentUrl(imageUrl, { base: link });
         if (imageUrl && !normalizedImageUrl) {
-            skippedItems.push({ reason: 'invalid_image', title, value: imageUrl });
+            skip('invalid_image');
         }
         if (normalizedImageUrl && !isKnownNonArticleImageUrl(normalizedImageUrl, feed)) {
             try {
@@ -399,25 +428,44 @@ export function parseRssXml(xmlString, feed) {
             id: getText('guid') || getText('id') || link,
             title,
             source: feed.name,
-            publicationDate: new Date(pubDate).toISOString(),
+            publicationDate: publishedAt.toISOString(),
             summary,
             link,
             imageUrl: finalImageUrl || null,
             needsScraping: !finalImageUrl && shouldScrapeMissingImage(feed),
             language: feed.language
         });
+      } catch {
+        // Unerwarteter Fehler in genau diesem Element. Die Ursache steht nicht
+        // im Zaehler: eine Ausnahme kann Inhalte oder Adressen des Elements
+        // mitfuehren, und die gehoeren weder ins Log noch in den Feed-Status.
+        skip('item_error');
+      }
     });
 
-    if (skippedItems.length > 0) {
-        const reasons = skippedItems.reduce((counts, item) => {
-            counts[item.reason] = (counts[item.reason] ?? 0) + 1;
-            return counts;
-        }, {});
-        const summary = Object.entries(reasons).map(([reason, count]) => `${reason}: ${count}`).join(', ');
-        console.warn(`   ⚠️  ${skippedItems.length} Element(e) aus ${feed?.name ?? 'Feed'} verworfen (${summary})`);
+    const skippedTotal = Object.values(skippedReasons).reduce((sum, count) => sum + count, 0);
+    if (skippedTotal > 0) {
+        const summary = Object.entries(skippedReasons)
+            .map(([reason, count]) => `${reason}: ${count}`)
+            .join(', ');
+        console.warn(`   ⚠️  ${skippedTotal} Element(e) aus ${feed?.name ?? 'Feed'} verworfen (${summary})`);
     }
 
-    return articles;
+    return { articles, skipped: { total: skippedTotal, reasons: skippedReasons } };
+}
+
+/**
+ * Rueckwaertskompatible Fassung: liefert nur die Artikel.
+ *
+ * Bestehende Aufrufer und Tests arbeiten unveraendert weiter; wer den
+ * Skip-Zaehler braucht, nimmt `parseFeedItems`.
+ *
+ * @param {string} xmlString
+ * @param {object} feed
+ * @returns {object[]}
+ */
+export function parseRssXml(xmlString, feed) {
+    return parseFeedItems(xmlString, feed).articles;
 }
 
 
@@ -954,29 +1002,39 @@ async function main() {
                 lastSuccessAt: recorder.lastSuccessAtFor(feed.id),
                 durationMs: feedDurationMs,
                 articleCount: null,
+                skippedItemCount: 0,
             };
 
             if (xmlString) {
                 try {
-                    const feedArticles = parseRssXml(xmlString, feed);
+                    const { articles: feedArticles, skipped } = parseFeedItems(xmlString, feed);
+                    // Nur Anzahl und Grund - keine Titel, Adressen oder Inhalte.
+                    const skippedNote = skipped.total > 0
+                        ? ` ${skipped.total} item(s) skipped (${Object.entries(skipped.reasons)
+                            .map(([reason, count]) => `${reason}: ${count}`)
+                            .join(', ')}).`
+                        : '';
+
                     if (feedArticles.length === 0) {
                         feedHealthStatus[feed.id] = {
                             ...baseEntry,
                             status: 'warning',
-                            message: 'Feed fetched successfully, but no articles were found.',
+                            message: `Feed fetched successfully, but no articles were found.${skippedNote}`,
                             articleCount: 0,
+                            skippedItemCount: skipped.total,
                         };
                     } else {
                         feedHealthStatus[feed.id] = {
                             ...baseEntry,
                             status: 'success',
-                            message: `Successfully fetched and parsed ${feedArticles.length} articles.`,
+                            message: `Successfully fetched and parsed ${feedArticles.length} articles.${skippedNote}`,
                             lastSuccessAt: attemptAt,
                             articleCount: feedArticles.length,
+                            skippedItemCount: skipped.total,
                         };
                     }
                     newlyFetchedArticles.push(...feedArticles);
-                    console.log(`   ✅ Parsed ${feedArticles.length} articles from ${feed.name} (${formatDuration(feedDurationMs)})`);
+                    console.log(`   ✅ Parsed ${feedArticles.length} articles from ${feed.name} (${formatDuration(feedDurationMs)})${skippedNote}`);
                 } catch (parseError) {
                     const message = parseError instanceof Error ? parseError.message : 'Unknown parse error';
                     console.error(`   ❌ Error parsing ${feed.name}: ${message}`);

@@ -180,6 +180,11 @@ export function normalizeFeedHealthEntry(raw) {
         articleCount: raw?.articleCount === undefined || raw?.articleCount === null
             ? null
             : toNonNegativeInteger(raw.articleCount),
+        // Anzahl der beim Parsen uebersprungenen Elemente (O2a). Nur eine Zahl -
+        // Gruende stehen in `message`, Inhalte nirgends.
+        skippedItemCount: raw?.skippedItemCount === undefined || raw?.skippedItemCount === null
+            ? null
+            : toNonNegativeInteger(raw.skippedItemCount),
     };
 }
 
