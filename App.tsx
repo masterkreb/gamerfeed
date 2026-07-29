@@ -431,7 +431,7 @@ const AppContent: React.FC = () => {
         } catch (error) {
             console.warn('Auto-update check failed:', error);
         }
-    }, [articles, acceptSnapshotResponse, snapshotUrl]);
+    }, [articles, snapshotUrl]);
 
     // Load pending articles (when user clicks the toast or badge)
     const loadPendingArticles = useCallback(() => {

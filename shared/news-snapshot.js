@@ -12,14 +12,24 @@
 // dadurch, dass jede Antwort sagt, aus welcher Generation sie stammt, und der
 // Leser sich auf genau eine festlegt.
 //
+// ## Noch nicht aktiviert
+//
+// Eine Kennung darf nur Inhalt bezeichnen, der nachweisbar zu ihr gehoert.
+// Solange die drei News-Keys **veraenderlich** sind, kann das niemand belegen:
+// ein Leser kann den Zeiger vor und die Artikel nach einem Publish erwischen,
+// und **keine Lesereihenfolge** schliesst das aus. Deshalb schreibt der Cron
+// bis O3b keinen Zeiger, und die Endpunkte melden eine Generation nur ueber
+// eine ausdruecklich injizierte Quelle. Siehe
+// docs/deployment/news-generations.md.
+//
 // Bewusst ohne `node:`-Importe und ohne Netzwerkzugriff: dieselbe Logik gilt im
 // Cron (Node), in den Endpunkten (Edge) und im Browser.
 //
 // ## Der Vertrag
 //
-// - Der Publisher schreibt nach den drei News-Caches einen **Zeiger**
+// - Eine Generation wird durch einen **Zeiger** beschrieben
 //   (`news_snapshot_pointer`) mit `schemaVersion`, `snapshotId` und
-//   `createdAt`.
+//   `createdAt`. Wer ihn schreiben darf, entscheidet O3b.
 // - Jede News-Antwort traegt diese Angaben als **Header**. Der Rumpf bleibt ein
 //   nacktes Array - ein Umschlag waere ein Bruch fuer bestehende Clients.
 // - Ein Leser merkt sich die Generation der ersten brauchbaren Antwort und
@@ -306,9 +316,11 @@ export function decideSnapshotAcceptance({ pinned = null, incoming = null } = {}
 /**
  * Haengt die gepinnte Generation an eine Endpunktadresse.
  *
- * Der Parameter macht den Edge-Cache generationsspezifisch: die Antwort zu
- * einer Kennung ist unveraenderlich, waehrend derselbe Pfad ohne Parameter
- * weiterhin den bisherigen kurzlebigen Cache benutzt.
+ * Der Parameter macht den Edge-Cache generationsspezifisch: verschiedene
+ * Generationen liegen unter verschiedenen Cache-Keys. Er sagt ausdruecklich
+ * **nicht**, dass der Inhalt unter einer Kennung unveraenderlich waere - das
+ * gilt erst mit den unveraenderlichen Generationen aus O3b. Deshalb bekommt
+ * eine passende gepinnte Anfrage heute auch keine laengere Cache-Frist.
  *
  * @param {string} path
  * @param {NewsSnapshotPointer|{ snapshotId?: string }|null} pinned
