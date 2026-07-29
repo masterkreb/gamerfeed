@@ -82,7 +82,8 @@
 │   └── useLocalStorage.ts  # localStorage Hook
 │
 ├── services/
-│   └── feeds-api.ts        # HTTP-Zugriff für Feed-Verwaltung
+│   ├── feeds-api.ts        # HTTP-Zugriff für Feed-Verwaltung
+│   └── news-load-controller.ts # Latest-request-wins für Preview/Medium/Full
 │
 ├── scripts/
 │   ├── fetch-feeds.js      # Cron-Job Script (GitHub Actions)
@@ -476,6 +477,31 @@ auf altem. Die Bindung muss aus der Speicherung kommen, und das ist **O3b**.
 Einzelheiten, Grenzen und Migrationsreihenfolge:
 `docs/deployment/news-generations.md`.
 
+## 🔄 Progressive News-Ladekette
+
+`services/news-load-controller.ts` ist seit F1 der einzige Besitzer von
+Preview-, Medium-, Full- und manuellen Refresh-Requests.
+
+- Jede autoritative Ladung hat eine Request-Epoche und einen
+  `AbortController`. Eine neue Ladung oder Unmount bricht alte Arbeit ab; die
+  Epochenprüfung verhindert Seiteneffekte selbst dann, wenn ein Fetch den Abort
+  ignoriert.
+- Nur die aktuelle Epoche darf Artikel, `localStorage`, Snapshot-Pin,
+  Ladeindikatoren oder Fehlerzustände verändern.
+- Medium und Full bleiben sequenziell, Full wird aber auch nach einem
+  Medium-Fehler versucht.
+- `error` ist ausschließlich blockierend, wenn keine verwendbaren Daten
+  vorhanden sind. `backgroundError` lässt sichtbare Artikel stehen und meldet
+  einen fehlgeschlagenen Refresh oberhalb der Liste.
+- Auto-Update-Abfragen sind passiv: sie starten nicht neben einer sichtbaren
+  Ladung und werden von Refresh, Unmount oder der Übernahme vorgemerkter Artikel
+  entwertet.
+- Diese Request-Ownership ergänzt O3a, ersetzt dessen Generationsprüfung aber
+  nicht. Aktiviert wird die Inhaltsbindung weiterhin erst durch O3b.
+
+Deferred-Promise- und Chromium-Fälle sowie die bewussten Grenzen stehen in
+`docs/development/progressive-news-loading.md`.
+
 ## 🔌 Feed-Proxy
 
 Einzelne Quellen – aktuell GamePro – beantworten Anfragen aus dem
@@ -609,6 +635,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Cron-Heartbeat (O1): Attempt-Status, Kern-Publish und Inhaltsfrische getrennt geführt, veraltete Daten ab 50 Minuten sichtbar; Workflow startet zu Minute 7/27/47
 - **Juli 2026:** Admin-APIs (S2): Laufzeitverträge statt TypeScript-Casts, stabile Fehlercodes, keine internen Fehlertexte mehr im Client, `private, no-store` auf allen geschützten Antworten, inaktive Ankündigungen im Admin wieder bearbeitbar
 - **Juli 2026:** Generationsgebundenes Leseprotokoll (O3a): Vertrag, Leseregeln und alle Consumer stehen; aktiviert wird es erst mit den unveränderlichen Generationen aus O3b, bis dahin entwertet der Cron jeden Zeiger und alles antwortet als Legacy
+- **Juli 2026:** Progressive Ladekette (F1): zentraler Request-Controller mit Abort und Epoche, Full läuft auch nach Medium-Fehlern, alte Antworten und Polls dürfen State oder lokale Kopie nicht mehr überschreiben
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 

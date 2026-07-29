@@ -8,7 +8,7 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
 
 - **Umfassende Nachrichten-Aggregation**: Sammelt Artikel aus einer Vielzahl von RSS-Feeds.
 - **Moderne Benutzeroberfläche**: Ein sauberes, responsives Design, gebaut mit React und Tailwind CSS (lokal gebaut, keine CDN-Abhängigkeit im App-Bundle).
-- **⚡ Blitzschnelles Progressive Loading**: 3-stufiges Laden der Artikel für sofortige Anzeige (16 → 64 → alle Artikel).
+- **⚡ Blitzschnelles Progressive Loading**: 3-stufiges Laden der Artikel für sofortige Anzeige (16 → 64 → alle Artikel). Eine neuere Ladung gewinnt immer gegen verspätete Antworten.
 - **🔄 Auto-Update mit Live-Benachrichtigungen**: 
     - Automatische Prüfung auf neue Artikel alle 5 Minuten
     - Tab-Titel zeigt Anzahl neuer Artikel: `(5) GamerFeed`
@@ -51,6 +51,12 @@ GamerFeed nutzt eine innovative 3-stufige Lade-Strategie, um eine sofortige Anze
 
 Die tatsächliche Größe hängt von Artikelanzahl und Feldlängen ab. Die Ladedauer
 wird zusätzlich von der Netzverbindung beeinflusst.
+
+`services/news-load-controller.ts` besitzt die vollständige Ladekette. Ein
+manueller Refresh oder Unmount bricht ältere Arbeit ab und entwertet sie
+zusätzlich über eine Request-Epoche. Medium-Fehler verhindern Full nicht;
+Hintergrundfehler behalten bereits sichtbare Artikel. Einzelheiten und
+Testfälle: [Progressive News-Ladekette](docs/development/progressive-news-loading.md).
 
 ### Technische Umsetzung:
 
@@ -138,6 +144,11 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
     3.  Im Hintergrund wird `/api/get-news-medium` aufgerufen und 64 Artikel geladen (Stage 2).
     4.  Danach wird `/api/get-news` aufgerufen und alle Artikel geladen (Stage 3).
 *   **Ergebnis:** Der Nutzer sieht Inhalte sofort, ohne Wartezeit. Die Daten sind immer so aktuell wie der letzte Cron-Job-Lauf.
+*   **Latest request wins:** Preview, Medium, Full und manueller Refresh haben
+    einen gemeinsamen Controller. Nur die aktuelle Request-Epoche darf
+    React-State, Snapshot-Pin oder lokale Kopie verändern. Auto-Update-Abfragen
+    sind passiv und werden durch einen Refresh beziehungsweise Unmount
+    entwertet.
 *   **Eine Generation, nicht drei:** Die drei Stufen werden nacheinander geholt und unabhängig voneinander am Edge gecacht. Damit daraus kein gemischter Stand entsteht, gibt es ein Leseprotokoll: jede Antwort nennt ihre Cache-Generation, die erste brauchbare legt sie fest, eine neuere wird übernommen, eine ältere verworfen. Das Protokoll ist vollständig umgesetzt, aber **noch nicht aktiv** – eine Kennung darf nur Inhalt bezeichnen, der nachweisbar zu ihr gehört, und dafür braucht es die unveränderlichen Generationen aus O3b. Bis dahin verhält sich alles wie bisher. Einzelheiten und Grenzen: [Generationsgebundenes Leseprotokoll](docs/deployment/news-generations.md).
 
 ---
@@ -274,6 +285,7 @@ Alle Tests liegen zentral unter `tests/` und sind dort nach Fachbereich sowie Te
 
 ```text
 tests/
+├── e2e/
 ├── feeds/
 │   ├── unit/
 │   └── integration/

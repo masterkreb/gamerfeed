@@ -113,6 +113,15 @@ Endpunkte antworten als Legacy. Der Schutz gegen gemischte Generationen greift
 damit erst mit **O3b**, das die unveränderlichen Generationen liefert. 593
 zentrale Tests und 17 Browser-Abnahmen laufen erfolgreich.
 
+**Stand 29. Juli 2026 (Branch `codex/f1-latest-request-wins`):** F1 ist
+abgeschlossen. Preview, Medium, Full und manueller Refresh haben einen
+gemeinsamen Controller mit Abort und Request-Epoche; verspätete Antworten
+verändern weder State, Pin noch lokale Kopie. Full läuft auch nach einem
+Medium-Fehler, Auto-Update-Abfragen werden bei sichtbaren Zustandswechseln
+entwertet, und Refresh-Fehler behalten vorhandene Artikel. 604 zentrale Tests
+und 21 Browser-Abnahmen laufen erfolgreich. Als nächstes ist O3b bereit: erst
+sein unveränderlicher Publish aktiviert die in O3a vorbereitete Inhaltsbindung.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -127,8 +136,8 @@ zentrale Tests und 17 Browser-Abnahmen laufen erfolgreich.
 | O2a | P1 | erledigt | Einzelitem-Fehler, Secrets und Provider-Timeouts absichern |
 | O2b | P1 | erledigt | Feed-Kernlauf mit Deadline und Scrape-Budget begrenzen |
 | O3a | P1 | erledigt | Generationsgebundenes Leseprotokoll und Migration vorbereiten |
-| F1 | P1 | **bereit** | Progressive News-Ladekette gegen veraltete Antworten absichern |
-| O3b | P1 | geplant | News-Caches größenbegrenzt und konsistent veröffentlichen |
+| F1 | P1 | erledigt | Progressive News-Ladekette gegen veraltete Antworten absichern |
+| O3b | P1 | **bereit** | News-Caches größenbegrenzt und konsistent veröffentlichen |
 | F3a | P2 | geplant | Zentrale Tastatur- und DOM-Probleme im Frontend beheben |
 | F3b | P2 | geplant | Veraltetes ArticleCard-Rendering verhindern |
 | F4a | P2 | geplant | Persistierten Zustand robust validieren |
@@ -511,6 +520,10 @@ Regressionstest für das generationsgebundene Protokoll und später F1.
 
 ### O3b – Konsistenter, größenbegrenzter Publish
 
+**Status:** bereit – nächstes Code-Arbeitspaket. O3a hat das Leseprotokoll
+vorbereitet, F1 besitzt und entwertet überlappende Browser-Requests. O3b kann
+damit die unveränderliche Schreibseite ergänzen und das Protokoll aktivieren.
+
 **Zusätzlich seit O3a:** O3b **aktiviert** das generationsgebundene
 Leseprotokoll. Erst unveränderliche Generationen können belegen, dass eine
 Kennung zu einem Inhalt gehört; bis dahin bleibt der Zeiger leer und alle
@@ -610,15 +623,15 @@ eine kleine, neutrale Infrastruktur.
 
 ### F1 – Progressive Ladekette: „latest request wins“
 
-**Status:** bereit – nächstes Code-Arbeitspaket. O3a hat das Leseprotokoll
-bereitgestellt, das eine *ältere Generation* verwirft; wirksam wird es aber erst
-mit O3b. Unabhängig davon offen bleiben die Reihenfolge der Requests selbst,
-Abbruch bei Unmount und die Trennung blockierender von nicht blockierenden
-Fehlern.
+**Status:** erledigt. `services/news-load-controller.ts` besitzt die komplette
+Stufenkette. Abort und Request-Epoche stellen gemeinsam sicher, dass nur die
+aktuelle Ladung State, `localStorage` und Snapshot-Pin ändern darf. Passive
+Auto-Update-Abfragen werden von Refresh, Unmount und einer sichtbaren
+Pending-Übernahme entwertet.
 
-**Warum:** Eine verspätete Medium- oder Full-Antwort der initialen Ladekette
-kann momentan einen neueren manuellen Refresh wieder überschreiben. Scheitert
-Medium, wird Full nicht mehr versucht.
+**Warum:** Vor F1 konnte eine verspätete Medium- oder Full-Antwort der
+initialen Ladekette einen neueren manuellen Refresh wieder überschreiben.
+Scheiterte Medium, wurde Full nicht mehr versucht.
 
 **Umfang:**
 
@@ -636,9 +649,16 @@ Medium, wird Full nicht mehr versucht.
 - Medium-Fehler verhindert Full nicht;
 - Unmount und neuer Refresh brechen Arbeit ab oder invalidieren sie so, dass
   sie weder State noch Cache verändern darf;
-- abweichende `snapshotId` wird verworfen;
+- eine nach den O3a-Regeln ältere oder unbrauchbare `snapshotId` wird
+  verworfen; eine belegbar neuere Generation bleibt weiterhin übernehmbar;
 - Deferred-Promise-Tests decken Reihenfolge, Fallback und Fehlerzustände ab;
 - ein Chromium-Smoke ergänzt T0 für den vollständigen Stufenablauf.
+
+Erfüllt durch Deferred-Promise-Tests in
+`tests/frontend/unit/news-load-controller.test.js` und die Chromium-Abnahmen in
+`tests/e2e/news-loading.spec.ts`. Die Trennung von Request-Reihenfolge und
+Inhaltsgeneration ist in
+`docs/development/progressive-news-loading.md` dokumentiert.
 
 ### F2 – Consent-Lifecycle vervollständigen
 
