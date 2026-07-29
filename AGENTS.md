@@ -92,6 +92,7 @@
 │   ├── feed-run-budget.js  # Zeit- und Scrape-Budget eines Laufs
 │   ├── feed-run-config.js  # Core- und optionale Konfiguration des Laufs
 │   ├── feed-run-recorder.js # Reihenfolge und Schreibregeln des Heartbeats
+│   ├── news-snapshot-publisher.js # Bytebudget, Lease, atomare Aktivierung und GC
 │   ├── groq-client.js      # Begrenzter Zugang zur Groq-API
 │   └── limited-response.js # Begrenztes Lesen fremder HTTP-Antworten
 │
@@ -104,6 +105,7 @@
 ├── shared/                 # Gemeinsame Frontend-/Backend-Verträge
 │   ├── announcement-contract.js # Typen, Längengrenze und Parser
 │   ├── news-snapshot.js         # Generationsgebundenes Leseprotokoll
+│   ├── news-snapshot-store.js   # Unveränderliche Keys, Manifest und Dual-Read
 │   ├── api-errors.js            # Stabile Fehlercodes und Cache-Vorgabe
 │   └── feed-health-model.js     # Cron-Heartbeat, Frische, FEED_STALE_AFTER_MS
 ├── tests/                  # Zentrale Tests nach Fachbereich und Testart
@@ -237,7 +239,9 @@ läuft).
 | `news_cache` | Alle Artikel (Array) |
 | `news_cache_16` | Erste 16 Artikel |
 | `news_cache_64` | Erste 64 Artikel |
-| `news_snapshot_pointer` | Aktive Cache-Generation; bis O3b bewusst leer |
+| `news_snapshot_pointer` | Aktive vollständige Cache-Generation |
+| `news_snapshot:<id>:{full,preview,medium,meta}` | Unveränderliche Payloads und Manifest |
+| `news_snapshot_publish_lease` | Kurzlebige Lease gegen parallele Writer |
 | `feed_health_status` | Status pro Feed, mit `lastAttemptAt`/`lastSuccessAt` |
 | `feed_run_status` | Veränderlicher Attempt-Status des Cron-Laufs |
 | `feed_publish_status` | Letzter erfolgreicher Kern-Publish |
@@ -430,22 +434,32 @@ voneinander am Edge gecacht. Ohne weiteres Zutun kann ein Browser Preview,
 Medium und Full aus drei verschiedenen Ständen zusammensetzen – beobachtet am
 29. Juli 2026, als das Frontend dauerhaft 25 statt 26 deutsche Quellen zeigte.
 
-**O3a definiert und verdrahtet das Protokoll, aktiviert es aber noch nicht.**
-Eine Snapshot-ID darf nur Inhalt kennzeichnen, der nachweisbar zu genau dieser
-Generation gehört. `news_cache`, `news_cache_16` und `news_cache_64` sind
-**veränderlich**; ein Leser kann den Zeiger vor und die Artikel nach einem
-Publish erwischen. **Keine Lesereihenfolge kann das ausschließen** – „Zeiger
-zuerst" ergibt eine alte Kennung auf neuem Inhalt, „Artikel zuerst" eine neue
-auf altem. Die Bindung muss aus der Speicherung kommen, und das ist **O3b**.
+O3a definiert die Leseregeln; **O3b aktiviert sie über unveränderliche
+Generationen**:
 
-- **Der Cron schreibt keinen Zeiger.** Er *entwertet* einen vorhandenen, bevor
-  er die veränderlichen Keys anfasst. Scheitert das, läuft der Publish weiter,
-  wird aber laut gemeldet.
+- **Eigene Keys je Generation:** Full, Preview und Medium liegen unter
+  `news_snapshot:<id>:*`. Ein strenges Manifest belegt Vollständigkeit,
+  Artikelzahl, Bytezahl und Quellen.
+- **Pointer zuletzt:** Der Cron schreibt Payloads, Manifest und dieselben
+  begrenzten Legacy-Keys, bevor `news_snapshot_pointer` die Generation
+  aktiviert. Ein Fehler davor lässt den alten vollständigen Stand sichtbar.
+- **Bytebudgets statt Artikelzahl:** Full 9 MiB, Medium 2 MiB, Preview
+  512 KiB, jeweils 64 KiB Reserve. Feldlängen und einzelne 64-KiB-Artikel sind
+  begrenzt; bei Platzmangel fallen deterministisch die ältesten Einträge weg.
+- **Parallele Writer:** Eine fünfminütige `SET NX PX`-Lease serialisiert den
+  Publish. Nach dem Erwerb verhindert ein monotoner Vergleich nach Laufstart,
+  dass ein älterer Lauf einen neueren Pointer zurücksetzt. Die abschließende
+  Pointer-Aktivierung prüft den Lease-Besitz atomar; ein Writer mit abgelaufener
+  Lease kann deshalb nicht nachträglich aktivieren. Das Warten bleibt innerhalb
+  der O2b-Deadline.
+- **Aktiv und vorherig bleiben:** Ein gepinnter Leser darf die aktive oder
+  direkt vorherige Generation abrufen. Ältere und unvollständige Generationen
+  werden erst nach 24 Stunden Grace Period best effort entfernt.
 - **Jede News-Antwort trägt die Generation als Header**, nicht als Umschlag.
   Der Rumpf bleibt ein nacktes Array – bestehende Clients merken nichts.
-- **Die Endpunkte melden nur, was belegt ist:** `createNewsCacheHandler` nimmt
-  `readSnapshot` entgegen und ist in Produktion bewusst unverdrahtet. Ohne
-  Quelle antwortet alles exakt wie vor O3a.
+- **Die Endpunkte melden nur, was belegt ist:** Produktion liest Manifest und
+  Payload derselben unveränderlichen ID. Fehlt diese Bindung, gilt der
+  Legacy-Fallback ohne Header.
 - **Drei Leseregeln:** gleiche Generation übernehmen, neuere übernehmen *und*
   umpinnen, ältere verwerfen.
 - **Gepinnt wird nur, was sichtbar ist.** Der Auto-Update-Pfad pollt im
@@ -462,17 +476,20 @@ auf altem. Die Bindung muss aus der Speicherung kommen, und das ist **O3b**.
 - **Ein Rollback im Poll-Pfad räumt auf.** Der Poll pinnt nicht, leert aber
   Warteschlange, Badge und Tab-Titel – eine zurückgezogene Generation darf nicht
   vorgemerkt bleiben. Wirksam wird der Rollback über Reload oder Refresh.
-- **Die Health-API meldet bis O3b `snapshot: null`.** Eine Zuordnung über die
-  Artikelzahl wäre geraten: zwei Generationen können dieselbe haben.
+- **Die Health-API liest nur das Manifest.** Quellenliste und Snapshot stammen
+  aus derselben Generation; der mehrere Megabyte große Full-Payload entfällt.
 - **`?snapshot=<id>`**: abweichend `no-store`, passend und ungepinnt dieselbe
-  Cache-Dauer wie bisher. **Kein** verlängerter Edge-Cache – der Inhalt unter
-  einer Kennung ist nicht unveränderlich, solange die Keys überschrieben werden.
+  Cache-Dauer wie bisher. Die HTTP-Frist bleibt während Dual-Read bewusst kurz,
+  obwohl der Inhalt unter der Kennung nun unveränderlich ist.
 - **Strenge Prüfung:** `snapshotId` muss `<epochMs>-<lauf>` entsprechen und zu
   `createdAt` passen. Ein beschädigter Wert könnte sonst lexikografisch jede
   echte Generation blockieren. Lieber gar keine Generation als eine falsche.
 - **`null` heißt überall „Legacy", nie „Fehler".**
 - **Auch die lokale Kopie zählt:** `cachedNews` ist 30 Minuten gültig, der
   Edge-Cache nur 60 Sekunden. Sie speichert deshalb ihre Generation mit.
+- **Zwei Rollbacks:** `rollbackToPreviousNewsSnapshot` schaltet gebunden auf
+  die vorherige Generation. `NEWS_SNAPSHOT_LEGACY_ROLLBACK=true` lässt alle
+  Consumer Legacy lesen und sendet das ausdrückliche, nie cachebare Signal.
 
 Einzelheiten, Grenzen und Migrationsreihenfolge:
 `docs/deployment/news-generations.md`.
@@ -614,6 +631,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - Für lokale Änderungen an Serverless Functions: `vercel dev` nutzen
 - GitHub Actions braucht die Core-Secrets `POSTGRES_URL`, `KV_REST_API_URL` und `KV_REST_API_TOKEN`; ohne sie endet der Lauf sofort. `GROQ_API_KEY` und `FEED_PROXY_URL` sind optional und schalten nur ihre Zusatzfunktion ab
 - `FEED_CORE_DEADLINE_MS` und `FEED_SCRAPE_LIMIT` sind optionale Grenzen; ohne sie gelten 18 Minuten und 80 Seitenabrufe
+- `NEWS_CACHE_*_MAX_BYTES` und `NEWS_CACHE_SAFETY_RESERVE_BYTES` sind optionale O3b-Grenzen; `NEWS_SNAPSHOT_LEGACY_ROLLBACK=true` ist eine bewusste, nie automatisch gesetzte Betriebsflagge
 - Der PHP-Feed-Proxy wird separat und manuell betrieben: `docs/deployment/feed-proxy.md`
 
 ---
@@ -636,6 +654,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Admin-APIs (S2): Laufzeitverträge statt TypeScript-Casts, stabile Fehlercodes, keine internen Fehlertexte mehr im Client, `private, no-store` auf allen geschützten Antworten, inaktive Ankündigungen im Admin wieder bearbeitbar
 - **Juli 2026:** Generationsgebundenes Leseprotokoll (O3a): Vertrag, Leseregeln und alle Consumer stehen; aktiviert wird es erst mit den unveränderlichen Generationen aus O3b, bis dahin entwertet der Cron jeden Zeiger und alles antwortet als Legacy
 - **Juli 2026:** Progressive Ladekette (F1): zentraler Request-Controller mit Abort und Epoche, Full läuft auch nach Medium-Fehlern, alte Antworten und Polls dürfen State oder lokale Kopie nicht mehr überschreiben
+- **Juli 2026:** Konsistenter News-Publish (O3b): unveränderliche, bytebegrenzte Generationen mit Manifest, Pointer-last-Aktivierung, Writer-Lease, vorheriger Generation, Rollback und Garbage Collection
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 
