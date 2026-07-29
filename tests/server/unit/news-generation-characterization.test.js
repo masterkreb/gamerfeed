@@ -74,9 +74,9 @@ test('ein Client ohne Generationswissen bekommt unveraenderte Cache-Header', asy
 
 // === Die heutige Luecke ===
 
-test('heute verraet keine Antwort, aus welcher Generation sie stammt', async () => {
-    // Charakterisierung, kein Wunschverhalten: ohne diese Angabe kann ein
-    // Client zwei Antworten nicht vergleichen.
+test('ohne Zeiger verraet keine Antwort eine Generation - das Legacy-Verhalten', async () => {
+    // Solange kein Cron-Lauf einen Zeiger geschrieben hat, bleibt alles wie
+    // vor O3a. Genau das braucht die schrittweise Migration.
     const cache = createCache({ news_cache: [createArticle('a1')] });
 
     const response = await handlerFor(cache, 'news_cache', '/api/get-news')(
@@ -84,9 +84,10 @@ test('heute verraet keine Antwort, aus welcher Generation sie stammt', async () 
     );
 
     assert.equal(response.headers.get('x-gamerfeed-snapshot-id'), null);
+    assert.equal(response.status, 200);
 });
 
-test('heute koennen Preview, Medium und Full aus drei Generationen stammen', async () => {
+test('ohne Protokoll koennten Preview, Medium und Full aus drei Generationen stammen', async () => {
     // Der Cron schreibt die drei Schluessel nacheinander. Faellt ein Lauf
     // dazwischen aus oder liefert der Edge unterschiedlich alte Kopien, sieht
     // der Browser eine Mischung - und nichts im Protokoll bemerkt es.
@@ -116,8 +117,9 @@ test('heute koennen Preview, Medium und Full aus drei Generationen stammen', asy
     assert.equal(previewQuellen.has('GameStar'), false, 'die aeltere Kopie kennt GameStar nicht');
     assert.equal(fullQuellen.has('GameStar'), true, 'der Full-Cache kennt GameStar');
 
-    // Und genau hier fehlt heute die Information, die den Unterschied
-    // erklaeren wuerde.
+    // Ohne Zeiger fehlt genau die Information, die den Unterschied erklaeren
+    // wuerde - der Zustand vor O3a. Mit Zeiger tragen beide Antworten ihre
+    // Generation; das prueft news-generation-protocol.test.js.
     assert.equal(preview.headers.get('x-gamerfeed-snapshot-id'), null);
     assert.equal(full.headers.get('x-gamerfeed-snapshot-id'), null);
 });

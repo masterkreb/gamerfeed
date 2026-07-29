@@ -15,6 +15,9 @@ function createArticle(id) {
     };
 }
 
+// Ab O3a liest jeder Endpunkt zuerst den Generationszeiger und danach die
+// Artikel. Die Reihenfolge steht ausdruecklich in den Erwartungen: sie ist Teil
+// des Vertrags, siehe server/news-cache-handler.ts.
 function createCache(values = {}, error = null) {
     const calls = [];
 
@@ -73,7 +76,7 @@ test('liefert den vollständigen Cache mit unveränderten Response-Headern', asy
 
     assert.equal(response.status, 200);
     assert.deepEqual(await readJson(response), articles);
-    assert.deepEqual(cache.calls, ['news_cache']);
+    assert.deepEqual(cache.calls, ['news_snapshot_pointer', 'news_cache']);
     assertSuccessHeaders(response);
 });
 
@@ -96,7 +99,7 @@ test('verwendet einen vorhandenen Teilcache ohne unnötigen Fallback-Abruf', asy
 
     assert.equal(response.status, 200);
     assert.deepEqual(await readJson(response), previewArticles);
-    assert.deepEqual(cache.calls, ['news_cache_16']);
+    assert.deepEqual(cache.calls, ['news_snapshot_pointer', 'news_cache_16']);
     assertSuccessHeaders(response);
 });
 
@@ -123,7 +126,7 @@ test('schneidet bei fehlendem Teilcache den vollständigen Cache auf das Limit z
 
     assert.equal(response.status, 200);
     assert.deepEqual(await readJson(response), fullArticles.slice(0, 2));
-    assert.deepEqual(cache.calls, ['news_cache_16', 'news_cache']);
+    assert.deepEqual(cache.calls, ['news_snapshot_pointer', 'news_cache_16', 'news_cache']);
     assertSuccessHeaders(response);
 });
 
@@ -145,7 +148,7 @@ test('behandelt einen vorhandenen leeren Teilcache weiterhin als gültige Antwor
 
     assert.equal(response.status, 200);
     assert.deepEqual(await readJson(response), []);
-    assert.deepEqual(cache.calls, ['news_cache_64']);
+    assert.deepEqual(cache.calls, ['news_snapshot_pointer', 'news_cache_64']);
     assertSuccessHeaders(response);
 });
 
@@ -166,7 +169,7 @@ test('liefert bei vollständig fehlendem Cache weiterhin 404', async () => {
     assert.deepEqual(await readJson(response), {
         error: 'Cache is empty or not available.',
     });
-    assert.deepEqual(cache.calls, ['news_cache_16', 'news_cache']);
+    assert.deepEqual(cache.calls, ['news_snapshot_pointer', 'news_cache_16', 'news_cache']);
     assertErrorHeaders(response);
 });
 
@@ -187,10 +190,12 @@ test('protokolliert KV-Fehler und liefert deren Fehlermeldung mit Status 500', a
 
     assert.equal(response.status, 500);
     assert.deepEqual(await readJson(response), { error: 'KV nicht erreichbar' });
-    assert.deepEqual(log.calls, [[
-        'API Error in /api/get-news:',
-        error,
-    ]]);
+    // Bei einem KV-Ausfall scheitert seit O3a zuerst der Zeiger - das bleibt
+    // folgenlos - und danach der Artikelabruf, der weiterhin die 500 erzeugt.
+    assert.deepEqual(log.calls, [
+        ['Snapshot pointer unavailable in /api/get-news:', error],
+        ['API Error in /api/get-news:', error],
+    ]);
     assertErrorHeaders(response);
 });
 

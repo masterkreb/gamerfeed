@@ -10,6 +10,11 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeContentUrl } from '../shared/url-policy.js';
 import { resolveRunResult, sanitizeErrorMessage } from '../shared/feed-health-model.js';
+import {
+    NEWS_SNAPSHOT_POINTER_KEY,
+    buildSnapshotPointer,
+    createSnapshotId,
+} from '../shared/news-snapshot.js';
 import { createFeedRunRecorder } from './feed-run-recorder.js';
 import { readFeedRunConfiguration } from './feed-run-config.js';
 import {
@@ -1458,6 +1463,28 @@ export async function main({
 
         await store.set('news_cache_64', sortedArticles.slice(0, 64));
         logger.log(`   ⚡ Saved 64 medium articles to KV key 'news_cache_64'`);
+
+        // Der Zeiger auf die Generation kommt **zuletzt** (O3a). Damit zeigt er
+        // nie auf Daten, die noch gar nicht vollständig geschrieben sind.
+        //
+        // Ein Schreibfehler hier ist ausdrücklich **nicht** fatal: die drei
+        // News-Caches stehen bereits, und ein Leser ohne Zeiger fällt
+        // kontrolliert auf das Legacy-Verhalten zurück. Den Kern-Publish
+        // deshalb scheitern zu lassen wäre der schlechtere Tausch.
+        const snapshot = buildSnapshotPointer({
+            snapshotId: createSnapshotId(new Date(), recorder.runId),
+            createdAt: new Date(),
+            articleCount: sortedArticles.length,
+            runId: recorder.runId,
+        });
+        try {
+            await store.set(NEWS_SNAPSHOT_POINTER_KEY, snapshot);
+            logger.log(`   🔖 Generation ${snapshot.snapshotId} veröffentlicht`);
+        } catch (pointerError) {
+            logger.warn(`   ⚠️  Generationszeiger konnte nicht gespeichert werden: ${redactMessage(
+                pointerError instanceof Error ? pointerError.message : String(pointerError),
+            )}`);
+        }
 
         durations.publishMs = Date.now() - publishStartMs;
         durations.totalMs = Date.now() - runStartMs;
