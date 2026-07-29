@@ -32,6 +32,16 @@
 // stillschweigend - genau das, was eine Dual-Read-Migration braucht.
 
 /**
+ * @typedef {{
+ *   schemaVersion: number,
+ *   snapshotId: string,
+ *   createdAt: string|null,
+ *   articleCount: number,
+ *   runId: string|null,
+ * }} NewsSnapshotPointer
+ */
+
+/**
  * Version des Leseprotokolls.
  *
  * Eine unbekannte Version wird wie „gar keine Generationsangabe“ behandelt und
@@ -125,7 +135,7 @@ export function buildSnapshotPointer({ snapshotId, createdAt, articleCount, runI
  * Verhalten vor O3a zurueck, statt eine brauchbare Antwort wegzuwerfen.
  *
  * @param {unknown} raw
- * @returns {{ schemaVersion: number, snapshotId: string, createdAt: string|null, articleCount: number, runId: string|null }|null}
+ * @returns {NewsSnapshotPointer|null}
  */
 export function normalizeSnapshotPointer(raw) {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
@@ -149,7 +159,7 @@ export function normalizeSnapshotPointer(raw) {
 /**
  * Header einer generationsgebundenen Antwort.
  *
- * @param {ReturnType<typeof normalizeSnapshotPointer>} pointer
+ * @param {NewsSnapshotPointer|null} pointer
  * @returns {Record<string, string>}
  */
 export function snapshotHeaders(pointer) {
@@ -171,8 +181,8 @@ export function snapshotHeaders(pointer) {
  * Eine Antwort ohne diese Header ist „Legacy“ und ergibt `null` - etwa eine
  * Kopie aus einem Edge-Cache von vor der Migration.
  *
- * @param {{ get(name: string): string|null }} headers
- * @returns {ReturnType<typeof normalizeSnapshotPointer>}
+ * @param {{ get(name: string): string|null }|null} headers
+ * @returns {NewsSnapshotPointer|null}
  */
 export function readSnapshotHeaders(headers) {
     if (!headers || typeof headers.get !== 'function') return null;
@@ -193,6 +203,8 @@ export function readSnapshotHeaders(headers) {
  * beginnt mit dem Zeitanteil, deshalb bleibt der Vergleich auch ohne
  * `createdAt` sinnvoll.
  *
+ * @param {NewsSnapshotPointer|null} a
+ * @param {NewsSnapshotPointer|null} b
  * @returns {-1|0|1} negativ, wenn `a` aelter ist als `b`
  */
 export function compareSnapshots(a, b) {
@@ -232,8 +244,8 @@ export function compareSnapshots(a, b) {
  * ist. Ist bereits eine echte Generation gepinnt, gilt Legacy als aelter und
  * wird verworfen.
  *
- * @param {{ pinned: object|null, incoming: object|null }} params
- * @returns {{ accept: boolean, pin: object|null, reason: string }}
+ * @param {{ pinned?: NewsSnapshotPointer|null, incoming?: NewsSnapshotPointer|null }} [params]
+ * @returns {{ accept: boolean, pin: NewsSnapshotPointer|null, reason: string }}
  */
 export function decideSnapshotAcceptance({ pinned = null, incoming = null } = {}) {
     if (!incoming) {
@@ -266,7 +278,7 @@ export function decideSnapshotAcceptance({ pinned = null, incoming = null } = {}
  * weiterhin den bisherigen kurzlebigen Cache benutzt.
  *
  * @param {string} path
- * @param {object|null} pinned
+ * @param {NewsSnapshotPointer|{ snapshotId?: string }|null} pinned
  * @returns {string}
  */
 export function withSnapshotQuery(path, pinned) {

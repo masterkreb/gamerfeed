@@ -232,7 +232,9 @@ test('ein KV-Fehler wird protokolliert, aber nicht ausgeliefert', async () => {
     assert.equal(calls.length, 1, 'der Originaltext landet ausschliesslich im Log');
 });
 
-test('es werden nur die vier erwarteten KV-Schluessel gelesen', async () => {
+test('es werden nur die fuenf erwarteten KV-Schluessel gelesen', async () => {
+    // Seit O3a kommt der Generationszeiger dazu: er sagt, auf welchem Stand
+    // `sourcesInCache` beruht.
     const { handler, cache } = createHandler(healthyStore());
     await handler(new Request('https://example.com/x'));
 
@@ -241,5 +243,51 @@ test('es werden nur die vier erwarteten KV-Schluessel gelesen', async () => {
         'feed_publish_status',
         'feed_run_status',
         'news_cache',
+        'news_snapshot_pointer',
     ]);
+});
+
+// === Generation der Quellenzaehlung (Roadmap O3a) ===
+
+test('die Antwort nennt die Generation, auf der sourcesInCache beruht', async () => {
+    // Ohne diese Angabe laesst sich „nicht im aktiven Snapshot" nicht von
+    // „das Frontend sieht einen anderen Snapshot" unterscheiden.
+    const store = healthyStore();
+    store.news_snapshot_pointer = {
+        schemaVersion: 1,
+        snapshotId: '2000-gha-2',
+        createdAt: '2026-07-29T10:20:00.000Z',
+        articleCount: 1,
+        runId: 'gha-2',
+    };
+
+    const { handler } = createHandler(store);
+    const body = await (await handler(new Request('https://example.com/x'))).json();
+
+    assert.equal(body.snapshot.snapshotId, '2000-gha-2');
+    assert.equal(body.snapshot.schemaVersion, 1);
+    assert.deepEqual(body.sourcesInCache, ['GameStar']);
+});
+
+test('ohne Zeiger meldet die Health-API null statt zu scheitern', async () => {
+    const { handler } = createHandler(healthyStore());
+    const response = await handler(new Request('https://example.com/x'));
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.snapshot, null);
+    assert.deepEqual(body.sourcesInCache, ['GameStar']);
+});
+
+test('ein fehlerhafter Zeiger wird in der Health-API zu null', async () => {
+    for (const kaputt of ['kein objekt', [], {}, { schemaVersion: 99, snapshotId: 'x' }]) {
+        const store = healthyStore();
+        store.news_snapshot_pointer = kaputt;
+
+        const { handler } = createHandler(store);
+        const body = await (await handler(new Request('https://example.com/x'))).json();
+
+        assert.equal(body.snapshot, null, JSON.stringify(kaputt));
+        assert.deepEqual(body.sourcesInCache, ['GameStar'], JSON.stringify(kaputt));
+    }
 });

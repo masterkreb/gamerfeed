@@ -5,7 +5,7 @@ import { FilterBar } from './components/FilterBar';
 import { ArticleCard } from './components/ArticleCard';
 import { TrendsView } from './components/TrendsView';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import type { Article, Theme, ViewMode, AppView, Announcement, CachedNews } from './types';
+import type { Article, Theme, ViewMode, AppView, Announcement, CachedNews, NewsSnapshotPointer } from './types';
 import { LoadingSpinner, SearchIcon, FilterIcon, ResetIcon, NewspaperIcon, BookmarkIcon, StarIcon, ArrowLeftIcon } from './components/Icons';
 import { FilterProvider, useFilter } from './contexts/FilterContext';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
@@ -16,6 +16,11 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { useCookieConsent } from './components/CookieConsent';
 import { createAnalyticsLifecycle } from './shared/analytics-lifecycle.js';
 import { filterArticles } from './shared/article-filters';
+import {
+    decideSnapshotAcceptance,
+    readSnapshotHeaders,
+    withSnapshotQuery,
+} from './shared/news-snapshot.js';
 
 const ARTICLES_PER_PAGE = 32;
 const INITIAL_ARTICLE_CACHE_COUNT = 32;
@@ -137,6 +142,39 @@ const AppContent: React.FC = () => {
     const [dismissedAnnouncementId, setDismissedAnnouncementId] = useLocalStorage<string | null>('dismissedAnnouncementId', null);
     const cachedArticlesRef = useRef<Article[]>([]);
 
+    // Gepinnte Cache-Generation (Roadmap O3a). Bewusst eine Ref und kein State:
+    // sie steuert nur, welche Antwort uebernommen wird, und darf dafuer kein
+    // Rendern ausloesen.
+    const pinnedSnapshotRef = useRef<NewsSnapshotPointer | null>(null);
+
+    /**
+     * Uebernimmt eine Antwort nur, wenn sie nicht aus einer aelteren Generation
+     * stammt.
+     *
+     * Ohne diese Pruefung konnte eine verspaetete oder aus dem Edge-Cache
+     * stammende Kopie den bereits sichtbaren neueren Stand ueberschreiben -
+     * genau der am 29. Juli 2026 beobachtete Fall, in dem der Browser dauerhaft
+     * 25 statt 26 deutsche Quellen zeigte.
+     */
+    const acceptSnapshotResponse = useCallback((response: Response): boolean => {
+        const incoming = readSnapshotHeaders(response.headers);
+        const decision = decideSnapshotAcceptance({
+            pinned: pinnedSnapshotRef.current,
+            incoming,
+        });
+
+        pinnedSnapshotRef.current = decision.pin;
+        if (!decision.accept) {
+            console.warn(`Antwort verworfen (${decision.reason})`);
+        }
+        return decision.accept;
+    }, []);
+
+    /** Haengt die gepinnte Generation an eine Endpunktadresse. */
+    const snapshotUrl = useCallback((path: string): string => (
+        withSnapshotQuery(path, pinnedSnapshotRef.current)
+    ), []);
+
     const validCachedArticles = useMemo(() => {
         const isFresh = Date.now() - cachedNews.timestamp < ARTICLE_CACHE_TTL_MS;
         return isFresh ? cachedNews.articles : [];
@@ -223,50 +261,57 @@ const AppContent: React.FC = () => {
         try {
             if (isManualRefresh) {
                 // Manual refresh: fetch all articles directly
-                const response = await fetch('/api/get-news');
+                const response = await fetch(snapshotUrl('/api/get-news'));
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => null);
                     const errorMessage = errorData?.error || `Failed to load news from API: ${response.status}`;
                     throw new Error(errorMessage);
                 }
                 const fetchedArticles: Article[] = await response.json();
-                setArticles(fetchedArticles);
-                persistCachedArticles(fetchedArticles);
-                console.log(`Refreshed ${fetchedArticles.length} articles from API`);
+                if (acceptSnapshotResponse(response)) {
+                    setArticles(fetchedArticles);
+                    persistCachedArticles(fetchedArticles);
+                    console.log(`Refreshed ${fetchedArticles.length} articles from API`);
+                }
             } else {
                 // Initial load: 3-stage progressive loading (16 → 64 → full)
-                const previewResponse = await fetch('/api/get-news-preview');
+                const previewResponse = await fetch(snapshotUrl('/api/get-news-preview'));
 
                 if (previewResponse.ok) {
                     // Stage 1: Show first 16 articles immediately
                     const previewArticles: Article[] = await previewResponse.json();
-                    setArticles(previewArticles);
-                    persistCachedArticles(previewArticles);
+                    if (acceptSnapshotResponse(previewResponse)) {
+                        setArticles(previewArticles);
+                        persistCachedArticles(previewArticles);
+                        console.log(`✅ Stage 1: Loaded ${previewArticles.length} preview articles`);
+                    }
                     setIsBlockingLoading(false);
-                    console.log(`✅ Stage 1: Loaded ${previewArticles.length} preview articles`);
 
-                    // Stage 2: Load 64 articles in background
-                    fetch('/api/get-news-medium')
-                        .then(response => {
+                    // Stage 2: Load 64 articles in background. Jede Stufe wird an
+                    // die inzwischen gepinnte Generation gebunden und nur
+                    // uebernommen, wenn sie nicht aelter ist als der sichtbare
+                    // Stand (Roadmap O3a).
+                    fetch(snapshotUrl('/api/get-news-medium'))
+                        .then(async response => {
                             if (!response.ok) throw new Error('Failed to load medium articles');
-                            return response.json();
-                        })
-                        .then((mediumArticles: Article[]) => {
-                            setArticles(mediumArticles);
-                            persistCachedArticles(mediumArticles);
-                            console.log(`✅ Stage 2: Loaded ${mediumArticles.length} medium articles`);
+                            const mediumArticles: Article[] = await response.json();
+                            if (acceptSnapshotResponse(response)) {
+                                setArticles(mediumArticles);
+                                persistCachedArticles(mediumArticles);
+                                console.log(`✅ Stage 2: Loaded ${mediumArticles.length} medium articles`);
+                            }
 
                             // Stage 3: Load all articles in background
-                            return fetch('/api/get-news');
+                            return fetch(snapshotUrl('/api/get-news'));
                         })
-                        .then(response => {
+                        .then(async response => {
                             if (!response.ok) throw new Error('Failed to load full articles');
-                            return response.json();
-                        })
-                        .then((fullArticles: Article[]) => {
-                            setArticles(fullArticles);
-                            persistCachedArticles(fullArticles);
-                            console.log(`✅ Stage 3: Loaded ${fullArticles.length} full articles`);
+                            const fullArticles: Article[] = await response.json();
+                            if (acceptSnapshotResponse(response)) {
+                                setArticles(fullArticles);
+                                persistCachedArticles(fullArticles);
+                                console.log(`✅ Stage 3: Loaded ${fullArticles.length} full articles`);
+                            }
                         })
                         .catch(err => {
                             console.warn('Background loading failed:', err);
@@ -276,16 +321,18 @@ const AppContent: React.FC = () => {
                 } else {
                     // Preview API not available (404) - fallback to full API
                     console.log('Preview API not available, falling back to full API');
-                    const response = await fetch('/api/get-news');
+                    const response = await fetch(snapshotUrl('/api/get-news'));
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => null);
                         const errorMessage = errorData?.error || `Failed to load news: ${response.status}`;
                         throw new Error(errorMessage);
                     }
                     const fetchedArticles: Article[] = await response.json();
-                    setArticles(fetchedArticles);
-                    persistCachedArticles(fetchedArticles);
-                    console.log(`Loaded ${fetchedArticles.length} articles (fallback)`);
+                    if (acceptSnapshotResponse(response)) {
+                        setArticles(fetchedArticles);
+                        persistCachedArticles(fetchedArticles);
+                        console.log(`Loaded ${fetchedArticles.length} articles (fallback)`);
+                    }
                 }
             }
 
@@ -297,7 +344,7 @@ const AppContent: React.FC = () => {
             setIsBlockingLoading(false);
             setIsRefreshing(false);
         }
-    }, [persistCachedArticles]);
+    }, [persistCachedArticles, acceptSnapshotResponse, snapshotUrl]);
 
     useEffect(() => {
         loadNews();
@@ -315,10 +362,12 @@ const AppContent: React.FC = () => {
     // Check for new articles without updating the view
     const checkForNewArticles = useCallback(async () => {
         try {
-            const response = await fetch('/api/get-news');
+            const response = await fetch(snapshotUrl('/api/get-news'));
             if (!response.ok) return;
             
             const fetchedArticles: Article[] = await response.json();
+            // Ein aelterer Stand darf keine neuen Artikel melden.
+            if (!acceptSnapshotResponse(response)) return;
             
             // Get the newest article date from currently loaded articles
             const newestLoadedDate = articles.length > 0 
@@ -344,7 +393,7 @@ const AppContent: React.FC = () => {
         } catch (error) {
             console.warn('Auto-update check failed:', error);
         }
-    }, [articles]);
+    }, [articles, acceptSnapshotResponse, snapshotUrl]);
 
     // Load pending articles (when user clicks the toast or badge)
     const loadPendingArticles = useCallback(() => {

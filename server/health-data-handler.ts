@@ -8,6 +8,10 @@ import {
     FEED_STALE_AFTER_MS,
     buildFreshnessReport,
 } from '../shared/feed-health-model.js';
+import {
+    NEWS_SNAPSHOT_POINTER_KEY,
+    normalizeSnapshotPointer,
+} from '../shared/news-snapshot.js';
 
 interface HealthCacheClient {
     get<T>(key: string): Promise<T | null>;
@@ -38,11 +42,12 @@ export function createHealthDataHandler(
 ) {
     return async function handler(_request: Request): Promise<Response> {
         try {
-            const [healthStatus, articles, runStatus, publishStatus] = await Promise.all([
+            const [healthStatus, articles, runStatus, publishStatus, snapshotPointer] = await Promise.all([
                 cache.get<BackendHealthStatus>(FEED_HEALTH_STATUS_KEY),
                 cache.get<Article[]>('news_cache'),
                 cache.get<unknown>(FEED_RUN_STATUS_KEY),
                 cache.get<unknown>(FEED_PUBLISH_STATUS_KEY),
+                cache.get<unknown>(NEWS_SNAPSHOT_POINTER_KEY),
             ]);
 
             if (!healthStatus || !articles) {
@@ -60,9 +65,17 @@ export function createHealthDataHandler(
                 staleAfterMs,
             });
 
+            // Welche Generation der Zaehlung `sourcesInCache` zugrunde liegt
+            // (O3a). Ohne diese Angabe laesst sich „nicht im aktiven Snapshot"
+            // nicht von „das Frontend sieht einen anderen Snapshot"
+            // unterscheiden - genau die Frage, die der beobachtete
+            // GameStar-Fall aufgeworfen hat. Die Auswertung im Admin bleibt
+            // A1b vorbehalten; hier wird die Angabe nur bereitgestellt.
+            const snapshot = normalizeSnapshotPointer(snapshotPointer);
+
             // Immer der aktuelle Stand und niemals zwischengespeichert: der
             // Frischebericht wäre sonst genau das, was er melden soll – alt.
-            return adminJsonResponse({ healthStatus, sourcesInCache, heartbeat });
+            return adminJsonResponse({ healthStatus, sourcesInCache, heartbeat, snapshot });
         } catch (error) {
             // Der KV-Originaltext bleibt im Log.
             logger.error('API Error in /api/get-health-data:', error);
