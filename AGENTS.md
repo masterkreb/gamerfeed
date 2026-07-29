@@ -102,6 +102,7 @@
 │   └── news-cache-handler.ts   # Gemeinsame Logik der News-Endpunkte
 ├── shared/                 # Gemeinsame Frontend-/Backend-Verträge
 │   ├── announcement-contract.js # Typen, Längengrenze und Parser
+│   ├── news-snapshot.js         # Generationsgebundenes Leseprotokoll
 │   ├── api-errors.js            # Stabile Fehlercodes und Cache-Vorgabe
 │   └── feed-health-model.js     # Cron-Heartbeat, Frische, FEED_STALE_AFTER_MS
 ├── tests/                  # Zentrale Tests nach Fachbereich und Testart
@@ -235,6 +236,7 @@ läuft).
 | `news_cache` | Alle Artikel (Array) |
 | `news_cache_16` | Erste 16 Artikel |
 | `news_cache_64` | Erste 64 Artikel |
+| `news_snapshot_pointer` | Aktive Cache-Generation (`snapshotId`, `createdAt`) |
 | `feed_health_status` | Status pro Feed, mit `lastAttemptAt`/`lastSuccessAt` |
 | `feed_run_status` | Veränderlicher Attempt-Status des Cron-Laufs |
 | `feed_publish_status` | Letzter erfolgreicher Kern-Publish |
@@ -420,6 +422,35 @@ Fehlerpfad und hinterlässt einen halben Heartbeat.
 
 Einzelheiten: `docs/deployment/feed-run-budget.md`.
 
+## 🧬 Generationsgebundenes Leseprotokoll
+
+Die drei News-Caches werden **nacheinander** geschrieben und unabhängig
+voneinander am Edge gecacht. Ohne weiteres Zutun kann ein Browser Preview,
+Medium und Full aus drei verschiedenen Ständen zusammensetzen – beobachtet am
+29. Juli 2026, als das Frontend dauerhaft 25 statt 26 deutsche Quellen zeigte.
+
+- **Der Cron schreibt zuletzt einen Zeiger** (`news_snapshot_pointer`) mit
+  `schemaVersion`, `snapshotId` und `createdAt`. Er zeigt damit nie auf
+  unvollständig geschriebene Daten. Ein Schreibfehler dort ist **nicht fatal**.
+- **Jede News-Antwort trägt die Generation als Header**, nicht als Umschlag.
+  Der Rumpf bleibt ein nacktes Array – bestehende Clients merken nichts.
+- **Endpunkte lesen den Zeiger vor den Artikeln.** Schreibt der Cron dazwischen,
+  ist das Etikett höchstens *älter* als die Daten und nie neuer; das heilt sich
+  beim nächsten Abruf selbst.
+- **Drei Leseregeln:** gleiche Generation übernehmen, neuere übernehmen *und*
+  umpinnen, ältere verwerfen. Die zweite Regel verhindert, dass ein Browser auf
+  einem alten Stand hängen bleibt; die dritte, dass eine verspätete Kopie den
+  Stand zurückdreht.
+- **`?snapshot=<id>`** macht den Edge-Cache generationsspezifisch: passend
+  länger cachebar, abweichend `no-store`, ungepinnt unverändert.
+- **`null` heißt überall „Legacy", nie „Fehler".** Fehlender, unlesbarer oder
+  unbekannt versionierter Zeiger fällt auf das Verhalten vor O3a zurück.
+- Consumer sind die drei News-Endpunkte, `App.tsx`, `/api/gaming-news` und die
+  Health-API. Die Merge-Basis des Cron liest weiterhin `news_cache`.
+
+Einzelheiten, Rollback und Migrationsreihenfolge:
+`docs/deployment/news-generations.md`.
+
 ## 🔌 Feed-Proxy
 
 Einzelne Quellen – aktuell GamePro – beantworten Anfragen aus dem
@@ -552,6 +583,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Einstellungsdialog mit echten ARIA-Tabs, angekündigten Formularmeldungen und jederzeit möglichem Schließen
 - **Juli 2026:** Cron-Heartbeat (O1): Attempt-Status, Kern-Publish und Inhaltsfrische getrennt geführt, veraltete Daten ab 50 Minuten sichtbar; Workflow startet zu Minute 7/27/47
 - **Juli 2026:** Admin-APIs (S2): Laufzeitverträge statt TypeScript-Casts, stabile Fehlercodes, keine internen Fehlertexte mehr im Client, `private, no-store` auf allen geschützten Antworten, inaktive Ankündigungen im Admin wieder bearbeitbar
+- **Juli 2026:** Generationsgebundenes Leseprotokoll (O3a): jede News-Antwort nennt ihre Cache-Generation, der Leser pinnt sie und verwirft ältere Antworten; fehlender Zeiger fällt auf Legacy zurück
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 

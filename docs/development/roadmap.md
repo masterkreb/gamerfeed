@@ -103,6 +103,16 @@ Arbeit ergibt `degraded` statt stillschweigend `success`. 502 zentrale Tests und
 zeitversetzt gecachten News-Endpunkten, die trotz Pointer verschiedene
 Generationen liefern können – dort setzt O3a an.
 
+**Stand 29. Juli 2026 (Branch `claude/o3a-generation-read-protocol`):** O3a ist
+abgeschlossen. Jede News-Antwort nennt ihre Cache-Generation, der Leser pinnt
+die erste brauchbare und misst jede weitere daran: neuere übernehmen, ältere
+verwerfen. Ein fehlender oder fehlerhafter Zeiger fällt kontrolliert auf das
+Legacy-Verhalten zurück, die bestehenden Keys bleiben unverändert. Der am
+29. Juli beobachtete GameStar-Fall ist als Regressionstest in beiden Richtungen
+abgedeckt. 559 zentrale Tests und 13 Browser-Abnahmen laufen erfolgreich. Als
+Nächstes steht die Ladekette selbst an – Reihenfolge, Abbruch und
+Fehlertrennung –, das ist F1.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -116,8 +126,8 @@ Generationen liefern können – dort setzt O3a an.
 | S2 | P1 | erledigt | Admin-API-Payloads validieren und Fehlerausgaben härten |
 | O2a | P1 | erledigt | Einzelitem-Fehler, Secrets und Provider-Timeouts absichern |
 | O2b | P1 | erledigt | Feed-Kernlauf mit Deadline und Scrape-Budget begrenzen |
-| O3a | P1 | **bereit** | Generationsgebundenes Leseprotokoll und Migration vorbereiten |
-| F1 | P1 | geplant | Progressive News-Ladekette gegen veraltete Antworten absichern |
+| O3a | P1 | erledigt | Generationsgebundenes Leseprotokoll und Migration vorbereiten |
+| F1 | P1 | **bereit** | Progressive News-Ladekette gegen veraltete Antworten absichern |
 | O3b | P1 | geplant | News-Caches größenbegrenzt und konsistent veröffentlichen |
 | F3a | P2 | geplant | Zentrale Tastatur- und DOM-Probleme im Frontend beheben |
 | F3b | P2 | geplant | Veraltetes ArticleCard-Rendering verhindern |
@@ -427,7 +437,24 @@ nicht zuverlässig durch den normalen Fehlerpfad.
 
 ### O3a – Generationsgebundenes Leseprotokoll und Migration
 
-**Status:** bereit – nächstes Code-Arbeitspaket.
+**Status:** erledigt. `shared/news-snapshot.js` legt den Vertrag fest:
+`schemaVersion`, eine sortierbare `snapshotId` und `createdAt` in einem Zeiger
+(`news_snapshot_pointer`), übertragen als **Header** statt als Umschlag – der
+Rumpf bleibt ein nacktes Array, bestehende Clients merken nichts. Der Cron
+schreibt den Zeiger **zuletzt**, nach allen drei News-Caches; ein Schreibfehler
+dort ist nicht fatal, ein gescheiterter Lauf fasst den bisherigen Zeiger nicht
+an. Die Endpunkte lesen den Zeiger **vor** den Artikeln, damit ein Etikett
+höchstens älter als die Daten sein kann und nie neuer. Der Leser pinnt die erste
+brauchbare Generation, hängt sie als `?snapshot=` an jede Folgeanfrage und
+entscheidet nach drei Regeln: gleiche übernehmen, neuere übernehmen und
+umpinnen, ältere verwerfen. `?snapshot=` macht den Edge-Cache
+generationsspezifisch – passend länger cachebar, abweichend `no-store`,
+ungepinnt unverändert. Ein fehlender, unlesbarer oder unbekannt versionierter
+Zeiger gilt überall als „Legacy" und nie als Fehler. Consumer sind die drei
+News-Endpunkte, `App.tsx`, `/api/gaming-news` und die Health-API; die
+Merge-Basis des Cron liest weiterhin `news_cache`. Einzelheiten, Rollback und
+Migrationsreihenfolge:
+[`docs/deployment/news-generations.md`](../deployment/news-generations.md).
 
 **Warum:** Ein einzelner Active-Pointer reicht bei drei zeitversetzten,
 unabhängig am Edge gecachten Endpunkten nicht aus. Preview, Medium und Full
@@ -560,6 +587,11 @@ eine kleine, neutrale Infrastruktur.
 - fachliche Smokes werden anschließend im jeweiligen Arbeitspaket ergänzt.
 
 ### F1 – Progressive Ladekette: „latest request wins“
+
+**Status:** bereit – nächstes Code-Arbeitspaket. O3a stellt sicher, dass keine
+*ältere Generation* den sichtbaren Stand überschreibt; die Reihenfolge der
+Requests selbst, Abbruch bei Unmount und die Trennung blockierender von nicht
+blockierenden Fehlern bleiben offen.
 
 **Warum:** Eine verspätete Medium- oder Full-Antwort der initialen Ladekette
 kann momentan einen neueren manuellen Refresh wieder überschreiben. Scheitert
