@@ -97,7 +97,7 @@ async function stelleLadekette(page: Page, stufen: {
 
 test.beforeEach(async ({ page }) => {
     // Der lokale 32er-Cache darf keinen Stand aus einem frueheren Test
-    // mitbringen.
+    // mitbringen. Ein Test, der ihn braucht, setzt ihn danach selbst.
     await page.addInitScript(() => window.localStorage.clear());
 });
 
@@ -151,5 +151,32 @@ test('ohne Generations-Header bleibt das bisherige Verhalten', async ({ page }) 
 
     await page.goto('/');
 
+    await expect(page.getByText(GAMESTAR_TITEL)).toBeVisible();
+});
+
+test('eine neuere lokale Kopie wird nicht von einer aelteren Antwort ersetzt', async ({ page }) => {
+    // Der lokale 32er-Cache ist 30 Minuten gueltig, der Edge-Cache 60 Sekunden.
+    // Eine lokale Kopie kann damit **neuer** sein als die Antwort, die
+    // zurueckkommt. Ohne die gespeicherte Generation wuerde sie ersetzt.
+    await stelleLadekette(page, { preview: ALT, medium: ALT, full: ALT });
+
+    await page.addInitScript(([artikel, zeiger]) => {
+        window.localStorage.setItem('cachedNews', JSON.stringify({
+            articles: artikel,
+            timestamp: Date.now(),
+            snapshot: zeiger,
+        }));
+    }, [NEUER_STAND, {
+        schemaVersion: 1,
+        snapshotId: NEU.snapshotId,
+        createdAt: NEU.createdAt,
+        articleCount: NEUER_STAND.length,
+        runId: 'gha-2',
+    }] as const);
+
+    await page.goto('/');
+
+    await expect(page.getByText(GAMESTAR_TITEL)).toBeVisible();
+    await page.waitForTimeout(500);
     await expect(page.getByText(GAMESTAR_TITEL)).toBeVisible();
 });

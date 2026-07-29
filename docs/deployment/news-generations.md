@@ -141,6 +141,14 @@ Cron-Lauf ist der Zustand aus Schritt 1.
 | `/api/gaming-news` | meldet die Generation als Meta-Angabe und Header |
 | `/api/get-health-data` | meldet, auf welcher Generation `sourcesInCache` beruht |
 | Merge-Basis des Cron | liest weiterhin `news_cache`; es gibt genau eine Generation |
+| lokale Kopie (`cachedNews`) | speichert ihre Generation mit und pinnt sie beim Start |
+
+Die lokale 32-Artikel-Kopie ist **30 Minuten** gültig, der Edge-Cache nur 60
+Sekunden. Sie kann damit *neuer* sein als die Antwort, die zurückkommt. Ohne
+gespeicherte Generation würde sie von genau dieser älteren Antwort ersetzt –
+deshalb bringt sie ihre Generation mit und pinnt sie, bevor der erste Request
+läuft. Ein vor der Umstellung gespeicherter Eintrag hat das Feld nicht und gilt
+als Legacy.
 
 Die Auswertung im Admin – „nicht im aktiven Snapshot" gegen „das Frontend sieht
 einen anderen Snapshot" – ist **A1b**. O3a stellt nur die Angabe bereit.

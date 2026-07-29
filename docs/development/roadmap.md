@@ -109,7 +109,7 @@ die erste brauchbare und misst jede weitere daran: neuere übernehmen, ältere
 verwerfen. Ein fehlender oder fehlerhafter Zeiger fällt kontrolliert auf das
 Legacy-Verhalten zurück, die bestehenden Keys bleiben unverändert. Der am
 29. Juli beobachtete GameStar-Fall ist als Regressionstest in beiden Richtungen
-abgedeckt. 559 zentrale Tests und 13 Browser-Abnahmen laufen erfolgreich. Als
+abgedeckt. 559 zentrale Tests und 14 Browser-Abnahmen laufen erfolgreich. Als
 Nächstes steht die Ladekette selbst an – Reihenfolge, Abbruch und
 Fehlertrennung –, das ist F1.
 

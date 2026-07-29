@@ -18,6 +18,7 @@ import { createAnalyticsLifecycle } from './shared/analytics-lifecycle.js';
 import { filterArticles } from './shared/article-filters';
 import {
     decideSnapshotAcceptance,
+    normalizeSnapshotPointer,
     readSnapshotHeaders,
     withSnapshotQuery,
 } from './shared/news-snapshot.js';
@@ -184,6 +185,11 @@ const AppContent: React.FC = () => {
         setCachedNews({
             articles: nextArticles.slice(0, INITIAL_ARTICLE_CACHE_COUNT),
             timestamp: Date.now(),
+            // Die lokale Kopie merkt sich ihre Generation. Ohne sie koennte
+            // eine aeltere Antwort aus dem Edge-Cache einen neueren lokalen
+            // Stand ueberschreiben - die 30-Minuten-Kopie ist laenger gueltig
+            // als der 60-Sekunden-Edge-Cache.
+            snapshot: pinnedSnapshotRef.current,
         });
     }, [setCachedNews]);
 
@@ -209,10 +215,14 @@ const AppContent: React.FC = () => {
 
     useEffect(() => {
         if (articles.length === 0 && validCachedArticles.length > 0) {
+            // Die lokale Kopie bringt ihre Generation mit. Damit ist der
+            // sichtbare Stand von Anfang an gepinnt und eine aeltere Antwort
+            // aus dem Edge-Cache kann ihn nicht ersetzen.
+            pinnedSnapshotRef.current = normalizeSnapshotPointer(cachedNews.snapshot);
             setArticles(validCachedArticles);
             setIsBlockingLoading(false);
         }
-    }, [articles.length, validCachedArticles]);
+    }, [articles.length, validCachedArticles, cachedNews.snapshot]);
 
     useEffect(() => {
         cachedArticlesRef.current = validCachedArticles;
@@ -366,7 +376,10 @@ const AppContent: React.FC = () => {
             if (!response.ok) return;
             
             const fetchedArticles: Article[] = await response.json();
-            // Ein aelterer Stand darf keine neuen Artikel melden.
+            // Ein aelterer Stand darf keine neuen Artikel melden. Eine neuere
+            // Generation wird hier gepinnt, aber noch nicht angezeigt - sie
+            // wird erst sichtbar, wenn der Benutzer die Aktualisierung
+            // annimmt.
             if (!acceptSnapshotResponse(response)) return;
             
             // Get the newest article date from currently loaded articles

@@ -447,6 +447,10 @@ Medium und Full aus drei verschiedenen Ständen zusammensetzen – beobachtet am
   unbekannt versionierter Zeiger fällt auf das Verhalten vor O3a zurück.
 - Consumer sind die drei News-Endpunkte, `App.tsx`, `/api/gaming-news` und die
   Health-API. Die Merge-Basis des Cron liest weiterhin `news_cache`.
+- **Auch die lokale Kopie zählt:** `cachedNews` ist 30 Minuten gültig, der
+  Edge-Cache nur 60 Sekunden. Sie speichert deshalb ihre Generation mit und
+  pinnt sie beim Start – sonst ersetzte eine ältere Antwort einen neueren
+  lokalen Stand.
 
 Einzelheiten, Rollback und Migrationsreihenfolge:
 `docs/deployment/news-generations.md`.
