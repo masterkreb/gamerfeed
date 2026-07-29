@@ -244,7 +244,7 @@ zurückgesetzten Generation. Contract-Tests decken beide Fälle ab.
 | Consumer | Rolle heute | ab O3b |
 |---|---|---|
 | `/api/get-news-preview`, `-medium`, `/api/get-news` | Legacy; `readSnapshot` unverdrahtet | melden die Generation, akzeptieren `?snapshot=` |
-| `App.tsx` (Ladekette, Refresh, Auto-Update) | pinnt und entscheidet – heute mangels Header inaktiv | voll wirksam |
+| `services/news-load-controller.ts` und `App.tsx` | Request-Ownership aktiv; Generationsregeln mangels Header inaktiv | beide Schutzschichten voll wirksam |
 | `/api/gaming-news` | reiner Legacy-Consumer | Generation als Meta-Angabe und Header |
 | `/api/get-health-data` | meldet `null`; `readSnapshot` unverdrahtet | meldet die Generation von `sourcesInCache` |
 | Merge-Basis des Cron | liest `news_cache` | unverändert, bis O3b umstellt |
@@ -276,12 +276,14 @@ einen anderen Snapshot" – ist **A1b**. O3a stellt nur die Angabe bereit.
 - **O3b:** unveränderliche Generationen, atomarer Publish, Byte-Budget, Garbage
   Collection, Lease/CAS gegen konkurrierende Writer – **und damit die
   Aktivierung dieses Protokolls**.
-- **F1:** „latest request wins", Abort-Strategie und die Neustrukturierung des
-  News-Lifecycles. O3a prüft nur die Generation einer Antwort; die Reihenfolge
-  der Requests bleibt unverändert.
 - **A1b:** Admin-Auswertung der Snapshot-Angabe.
 - Keine Änderung an Legacy-Keys, Workflow-Zeitplan, Secrets, Vercel, Cyon oder
   am PHP-Proxy.
+
+F1 ist inzwischen umgesetzt: `services/news-load-controller.ts` entwertet
+ältere Requests per Abort und Epoche. Diese zeitliche Request-Ownership ergänzt
+die hier beschriebenen Inhaltsgenerationen; Einzelheiten stehen in
+`docs/development/progressive-news-loading.md`.
 
 ## Verbleibende Grenzen
 
