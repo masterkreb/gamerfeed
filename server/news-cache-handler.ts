@@ -25,6 +25,14 @@ interface NewsCacheEndpoint {
 
 interface NewsCacheOptions {
     /**
+     * Liest Artikel und Zeiger gemeinsam aus einer unveraenderlichen
+     * Generation. Nur diese O3b-Quelle darf in Produktion Snapshot-Header
+     * ausstellen.
+     */
+    readBoundSnapshot?: (
+        requestedSnapshotId: string | null,
+    ) => Promise<{ articles: Article[], snapshot: unknown } | null>;
+    /**
      * Liefert die Generation, zu der die gelesenen Artikel **nachweisbar**
      * gehören.
      *
@@ -95,42 +103,53 @@ function requestedSnapshotId(request: Request): string | null {
  * unverändert weiter. Die Generation reist in Headern mit, die ein alter Client
  * stillschweigend ignoriert – genau das braucht eine Dual-Read-Migration.
  *
- * ## Warum in Produktion (noch) keine Generation gemeldet wird
+ * ## Belegbare Bindung ab O3b
  *
- * `news_cache`, `news_cache_16` und `news_cache_64` sind **veränderliche**
- * Schlüssel: der Cron überschreibt sie an Ort und Stelle. Zwischen dem Lesen
- * eines Zeigers und dem Lesen der Artikel kann also ein Publish liegen – und
- * **keine** Lesereihenfolge kann das ausschließen:
+ * Die Legacy-Keys `news_cache`, `news_cache_16` und `news_cache_64` bleiben
+ * **veränderlich**. Eine Kennung darf deshalb nie aus einem getrennt gelesenen
+ * Pointer neben diesen Werten geraten werden.
  *
- * - Zeiger zuerst → die Antwort trägt eine alte Kennung auf neuem Inhalt.
- * - Artikel zuerst → sie trägt eine neue Kennung auf altem Inhalt.
- *
- * Beides ist eine Falschaussage, und die zweite ist über einen gepinnten
- * Edge-Cache sogar dauerhaft: unter derselben Kennung lägen dann verschiedene
- * Inhalte. Damit wäre die Grundannahme des Protokolls verletzt.
- *
- * Deshalb meldet dieser Endpunkt eine Generation **nur**, wenn ihm über
- * `readSnapshot` eine Quelle gegeben wird, die die Zugehörigkeit belegen kann.
- * Die unveränderlichen Generationen dafür bringt **O3b**; bis dahin bleibt die
- * Vorgabe „keine Quelle“ und der Endpunkt antwortet exakt wie vor O3a.
- *
- * Das Leseprotokoll selbst ist damit nicht ungetestet: die Contract-Tests
- * reichen eine Quelle herein und prüfen den vollständigen Ablauf.
+ * Produktion reicht stattdessen `readBoundSnapshot` herein. Diese Quelle liest
+ * Manifest und Payload unter derselben unveränderlichen Snapshot-ID.
+ * `readSnapshot` bleibt nur als O3a-Vertragsadapter und für Tests erhalten;
+ * ohne belegbare Quelle antwortet der Handler weiterhin kontrolliert als
+ * Legacy.
  */
 export function createNewsCacheHandler(
     cache: NewsCacheClient,
     endpoint: NewsCacheEndpoint,
     logger: Pick<Console, 'error'> = console,
-    { readSnapshot, legacyRollback = false }: NewsCacheOptions = {},
+    { readBoundSnapshot, readSnapshot, legacyRollback = false }: NewsCacheOptions = {},
 ) {
     return async function handler(request: Request): Promise<Response> {
         try {
-            let articles = await cache.get<Article[]>(endpoint.cacheKey);
+            const requestedId = requestedSnapshotId(request);
+            let articles: Article[] | null = null;
+            let pointer = null;
 
-            if (!articles && endpoint.fallback) {
-                const fallbackArticles = await cache.get<Article[]>(endpoint.fallback.cacheKey);
-                if (fallbackArticles) {
-                    articles = fallbackArticles.slice(0, endpoint.fallback.limit);
+            if (readBoundSnapshot && !legacyRollback) {
+                try {
+                    const bound = await readBoundSnapshot(requestedId);
+                    if (bound && Array.isArray(bound.articles)) {
+                        articles = bound.articles;
+                        pointer = normalizeSnapshotPointer(bound.snapshot);
+                    }
+                } catch (snapshotError) {
+                    logger.error(`Snapshot unavailable in ${endpoint.endpointPath}:`, snapshotError);
+                }
+            }
+
+            // Dual-Read waehrend der Migration und fuer einen bewussten
+            // Legacy-Rollback. Eine generationsgebundene Quelle faellt hier
+            // ebenfalls zurueck, wenn Pointer oder Manifest fehlen.
+            if (!articles) {
+                articles = await cache.get<Article[]>(endpoint.cacheKey);
+
+                if (!articles && endpoint.fallback) {
+                    const fallbackArticles = await cache.get<Article[]>(endpoint.fallback.cacheKey);
+                    if (fallbackArticles) {
+                        articles = fallbackArticles.slice(0, endpoint.fallback.limit);
+                    }
                 }
             }
 
@@ -145,8 +164,7 @@ export function createNewsCacheHandler(
             // Ohne belegbare Zugehörigkeit gibt es keine Kennung. Ein Ausfall
             // der Quelle ist kein Grund, die News zu verweigern – dann gilt
             // Legacy.
-            let pointer = null;
-            if (readSnapshot && !legacyRollback) {
+            if (!pointer && readSnapshot && !legacyRollback) {
                 try {
                     pointer = normalizeSnapshotPointer(await readSnapshot(articles));
                 } catch (snapshotError) {
@@ -154,7 +172,6 @@ export function createNewsCacheHandler(
                 }
             }
 
-            const requestedId = requestedSnapshotId(request);
             // Beim Rollback ersetzt das Signal die Generationsangaben: der
             // Leser soll seine gepinnte Generation aufgeben, nicht eine neue
             // annehmen.

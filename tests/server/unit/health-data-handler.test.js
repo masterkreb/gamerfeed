@@ -2,6 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHealthDataHandler } from '../../../server/health-data-handler.ts';
 import { FEED_STALE_AFTER_MS } from '../../../shared/feed-health-model.js';
+import {
+    NEWS_SNAPSHOT_VARIANTS,
+    newsSnapshotPayloadKey,
+} from '../../../shared/news-snapshot-store.js';
 
 const NOW = Date.parse('2026-07-28T12:00:00.000Z');
 
@@ -267,6 +271,38 @@ test('eine belegbar gebundene Quelle wird gemeldet', async () => {
     assert.equal(body.snapshot.snapshotId, '2000-gha-2');
     assert.equal(body.snapshot.schemaVersion, 1);
     assert.deepEqual(body.sourcesInCache, ['GameStar']);
+});
+
+test('O3b liest Quellen und Generation aus dem Manifest statt aus dem Full-Cache', async () => {
+    const snapshotId = '2000-gha-2';
+    const descriptor = variant => ({
+        key: newsSnapshotPayloadKey(snapshotId, variant),
+        count: 1,
+        bytes: 100,
+    });
+    const metadata = {
+        schemaVersion: 1,
+        snapshotId,
+        createdAt: new Date(2000).toISOString(),
+        articleCount: 1,
+        runId: 'gha-2',
+        complete: true,
+        sources: ['GameStar', 'GameZone'],
+        payloads: {
+            full: descriptor(NEWS_SNAPSHOT_VARIANTS.FULL),
+            preview: descriptor(NEWS_SNAPSHOT_VARIANTS.PREVIEW),
+            medium: descriptor(NEWS_SNAPSHOT_VARIANTS.MEDIUM),
+        },
+    };
+    const { handler, cache } = createHandler(healthyStore(), {
+        readSnapshotMetadata: () => metadata,
+    });
+
+    const body = await (await handler(new Request('https://example.com/x'))).json();
+
+    assert.equal(body.snapshot.snapshotId, snapshotId);
+    assert.deepEqual(body.sourcesInCache, ['GameStar', 'GameZone']);
+    assert.equal(cache.calls.includes('news_cache'), false, 'der grosse Full-Payload bleibt ungelesen');
 });
 
 test('die gebundene Quelle sieht die tatsaechlich gelesenen Artikel', async () => {

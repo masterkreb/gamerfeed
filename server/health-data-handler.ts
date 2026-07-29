@@ -9,6 +9,7 @@ import {
     buildFreshnessReport,
 } from '../shared/feed-health-model.js';
 import { normalizeSnapshotPointer } from '../shared/news-snapshot.js';
+import { normalizeNewsSnapshotMetadata } from '../shared/news-snapshot-store.js';
 
 interface HealthCacheClient {
     get<T>(key: string): Promise<T | null>;
@@ -22,11 +23,16 @@ interface HealthHandlerOptions {
      * Liefert die Generation, zu der die gelesenen Artikel **nachweisbar**
      * gehören.
      *
-     * Bewusst ohne Vorgabe: solange die News-Keys veränderlich sind, kann das
-     * niemand belegen – jede Näherung (etwa über die Artikelzahl) würde im
-     * Admin eine falsche Zuordnung anzeigen. Die belegbare Quelle bringt O3b.
+     * O3a-Vertragsadapter fuer Legacy-Artikel. Produktion verwendet ab O3b
+     * `readSnapshotMetadata`; jede Naeherung ueber die Artikelzahl bleibt
+     * unzulaessig.
      */
     readSnapshot?: (articles: Article[]) => Promise<unknown> | unknown;
+    /**
+     * Liefert das Manifest der aktiven unveraenderlichen O3b-Generation.
+     * Damit braucht die Health-API den grossen Full-Payload nicht zu laden.
+     */
+    readSnapshotMetadata?: () => Promise<unknown> | unknown;
 }
 
 // Neutral formuliert: die Meldung geht an den Client und soll weder den
@@ -47,25 +53,59 @@ export function createHealthDataHandler(
         now = () => new Date(),
         staleAfterMs = FEED_STALE_AFTER_MS,
         readSnapshot,
+        readSnapshotMetadata,
     }: HealthHandlerOptions = {},
     logger: Pick<Console, 'error'> = console,
 ) {
     return async function handler(_request: Request): Promise<Response> {
         try {
-            const [healthStatus, articles, runStatus, publishStatus] = await Promise.all([
+            const [healthStatus, runStatus, publishStatus] = await Promise.all([
                 cache.get<BackendHealthStatus>(FEED_HEALTH_STATUS_KEY),
-                cache.get<Article[]>('news_cache'),
                 cache.get<unknown>(FEED_RUN_STATUS_KEY),
                 cache.get<unknown>(FEED_PUBLISH_STATUS_KEY),
             ]);
 
-            if (!healthStatus || !articles) {
+            if (!healthStatus) {
                 return adminErrorResponse(404, API_ERROR_CODES.NOT_FOUND, MISSING_DATA_MESSAGE);
             }
 
-            // We only need the unique sources from the articles for the health
-            // check logic, not all article data.
-            const sourcesInCache = [...new Set(articles.map(article => article.source))];
+            let sourcesInCache: string[] | null = null;
+            let snapshot: NewsSnapshotPointer | null = null;
+
+            if (readSnapshotMetadata) {
+                try {
+                    const metadata = normalizeNewsSnapshotMetadata(await readSnapshotMetadata());
+                    if (metadata) {
+                        sourcesInCache = metadata.sources;
+                        snapshot = normalizeSnapshotPointer(metadata);
+                    }
+                } catch (snapshotError) {
+                    logger.error('Snapshot unavailable in /api/get-health-data:', snapshotError);
+                }
+            }
+
+            // Dual-Read fuer die Migration und einen Legacy-Rollback. Nur wenn
+            // kein vollstaendiges Manifest vorliegt, wird der grosse
+            // veraenderliche Full-Cache noch fuer die Quellenliste geladen.
+            if (sourcesInCache === null) {
+                const articles = await cache.get<Article[]>('news_cache');
+                if (!articles) {
+                    return adminErrorResponse(404, API_ERROR_CODES.NOT_FOUND, MISSING_DATA_MESSAGE);
+                }
+
+                sourcesInCache = [...new Set(articles.map(article => article.source))];
+
+                // O3a-Testadapter: eine Generation nur melden, wenn die
+                // injizierte Quelle ihre Bindung an genau diese Artikel
+                // belegen kann.
+                if (readSnapshot) {
+                    try {
+                        snapshot = normalizeSnapshotPointer(await readSnapshot(articles));
+                    } catch (snapshotError) {
+                        logger.error('Snapshot unavailable in /api/get-health-data:', snapshotError);
+                    }
+                }
+            }
 
             const heartbeat: FeedHeartbeat = buildFreshnessReport({
                 run: runStatus,
@@ -73,27 +113,6 @@ export function createHealthDataHandler(
                 now: now(),
                 staleAfterMs,
             });
-
-            // Welche Generation der Zaehlung `sourcesInCache` zugrunde liegt
-            // (O3a). Ohne diese Angabe laesst sich „nicht im aktiven Snapshot"
-            // nicht von „das Frontend sieht einen anderen Snapshot"
-            // unterscheiden - genau die Frage, die der beobachtete
-            // GameStar-Fall aufgeworfen hat. Die Auswertung im Admin bleibt
-            // A1b vorbehalten.
-            //
-            // Gemeldet wird nur, was eine **belegbar gebundene** Quelle
-            // liefert. Eine Heuristik waere hier besonders gefaehrlich: zwei
-            // Generationen koennen dieselbe Artikelzahl haben, und dann stuende
-            // im Admin eine falsche Zuordnung. Ein Fehler beim Lesen ist kein
-            // Grund, die Health-Daten zu verweigern - dann gilt Legacy.
-            let snapshot: NewsSnapshotPointer | null = null;
-            if (readSnapshot) {
-                try {
-                    snapshot = normalizeSnapshotPointer(await readSnapshot(articles));
-                } catch (snapshotError) {
-                    logger.error('Snapshot unavailable in /api/get-health-data:', snapshotError);
-                }
-            }
 
             // Immer der aktuelle Stand und niemals zwischengespeichert: der
             // Frischebericht wäre sonst genau das, was er melden soll – alt.
