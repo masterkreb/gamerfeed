@@ -16,8 +16,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { useCookieConsent } from './components/CookieConsent';
 import { createAnalyticsLifecycle } from './shared/analytics-lifecycle.js';
 import { filterArticles } from './shared/article-filters';
+import { createNewsLoadController } from './services/news-load-controller';
 import {
-    decideSnapshotAcceptance,
     normalizeSnapshotPointer,
     planPendingAdoption,
     planPollResponse,
@@ -120,10 +120,12 @@ const AppContent: React.FC = () => {
     const [currentView, setCurrentView] = useState<AppView>('news');
 
     const [articles, setArticles] = useState<Article[]>([]);
+    const articlesRef = useRef<Article[]>([]);
     const [cachedNews, setCachedNews] = useLocalStorage<CachedNews>('cachedNews', { articles: [], timestamp: 0 });
     const [isBlockingLoading, setIsBlockingLoading] = useState<boolean>(true);
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [backgroundError, setBackgroundError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
 
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -157,32 +159,6 @@ const AppContent: React.FC = () => {
     // Rendern ausloesen.
     const pinnedSnapshotRef = useRef<NewsSnapshotPointer | null>(null);
 
-    /**
-     * Uebernimmt eine Antwort nur, wenn sie nicht aus einer aelteren Generation
-     * stammt.
-     *
-     * Ohne diese Pruefung konnte eine verspaetete oder aus dem Edge-Cache
-     * stammende Kopie den bereits sichtbaren neueren Stand ueberschreiben -
-     * genau der am 29. Juli 2026 beobachtete Fall, in dem der Browser dauerhaft
-     * 25 statt 26 deutsche Quellen zeigte.
-     */
-    const acceptSnapshotResponse = useCallback((response: Response): boolean => {
-        const decision = decideSnapshotAcceptance({
-            pinned: pinnedSnapshotRef.current,
-            incoming: readSnapshotHeaders(response.headers),
-            // Nur ein ausdrückliches Serversignal gibt eine gepinnte Generation
-            // wieder frei. Eine bloß fehlende Angabe ist meistens eine alte
-            // Kopie und darf den Stand nicht zurückdrehen.
-            rollback: readSnapshotRollback(response.headers),
-        });
-
-        pinnedSnapshotRef.current = decision.pin;
-        if (!decision.accept) {
-            console.warn(`Antwort verworfen (${decision.reason})`);
-        }
-        return decision.accept;
-    }, []);
-
     /** Haengt die gepinnte Generation an eine Endpunktadresse. */
     const snapshotUrl = useCallback((path: string): string => (
         withSnapshotQuery(path, pinnedSnapshotRef.current)
@@ -215,6 +191,40 @@ const AppContent: React.FC = () => {
         });
     }, [setCachedNews]);
 
+    /**
+     * Ein einziger Besitzer fuer Preview, Medium, Full und manuellen Refresh.
+     *
+     * Der Controller prueft nach jeder asynchronen Grenze seine Request-Epoche.
+     * Damit kann eine alte Ladekette weder den sichtbaren State noch Pin oder
+     * lokale Kopie einer neueren Ladung ueberschreiben (Roadmap F1).
+     */
+    const newsLoadController = useMemo(() => createNewsLoadController({
+        fetchImpl: (input, init) => fetch(input, init),
+        getPinnedSnapshot: () => pinnedSnapshotRef.current,
+        setPinnedSnapshot: snapshot => {
+            pinnedSnapshotRef.current = snapshot;
+        },
+        commitArticles: (nextArticles, snapshot) => {
+            articlesRef.current = nextArticles;
+            setArticles(nextArticles);
+            persistCachedArticles(nextArticles, snapshot);
+        },
+        setBlockingLoading: setIsBlockingLoading,
+        setRefreshing: setIsRefreshing,
+        clearBlockingError: () => setError(null),
+        clearBackgroundError: () => setBackgroundError(null),
+        reportBlockingError: ({ error: loadError }) => {
+            console.error('Failed to fetch articles from API:', loadError);
+            setError(loadError.message);
+        },
+        reportBackgroundError: ({ error: loadError, stage }) => {
+            // Hintergrundfehler duerfen bereits sichtbare Artikel nicht durch
+            // den blockierenden Fehlerzustand ersetzen.
+            console.warn(`Background news loading failed during ${stage}:`, loadError);
+            setBackgroundError(loadError.message);
+        },
+    }), [persistCachedArticles]);
+
     // Cookie Consent Hook
     const { showPreferences } = useCookieConsent({
         onConsent: useCallback((categories: string[]) => {
@@ -241,10 +251,15 @@ const AppContent: React.FC = () => {
             // sichtbare Stand von Anfang an gepinnt und eine aeltere Antwort
             // aus dem Edge-Cache kann ihn nicht ersetzen.
             pinnedSnapshotRef.current = normalizeSnapshotPointer(cachedNews.snapshot);
+            articlesRef.current = validCachedArticles;
             setArticles(validCachedArticles);
             setIsBlockingLoading(false);
         }
     }, [articles.length, validCachedArticles, cachedNews.snapshot]);
+
+    useEffect(() => {
+        articlesRef.current = articles;
+    }, [articles]);
 
     useEffect(() => {
         cachedArticlesRef.current = validCachedArticles;
@@ -280,110 +295,23 @@ const AppContent: React.FC = () => {
         setAnnouncement(null);
     }, [setDismissedAnnouncementId]);
 
-    const loadNews = useCallback(async (isManualRefresh = false) => {
-        setError(null);
-        const hasCachedArticles = cachedArticlesRef.current.length > 0;
-
-        if (!isManualRefresh && !hasCachedArticles) {
-            setIsBlockingLoading(true);
-        } else if (isManualRefresh) {
-            setIsRefreshing(true);
-        }
-
-        try {
-            if (isManualRefresh) {
-                // Manual refresh: fetch all articles directly
-                const response = await fetch(snapshotUrl('/api/get-news'));
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => null);
-                    const errorMessage = errorData?.error || `Failed to load news from API: ${response.status}`;
-                    throw new Error(errorMessage);
-                }
-                const fetchedArticles: Article[] = await response.json();
-                if (acceptSnapshotResponse(response)) {
-                    setArticles(fetchedArticles);
-                    persistCachedArticles(fetchedArticles, pinnedSnapshotRef.current);
-                    console.log(`Refreshed ${fetchedArticles.length} articles from API`);
-                }
-            } else {
-                // Initial load: 3-stage progressive loading (16 → 64 → full)
-                const previewResponse = await fetch(snapshotUrl('/api/get-news-preview'));
-
-                if (previewResponse.ok) {
-                    // Stage 1: Show first 16 articles immediately
-                    const previewArticles: Article[] = await previewResponse.json();
-                    if (acceptSnapshotResponse(previewResponse)) {
-                        setArticles(previewArticles);
-                        persistCachedArticles(previewArticles, pinnedSnapshotRef.current);
-                        console.log(`✅ Stage 1: Loaded ${previewArticles.length} preview articles`);
-                    }
-                    setIsBlockingLoading(false);
-
-                    // Stage 2: Load 64 articles in background. Jede Stufe wird an
-                    // die inzwischen gepinnte Generation gebunden und nur
-                    // uebernommen, wenn sie nicht aelter ist als der sichtbare
-                    // Stand (Roadmap O3a).
-                    fetch(snapshotUrl('/api/get-news-medium'))
-                        .then(async response => {
-                            if (!response.ok) throw new Error('Failed to load medium articles');
-                            const mediumArticles: Article[] = await response.json();
-                            if (acceptSnapshotResponse(response)) {
-                                setArticles(mediumArticles);
-                                persistCachedArticles(mediumArticles, pinnedSnapshotRef.current);
-                                console.log(`✅ Stage 2: Loaded ${mediumArticles.length} medium articles`);
-                            }
-
-                            // Stage 3: Load all articles in background
-                            return fetch(snapshotUrl('/api/get-news'));
-                        })
-                        .then(async response => {
-                            if (!response.ok) throw new Error('Failed to load full articles');
-                            const fullArticles: Article[] = await response.json();
-                            if (acceptSnapshotResponse(response)) {
-                                setArticles(fullArticles);
-                                persistCachedArticles(fullArticles, pinnedSnapshotRef.current);
-                                console.log(`✅ Stage 3: Loaded ${fullArticles.length} full articles`);
-                            }
-                        })
-                        .catch(err => {
-                            console.warn('Background loading failed:', err);
-                        });
-
-                    return; // Exit early since we already set isBlockingLoading to false
-                } else {
-                    // Preview API not available (404) - fallback to full API
-                    console.log('Preview API not available, falling back to full API');
-                    const response = await fetch(snapshotUrl('/api/get-news'));
-                    if (!response.ok) {
-                        const errorData = await response.json().catch(() => null);
-                        const errorMessage = errorData?.error || `Failed to load news: ${response.status}`;
-                        throw new Error(errorMessage);
-                    }
-                    const fetchedArticles: Article[] = await response.json();
-                    if (acceptSnapshotResponse(response)) {
-                        setArticles(fetchedArticles);
-                        persistCachedArticles(fetchedArticles, pinnedSnapshotRef.current);
-                        console.log(`Loaded ${fetchedArticles.length} articles (fallback)`);
-                    }
-                }
-            }
-
-        } catch (error) {
-            console.error("Failed to fetch articles from API:", error);
-            const message = error instanceof Error ? error.message : "An unknown error occurred.";
-            setError(message);
-        } finally {
-            setIsBlockingLoading(false);
-            setIsRefreshing(false);
-        }
-    }, [persistCachedArticles, acceptSnapshotResponse, snapshotUrl]);
+    const loadNews = useCallback((isManualRefresh = false) => (
+        newsLoadController.load({
+            manualRefresh: isManualRefresh,
+            hasVisibleArticles: (
+                articlesRef.current.length > 0
+                || cachedArticlesRef.current.length > 0
+            ),
+        })
+    ), [newsLoadController]);
 
     useEffect(() => {
-        loadNews();
-    }, [loadNews]);
+        void loadNews();
+        return () => newsLoadController.cancel();
+    }, [loadNews, newsLoadController]);
 
     const handleRefresh = useCallback(() => {
-        loadNews(true);
+        void loadNews(true);
         // Clear pending articles when manually refreshing
         setNewArticlesCount(0);
         setPending({ articles: [], snapshot: null });
@@ -393,11 +321,18 @@ const AppContent: React.FC = () => {
 
     // Check for new articles without updating the view
     const checkForNewArticles = useCallback(async () => {
+        const request = newsLoadController.beginPassiveRequest();
+        if (!request) return;
+
         try {
-            const response = await fetch(snapshotUrl('/api/get-news'));
-            if (!response.ok) return;
+            const response = await fetch(
+                snapshotUrl('/api/get-news'),
+                { signal: request.signal },
+            );
+            if (!request.isCurrent() || !response.ok) return;
             
             const fetchedArticles: Article[] = await response.json();
+            if (!request.isCurrent()) return;
 
             // Hier wird **nicht** gepinnt. Der Benutzer hat die Artikel noch
             // nicht übernommen; die gepinnte Generation muss zum *sichtbaren*
@@ -410,6 +345,7 @@ const AppContent: React.FC = () => {
                 incoming,
                 rollback: readSnapshotRollback(response.headers),
             });
+            if (!request.isCurrent()) return;
 
             if (plan.clearPending) {
                 // Autoritativer Rollback: eine vorgemerkte Generation ist
@@ -448,13 +384,22 @@ const AppContent: React.FC = () => {
             }
             
         } catch (error) {
-            console.warn('Auto-update check failed:', error);
+            if (request.isCurrent()) {
+                console.warn('Auto-update check failed:', error);
+            }
+        } finally {
+            request.release();
         }
-    }, [articles, snapshotUrl]);
+    }, [articles, newsLoadController, snapshotUrl]);
 
     // Load pending articles (when user clicks the toast or badge)
     const loadPendingArticles = useCallback(() => {
         if (pending.articles.length === 0) return;
+
+        // Der sichtbare Stand wechselt. Ein bereits laufender Poll hat noch den
+        // vorherigen Artikel-State in seiner Closure und darf die eben
+        // uebernommene Warteschlange nicht gleich erneut vormerken.
+        newsLoadController.cancelPassiveRequests();
 
         // Zwischen dem Vormerken und diesem Klick können Minuten liegen - genug
         // Zeit, damit der sichtbare Stand längst weiter ist. Die Warteschlange
@@ -478,6 +423,7 @@ const AppContent: React.FC = () => {
         // Erst jetzt wird die Generation der ausstehenden Artikel gepinnt:
         // ab diesem Moment ist sie der sichtbare Stand.
         pinnedSnapshotRef.current = plan.snapshot;
+        articlesRef.current = pending.articles;
         setArticles(pending.articles);
         persistCachedArticles(pending.articles, plan.snapshot);
         setNewArticlesCount(0);
@@ -485,7 +431,7 @@ const AppContent: React.FC = () => {
         // Reset tab title
         document.title = 'GamerFeed';
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [pending, persistCachedArticles]);
+    }, [newsLoadController, pending, persistCachedArticles]);
 
     // Auto-update polling (every 5 minutes) - runs even when tab is inactive
     useEffect(() => {
@@ -911,6 +857,16 @@ const AppContent: React.FC = () => {
                     />
                 )}
 
+                {backgroundError && !isBlockingLoading && (
+                    <div
+                        role="status"
+                        className="mt-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+                    >
+                        <p className="font-semibold">{t('error.refreshFailed')}</p>
+                        <p className="mt-1 text-sm">{backgroundError}</p>
+                    </div>
+                )}
+
                 {isBlockingLoading ? (
                     <div className="flex justify-center items-center h-64">
                         <LoadingSpinner />
@@ -925,7 +881,7 @@ const AppContent: React.FC = () => {
                         <h3 className="mt-4 text-2xl font-semibold text-red-600 dark:text-red-400">{t('error.couldNotLoad')}</h3>
                         <p className="mt-2 text-slate-600 dark:text-zinc-400">{error}</p>
                         <button
-                            onClick={() => loadNews(true)}
+                            onClick={() => void loadNews(true)}
                             className="mt-6 inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-zinc-900 transition-all duration-200 hover:shadow-lg"
                         >
                             {t('error.tryAgain')}

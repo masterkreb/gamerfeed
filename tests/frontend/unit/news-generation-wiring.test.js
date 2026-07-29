@@ -4,19 +4,11 @@ import { readFile } from 'node:fs/promises';
 
 // Verdrahtungswaechter fuer das Leseprotokoll in App.tsx (Roadmap O3a).
 //
-// **Warum ein Quelltextwaechter und kein Verhaltenstest?**
+// **Warum bleibt ein kleiner Quelltextwaechter bestehen?**
 //
-// Die drei Entscheidungen unten liegen in `shared/news-snapshot.js` und sind
-// dort vollstaendig gegen ihre Regeln getestet. Was ein Regeltest nicht
-// abdeckt, ist der Fall „App.tsx ruft die Funktion gar nicht mehr auf" - und
-// genau das soll hier auffallen.
-//
-// Ein Verhaltenstest waere der bessere Waechter, ist aber fuer den
-// Auto-Update-Pfad derzeit nicht erreichbar: er haengt an einem
-// 5-Minuten-Intervall, und ein manueller Refresh leert die Warteschlange, bevor
-// sich der sichtbare Stand ueberhaupt verschieben kann. Mit der Umstrukturierung
-// des News-Lifecycles in F1 wird der Pfad testbar; bis dahin ist dieser
-// Waechter die ehrlichere Absicherung als gar keiner.
+// Seit F1 pruefen Deferred-Promise-Tests den echten Controller. Diese Datei
+// kontrolliert nur noch die duenne Verdrahtung in App.tsx: Controller, Pin,
+// lokale Kopie und der weiterhin separate Auto-Update-Pfad.
 
 const APP_SOURCE = await readFile(new URL('../../../App.tsx', import.meta.url), 'utf8');
 
@@ -44,6 +36,8 @@ test('die Uebernahme ausstehender Artikel prueft die Generation erneut', () => {
     );
     assert.match(body, /pinned:\s*pinnedSnapshotRef\.current/, 'gegen die gepinnte Generation');
     assert.match(body, /if\s*\(!plan\.adopt\)/, 'und das Ergebnis auch auswerten');
+    assert.match(body, /newsLoadController\.cancelPassiveRequests\(\)/,
+        'eine sichtbare Uebernahme entwertet einen Poll mit altem Artikel-State');
 });
 
 test('die Uebernahme speichert den Snapshot der uebernommenen Artikel', () => {
@@ -56,12 +50,18 @@ test('die Uebernahme speichert den Snapshot der uebernommenen Artikel', () => {
     );
 });
 
-test('jede Antwort wird gegen die gepinnte Generation geprueft', () => {
-    const body = callbackBody(APP_SOURCE, 'acceptSnapshotResponse');
-
-    assert.match(body, /decideSnapshotAcceptance\(\s*\{/);
-    assert.match(body, /rollback:\s*readSnapshotRollback\(response\.headers\)/,
-        'ein ausdruecklicher Rollback muss erkannt werden');
+test('der News-Controller ist mit Pin und lokaler Kopie verdrahtet', () => {
+    assert.match(APP_SOURCE, /createNewsLoadController\(\s*\{/);
+    assert.match(APP_SOURCE, /getPinnedSnapshot:\s*\(\)\s*=>\s*pinnedSnapshotRef\.current/);
+    assert.match(
+        APP_SOURCE,
+        /setPinnedSnapshot:\s*snapshot\s*=>\s*\{\s*pinnedSnapshotRef\.current\s*=\s*snapshot/,
+    );
+    assert.match(
+        APP_SOURCE,
+        /commitArticles:\s*\(nextArticles,\s*snapshot\)\s*=>\s*\{[\s\S]*?persistCachedArticles\(nextArticles,\s*snapshot\)/,
+        'nur der vom Controller akzeptierte Snapshot wird zusammen mit seinen Artikeln gespeichert',
+    );
 });
 
 test('der Auto-Update-Pfad pinnt nicht', () => {
@@ -69,6 +69,10 @@ test('der Auto-Update-Pfad pinnt nicht', () => {
     // passen. Ein `pinnedSnapshotRef.current = ...` waere hier der Fehler.
     const body = callbackBody(APP_SOURCE, 'checkForNewArticles');
 
+    assert.match(body, /newsLoadController\.beginPassiveRequest\(\)/);
+    assert.match(body, /\{\s*signal:\s*request\.signal\s*\}/);
+    assert.match(body, /if\s*\(!request\.isCurrent\(\)/,
+        'der Poll muss vor Seiteneffekten weiter aktuell sein');
     assert.doesNotMatch(
         body,
         /pinnedSnapshotRef\.current\s*=/,
@@ -100,7 +104,7 @@ test('die lokale Kopie wird immer mit einer ausdruecklichen Generation gespeiche
         .map(treffer => treffer[1].trim())
         .filter(argumente => !argumente.startsWith('('));
 
-    assert.ok(aufrufe.length >= 5, `erwartet mehrere Aufrufe, gefunden: ${aufrufe.length}`);
+    assert.ok(aufrufe.length >= 2, `erwartet Controller und Pending-Pfad, gefunden: ${aufrufe.length}`);
     for (const argumente of aufrufe) {
         assert.match(argumente, /,/, `zweites Argument fehlt: persistCachedArticles(${argumente})`);
     }
