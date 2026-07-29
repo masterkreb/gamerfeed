@@ -687,3 +687,20 @@ test('ein laufender Client folgt einem ausdruecklichen Rollback', async () => {
     assert.equal(pinned, null, 'danach ist nichts mehr gepinnt');
     assert.deepEqual(sichtbar, OHNE_GAMESTAR, 'der Legacy-Stand ist sichtbar');
 });
+
+test('ein Rollback im Auto-Update-Pfad wird nicht heimlich uebernommen', async () => {
+    // Bewusste Grenze: der Poll-Pfad veraendert die gepinnte Generation nie -
+    // auch nicht, um sie freizugeben. Eine Warteschlange ohne Generation wird
+    // beim Klick deshalb verworfen. Wirksam wird ein Rollback ueber die
+    // Ladekette (Reload oder manueller Refresh), also genau dort, wo sich der
+    // sichtbare Stand ohnehin aendert.
+    const B = pointerFor(2000, 'gha-2');
+
+    const plan = planPendingAdoption({
+        pinned: B,
+        pending: { articles: [createArticle('x1')], snapshot: null },
+    });
+
+    assert.equal(plan.adopt, false, 'die Warteschlange wird verworfen');
+    assert.equal(plan.snapshot.snapshotId, B.snapshotId, 'der sichtbare Stand bleibt unberuehrt');
+});

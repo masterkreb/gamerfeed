@@ -145,6 +145,13 @@ gibt eine auf.
 Gesteuert wird das über `legacyRollback` an `createNewsCacheHandler` – eine
 bewusste Betriebsentscheidung, kein Automatismus.
 
+**Grenze:** Der Auto-Update-Pfad verändert die gepinnte Generation nie – auch
+nicht, um sie freizugeben. Ein Rollback, der dort ankommt, führt lediglich dazu,
+dass die Warteschlange beim Klick verworfen wird. Wirksam wird er über die
+Ladekette, also bei Reload oder manuellem Refresh – genau dort, wo sich der
+sichtbare Stand ohnehin ändert. Das ist die konservative Richtung: ein
+Poll-Ergebnis soll nie still den Schutz aufheben, den der Pin bietet.
+
 ### Pinnen nur, was sichtbar ist
 
 Der Auto-Update-Pfad pollt im Hintergrund und zeigt nichts an. Er **pinnt

@@ -110,7 +110,7 @@ in beiden Richtungen als Regressionstest abgedeckt. **Aktiviert ist das
 Protokoll nicht:** neben veränderlichen Legacy-Keys kann eine Kennung ihre
 Zugehörigkeit nicht belegen, deshalb entwertet der Cron jeden Zeiger und alle
 Endpunkte antworten als Legacy. Der Schutz gegen gemischte Generationen greift
-damit erst mit **O3b**, das die unveränderlichen Generationen liefert. 585
+damit erst mit **O3b**, das die unveränderlichen Generationen liefert. 586
 zentrale Tests und 17 Browser-Abnahmen laufen erfolgreich.
 
 ## Empfohlene Reihenfolge
