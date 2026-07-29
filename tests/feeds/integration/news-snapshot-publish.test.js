@@ -164,3 +164,22 @@ test('der Zeiger enthaelt keine Secrets', async () => {
         assert.doesNotMatch(gespeichert, new RegExp(secret), secret);
     }
 });
+
+test('Kennung und Zeitpunkt des Zeigers stammen aus demselben Moment', async () => {
+    // Zwei getrennte `new Date()`-Aufrufe koennten sich um eine Millisekunde
+    // unterscheiden - dann passten der sortierbare Zeitanteil der Kennung und
+    // `createdAt` nicht mehr zueinander.
+    const spies = createSpies();
+    const { sleep } = createSchlaf();
+
+    await runMain(spies, {
+        sleep,
+        fetchImpl: feedFetch(spies),
+        groqFetch: spies.makeGroqFetch(GROQ_LEER),
+    });
+
+    const zeiger = normalizeSnapshotPointer(spies.kvStore[NEWS_SNAPSHOT_POINTER_KEY]);
+    const zeitanteil = Number(zeiger.snapshotId.split('-')[0]);
+
+    assert.equal(zeitanteil, Date.parse(zeiger.createdAt));
+});

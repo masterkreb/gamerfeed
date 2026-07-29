@@ -1471,9 +1471,14 @@ export async function main({
         // News-Caches stehen bereits, und ein Leser ohne Zeiger fällt
         // kontrolliert auf das Legacy-Verhalten zurück. Den Kern-Publish
         // deshalb scheitern zu lassen wäre der schlechtere Tausch.
+        // Ein einziger Zeitpunkt fuer Kennung und `createdAt`: zwei Aufrufe
+        // koennten sich um eine Millisekunde unterscheiden, und dann passten
+        // der sortierbare Zeitanteil der Kennung und der Zeitstempel nicht
+        // mehr zueinander.
+        const publishedAt = new Date();
         const snapshot = buildSnapshotPointer({
-            snapshotId: createSnapshotId(new Date(), recorder.runId),
-            createdAt: new Date(),
+            snapshotId: createSnapshotId(publishedAt, recorder.runId),
+            createdAt: publishedAt,
             articleCount: sortedArticles.length,
             runId: recorder.runId,
         });
