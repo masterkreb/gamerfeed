@@ -102,6 +102,7 @@
 │   └── news-cache-handler.ts   # Gemeinsame Logik der News-Endpunkte
 ├── shared/                 # Gemeinsame Frontend-/Backend-Verträge
 │   ├── announcement-contract.js # Typen, Längengrenze und Parser
+│   ├── news-snapshot.js         # Generationsgebundenes Leseprotokoll
 │   ├── api-errors.js            # Stabile Fehlercodes und Cache-Vorgabe
 │   └── feed-health-model.js     # Cron-Heartbeat, Frische, FEED_STALE_AFTER_MS
 ├── tests/                  # Zentrale Tests nach Fachbereich und Testart
@@ -235,6 +236,7 @@ läuft).
 | `news_cache` | Alle Artikel (Array) |
 | `news_cache_16` | Erste 16 Artikel |
 | `news_cache_64` | Erste 64 Artikel |
+| `news_snapshot_pointer` | Aktive Cache-Generation; bis O3b bewusst leer |
 | `feed_health_status` | Status pro Feed, mit `lastAttemptAt`/`lastSuccessAt` |
 | `feed_run_status` | Veränderlicher Attempt-Status des Cron-Laufs |
 | `feed_publish_status` | Letzter erfolgreicher Kern-Publish |
@@ -420,6 +422,60 @@ Fehlerpfad und hinterlässt einen halben Heartbeat.
 
 Einzelheiten: `docs/deployment/feed-run-budget.md`.
 
+## 🧬 Generationsgebundenes Leseprotokoll
+
+Die drei News-Caches werden **nacheinander** geschrieben und unabhängig
+voneinander am Edge gecacht. Ohne weiteres Zutun kann ein Browser Preview,
+Medium und Full aus drei verschiedenen Ständen zusammensetzen – beobachtet am
+29. Juli 2026, als das Frontend dauerhaft 25 statt 26 deutsche Quellen zeigte.
+
+**O3a definiert und verdrahtet das Protokoll, aktiviert es aber noch nicht.**
+Eine Snapshot-ID darf nur Inhalt kennzeichnen, der nachweisbar zu genau dieser
+Generation gehört. `news_cache`, `news_cache_16` und `news_cache_64` sind
+**veränderlich**; ein Leser kann den Zeiger vor und die Artikel nach einem
+Publish erwischen. **Keine Lesereihenfolge kann das ausschließen** – „Zeiger
+zuerst" ergibt eine alte Kennung auf neuem Inhalt, „Artikel zuerst" eine neue
+auf altem. Die Bindung muss aus der Speicherung kommen, und das ist **O3b**.
+
+- **Der Cron schreibt keinen Zeiger.** Er *entwertet* einen vorhandenen, bevor
+  er die veränderlichen Keys anfasst. Scheitert das, läuft der Publish weiter,
+  wird aber laut gemeldet.
+- **Jede News-Antwort trägt die Generation als Header**, nicht als Umschlag.
+  Der Rumpf bleibt ein nacktes Array – bestehende Clients merken nichts.
+- **Die Endpunkte melden nur, was belegt ist:** `createNewsCacheHandler` nimmt
+  `readSnapshot` entgegen und ist in Produktion bewusst unverdrahtet. Ohne
+  Quelle antwortet alles exakt wie vor O3a.
+- **Drei Leseregeln:** gleiche Generation übernehmen, neuere übernehmen *und*
+  umpinnen, ältere verwerfen.
+- **Gepinnt wird nur, was sichtbar ist.** Der Auto-Update-Pfad pollt im
+  Hintergrund und pinnt deshalb nicht; Artikel und Generation wandern gemeinsam
+  in die Warteschlange und werden beim Klick über `planPendingAdoption` erneut
+  geprüft. `persistCachedArticles` verlangt den Snapshot als ausdrücklichen
+  Parameter.
+- **Rollback braucht ein Signal.** Eine bloß fehlende Generationsangabe ist
+  meistens eine alte Kopie und darf nichts zurückdrehen. Ein bewusster Rückfall
+  meldet sich mit `x-gamerfeed-snapshot-rollback: legacy` und löscht die
+  gepinnte Generation – auch in der lokalen Kopie. Eine Rollback-Antwort trägt
+  **immer** `no-store`: das Signal ist eine kurzlebige Betriebsanweisung und
+  darf nicht aus einem Edge-Cache nachwirken.
+- **Ein Rollback im Poll-Pfad räumt auf.** Der Poll pinnt nicht, leert aber
+  Warteschlange, Badge und Tab-Titel – eine zurückgezogene Generation darf nicht
+  vorgemerkt bleiben. Wirksam wird der Rollback über Reload oder Refresh.
+- **Die Health-API meldet bis O3b `snapshot: null`.** Eine Zuordnung über die
+  Artikelzahl wäre geraten: zwei Generationen können dieselbe haben.
+- **`?snapshot=<id>`**: abweichend `no-store`, passend und ungepinnt dieselbe
+  Cache-Dauer wie bisher. **Kein** verlängerter Edge-Cache – der Inhalt unter
+  einer Kennung ist nicht unveränderlich, solange die Keys überschrieben werden.
+- **Strenge Prüfung:** `snapshotId` muss `<epochMs>-<lauf>` entsprechen und zu
+  `createdAt` passen. Ein beschädigter Wert könnte sonst lexikografisch jede
+  echte Generation blockieren. Lieber gar keine Generation als eine falsche.
+- **`null` heißt überall „Legacy", nie „Fehler".**
+- **Auch die lokale Kopie zählt:** `cachedNews` ist 30 Minuten gültig, der
+  Edge-Cache nur 60 Sekunden. Sie speichert deshalb ihre Generation mit.
+
+Einzelheiten, Grenzen und Migrationsreihenfolge:
+`docs/deployment/news-generations.md`.
+
 ## 🔌 Feed-Proxy
 
 Einzelne Quellen – aktuell GamePro – beantworten Anfragen aus dem
@@ -552,6 +608,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Einstellungsdialog mit echten ARIA-Tabs, angekündigten Formularmeldungen und jederzeit möglichem Schließen
 - **Juli 2026:** Cron-Heartbeat (O1): Attempt-Status, Kern-Publish und Inhaltsfrische getrennt geführt, veraltete Daten ab 50 Minuten sichtbar; Workflow startet zu Minute 7/27/47
 - **Juli 2026:** Admin-APIs (S2): Laufzeitverträge statt TypeScript-Casts, stabile Fehlercodes, keine internen Fehlertexte mehr im Client, `private, no-store` auf allen geschützten Antworten, inaktive Ankündigungen im Admin wieder bearbeitbar
+- **Juli 2026:** Generationsgebundenes Leseprotokoll (O3a): Vertrag, Leseregeln und alle Consumer stehen; aktiviert wird es erst mit den unveränderlichen Generationen aus O3b, bis dahin entwertet der Cron jeden Zeiger und alles antwortet als Legacy
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 

@@ -36,6 +36,14 @@ export interface Article {
 export interface CachedNews {
     articles: Article[];
     timestamp: number;
+    /**
+     * Generation, aus der die lokale Kopie stammt (Roadmap O3a).
+     *
+     * Optional, weil ein vor der Umstellung gespeicherter Eintrag sie nicht
+     * hat. Fehlt sie, gilt die Kopie als Legacy und wird von der ersten
+     * echten Generation abgelöst.
+     */
+    snapshot?: NewsSnapshotPointer | null;
 }
 
 export interface FeedSource {
@@ -134,8 +142,19 @@ export interface FeedHeartbeat {
     };
 }
 
+/** Aktive Cache-Generation des Leseprotokolls (Roadmap O3a). */
+export interface NewsSnapshotPointer {
+    schemaVersion: number;
+    snapshotId: string;
+    createdAt: string | null;
+    articleCount: number;
+    runId: string | null;
+}
+
 export interface HealthDataResponse {
     healthStatus: BackendHealthStatus;
     sourcesInCache: string[];
     heartbeat: FeedHeartbeat;
+    /** Generation, auf der `sourcesInCache` beruht; `null` bei Legacy-Stand. */
+    snapshot: NewsSnapshotPointer | null;
 }

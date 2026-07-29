@@ -1,4 +1,4 @@
-import type { Article, BackendHealthStatus, FeedHeartbeat } from '../types';
+import type { Article, BackendHealthStatus, FeedHeartbeat, NewsSnapshotPointer } from '../types';
 import { adminErrorResponse, adminJsonResponse, internalErrorResponse } from './admin-api.js';
 import { API_ERROR_CODES } from '../shared/api-errors.js';
 import {
@@ -8,6 +8,7 @@ import {
     FEED_STALE_AFTER_MS,
     buildFreshnessReport,
 } from '../shared/feed-health-model.js';
+import { normalizeSnapshotPointer } from '../shared/news-snapshot.js';
 
 interface HealthCacheClient {
     get<T>(key: string): Promise<T | null>;
@@ -17,6 +18,15 @@ interface HealthHandlerOptions {
     /** Injizierbare Uhr: Grenzfälle der Frische sind so ohne Wartezeit testbar. */
     now?: () => Date;
     staleAfterMs?: number;
+    /**
+     * Liefert die Generation, zu der die gelesenen Artikel **nachweisbar**
+     * gehören.
+     *
+     * Bewusst ohne Vorgabe: solange die News-Keys veränderlich sind, kann das
+     * niemand belegen – jede Näherung (etwa über die Artikelzahl) würde im
+     * Admin eine falsche Zuordnung anzeigen. Die belegbare Quelle bringt O3b.
+     */
+    readSnapshot?: (articles: Article[]) => Promise<unknown> | unknown;
 }
 
 // Neutral formuliert: die Meldung geht an den Client und soll weder den
@@ -33,7 +43,11 @@ const MISSING_DATA_MESSAGE = 'Health-Daten sind derzeit nicht verfügbar.';
  */
 export function createHealthDataHandler(
     cache: HealthCacheClient,
-    { now = () => new Date(), staleAfterMs = FEED_STALE_AFTER_MS }: HealthHandlerOptions = {},
+    {
+        now = () => new Date(),
+        staleAfterMs = FEED_STALE_AFTER_MS,
+        readSnapshot,
+    }: HealthHandlerOptions = {},
     logger: Pick<Console, 'error'> = console,
 ) {
     return async function handler(_request: Request): Promise<Response> {
@@ -60,9 +74,30 @@ export function createHealthDataHandler(
                 staleAfterMs,
             });
 
+            // Welche Generation der Zaehlung `sourcesInCache` zugrunde liegt
+            // (O3a). Ohne diese Angabe laesst sich „nicht im aktiven Snapshot"
+            // nicht von „das Frontend sieht einen anderen Snapshot"
+            // unterscheiden - genau die Frage, die der beobachtete
+            // GameStar-Fall aufgeworfen hat. Die Auswertung im Admin bleibt
+            // A1b vorbehalten.
+            //
+            // Gemeldet wird nur, was eine **belegbar gebundene** Quelle
+            // liefert. Eine Heuristik waere hier besonders gefaehrlich: zwei
+            // Generationen koennen dieselbe Artikelzahl haben, und dann stuende
+            // im Admin eine falsche Zuordnung. Ein Fehler beim Lesen ist kein
+            // Grund, die Health-Daten zu verweigern - dann gilt Legacy.
+            let snapshot: NewsSnapshotPointer | null = null;
+            if (readSnapshot) {
+                try {
+                    snapshot = normalizeSnapshotPointer(await readSnapshot(articles));
+                } catch (snapshotError) {
+                    logger.error('Snapshot unavailable in /api/get-health-data:', snapshotError);
+                }
+            }
+
             // Immer der aktuelle Stand und niemals zwischengespeichert: der
             // Frischebericht wäre sonst genau das, was er melden soll – alt.
-            return adminJsonResponse({ healthStatus, sourcesInCache, heartbeat });
+            return adminJsonResponse({ healthStatus, sourcesInCache, heartbeat, snapshot });
         } catch (error) {
             // Der KV-Originaltext bleibt im Log.
             logger.error('API Error in /api/get-health-data:', error);

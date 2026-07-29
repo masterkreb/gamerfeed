@@ -5,7 +5,7 @@ import { FilterBar } from './components/FilterBar';
 import { ArticleCard } from './components/ArticleCard';
 import { TrendsView } from './components/TrendsView';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import type { Article, Theme, ViewMode, AppView, Announcement, CachedNews } from './types';
+import type { Article, Theme, ViewMode, AppView, Announcement, CachedNews, NewsSnapshotPointer } from './types';
 import { LoadingSpinner, SearchIcon, FilterIcon, ResetIcon, NewspaperIcon, BookmarkIcon, StarIcon, ArrowLeftIcon } from './components/Icons';
 import { FilterProvider, useFilter } from './contexts/FilterContext';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
@@ -16,6 +16,15 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { useCookieConsent } from './components/CookieConsent';
 import { createAnalyticsLifecycle } from './shared/analytics-lifecycle.js';
 import { filterArticles } from './shared/article-filters';
+import {
+    decideSnapshotAcceptance,
+    normalizeSnapshotPointer,
+    planPendingAdoption,
+    planPollResponse,
+    readSnapshotHeaders,
+    readSnapshotRollback,
+    withSnapshotQuery,
+} from './shared/news-snapshot.js';
 
 const ARTICLES_PER_PAGE = 32;
 const INITIAL_ARTICLE_CACHE_COUNT = 32;
@@ -129,7 +138,13 @@ const AppContent: React.FC = () => {
 
     // Auto-update state
     const [newArticlesCount, setNewArticlesCount] = useState(0);
-    const [pendingArticles, setPendingArticles] = useState<Article[]>([]);
+    // Ausstehende Artikel und die Generation, aus der sie stammen, gehören
+    // zusammen. Getrennt gespeichert könnten sie beim Übernehmen unter einer
+    // fremden Kennung landen (Roadmap O3a).
+    const [pending, setPending] = useState<{ articles: Article[]; snapshot: NewsSnapshotPointer | null }>({
+        articles: [],
+        snapshot: null,
+    });
     const autoUpdateIntervalRef = useRef<number | null>(null);
 
     // Announcement state
@@ -137,15 +152,66 @@ const AppContent: React.FC = () => {
     const [dismissedAnnouncementId, setDismissedAnnouncementId] = useLocalStorage<string | null>('dismissedAnnouncementId', null);
     const cachedArticlesRef = useRef<Article[]>([]);
 
+    // Gepinnte Cache-Generation (Roadmap O3a). Bewusst eine Ref und kein State:
+    // sie steuert nur, welche Antwort uebernommen wird, und darf dafuer kein
+    // Rendern ausloesen.
+    const pinnedSnapshotRef = useRef<NewsSnapshotPointer | null>(null);
+
+    /**
+     * Uebernimmt eine Antwort nur, wenn sie nicht aus einer aelteren Generation
+     * stammt.
+     *
+     * Ohne diese Pruefung konnte eine verspaetete oder aus dem Edge-Cache
+     * stammende Kopie den bereits sichtbaren neueren Stand ueberschreiben -
+     * genau der am 29. Juli 2026 beobachtete Fall, in dem der Browser dauerhaft
+     * 25 statt 26 deutsche Quellen zeigte.
+     */
+    const acceptSnapshotResponse = useCallback((response: Response): boolean => {
+        const decision = decideSnapshotAcceptance({
+            pinned: pinnedSnapshotRef.current,
+            incoming: readSnapshotHeaders(response.headers),
+            // Nur ein ausdrückliches Serversignal gibt eine gepinnte Generation
+            // wieder frei. Eine bloß fehlende Angabe ist meistens eine alte
+            // Kopie und darf den Stand nicht zurückdrehen.
+            rollback: readSnapshotRollback(response.headers),
+        });
+
+        pinnedSnapshotRef.current = decision.pin;
+        if (!decision.accept) {
+            console.warn(`Antwort verworfen (${decision.reason})`);
+        }
+        return decision.accept;
+    }, []);
+
+    /** Haengt die gepinnte Generation an eine Endpunktadresse. */
+    const snapshotUrl = useCallback((path: string): string => (
+        withSnapshotQuery(path, pinnedSnapshotRef.current)
+    ), []);
+
     const validCachedArticles = useMemo(() => {
         const isFresh = Date.now() - cachedNews.timestamp < ARTICLE_CACHE_TTL_MS;
         return isFresh ? cachedNews.articles : [];
     }, [cachedNews]);
 
-    const persistCachedArticles = useCallback((nextArticles: Article[]) => {
+    /**
+     * Speichert die lokale Kopie **mit** ihrer Generation.
+     *
+     * `snapshot` wird ausdrücklich übergeben und nicht aus der gepinnten
+     * Generation gelesen: beim Übernehmen ausstehender Artikel gehören die
+     * Artikel zu der Generation, aus der sie geholt wurden – nicht zu der,
+     * die inzwischen gepinnt sein könnte.
+     */
+    const persistCachedArticles = useCallback((
+        nextArticles: Article[],
+        snapshot: NewsSnapshotPointer | null,
+    ) => {
         setCachedNews({
             articles: nextArticles.slice(0, INITIAL_ARTICLE_CACHE_COUNT),
             timestamp: Date.now(),
+            // Ohne die Generation könnte eine ältere Antwort aus dem
+            // Edge-Cache einen neueren lokalen Stand überschreiben - die
+            // 30-Minuten-Kopie ist länger gültig als der 60-Sekunden-Cache.
+            snapshot,
         });
     }, [setCachedNews]);
 
@@ -171,10 +237,14 @@ const AppContent: React.FC = () => {
 
     useEffect(() => {
         if (articles.length === 0 && validCachedArticles.length > 0) {
+            // Die lokale Kopie bringt ihre Generation mit. Damit ist der
+            // sichtbare Stand von Anfang an gepinnt und eine aeltere Antwort
+            // aus dem Edge-Cache kann ihn nicht ersetzen.
+            pinnedSnapshotRef.current = normalizeSnapshotPointer(cachedNews.snapshot);
             setArticles(validCachedArticles);
             setIsBlockingLoading(false);
         }
-    }, [articles.length, validCachedArticles]);
+    }, [articles.length, validCachedArticles, cachedNews.snapshot]);
 
     useEffect(() => {
         cachedArticlesRef.current = validCachedArticles;
@@ -223,50 +293,57 @@ const AppContent: React.FC = () => {
         try {
             if (isManualRefresh) {
                 // Manual refresh: fetch all articles directly
-                const response = await fetch('/api/get-news');
+                const response = await fetch(snapshotUrl('/api/get-news'));
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => null);
                     const errorMessage = errorData?.error || `Failed to load news from API: ${response.status}`;
                     throw new Error(errorMessage);
                 }
                 const fetchedArticles: Article[] = await response.json();
-                setArticles(fetchedArticles);
-                persistCachedArticles(fetchedArticles);
-                console.log(`Refreshed ${fetchedArticles.length} articles from API`);
+                if (acceptSnapshotResponse(response)) {
+                    setArticles(fetchedArticles);
+                    persistCachedArticles(fetchedArticles, pinnedSnapshotRef.current);
+                    console.log(`Refreshed ${fetchedArticles.length} articles from API`);
+                }
             } else {
                 // Initial load: 3-stage progressive loading (16 → 64 → full)
-                const previewResponse = await fetch('/api/get-news-preview');
+                const previewResponse = await fetch(snapshotUrl('/api/get-news-preview'));
 
                 if (previewResponse.ok) {
                     // Stage 1: Show first 16 articles immediately
                     const previewArticles: Article[] = await previewResponse.json();
-                    setArticles(previewArticles);
-                    persistCachedArticles(previewArticles);
+                    if (acceptSnapshotResponse(previewResponse)) {
+                        setArticles(previewArticles);
+                        persistCachedArticles(previewArticles, pinnedSnapshotRef.current);
+                        console.log(`✅ Stage 1: Loaded ${previewArticles.length} preview articles`);
+                    }
                     setIsBlockingLoading(false);
-                    console.log(`✅ Stage 1: Loaded ${previewArticles.length} preview articles`);
 
-                    // Stage 2: Load 64 articles in background
-                    fetch('/api/get-news-medium')
-                        .then(response => {
+                    // Stage 2: Load 64 articles in background. Jede Stufe wird an
+                    // die inzwischen gepinnte Generation gebunden und nur
+                    // uebernommen, wenn sie nicht aelter ist als der sichtbare
+                    // Stand (Roadmap O3a).
+                    fetch(snapshotUrl('/api/get-news-medium'))
+                        .then(async response => {
                             if (!response.ok) throw new Error('Failed to load medium articles');
-                            return response.json();
-                        })
-                        .then((mediumArticles: Article[]) => {
-                            setArticles(mediumArticles);
-                            persistCachedArticles(mediumArticles);
-                            console.log(`✅ Stage 2: Loaded ${mediumArticles.length} medium articles`);
+                            const mediumArticles: Article[] = await response.json();
+                            if (acceptSnapshotResponse(response)) {
+                                setArticles(mediumArticles);
+                                persistCachedArticles(mediumArticles, pinnedSnapshotRef.current);
+                                console.log(`✅ Stage 2: Loaded ${mediumArticles.length} medium articles`);
+                            }
 
                             // Stage 3: Load all articles in background
-                            return fetch('/api/get-news');
+                            return fetch(snapshotUrl('/api/get-news'));
                         })
-                        .then(response => {
+                        .then(async response => {
                             if (!response.ok) throw new Error('Failed to load full articles');
-                            return response.json();
-                        })
-                        .then((fullArticles: Article[]) => {
-                            setArticles(fullArticles);
-                            persistCachedArticles(fullArticles);
-                            console.log(`✅ Stage 3: Loaded ${fullArticles.length} full articles`);
+                            const fullArticles: Article[] = await response.json();
+                            if (acceptSnapshotResponse(response)) {
+                                setArticles(fullArticles);
+                                persistCachedArticles(fullArticles, pinnedSnapshotRef.current);
+                                console.log(`✅ Stage 3: Loaded ${fullArticles.length} full articles`);
+                            }
                         })
                         .catch(err => {
                             console.warn('Background loading failed:', err);
@@ -276,16 +353,18 @@ const AppContent: React.FC = () => {
                 } else {
                     // Preview API not available (404) - fallback to full API
                     console.log('Preview API not available, falling back to full API');
-                    const response = await fetch('/api/get-news');
+                    const response = await fetch(snapshotUrl('/api/get-news'));
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => null);
                         const errorMessage = errorData?.error || `Failed to load news: ${response.status}`;
                         throw new Error(errorMessage);
                     }
                     const fetchedArticles: Article[] = await response.json();
-                    setArticles(fetchedArticles);
-                    persistCachedArticles(fetchedArticles);
-                    console.log(`Loaded ${fetchedArticles.length} articles (fallback)`);
+                    if (acceptSnapshotResponse(response)) {
+                        setArticles(fetchedArticles);
+                        persistCachedArticles(fetchedArticles, pinnedSnapshotRef.current);
+                        console.log(`Loaded ${fetchedArticles.length} articles (fallback)`);
+                    }
                 }
             }
 
@@ -297,7 +376,7 @@ const AppContent: React.FC = () => {
             setIsBlockingLoading(false);
             setIsRefreshing(false);
         }
-    }, [persistCachedArticles]);
+    }, [persistCachedArticles, acceptSnapshotResponse, snapshotUrl]);
 
     useEffect(() => {
         loadNews();
@@ -307,7 +386,7 @@ const AppContent: React.FC = () => {
         loadNews(true);
         // Clear pending articles when manually refreshing
         setNewArticlesCount(0);
-        setPendingArticles([]);
+        setPending({ articles: [], snapshot: null });
         // Reset tab title
         document.title = 'GamerFeed';
     }, [loadNews]);
@@ -315,10 +394,36 @@ const AppContent: React.FC = () => {
     // Check for new articles without updating the view
     const checkForNewArticles = useCallback(async () => {
         try {
-            const response = await fetch('/api/get-news');
+            const response = await fetch(snapshotUrl('/api/get-news'));
             if (!response.ok) return;
             
             const fetchedArticles: Article[] = await response.json();
+
+            // Hier wird **nicht** gepinnt. Der Benutzer hat die Artikel noch
+            // nicht übernommen; die gepinnte Generation muss zum *sichtbaren*
+            // Stand passen. Sonst könnten ausstehende Artikel aus Generation B
+            // später unter einer inzwischen gepinnten Generation C gespeichert
+            // werden.
+            const incoming = readSnapshotHeaders(response.headers);
+            const plan = planPollResponse({
+                pinned: pinnedSnapshotRef.current,
+                incoming,
+                rollback: readSnapshotRollback(response.headers),
+            });
+
+            if (plan.clearPending) {
+                // Autoritativer Rollback: eine vorgemerkte Generation ist
+                // zurückgezogen. Sie stehen zu lassen hieße, sie später per
+                // Klick doch noch einzuspielen. Der sichtbare Stand bleibt
+                // unberührt - er wechselt erst beim nächsten Ladevorgang.
+                setNewArticlesCount(0);
+                setPending({ articles: [], snapshot: null });
+                document.title = 'GamerFeed';
+                return;
+            }
+
+            // Ein älterer Stand darf keine neuen Artikel melden.
+            if (!plan.accept) return;
             
             // Get the newest article date from currently loaded articles
             const newestLoadedDate = articles.length > 0 
@@ -335,7 +440,8 @@ const AppContent: React.FC = () => {
             if (trulyNewArticles.length > 0) {
                 // Set count directly (not accumulate) since we're comparing against dates
                 setNewArticlesCount(trulyNewArticles.length);
-                setPendingArticles(fetchedArticles);
+                // Artikel und ihre Generation gemeinsam - sie gehören zusammen.
+                setPending({ articles: fetchedArticles, snapshot: incoming });
                 // Update tab title
                 document.title = `(${trulyNewArticles.length}) GamerFeed`;
                 console.log(`🆕 ${trulyNewArticles.length} neue Artikel verfügbar`);
@@ -344,20 +450,42 @@ const AppContent: React.FC = () => {
         } catch (error) {
             console.warn('Auto-update check failed:', error);
         }
-    }, [articles]);
+    }, [articles, snapshotUrl]);
 
     // Load pending articles (when user clicks the toast or badge)
     const loadPendingArticles = useCallback(() => {
-        if (pendingArticles.length > 0) {
-            setArticles(pendingArticles);
-            persistCachedArticles(pendingArticles);
+        if (pending.articles.length === 0) return;
+
+        // Zwischen dem Vormerken und diesem Klick können Minuten liegen - genug
+        // Zeit, damit der sichtbare Stand längst weiter ist. Die Warteschlange
+        // wird deshalb **hier erneut** geprüft, nicht nur beim Befüllen.
+        const plan = planPendingAdoption({
+            pinned: pinnedSnapshotRef.current,
+            pending,
+        });
+
+        if (!plan.adopt) {
+            // Verworfen, aber nicht vergessen: die Warteschlange wird geleert
+            // und das Abzeichen zurückgesetzt, State und lokale Kopie bleiben
+            // unangetastet.
+            console.warn(`Ausstehende Artikel verworfen (${plan.reason})`);
             setNewArticlesCount(0);
-            setPendingArticles([]);
-            // Reset tab title
+            setPending({ articles: [], snapshot: null });
             document.title = 'GamerFeed';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
         }
-    }, [pendingArticles, persistCachedArticles]);
+
+        // Erst jetzt wird die Generation der ausstehenden Artikel gepinnt:
+        // ab diesem Moment ist sie der sichtbare Stand.
+        pinnedSnapshotRef.current = plan.snapshot;
+        setArticles(pending.articles);
+        persistCachedArticles(pending.articles, plan.snapshot);
+        setNewArticlesCount(0);
+        setPending({ articles: [], snapshot: null });
+        // Reset tab title
+        document.title = 'GamerFeed';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [pending, persistCachedArticles]);
 
     // Auto-update polling (every 5 minutes) - runs even when tab is inactive
     useEffect(() => {

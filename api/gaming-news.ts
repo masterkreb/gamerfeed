@@ -39,6 +39,12 @@ function formatDateDE(date: Date): string {
 
 export default async function handler(_req: Request) {
     try {
+        // Diese Seite liest den **veränderlichen** `news_cache` und ist damit
+        // bis O3b ein reiner Legacy-Consumer des Leseprotokolls: eine Kennung
+        // hier würde Inhalt beschriften, dessen Zugehörigkeit niemand belegen
+        // kann. Sobald O3b unveränderliche Generationen bereitstellt, bekommt
+        // die Seite ihre Generation als Meta-Angabe und Header.
+        // Siehe docs/deployment/news-generations.md.
         const articles = await kv.get<Article[]>('news_cache');
 
         if (!articles || articles.length === 0) {

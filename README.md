@@ -89,6 +89,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     - `news_cache_64`: Erste 64 Artikel (Medium)
     - `feed_health_status`: Systemstatus je Feed
     - `feed_run_status` & `feed_publish_status`: Cron-Heartbeat und letzter Kern-Publish
+    - `news_snapshot_pointer`: aktive Cache-Generation des Leseprotokolls (bis O3b bewusst leer)
     - `daily_trends` & `weekly_trends`: KI-generierte Trends
 4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 20 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung. Falls eine freigegebene Quelle GitHub-Runner blockiert, kann der Workflow optional auf den extern betriebenen PHP-Fallback `tools/feed-proxy.php` zurückgreifen. Einrichtung und Grenzen stehen in der [Feed-Proxy-Betriebsanleitung](docs/deployment/feed-proxy.md).
 5.  **API-Schicht (Vercel Functions)**: Schlanke Edge Functions für Datenabrufe sowie eine Node.js Function für den SMTP-Versand:
@@ -137,6 +138,7 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
     3.  Im Hintergrund wird `/api/get-news-medium` aufgerufen und 64 Artikel geladen (Stage 2).
     4.  Danach wird `/api/get-news` aufgerufen und alle Artikel geladen (Stage 3).
 *   **Ergebnis:** Der Nutzer sieht Inhalte sofort, ohne Wartezeit. Die Daten sind immer so aktuell wie der letzte Cron-Job-Lauf.
+*   **Eine Generation, nicht drei:** Die drei Stufen werden nacheinander geholt und unabhängig voneinander am Edge gecacht. Damit daraus kein gemischter Stand entsteht, gibt es ein Leseprotokoll: jede Antwort nennt ihre Cache-Generation, die erste brauchbare legt sie fest, eine neuere wird übernommen, eine ältere verworfen. Das Protokoll ist vollständig umgesetzt, aber **noch nicht aktiv** – eine Kennung darf nur Inhalt bezeichnen, der nachweisbar zu ihr gehört, und dafür braucht es die unveränderlichen Generationen aus O3b. Bis dahin verhält sich alles wie bisher. Einzelheiten und Grenzen: [Generationsgebundenes Leseprotokoll](docs/deployment/news-generations.md).
 
 ---
 

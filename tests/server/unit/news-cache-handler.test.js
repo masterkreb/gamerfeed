@@ -15,6 +15,9 @@ function createArticle(id) {
     };
 }
 
+// Ohne injizierte Snapshot-Quelle liest der Endpunkt ausschliesslich die
+// Artikel - genau wie vor O3a. Die Quelle bleibt bis O3b unverdrahtet, siehe
+// server/news-cache-handler.ts.
 function createCache(values = {}, error = null) {
     const calls = [];
 
