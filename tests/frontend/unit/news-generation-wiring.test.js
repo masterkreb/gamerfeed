@@ -78,6 +78,19 @@ test('der Auto-Update-Pfad pinnt nicht', () => {
         'Artikel und Generation werden gemeinsam vorgemerkt');
 });
 
+test('ein Rollback im Auto-Update-Pfad raeumt die Warteschlange', () => {
+    // Eine zurueckgezogene Generation darf nicht vorgemerkt bleiben - sonst
+    // spielt ein spaeterer Klick genau sie ein.
+    const body = callbackBody(APP_SOURCE, 'checkForNewArticles');
+
+    assert.match(body, /planPollResponse\(\s*\{/, 'checkForNewArticles muss planPollResponse aufrufen');
+    assert.match(body, /rollback:\s*readSnapshotRollback\(response\.headers\)/);
+    assert.match(body, /if\s*\(plan\.clearPending\)/, 'und das Aufraeumen auch ausfuehren');
+    assert.match(body, /setPending\(\{\s*articles:\s*\[\],\s*snapshot:\s*null\s*\}\)/,
+        'die Warteschlange wird geleert');
+    assert.match(body, /setNewArticlesCount\(0\)/, 'das Abzeichen wird zurueckgesetzt');
+});
+
 test('die lokale Kopie wird immer mit einer ausdruecklichen Generation gespeichert', () => {
     // `persistCachedArticles` verlangt den Snapshot als zweiten Parameter.
     // Ein Aufruf ohne ihn waere ein TypeScript-Fehler - dieser Test haelt

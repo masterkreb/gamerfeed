@@ -110,7 +110,7 @@ in beiden Richtungen als Regressionstest abgedeckt. **Aktiviert ist das
 Protokoll nicht:** neben veränderlichen Legacy-Keys kann eine Kennung ihre
 Zugehörigkeit nicht belegen, deshalb entwertet der Cron jeden Zeiger und alle
 Endpunkte antworten als Legacy. Der Schutz gegen gemischte Generationen greift
-damit erst mit **O3b**, das die unveränderlichen Generationen liefert. 586
+damit erst mit **O3b**, das die unveränderlichen Generationen liefert. 593
 zentrale Tests und 17 Browser-Abnahmen laufen erfolgreich.
 
 ## Empfohlene Reihenfolge
@@ -451,7 +451,9 @@ umpinnen, ältere verwerfen. Gepinnt wird nur, was auch sichtbar ist – der
 Auto-Update-Pfad merkt Artikel samt ihrer Generation vor und prüft sie bei der
 Übernahme erneut gegen den inzwischen sichtbaren Stand. Ein Rückfall auf Legacy
 verlangt ein **ausdrückliches Signal** (`x-gamerfeed-snapshot-rollback`); eine
-bloß fehlende Angabe bleibt eine alte Kopie und dreht nichts zurück. Die
+bloß fehlende Angabe bleibt eine alte Kopie und dreht nichts zurück. Eine
+Rollback-Antwort ist nie cachebar, und ein Rollback im Poll-Pfad räumt eine
+vorgemerkte, inzwischen zurückgezogene Generation weg. Die
 Health-API meldet bis O3b `snapshot: null` – eine Zuordnung über die Artikelzahl
 wäre geraten, weil zwei Generationen dieselbe haben können.
 

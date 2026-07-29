@@ -145,12 +145,26 @@ gibt eine auf.
 Gesteuert wird das über `legacyRollback` an `createNewsCacheHandler` – eine
 bewusste Betriebsentscheidung, kein Automatismus.
 
-**Grenze:** Der Auto-Update-Pfad verändert die gepinnte Generation nie – auch
-nicht, um sie freizugeben. Ein Rollback, der dort ankommt, führt lediglich dazu,
-dass die Warteschlange beim Klick verworfen wird. Wirksam wird er über die
-Ladekette, also bei Reload oder manuellem Refresh – genau dort, wo sich der
-sichtbare Stand ohnehin ändert. Das ist die konservative Richtung: ein
-Poll-Ergebnis soll nie still den Schutz aufheben, den der Pin bietet.
+**Eine Rollback-Antwort wird nie zwischengespeichert.** Unabhängig vom
+Query-Parameter trägt sie `Cache-Control: no-store`. Läge sie am Edge, käme das
+Signal noch Minuten später bei Clients an, obwohl der Rollback längst beendet
+und wieder eine gültige Generation aktiv ist – diese Clients gäben dann grundlos
+ihre Generation auf. Ein Rollback ist eine kurzlebige Betriebsanweisung, keine
+cachebare Eigenschaft des Inhalts.
+
+**Grenze im Auto-Update-Pfad:** Der Poll verändert die gepinnte Generation nie –
+auch nicht, um sie freizugeben. Er **räumt** aber auf: eine bereits vorgemerkte
+Generation ist mit dem Rollback zurückgezogen, also werden Warteschlange, Badge
+und Tab-Titel geleert. Bliebe die Warteschlange stehen, spielte ein späterer
+Klick genau die Generation ein, die der Server gerade widerrufen hat.
+
+Die eigentliche Übernahme des Rollbacks bleibt der Ladekette vorbehalten – also
+Reload oder manueller Refresh –, genau dort, wo sich der sichtbare Stand ohnehin
+ändert. Das ist die konservative Richtung: ein Poll-Ergebnis soll nie still den
+Schutz aufheben, den der Pin bietet.
+
+Beide Entscheidungen liegen als `planPollResponse` und `planPendingAdoption` in
+`shared/news-snapshot.js`; `App.tsx` ruft genau sie auf.
 
 ### Pinnen nur, was sichtbar ist
 
@@ -178,6 +192,7 @@ einer Stelle.
 | ohne `?snapshot` | `s-maxage=60, stale-while-revalidate=300` | unverändert, für bestehende Clients |
 | `?snapshot=` passend | `s-maxage=60, stale-while-revalidate=300` | **wie sonst auch** |
 | `?snapshot=` abweichend | `no-store` | sonst läge die Antwort einer anderen Generation unter der angefragten Kennung |
+| **Rollback-Antwort** (mit oder ohne `?snapshot`) | `no-store` | ein Rollback ist eine kurzlebige Betriebsanweisung, keine Eigenschaft des Inhalts |
 
 Eine frühere Fassung gab passenden Anfragen eine längere Frist mit der
 Begründung, der Inhalt unter einer Kennung sei unveränderlich. **Das gilt

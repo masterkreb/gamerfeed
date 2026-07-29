@@ -455,7 +455,12 @@ auf altem. Die Bindung muss aus der Speicherung kommen, und das ist **O3b**.
 - **Rollback braucht ein Signal.** Eine bloß fehlende Generationsangabe ist
   meistens eine alte Kopie und darf nichts zurückdrehen. Ein bewusster Rückfall
   meldet sich mit `x-gamerfeed-snapshot-rollback: legacy` und löscht die
-  gepinnte Generation – auch in der lokalen Kopie.
+  gepinnte Generation – auch in der lokalen Kopie. Eine Rollback-Antwort trägt
+  **immer** `no-store`: das Signal ist eine kurzlebige Betriebsanweisung und
+  darf nicht aus einem Edge-Cache nachwirken.
+- **Ein Rollback im Poll-Pfad räumt auf.** Der Poll pinnt nicht, leert aber
+  Warteschlange, Badge und Tab-Titel – eine zurückgezogene Generation darf nicht
+  vorgemerkt bleiben. Wirksam wird der Rollback über Reload oder Refresh.
 - **Die Health-API meldet bis O3b `snapshot: null`.** Eine Zuordnung über die
   Artikelzahl wäre geraten: zwei Generationen können dieselbe haben.
 - **`?snapshot=<id>`**: abweichend `no-store`, passend und ungepinnt dieselbe

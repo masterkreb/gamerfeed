@@ -10,6 +10,7 @@ import {
     buildSnapshotPointer,
     decideSnapshotAcceptance,
     planPendingAdoption,
+    planPollResponse,
     readSnapshotHeaders,
     readSnapshotRollback,
     withSnapshotQuery,
@@ -688,19 +689,182 @@ test('ein laufender Client folgt einem ausdruecklichen Rollback', async () => {
     assert.deepEqual(sichtbar, OHNE_GAMESTAR, 'der Legacy-Stand ist sichtbar');
 });
 
-test('ein Rollback im Auto-Update-Pfad wird nicht heimlich uebernommen', async () => {
-    // Bewusste Grenze: der Poll-Pfad veraendert die gepinnte Generation nie -
-    // auch nicht, um sie freizugeben. Eine Warteschlange ohne Generation wird
-    // beim Klick deshalb verworfen. Wirksam wird ein Rollback ueber die
-    // Ladekette (Reload oder manueller Refresh), also genau dort, wo sich der
-    // sichtbare Stand ohnehin aendert.
+// === Rollback im Poll-Pfad ===
+
+test('ein Rollback im Poll-Pfad raeumt die Warteschlange und zeigt nichts an', async () => {
+    // Der Poll aendert den sichtbaren Stand nie - aber eine zurueckgezogene
+    // Generation darf auch nicht vorgemerkt bleiben.
+    const A = pointerFor(1000, 'gha-1');
+
+    const plan = planPollResponse({ pinned: A, incoming: null, rollback: true });
+
+    assert.equal(plan.clearPending, true, 'die Warteschlange wird geraeumt');
+    assert.equal(plan.accept, false, 'angezeigt wird nichts');
+    assert.equal(plan.reason, 'legacy_rollback');
+});
+
+test('ohne Rollback entscheidet der Poll wie bisher', async () => {
+    const A = pointerFor(1000, 'gha-1');
     const B = pointerFor(2000, 'gha-2');
 
-    const plan = planPendingAdoption({
-        pinned: B,
-        pending: { articles: [createArticle('x1')], snapshot: null },
+    const neuer = planPollResponse({ pinned: A, incoming: B });
+    assert.equal(neuer.accept, true);
+    assert.equal(neuer.clearPending, false);
+    assert.equal(neuer.reason, 'newer_generation');
+
+    const aelter = planPollResponse({ pinned: B, incoming: A });
+    assert.equal(aelter.accept, false);
+    assert.equal(aelter.clearPending, false);
+    assert.equal(aelter.reason, 'older_generation');
+
+    const legacy = planPollResponse({ pinned: B, incoming: null });
+    assert.equal(legacy.accept, false, 'eine headerlose Antwort bleibt eine alte Kopie');
+    assert.equal(legacy.clearPending, false, 'und raeumt nichts');
+});
+
+test('die vollstaendige Rollback-Sequenz im Poll-Pfad', async () => {
+    // 1. A sichtbar, 2. B vorgemerkt, 3. Rollback-Poll, 4. Warteschlange leer,
+    // 5. ein spaeterer Klick kann B weder anzeigen noch speichern,
+    // 6. der sichtbare Pin A bleibt bis zum naechsten Ladevorgang.
+    //
+    // Gerechnet wird ausschliesslich mit `planPollResponse` und
+    // `planPendingAdoption` - denselben Funktionen, die App.tsx aufruft. Der
+    // Zustand hier haelt nur, was App.tsx in State und Ref haelt.
+    const A = pointerFor(1000, 'gha-1');
+    const B = pointerFor(2000, 'gha-2');
+    const artikelB = [createArticle('b1'), createArticle('b2', 'GameStar')];
+
+    let pinned = A;
+    let pending = { articles: [], snapshot: null };
+    let badge = 0;
+    let gespeichert = null;
+    let sichtbar = [createArticle('a1')];
+
+    /** Eine Poll-Antwort trifft ein. */
+    const poll = ({ incoming, rollback = false, artikel = [], hatNeuereArtikel = false }) => {
+        const plan = planPollResponse({ pinned, incoming, rollback });
+
+        if (plan.clearPending) {
+            badge = 0;
+            pending = { articles: [], snapshot: null };
+            return plan.reason;
+        }
+        if (!plan.accept) return plan.reason;
+        if (hatNeuereArtikel) {
+            badge = artikel.length;
+            pending = { articles: artikel, snapshot: incoming };
+        }
+        return plan.reason;
+    };
+
+    /** Der Benutzer klickt auf die Meldung. */
+    const klick = () => {
+        if (pending.articles.length === 0) return 'nichts vorgemerkt';
+
+        const plan = planPendingAdoption({ pinned, pending });
+        if (!plan.adopt) {
+            badge = 0;
+            pending = { articles: [], snapshot: null };
+            return plan.reason;
+        }
+
+        pinned = plan.snapshot;
+        sichtbar = pending.articles;
+        gespeichert = { articles: pending.articles, snapshot: plan.snapshot };
+        badge = 0;
+        pending = { articles: [], snapshot: null };
+        return 'uebernommen';
+    };
+
+    // 2. B wird vorgemerkt.
+    assert.equal(
+        poll({ incoming: B, artikel: artikelB, hatNeuereArtikel: true }),
+        'newer_generation',
+    );
+    assert.equal(pending.snapshot.snapshotId, B.snapshotId);
+    assert.equal(badge, 2);
+    assert.equal(pinned.snapshotId, A.snapshotId, 'der Poll pinnt nicht');
+
+    // 3. Der Rollback-Poll trifft ein - ohne neuere Artikel.
+    assert.equal(poll({ incoming: null, rollback: true }), 'legacy_rollback');
+
+    // 4. Warteschlange und Abzeichen sind leer.
+    assert.deepEqual(pending, { articles: [], snapshot: null });
+    assert.equal(badge, 0);
+
+    // 5. Ein spaeterer Klick kann B weder anzeigen noch speichern.
+    assert.equal(klick(), 'nichts vorgemerkt');
+    assert.equal(gespeichert, null, 'nichts wurde gespeichert');
+    assert.deepEqual(sichtbar.map(a => a.id), ['a1'], 'der sichtbare Stand ist unveraendert');
+
+    // 6. Der sichtbare Pin bleibt A - der Rollback wirkt erst beim naechsten
+    //    Ladevorgang.
+    assert.equal(pinned.snapshotId, A.snapshotId);
+});
+
+// === Rollback-Antworten sind nie cachebar ===
+
+function rollbackHandlerFuer(cache) {
+    return createNewsCacheHandler(cache.client, ENDPOINTS.full, undefined, {
+        readSnapshot: () => cache.client.get(NEWS_SNAPSHOT_POINTER_KEY),
+        legacyRollback: true,
+    });
+}
+
+test('eine ungepinnte Rollback-Anfrage wird nicht am Edge gespeichert', async () => {
+    // Sonst kaeme das Signal noch Minuten spaeter bei Clients an, obwohl der
+    // Rollback laengst beendet ist - sie gaeben grundlos ihre Generation auf.
+    const cache = createCache({
+        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor(2000, 'gha-2'),
+        news_cache: [createArticle('a1')],
     });
 
-    assert.equal(plan.adopt, false, 'die Warteschlange wird verworfen');
-    assert.equal(plan.snapshot.snapshotId, B.snapshotId, 'der sichtbare Stand bleibt unberuehrt');
+    const response = await rollbackHandlerFuer(cache)(
+        new Request('https://gamerfeed.example/api/get-news'),
+    );
+
+    assert.equal(response.headers.get(SNAPSHOT_ROLLBACK_HEADER), 'legacy');
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+});
+
+test('eine gepinnte Rollback-Anfrage wird ebenfalls nicht gespeichert', async () => {
+    const cache = createCache({
+        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor(2000, 'gha-2'),
+        news_cache: [createArticle('a1')],
+    });
+
+    const response = await rollbackHandlerFuer(cache)(
+        new Request('https://gamerfeed.example/api/get-news?snapshot=2000-gha-2'),
+    );
+
+    assert.equal(response.headers.get(SNAPSHOT_ROLLBACK_HEADER), 'legacy');
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+});
+
+test('eine gewoehnliche Legacy-Antwort behaelt ihren bisherigen Cache-Header', async () => {
+    // Ohne Rollback-Signal ist eine headerlose Antwort schlicht der Stand von
+    // vor O3a - und der wird wie eh und je gecacht.
+    const cache = createCache({ news_cache: [createArticle('a1')] });
+    const handler = createNewsCacheHandler(cache.client, ENDPOINTS.full);
+
+    const response = await handler(new Request('https://gamerfeed.example/api/get-news'));
+
+    assert.equal(response.headers.get(SNAPSHOT_ROLLBACK_HEADER), null);
+    assert.equal(response.headers.get('cache-control'), 's-maxage=60, stale-while-revalidate=300');
+});
+
+test('eine normale Generationsantwort bleibt unveraendert cachebar', async () => {
+    const zeiger = pointerFor(2000, 'gha-2');
+    const cache = createCache({
+        [NEWS_SNAPSHOT_POINTER_KEY]: zeiger,
+        news_cache: [createArticle('a1')],
+    });
+
+    const ungepinnt = await callEndpoint(cache, 'full');
+    assert.equal(ungepinnt.headers.get('cache-control'), 's-maxage=60, stale-while-revalidate=300');
+    assert.equal(ungepinnt.headers.get(SNAPSHOT_ROLLBACK_HEADER), null);
+
+    const gepinnt = await callEndpoint(cache, 'full', { snapshot: zeiger });
+    assert.equal(gepinnt.headers.get('cache-control'), 's-maxage=60, stale-while-revalidate=300');
+    assert.equal(gepinnt.headers.get(SNAPSHOT_ID_HEADER), '2000-gha-2');
 });

@@ -366,6 +366,41 @@ export function decideSnapshotAcceptance({ pinned = null, incoming = null, rollb
 }
 
 /**
+ * Entscheidet ueber eine Antwort der Hintergrundpruefung (Auto-Update).
+ *
+ * Der Poll zeigt nichts an und veraendert die gepinnte Generation deshalb
+ * **nie** - auch nicht, um sie freizugeben. Die eigentliche Uebernahme eines
+ * Rollbacks bleibt der Ladekette vorbehalten, also Reload oder manuellem
+ * Refresh.
+ *
+ * Ein autoritativer Rollback muss hier aber **aufraeumen**: eine bereits
+ * vorgemerkte Generation ist damit zurueckgezogen. Bliebe sie stehen, koennte
+ * ein spaeterer Klick genau die Generation einspielen, die der Server gerade
+ * widerrufen hat.
+ *
+ * @param {{
+ *   pinned?: NewsSnapshotPointer|null,
+ *   incoming?: NewsSnapshotPointer|null,
+ *   rollback?: boolean,
+ * }} [params]
+ * @returns {{ accept: boolean, clearPending: boolean, reason: string }}
+ */
+export function planPollResponse({ pinned = null, incoming = null, rollback = false } = {}) {
+    if (rollback) {
+        return {
+            // Nicht anzeigen: der sichtbare Stand aendert sich erst beim
+            // naechsten Ladevorgang.
+            accept: false,
+            clearPending: true,
+            reason: SNAPSHOT_DECISIONS.LEGACY_ROLLBACK,
+        };
+    }
+
+    const decision = decideSnapshotAcceptance({ pinned, incoming });
+    return { accept: decision.accept, clearPending: false, reason: decision.reason };
+}
+
+/**
  * Entscheidet ueber die Uebernahme vorgemerkter Auto-Update-Artikel.
  *
  * Zwischen dem Vormerken und dem Klick des Benutzers koennen Minuten liegen -

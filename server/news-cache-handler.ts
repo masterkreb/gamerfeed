@@ -45,12 +45,18 @@ interface NewsCacheOptions {
 
 const SUCCESS_CACHE_CONTROL = 's-maxage=60, stale-while-revalidate=300';
 /**
- * Der Leser hat eine andere Generation angefragt, als hier vorliegt. Diese
- * Antwort darf **nicht** unter der angefragten Kennung im Edge liegen bleiben:
- * sie gehört zu einer anderen Generation und würde die Verwechslung sonst
- * konservieren.
+ * Zwei Fälle dürfen den Edge-Cache nie erreichen:
+ *
+ * 1. **Abweichende Generation** – der Leser hat eine andere angefragt, als hier
+ *    vorliegt. Unter der angefragten Kennung läge sonst fremder Inhalt und die
+ *    Verwechslung wäre konserviert.
+ * 2. **Rollback-Signal** – es ist eine kurzlebige Betriebsanweisung und keine
+ *    cachebare Eigenschaft des Inhalts. Läge es am Edge, käme es noch Minuten
+ *    später bei Clients an, obwohl der Rollback längst beendet und wieder eine
+ *    gültige Generation aktiv ist. Diese Clients gäben dann grundlos ihre
+ *    Generation auf.
  */
-const MISMATCH_CACHE_CONTROL = 'no-store';
+const NO_STORE_CACHE_CONTROL = 'no-store';
 const ERROR_CACHE_CONTROL = 'no-cache';
 const EMPTY_CACHE_MESSAGE = 'Cache is empty or not available.';
 const UNKNOWN_ERROR_MESSAGE = 'An unknown server error occurred.';
@@ -154,12 +160,13 @@ export function createNewsCacheHandler(
             // annehmen.
             const headers = legacyRollback ? rollbackHeaders() : snapshotHeaders(pointer);
 
-            // Eine Anfrage, die eine bestimmte Generation will, aber eine
-            // andere (oder gar keine) bekommt, darf nicht unter der
-            // angefragten Kennung am Edge liegen bleiben.
+            // Ein Rollback wird **unabhängig vom Query-Parameter** nie
+            // gespeichert; eine Anfrage, die eine bestimmte Generation will,
+            // aber eine andere (oder gar keine) bekommt, ebenfalls nicht.
             const matches = pointer !== null && pointer.snapshotId === requestedId;
-            const cacheControl = requestedId !== null && !matches
-                ? MISMATCH_CACHE_CONTROL
+            const mismatch = requestedId !== null && !matches;
+            const cacheControl = legacyRollback || mismatch
+                ? NO_STORE_CACHE_CONTROL
                 : SUCCESS_CACHE_CONTROL;
 
             // Geliefert wird in jedem Fall: der Rumpf ist ein gültiger Stand,

@@ -20,6 +20,7 @@ import {
     decideSnapshotAcceptance,
     normalizeSnapshotPointer,
     planPendingAdoption,
+    planPollResponse,
     readSnapshotHeaders,
     readSnapshotRollback,
     withSnapshotQuery,
@@ -404,13 +405,25 @@ const AppContent: React.FC = () => {
             // später unter einer inzwischen gepinnten Generation C gespeichert
             // werden.
             const incoming = readSnapshotHeaders(response.headers);
-            const decision = decideSnapshotAcceptance({
+            const plan = planPollResponse({
                 pinned: pinnedSnapshotRef.current,
                 incoming,
                 rollback: readSnapshotRollback(response.headers),
             });
+
+            if (plan.clearPending) {
+                // Autoritativer Rollback: eine vorgemerkte Generation ist
+                // zurückgezogen. Sie stehen zu lassen hieße, sie später per
+                // Klick doch noch einzuspielen. Der sichtbare Stand bleibt
+                // unberührt - er wechselt erst beim nächsten Ladevorgang.
+                setNewArticlesCount(0);
+                setPending({ articles: [], snapshot: null });
+                document.title = 'GamerFeed';
+                return;
+            }
+
             // Ein älterer Stand darf keine neuen Artikel melden.
-            if (!decision.accept) return;
+            if (!plan.accept) return;
             
             // Get the newest article date from currently loaded articles
             const newestLoadedDate = articles.length > 0 
