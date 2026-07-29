@@ -70,14 +70,45 @@ export function createSpies({ feeds = [FEED_ROW], sqlError = null } = {}) {
             kvGets.push(key);
             return Object.hasOwn(kvStore, key) ? kvStore[key] : null;
         },
-        async set(key, value) {
-            kvSets.push({ key, value });
+        async set(key, value, options = undefined) {
+            kvSets.push({ key, value, options });
+            if (options?.nx === true && Object.hasOwn(kvStore, key)) return null;
             kvStore[key] = value;
             return 'OK';
         },
-        async del(key) {
-            delete kvStore[key];
+        async del(...keys) {
+            let removed = 0;
+            for (const key of keys) {
+                if (Object.hasOwn(kvStore, key)) {
+                    delete kvStore[key];
+                    removed += 1;
+                }
+            }
+            return removed;
+        },
+        async eval(_script, keys, args) {
+            const [leaseKey, pointerKey] = keys;
+            const [expected, serializedPointer] = args;
+            if (kvStore[leaseKey] !== expected) return 0;
+
+            if (pointerKey) {
+                kvSets.push({
+                    key: pointerKey,
+                    value: JSON.parse(serializedPointer),
+                    options: { atomicLease: true },
+                });
+                kvStore[pointerKey] = JSON.parse(serializedPointer);
+                return 1;
+            }
+
+            delete kvStore[leaseKey];
             return 1;
+        },
+        async scan(_cursor, { match } = {}) {
+            const prefix = typeof match === 'string' && match.endsWith('*')
+                ? match.slice(0, -1)
+                : '';
+            return [0, Object.keys(kvStore).filter(key => key.startsWith(prefix))];
         },
     };
 

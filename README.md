@@ -60,10 +60,14 @@ Testfälle: [Progressive News-Ladekette](docs/development/progressive-news-loadi
 
 ### Technische Umsetzung:
 
-Der Cron-Job speichert drei optimierte Cache-Versionen in Vercel KV:
-- `news_cache_16`: Erste 16 Artikel für instant loading
-- `news_cache_64`: Erste 64 Artikel für schnelles nachladen
-- `news_cache`: Alle Artikel für vollständige Darstellung
+Der Cron-Job speichert drei optimierte Payloads pro unveränderlicher Generation
+in Vercel KV. `news_cache_16`, `news_cache_64` und `news_cache` bleiben während
+der Migration als Legacy-Kopien erhalten. Erst ein abschließender Pointer-Write
+aktiviert eine vollständig geschriebene Generation:
+
+- Preview: bis zu 16 Artikel für Instant Loading
+- Medium: bis zu 64 Artikel für schnelles Nachladen
+- Full: alle Artikel innerhalb des festen Bytebudgets
 
 **Ergebnis**: Der Nutzer sieht Inhalte sofort, ohne auf das Laden des vollständigen Caches mit bis zu 10.000 Artikeln warten zu müssen.
 
@@ -95,7 +99,8 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     - `news_cache_64`: Erste 64 Artikel (Medium)
     - `feed_health_status`: Systemstatus je Feed
     - `feed_run_status` & `feed_publish_status`: Cron-Heartbeat und letzter Kern-Publish
-    - `news_snapshot_pointer`: aktive Cache-Generation des Leseprotokolls (bis O3b bewusst leer)
+    - `news_snapshot_pointer`: aktive vollständige Cache-Generation
+    - `news_snapshot:<id>:{full,preview,medium,meta}`: unveränderliche Payloads und Manifest
     - `daily_trends` & `weekly_trends`: KI-generierte Trends
 4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 20 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung. Falls eine freigegebene Quelle GitHub-Runner blockiert, kann der Workflow optional auf den extern betriebenen PHP-Fallback `tools/feed-proxy.php` zurückgreifen. Einrichtung und Grenzen stehen in der [Feed-Proxy-Betriebsanleitung](docs/deployment/feed-proxy.md).
 5.  **API-Schicht (Vercel Functions)**: Schlanke Edge Functions für Datenabrufe sowie eine Node.js Function für den SMTP-Versand:
@@ -123,9 +128,9 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
     1.  Der GitHub-Workflow (`.github/workflows/update-feeds.yml`) startet das `fetch-feeds.js`-Skript.
     2.  Das Skript holt die Feed-Liste aus der Postgres-Datenbank.
     3.  Es ruft jeden Feed ab, verarbeitet die Artikel und generiert mehrere Datensätze:
-        *   `news_cache`: Vollständige Liste aller Artikel
-        *   `news_cache_16`: Erste 16 Artikel (für Progressive Loading)
-        *   `news_cache_64`: Erste 64 Artikel (für Progressive Loading)
+        *   unveränderliche Full-, Preview- und Medium-Payloads samt Manifest
+        *   `news_snapshot_pointer`: zuletzt aktivierte vollständige Generation
+        *   `news_cache`, `news_cache_16`, `news_cache_64`: Legacy-Kopien aus denselben begrenzten Payloads
         *   `feed_health_status`: Protokoll über Erfolg/Misserfolg der Feed-Abrufe
         *   `feed_run_status`: Veränderlicher Status des laufenden bzw. letzten Versuchs
         *   `feed_publish_status`: Zeitpunkt des letzten erfolgreichen Kern-Publish
@@ -149,7 +154,7 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
     React-State, Snapshot-Pin oder lokale Kopie verändern. Auto-Update-Abfragen
     sind passiv und werden durch einen Refresh beziehungsweise Unmount
     entwertet.
-*   **Eine Generation, nicht drei:** Die drei Stufen werden nacheinander geholt und unabhängig voneinander am Edge gecacht. Damit daraus kein gemischter Stand entsteht, gibt es ein Leseprotokoll: jede Antwort nennt ihre Cache-Generation, die erste brauchbare legt sie fest, eine neuere wird übernommen, eine ältere verworfen. Das Protokoll ist vollständig umgesetzt, aber **noch nicht aktiv** – eine Kennung darf nur Inhalt bezeichnen, der nachweisbar zu ihr gehört, und dafür braucht es die unveränderlichen Generationen aus O3b. Bis dahin verhält sich alles wie bisher. Einzelheiten und Grenzen: [Generationsgebundenes Leseprotokoll](docs/deployment/news-generations.md).
+*   **Eine Generation, nicht drei:** Die drei Stufen werden nacheinander geholt und unabhängig voneinander am Edge gecacht. O3b schreibt sie deshalb unter unveränderlichen Generations-Keys und aktiviert den Pointer erst nach Payloads, Manifest und Legacy-Kopien. Jede Antwort nennt ihre belegte Cache-Generation; die erste brauchbare legt sie fest, eine neuere wird übernommen, eine ältere verworfen. Eine Lease schützt parallele Writer; die Pointer-Aktivierung prüft den Lease-Besitz atomar. Aktive und vorherige Generation bleiben lesbar, und Bytebudgets entfernen bei Bedarf deterministisch die ältesten Artikel. Einzelheiten und Rollback: [Generationsgebundener Publish](docs/deployment/news-generations.md).
 
 ---
 
@@ -160,12 +165,14 @@ Das "Health Center" im Admin-Panel ist ein intelligentes **Berichtssystem**, das
 Es basiert auf dem Abgleich von zwei Datensätzen, die vom "Datensammler" im Vercel KV Store abgelegt und über die API (`/api/get-health-data`) bereitgestellt werden:
 
 1.  **`feed_health_status`**: Ein Protokoll. Hat das Skript den Feed erfolgreich abgerufen und geparst? (`status: "success"`) Oder gab es einen Fehler? (`status: "error"`).
-2.  **`news_cache`**: Die finale Liste aller Artikel, die tatsächlich auf der Live-Seite angezeigt werden.
+2.  **Aktives Snapshot-Manifest**: Die gebundene Quellenliste der Generation,
+    die tatsächlich von den News-Endpunkten ausgeliefert wird. Fehlt noch eine
+    Generation oder läuft ein Legacy-Rollback, dient `news_cache` als Fallback.
 
 Die Statusanzeige wird wie folgt ermittelt:
 
-*   **Status: OK (Grün)**: Der Feed hat im `feed_health_status` den Status `success` **UND** es gibt Artikel von dieser Quelle im `news_cache`.
-*   **Status: Warnung (Gelb)**: Der Feed hat den Status `success`, **ABER** es gibt **keine** Artikel von dieser Quelle im `news_cache`. (Mögliche Gründe: Feed ist leer, Name stimmt nicht überein, etc.)
+*   **Status: OK (Grün)**: Der Feed hat im `feed_health_status` den Status `success` **UND** die Quelle steht im aktiven Snapshot.
+*   **Status: Warnung (Gelb)**: Der Feed hat den Status `success`, **ABER** die Quelle steht nicht im aktiven Snapshot. (Mögliche Gründe: Feed ist leer, Name stimmt nicht überein, etc.)
 *   **Status: Fehler (Rot)**: Der Feed hat im `feed_health_status` den Status `error`. (Mögliche Gründe: URL nicht erreichbar, XML-Fehler, etc.)
 
 #### Cron-Heartbeat: Wann ist ein grüner Status trotzdem alt?

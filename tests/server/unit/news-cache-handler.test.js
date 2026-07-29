@@ -16,8 +16,8 @@ function createArticle(id) {
 }
 
 // Ohne injizierte Snapshot-Quelle liest der Endpunkt ausschliesslich die
-// Artikel - genau wie vor O3a. Die Quelle bleibt bis O3b unverdrahtet, siehe
-// server/news-cache-handler.ts.
+// Legacy-Artikel. Die O3b-Produktionsverdrahtung mit unveraenderlichem
+// Manifest und Payload steht in news-snapshot-store.test.js.
 function createCache(values = {}, error = null) {
     const calls = [];
 

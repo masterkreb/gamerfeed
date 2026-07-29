@@ -8,19 +8,12 @@
 // 2026, als das Frontend dauerhaft 25 deutsche Quellen zeigte, waehrend der
 // direkt abgerufene Full-Cache 26 enthielt (GameStar fehlte nur im Browser).
 //
-// O3a loest das **nicht** durch atomares Schreiben - das ist O3b -, sondern
-// dadurch, dass jede Antwort sagt, aus welcher Generation sie stammt, und der
-// Leser sich auf genau eine festlegt.
-//
-// ## Noch nicht aktiviert
-//
-// Eine Kennung darf nur Inhalt bezeichnen, der nachweisbar zu ihr gehoert.
-// Solange die drei News-Keys **veraenderlich** sind, kann das niemand belegen:
-// ein Leser kann den Zeiger vor und die Artikel nach einem Publish erwischen,
-// und **keine Lesereihenfolge** schliesst das aus. Deshalb schreibt der Cron
-// bis O3b keinen Zeiger, und die Endpunkte melden eine Generation nur ueber
-// eine ausdruecklich injizierte Quelle. Siehe
-// docs/deployment/news-generations.md.
+// O3a definierte dafuer das Leseprotokoll. O3b aktiviert es: der Cron schreibt
+// jeden Payload unter einem eigenen unveraenderlichen Generations-Key und
+// schaltet erst danach den Active-Pointer um. Damit darf jede Antwort
+// nachweislich sagen, aus welcher Generation sie stammt, und der Leser kann
+// sich auf genau eine festlegen. Die veränderlichen `news_cache*`-Keys bleiben
+// nur als Migrations- und Legacy-Fallback bestehen.
 //
 // Bewusst ohne `node:`-Importe und ohne Netzwerkzugriff: dieselbe Logik gilt im
 // Cron (Node), in den Endpunkten (Edge) und im Browser.
@@ -445,10 +438,10 @@ export function planPendingAdoption({ pinned = null, pending = null } = {}) {
  * Haengt die gepinnte Generation an eine Endpunktadresse.
  *
  * Der Parameter macht den Edge-Cache generationsspezifisch: verschiedene
- * Generationen liegen unter verschiedenen Cache-Keys. Er sagt ausdruecklich
- * **nicht**, dass der Inhalt unter einer Kennung unveraenderlich waere - das
- * gilt erst mit den unveraenderlichen Generationen aus O3b. Deshalb bekommt
- * eine passende gepinnte Anfrage heute auch keine laengere Cache-Frist.
+ * Generationen liegen unter verschiedenen Cache-Keys. O3b garantiert
+ * inzwischen, dass der Inhalt unter einer Kennung unveraenderlich ist. Die
+ * HTTP-Frist bleibt waehrend der Dual-Read-Migration trotzdem bewusst
+ * unveraendert; eine laengere Frist ist keine Voraussetzung fuer Konsistenz.
  *
  * @param {string} path
  * @param {NewsSnapshotPointer|{ snapshotId?: string }|null} pinned

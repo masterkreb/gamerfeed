@@ -111,7 +111,8 @@ gemeinsame E2E-Sicherheitsnetz blockiert.
 ## Bewusste Grenzen
 
 - F1 ändert weder API-Cachezeiten noch den Fünf-Minuten-Poll.
-- F1 aktiviert das O3a-Protokoll nicht. Unveränderliche Generationen und der
-  atomare Publish bleiben O3b.
+- F1 selbst aktiviert das O3a-Protokoll nicht. Die inzwischen umgesetzten
+  unveränderlichen Generationen aus O3b liefern die Inhaltsbindung; F1 bleibt
+  für die davon unabhängige zeitliche Request-Ownership zuständig.
 - Es gibt keinen pauschalen Retry. Nur der bereits fachlich vorhandene
   Preview→Full-Fallback wird einmal ausgeführt.

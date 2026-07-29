@@ -10,7 +10,10 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeContentUrl } from '../shared/url-policy.js';
 import { resolveRunResult, sanitizeErrorMessage } from '../shared/feed-health-model.js';
-import { NEWS_SNAPSHOT_POINTER_KEY } from '../shared/news-snapshot.js';
+import {
+    NEWS_SNAPSHOT_VARIANTS,
+    readBoundNewsSnapshot,
+} from '../shared/news-snapshot-store.js';
 import { createFeedRunRecorder } from './feed-run-recorder.js';
 import { readFeedRunConfiguration } from './feed-run-config.js';
 import {
@@ -36,6 +39,7 @@ import {
     isFeedXml,
     isProxyEligibleSource,
 } from './feed-fetch-utils.js';
+import { publishNewsSnapshot } from './news-snapshot-publisher.js';
 
 // === HELPER FUNCTIONS (DECODING, STRIPPING, ETC.) ===
 function decodeHtmlEntities(text) {
@@ -904,37 +908,6 @@ async function generateAndSaveTrends(articles, { groqApiKey, groqFetch, logger =
     logger.log('   🧠 Trend analysis complete!\n');
 }
 
-/**
- * Entwertet einen vorhandenen Generationszeiger vor einem Publish (O3a).
- *
- * Der Lauf schreibt gleich die **veraenderlichen** News-Keys. Ein danach noch
- * bestehender Zeiger wuerde neuen Inhalt mit einer alten Kennung beschriften -
- * und ueber einen gepinnten Edge-Cache liesse sich das sogar festschreiben.
- *
- * Scheitert das Entfernen, laeuft der Publish trotzdem weiter: die Artikel sind
- * wichtiger als das Etikett. Der Fall wird laut gemeldet, damit er nicht
- * unbemerkt bleibt, und der naechste Lauf versucht es erneut.
- *
- * @returns {Promise<boolean>} ob der Zeiger sicher entwertet ist
- */
-export async function invalidateSnapshotPointer({ store, logger = console, redact = message => String(message) }) {
-    try {
-        if (typeof store.del === 'function') {
-            await store.del(NEWS_SNAPSHOT_POINTER_KEY);
-        } else {
-            // Ein Speicher ohne `del` bekommt wenigstens einen leeren Wert -
-            // `normalizeSnapshotPointer` liest daraus Legacy.
-            await store.set(NEWS_SNAPSHOT_POINTER_KEY, null);
-        }
-        return true;
-    } catch (error) {
-        logger.warn?.(`   ⚠️  Generationszeiger konnte nicht entwertet werden: ${redact(
-            error instanceof Error ? error.message : String(error),
-        )}`);
-        return false;
-    }
-}
-
 // === HEARTBEAT (Roadmap O1) ===
 
 // Die Actions-Run-ID ist nicht geheim und laesst einen Lauf im Admin direkt dem
@@ -999,6 +972,9 @@ export async function main({
     // Uhr und gestellten Timern herein; in Produktion entsteht es unten aus der
     // geprueften Konfiguration.
     budget,
+    // Unveraenderlicher, groessenbegrenzter O3b-Publish. Injizierbar fuer
+    // Orchestrierungs- und Fault-Injection-Tests.
+    publishSnapshot = publishNewsSnapshot,
 } = {}) {
     // === Vorpruefung: laeuft vor jeder Verbindung ===
     //
@@ -1069,7 +1045,13 @@ export async function main({
 
         let oldArticles = [];
         try {
-            const cachedData = await store.get('news_cache');
+            // Ab O3b ist die aktive unveraenderliche Full-Generation die
+            // Merge-Basis. Fehlt noch ein Zeiger (Migration/Rollback), liest
+            // dieselbe gemeinsame Schicht kontrolliert den Legacy-Key.
+            const cachedSnapshot = await readBoundNewsSnapshot(store, {
+                variant: NEWS_SNAPSHOT_VARIANTS.FULL,
+            });
+            const cachedData = cachedSnapshot?.articles ?? null;
 
             // If cache exists and is a valid array, use it.
             if (cachedData && Array.isArray(cachedData)) {
@@ -1480,34 +1462,25 @@ export async function main({
         logger.log('\n💾 Saving data to Vercel KV...');
         const publishStartMs = Date.now();
 
-        // === Generationszeiger entwerten (Roadmap O3a) ===
-        //
-        // `news_cache`, `news_cache_16` und `news_cache_64` sind veränderliche
-        // Schlüssel: gleich werden sie an Ort und Stelle überschrieben. Ein
-        // Zeiger daneben kann deshalb **nicht** belegen, dass ein gelesener
-        // Inhalt zu ihm gehört – ein Leser kann den Zeiger vor und die Artikel
-        // nach dem Überschreiben erwischen, ohne das bemerken zu können.
-        //
-        // Deshalb schreibt dieser Lauf keinen Zeiger, sondern entfernt einen
-        // vorhandenen, **bevor** er die Keys anfasst. Zwischen Entwertung und
-        // Publish gibt es damit keinen Moment, in dem eine alte Kennung neuen
-        // Inhalt beschriften könnte.
-        //
-        // Aktiviert wird das Protokoll mit den unveränderlichen Generationen
-        // aus O3b. Bis dahin antworten alle Endpunkte als Legacy – siehe
-        // docs/deployment/news-generations.md.
-        await invalidateSnapshotPointer({ store, logger, redact: redactMessage });
-
-        // Save full cache
-        await store.set('news_cache', sortedArticles);
-        logger.log(`   ✅ Saved ${sortedArticles.length} articles to KV key 'news_cache'`);
-
-        // Save progressive loading caches for faster page load
-        await store.set('news_cache_16', sortedArticles.slice(0, 16));
-        logger.log(`   ⚡ Saved 16 preview articles to KV key 'news_cache_16'`);
-
-        await store.set('news_cache_64', sortedArticles.slice(0, 64));
-        logger.log(`   ⚡ Saved 64 medium articles to KV key 'news_cache_64'`);
+        // O3b schreibt zuerst eine vollstaendige unveraenderliche Generation
+        // und schaltet ihren Zeiger als letzten kritischen Write um. Die drei
+        // Legacy-Keys werden waehrend der Migration aus denselben begrenzten
+        // Payloads weiter bedient.
+        const snapshotPublish = await publishSnapshot({
+            store,
+            articles: sortedArticles,
+            runId: recorder.runId,
+            createdAt: recorder.startedAt,
+            env,
+            logger,
+            redact: redactMessage,
+            sleep,
+            // Auch das Warten auf einen parallelen Writer bleibt innerhalb
+            // der O2b-Kerndeadline; eine Sekunde bleibt fuer den fatalen
+            // Heartbeat reserviert.
+            leaseWaitMs: Math.min(30_000, Math.max(0, runBudget.remainingMs() - 1_000)),
+        });
+        sortedArticles = snapshotPublish.payloads.full.articles;
 
         durations.publishMs = Date.now() - publishStartMs;
         durations.totalMs = Date.now() - runStartMs;

@@ -11,10 +11,10 @@ import {
 // Bindung zwischen Kennung und Inhalt (Roadmap O3a, Reviewrunde).
 //
 // Eine Snapshot-ID darf nur Inhalt kennzeichnen, der nachweisbar zu genau
-// dieser Generation gehoert. Die drei News-Keys sind bis O3b **veraenderlich**:
-// der Cron ueberschreibt sie, waehrend ein Endpunkt liest. Eine blosse
-// Lesereihenfolge kann daraus keine Bindung machen - diese Datei haelt genau
-// das fest.
+// dieser Generation gehoert. Die drei Legacy-Keys bleiben auch nach O3b
+// **veraenderlich**. Eine blosse Lesereihenfolge kann daraus keine Bindung
+// machen - diese Datei haelt fest, warum nur der gebundene O3b-Reader Header
+// ausstellen darf.
 
 function artikel(id, quelle = 'GameZone') {
     return {

@@ -1,6 +1,12 @@
 import { kv } from '@vercel/kv';
 import type { Article } from '../types';
 import { normalizeContentUrl } from '../shared/url-policy.js';
+import { snapshotHeaders } from '../shared/news-snapshot.js';
+import {
+    NEWS_SNAPSHOT_VARIANTS,
+    legacySnapshotRollbackEnabled,
+    readBoundNewsSnapshot,
+} from '../shared/news-snapshot-store.js';
 
 export const config = {
     runtime: 'edge',
@@ -37,15 +43,25 @@ function formatDateDE(date: Date): string {
     });
 }
 
-export default async function handler(_req: Request) {
+interface GamingNewsCache {
+    get<T>(key: string): Promise<T | null>;
+}
+
+async function renderGamingNews(
+    cache: GamingNewsCache,
+    legacyRollback: boolean,
+) {
     try {
-        // Diese Seite liest den **veränderlichen** `news_cache` und ist damit
-        // bis O3b ein reiner Legacy-Consumer des Leseprotokolls: eine Kennung
-        // hier würde Inhalt beschriften, dessen Zugehörigkeit niemand belegen
-        // kann. Sobald O3b unveränderliche Generationen bereitstellt, bekommt
-        // die Seite ihre Generation als Meta-Angabe und Header.
-        // Siehe docs/deployment/news-generations.md.
-        const articles = await kv.get<Article[]>('news_cache');
+        const bound = legacyRollback
+            ? {
+                articles: await cache.get<Article[]>('news_cache'),
+                snapshot: null,
+            }
+            : await readBoundNewsSnapshot(cache, {
+                variant: NEWS_SNAPSHOT_VARIANTS.FULL,
+            });
+        const articles = bound?.articles as Article[] | undefined;
+        const snapshot = bound?.snapshot ?? null;
 
         if (!articles || articles.length === 0) {
             return new Response('Keine Artikel verfügbar.', { status: 503 });
@@ -104,6 +120,7 @@ export default async function handler(_req: Request) {
     <meta name="description" content="${metaDesc}">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://gamerfeed.vercel.app/gaming-news">
+    ${snapshot ? `<meta name="gamerfeed:snapshot" content="${escapeHtml(snapshot.snapshotId)}">` : ''}
 
     <meta property="og:title" content="Gaming News heute — ${escapeHtml(todayStr)} | GamerFeed">
     <meta property="og:description" content="${articles.length} aktuelle Gaming-Artikel aus ${sourcesCount} Quellen">
@@ -322,6 +339,7 @@ export default async function handler(_req: Request) {
                 'Content-Type': 'text/html; charset=utf-8',
                 // Cache 20 minutes on edge (matches cron interval), stale ok for 1 hour
                 'Cache-Control': 's-maxage=1200, stale-while-revalidate=3600',
+                ...snapshotHeaders(snapshot),
             },
         });
 
@@ -330,3 +348,18 @@ export default async function handler(_req: Request) {
         return new Response('Fehler beim Laden der News.', { status: 500 });
     }
 }
+
+export function createGamingNewsHandler(
+    cache: GamingNewsCache,
+    { legacyRollback = false }: { legacyRollback?: boolean } = {},
+) {
+    return async function handler(_req: Request) {
+        return renderGamingNews(cache, legacyRollback);
+    };
+}
+
+export default createGamingNewsHandler(kv, {
+    legacyRollback: legacySnapshotRollbackEnabled(
+        process.env.NEWS_SNAPSHOT_LEGACY_ROLLBACK,
+    ),
+});

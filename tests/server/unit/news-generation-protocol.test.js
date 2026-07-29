@@ -19,12 +19,10 @@ import {
 // Contract-Tests des generationsgebundenen Leseprotokolls an den drei
 // News-Endpunkten (Roadmap O3a). Kein Netz, kein KV, keine Uhr.
 //
-// **Wichtig:** Diese Tests reichen den Endpunkten ausdruecklich eine
-// Snapshot-Quelle herein (`readSnapshot`). In Produktion gibt es die bis O3b
-// nicht - die veraenderlichen News-Keys koennen die Zugehoerigkeit einer
-// Kennung nicht belegen. Geprueft wird hier also die **Bereitschaft** des
-// Leseprotokolls, nicht das heutige Produktionsverhalten. Letzteres steht in
-// news-generation-binding.test.js und news-cache-handler.test.js.
+// **Wichtig:** Diese O3a-Vertragstests reichen den Endpunkten weiterhin den
+// schmalen Adapter `readSnapshot` herein. Produktion verwendet seit O3b
+// `readBoundSnapshot` aus unveraenderlichem Manifest und Payload; dessen
+// Speicherbindung steht in news-snapshot-store.test.js.
 
 function createArticle(id, source = 'GameZone') {
     return {
@@ -80,8 +78,8 @@ const ENDPOINTS = Object.freeze({
 /**
  * Ruft einen Endpunkt mit injizierter Snapshot-Quelle auf.
  *
- * Die Quelle liest denselben Attrappen-Cache; in Produktion uebernimmt diese
- * Rolle erst O3b mit unveraenderlichen Generationen.
+ * Die Quelle liest denselben Attrappen-Cache und charakterisiert damit den
+ * O3a-Headervertrag unabhaengig von der O3b-Speicherschicht.
  */
 function callEndpoint(cache, name, { snapshot = null, logger } = {}) {
     const endpoint = ENDPOINTS[name];
@@ -158,9 +156,9 @@ test('auch der Fallback auf den Full-Cache behaelt die Generation', async () => 
 // === Generationsspezifische Cache-Keys ===
 
 test('eine passende gepinnte Anfrage behaelt die uebliche Cache-Dauer', async () => {
-    // Bewusst **kein** verlaengerter Edge-Cache: der Inhalt unter einer Kennung
-    // ist nicht unveraenderlich, solange die News-Keys ueberschrieben werden.
-    // Eine laengere Frist wuerde eine Zusage geben, die niemand einhaelt.
+    // O3b macht den Inhalt unveraenderlich. Die HTTP-Frist bleibt waehrend der
+    // Dual-Read-Migration trotzdem gleich; Konsistenz braucht keine laengere
+    // Cachezeit.
     const zeiger = pointerFor(1000, 'gha-1');
     const cache = createCache({
         [NEWS_SNAPSHOT_POINTER_KEY]: zeiger,

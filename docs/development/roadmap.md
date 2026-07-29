@@ -122,6 +122,17 @@ entwertet, und Refresh-Fehler behalten vorhandene Artikel. 604 zentrale Tests
 und 21 Browser-Abnahmen laufen erfolgreich. Als nächstes ist O3b bereit: erst
 sein unveränderlicher Publish aktiviert die in O3a vorbereitete Inhaltsbindung.
 
+**Stand 29. Juli 2026 (Branch `codex/o3b-atomic-snapshot-publish`):** O3b ist
+abgeschlossen. Full, Preview und Medium werden unter unveränderlichen
+Generations-Keys größenbegrenzt aufgebaut; Manifest und Legacy-Keys stehen vor
+der abschließenden Pointer-Aktivierung. Eine Lease mit monotoner Prüfung und
+atomarer Besitzprüfung beim Umschalten serialisiert konkurrierende Writer,
+aktive und vorherige Generation bleiben
+lesbar, und ältere Orphans werden erst nach Grace Period entfernt. Alle
+Consumer lesen belegbar gebundene Daten; Health benötigt dafür nicht mehr den
+Full-Payload. 626 zentrale Tests und 21 Browser-Abnahmen laufen erfolgreich.
+Damit sind alle P1-Codepakete der Roadmap abgeschlossen.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -137,7 +148,7 @@ sein unveränderlicher Publish aktiviert die in O3a vorbereitete Inhaltsbindung.
 | O2b | P1 | erledigt | Feed-Kernlauf mit Deadline und Scrape-Budget begrenzen |
 | O3a | P1 | erledigt | Generationsgebundenes Leseprotokoll und Migration vorbereiten |
 | F1 | P1 | erledigt | Progressive News-Ladekette gegen veraltete Antworten absichern |
-| O3b | P1 | **bereit** | News-Caches größenbegrenzt und konsistent veröffentlichen |
+| O3b | P1 | erledigt | News-Caches größenbegrenzt und konsistent veröffentlichen |
 | F3a | P2 | geplant | Zentrale Tastatur- und DOM-Probleme im Frontend beheben |
 | F3b | P2 | geplant | Veraltetes ArticleCard-Rendering verhindern |
 | F4a | P2 | geplant | Persistierten Zustand robust validieren |
@@ -446,9 +457,9 @@ nicht zuverlässig durch den normalen Fehlerpfad.
 
 ### O3a – Generationsgebundenes Leseprotokoll und Migration
 
-**Status:** erledigt als **sichere Dual-Read-Vorbereitung** – das Protokoll ist
-vollständig definiert, in allen Consumern verdrahtet und getestet, in Produktion
-aber bewusst **noch nicht aktiviert**.
+**Status:** erledigt als **sichere Dual-Read-Vorbereitung**. O3a definierte das
+Protokoll und verdrahtete alle Consumer zunächst inert; O3b hat es inzwischen
+mit den unveränderlichen Generationen aktiviert.
 
 `shared/news-snapshot.js` legt den Vertrag fest: `schemaVersion`, eine
 sortierbare `snapshotId` (`<epochMs>-<lauf>`, Format und Übereinstimmung mit
@@ -463,18 +474,18 @@ verlangt ein **ausdrückliches Signal** (`x-gamerfeed-snapshot-rollback`); eine
 bloß fehlende Angabe bleibt eine alte Kopie und dreht nichts zurück. Eine
 Rollback-Antwort ist nie cachebar, und ein Rollback im Poll-Pfad räumt eine
 vorgemerkte, inzwischen zurückgezogene Generation weg. Die
-Health-API meldet bis O3b `snapshot: null` – eine Zuordnung über die Artikelzahl
-wäre geraten, weil zwei Generationen dieselbe haben können.
+Health-API meldete bis O3b `snapshot: null` – eine Zuordnung über die
+Artikelzahl wäre geraten gewesen, weil zwei Generationen dieselbe haben können.
 
-**Warum noch nicht aktiviert:** Eine Kennung darf nur Inhalt bezeichnen, der
+**Warum O3a allein noch nicht aktivierte:** Eine Kennung darf nur Inhalt bezeichnen, der
 nachweisbar zu ihr gehört. `news_cache`, `news_cache_16` und `news_cache_64`
 sind veränderlich; ein Leser kann den Zeiger vor und die Artikel nach einem
 Publish erwischen, und **keine Lesereihenfolge** schließt das aus. Der Cron
-schreibt deshalb keinen Zeiger, sondern entwertet einen vorhandenen vor jedem
-Publish; die Endpunkte melden eine Generation nur über eine ausdrücklich
-injizierte Quelle, die in Produktion unverdrahtet bleibt. Die unveränderlichen
-Generationen dafür bringt **O3b** – erst damit greift der Schutz gegen gemischte
-Generationen wirklich.
+schrieb deshalb damals keinen Zeiger, sondern entwertete einen vorhandenen vor
+jedem Publish; die Endpunkte meldeten eine Generation nur über eine
+ausdrücklich injizierte Quelle. Die inzwischen umgesetzten unveränderlichen
+Generationen aus **O3b** liefern nun diese belegbare Quelle – erst damit greift
+der Schutz gegen gemischte Generationen wirklich.
 
 Einzelheiten, Grenzen und Migrationsreihenfolge:
 [`docs/deployment/news-generations.md`](../deployment/news-generations.md).
@@ -520,9 +531,20 @@ Regressionstest für das generationsgebundene Protokoll und später F1.
 
 ### O3b – Konsistenter, größenbegrenzter Publish
 
-**Status:** bereit – nächstes Code-Arbeitspaket. O3a hat das Leseprotokoll
-vorbereitet, F1 besitzt und entwertet überlappende Browser-Requests. O3b kann
-damit die unveränderliche Schreibseite ergänzen und das Protokoll aktivieren.
+**Status:** erledigt. `scripts/news-snapshot-publisher.js` misst und begrenzt
+Full, Preview und Medium, schreibt jede Generation unter eigenen Keys und
+aktiviert ihren Pointer zuletzt. `shared/news-snapshot-store.js` bindet alle
+Reader an Manifest und Payload derselben Kennung, hält aktiv und vorherig
+lesbar und fällt kontrolliert auf Legacy zurück. Eine fünfminütige Lease,
+höchstens 30 Sekunden Warten innerhalb der O2b-Deadline, ein monotones
+Vergleichen nach Laufstart und eine atomare Besitzprüfung bei der Aktivierung
+verhindern das Zurückdrehen durch konkurrierende Writer. Garbage Collection entfernt ältere Voll- und Teilgenerationen erst
+nach 24 Stunden. Health liest Quellen und Generation aus dem Manifest statt aus
+dem Full-Cache; `/gaming-news` nennt denselben Snapshot als Header und
+Meta-Angabe. Ein getesteter Rollback auf die vorherige Generation sowie die
+optionale Betriebsflagge `NEWS_SNAPSHOT_LEGACY_ROLLBACK` decken beide
+Rückwege ab. Einzelheiten:
+[`docs/deployment/news-generations.md`](../deployment/news-generations.md).
 
 **Zusätzlich seit O3a:** O3b **aktiviert** das generationsgebundene
 Leseprotokoll. Erst unveränderliche Generationen können belegen, dass eine
