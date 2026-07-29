@@ -1,6 +1,6 @@
 # GamerFeed – Projekt-Roadmap
 
-Stand: 28. Juli 2026
+Stand: 29. Juli 2026
 
 Diese Roadmap ordnet die technische Weiterentwicklung von GamerFeed. Sie ist
 kein fester Veröffentlichungskalender und keine automatische Freigabe, alle
@@ -433,6 +433,14 @@ nicht zuverlässig durch den normalen Fehlerpfad.
 unabhängig am Edge gecachten Endpunkten nicht aus. Preview, Medium und Full
 könnten trotz Pointer verschiedene Generationen liefern.
 
+**Beobachtung vom 29. Juli 2026:** Das Frontend zeigte auch nach einem Hard
+Refresh dauerhaft 25 deutsche und 13 englische Quellen. Im zeitgleich direkt
+abgerufenen Full-Cache standen dagegen 26 deutsche und 13 englische Quellen:
+GameStar war im Full-Cache vorhanden, im Browser aber nicht; VG247 fehlte in
+beiden. Das beweist noch nicht allein, ob Edge-Cache, lokale 32er-Kopie oder die
+progressive Ladekette den älteren Stand festhielt, ist aber ein konkreter
+Regressionstest für das generationsgebundene Protokoll und später F1.
+
 **Umfang:**
 
 - ein versionsgebundenes Leseprotokoll definieren: Bootstrap-Antwort oder
@@ -454,6 +462,10 @@ könnten trotz Pointer verschiedene Generationen liefern.
 - fehlender oder fehlerhafter Pointer fällt kontrolliert auf Legacy
   beziehungsweise die vorherige Generation zurück;
 - bestehende Clients funktionieren während der schrittweisen Migration;
+- ein Browser, dessen lokaler oder HTTP-gecachter Stand GameStar noch nicht
+  enthält, übernimmt nach erfolgreicher Aktualisierung die vollständige
+  gepinnte Generation und bleibt nicht dauerhaft bei 25 statt 26 deutschen
+  Cache-Quellen;
 - Contract-Tests decken jeden Consumer und einen Rollback ab.
 
 ### O3b – Konsistenter, größenbegrenzter Publish
@@ -687,14 +699,34 @@ erreichbar.
 - Admin-Tabs mit IDs, `aria-controls`, roving `tabIndex` und Pfeiltasten;
 - unbenannte Accordion-Schaltflächen benennen;
 - Health-Aktualisierung eindeutig als erneutes Laden des gespeicherten Status
-  beschriften.
+  beschriften;
+- „konfigurierte Feeds“ aus der Datenbank und „Quellen mit aktuellen Artikeln“
+  im News-Cache als zwei verschiedene, zeitabhängige Kennzahlen benennen und
+  erklären. Die am 28. Juli beobachteten 40 zu 38 waren deshalb nicht
+  automatisch ein Zählfehler; am 29. Juli enthielt derselbe Cache bereits 39
+  Quellen;
+- fehlende Cache-Quellen vollständig und nachvollziehbar ausweisen, ohne die
+  Zuordnung nur aus unscharf verglichenen Anzeigenamen abzuleiten. Die
+  Beobachtung vom 29. Juli muss zwei Ursachen unterscheiden: VG247 fehlt auch
+  im aktuellen Full-Cache und wird als erfolgreich abgerufen, aber ohne
+  aktuelle Artikel erkannt; GameStar steht dagegen im aktuellen Full-Cache,
+  fehlte jedoch im länger sichtbaren 38er-Frontend-Stand und ist deshalb kein
+  Feed-Ausfall.
 
 **Abnahme:**
 
 - Tab-Tests prüfen Pfeiltasten, Home, End, `aria-controls` und roving
   `tabIndex`;
 - Accordion-Schaltflächen besitzen eindeutige Accessible Names;
-- die Oberfläche behauptet nicht, ein einzelner RSS-Feed werde live abgerufen.
+- die Oberfläche behauptet nicht, ein einzelner RSS-Feed werde live abgerufen;
+- ein Fixture mit mehr konfigurierten Feeds als im Cache vertretenen Quellen
+  zeigt beide Zahlen mit ihrer jeweiligen Bedeutung und erklärt jede
+  Abweichung;
+- der Admin unterscheidet „nicht im aktiven News-Snapshot“ von „Frontend nutzt
+  noch einen anderen Snapshot“, sobald O3a die dafür nötigen Snapshot-IDs
+  bereitstellt;
+- gleiche, abweichend geschriebene oder derzeit artikelarme Quellennamen führen
+  weder zu einer verschwundenen Zeile noch zu einer falschen Gesundmeldung.
 
 Ein echter manueller Einzelquellen-Abruf ist ein separates, derzeit nicht
 geplantes Produktfeature.
@@ -709,6 +741,12 @@ geplantes Produktfeature.
 
 - versioniertes SQL-Schema und nachvollziehbare Migrationen für `feeds`;
 - Constraints wie eindeutige Feed-URL dort absichern, wo sie fachlich gelten;
+- die historische Spalte `priority` bewusst entscheiden: Sie wird derzeit in
+  API und Admin gespeichert und angezeigt, beeinflusst den Feed-Lauf aber
+  nicht. Da alle aktiven Feeds weiterhin gemeinsam alle 20 Minuten laufen,
+  entweder das tote Feld sauber aus Schema, Verträgen und Oberfläche entfernen
+  oder eine konkrete, getestete Produktbedeutung dokumentieren – keine
+  stillschweigende Rückkehr zu getrennten Abrufgruppen;
 - anonymisierten lokalen Seed bereitstellen;
 - Verantwortung, Aufbewahrung, RPO und RTO für Neon-Backups festlegen;
 - Restore in eine getrennte Testumgebung mindestens einmal nachvollziehen.
@@ -718,6 +756,9 @@ geplantes Produktfeature.
 - eine leere sowie die aktuelle Datenbank lassen sich reproduzierbar auf den
   dokumentierten Stand migrieren;
 - ein doppelter oder ungültiger Feed verletzt keine Datenkonsistenz;
+- `priority` ist entweder vollständig entfernt oder besitzt eine sichtbare,
+  getestete Wirkung; ein nur noch mitgeschlepptes Auswahlfeld bleibt nicht
+  bestehen;
 - Restore-Runbook nennt Eigentümer, Zielumgebung, Prüfung und Rückweg;
 - ein Restore-Test verändert niemals Production.
 
