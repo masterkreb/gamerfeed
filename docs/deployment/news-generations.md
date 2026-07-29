@@ -16,19 +16,73 @@ abgerufenen Full-Cache standen 26 deutsche und 13 englische. GameStar war im
 Full-Cache vorhanden, im Browser nicht. VG247 fehlte in beiden – das ist ein
 Feed-Thema und **kein** Protokollfehler.
 
+## Was O3a liefert – und was nicht
+
+O3a definiert das Leseprotokoll vollständig, verdrahtet es in allen Consumern
+und testet es. **Aktiviert ist es in Produktion noch nicht.**
+
+Der Grund steht im nächsten Abschnitt und ist nicht verhandelbar: eine
+Snapshot-ID darf nur Inhalt kennzeichnen, der nachweisbar zu genau dieser
+Generation gehört. Solange die drei News-Keys **veränderlich** sind, kann das
+niemand belegen. Die unveränderlichen Generationen dafür bringt **O3b**.
+
+Bis dahin gilt: der Cron schreibt keinen Zeiger, alle Endpunkte antworten als
+Legacy, und das Verhalten ist exakt das von vor O3a.
+
+## Warum eine Lesereihenfolge nicht reicht
+
+Die naheliegende Idee – „erst den Zeiger lesen, dann die Artikel" – trägt
+nicht. Der Cron überschreibt die Keys an Ort und Stelle, und ein Leser kann
+mitten hinein geraten:
+
+- **Zeiger zuerst** → die Antwort trägt eine *alte* Kennung auf *neuem* Inhalt.
+- **Artikel zuerst** → sie trägt eine *neue* Kennung auf *altem* Inhalt.
+
+Beides ist eine Falschaussage. Eine frühere Fassung dieses Dokuments nannte den
+ersten Fall „harmlos, weil er sich selbst heilt". **Das war falsch:**
+
+- Der Leser pinnt die alte Kennung, hält aber neuen Inhalt. Nichts an einer
+  späteren Antwort deckt den Widerspruch auf, wenn inzwischen alle Stufen auf
+  dem neuen Stand sind.
+- Schlimmer: Die Antwort auf `?snapshot=<alt>` wurde unter genau dieser Kennung
+  am Edge zwischengespeichert. Damit lägen unter **einer** Kennung
+  **verschiedene** Inhalte – und die Grundannahme des Protokolls wäre verletzt.
+
+Auch ein doppeltes Lesen des Zeigers (davor und danach, auf Gleichheit prüfen)
+löst das nicht: während des gesamten Publish-Fensters steht der Zeiger noch auf
+der alten Generation, während die Keys bereits kippen.
+
+**Es gibt keine Leseseitenlösung.** Die Bindung muss aus der Speicherung
+kommen – und das ist O3b.
+
 ## Der Vertrag
 
 | Baustein | Wert |
 |---|---|
 | Zeiger-Key in KV | `news_snapshot_pointer` |
 | `schemaVersion` | `1` |
-| `snapshotId` | `<epochMs>-<runId>`, sortierbar |
+| `snapshotId` | `<epochMs>-<lauf>`, Format erzwungen |
 | Header | `x-gamerfeed-snapshot-id`, `-schema`, `-created-at` |
 | Query-Parameter | `?snapshot=<id>` |
 
 Die Rechenregeln stehen an genau einer Stelle: `shared/news-snapshot.js`. Sie
 kommt ohne `node:`-Importe aus und gilt deshalb im Cron (Node), in den
 Endpunkten (Edge) und im Browser gleichermaßen.
+
+### Strenge Prüfung beim Lesen
+
+`normalizeSnapshotPointer` weist einen Zeiger vollständig ab, sobald etwas
+nicht stimmt:
+
+- unbekannte `schemaVersion`;
+- `snapshotId` außerhalb von `^\d{1,15}-[A-Za-z0-9_-]{1,64}$`;
+- fehlender oder unlesbarer `createdAt`;
+- Zeitanteil der Kennung und `createdAt` widersprechen sich.
+
+Die letzten beiden Punkte sind nicht kosmetisch. Der Vergleich zweier
+Generationen stützt sich auf beide Werte; ein beschädigter Eintrag wie `"zzz"`
+hätte im lexikografischen Vergleich jede echte Kennung geschlagen und dauerhaft
+blockiert. **Lieber gar keine Generation als eine falsche.**
 
 ### Warum Header und kein Umschlag
 
@@ -38,33 +92,22 @@ ignorieren sie stillschweigend – genau das braucht eine Dual-Read-Migration.
 
 **Der Rumpf bleibt ein nacktes Array.** Ein Regressionstest hält das fest.
 
-## Schreibreihenfolge
+## Schreibseite: entwerten statt beschriften
 
-Der Cron schreibt den Zeiger **zuletzt**, nach allen drei News-Caches. Damit
-zeigt er nie auf Daten, die noch gar nicht vollständig geschrieben sind.
+Der Cron **schreibt keinen Zeiger**. Stattdessen entfernt er einen vorhandenen,
+**bevor** er die veränderlichen Keys anfasst (`invalidateSnapshotPointer`).
+Zwischen Entwertung und Publish gibt es damit keinen Moment, in dem eine alte
+Kennung neuen Inhalt beschriften könnte.
 
-Ein Schreibfehler am Zeiger ist **nicht fatal**: die Caches stehen bereits, und
-ein Leser ohne Zeiger fällt auf Legacy zurück. Den Kern-Publish deshalb
-scheitern zu lassen wäre der schlechtere Tausch. Ein gescheiterter Lauf fasst
-den bisherigen Zeiger nicht an.
-
-## Lesereihenfolge
-
-Jeder Endpunkt liest den Zeiger **vor** den Artikeln. Das ist keine Kosmetik:
-
-- Zeiger zuerst, Daten danach → schreibt der Cron dazwischen, ist das Etikett
-  höchstens **älter** als die Daten. Der Leser sieht in der nächsten Stufe die
-  neuere Kennung und übernimmt sie – die Verwechslung heilt sich selbst.
-- Daten zuerst, Zeiger danach → alter Inhalt trüge eine **neue** Kennung. Das
-  könnte niemand mehr bemerken.
-
-Ein wirklich atomarer Publish samt unveränderlicher Generationen bleibt **O3b**.
-Bis dahin ist diese Reihenfolge die Absicherung.
+Scheitert die Entwertung, läuft der Publish trotzdem weiter – die Artikel sind
+wichtiger als das Etikett –, der Fall wird aber laut protokolliert, und der
+nächste Lauf versucht es erneut. Ein gescheiterter Lauf fasst weder Keys noch
+Zeiger an.
 
 ## Die drei Leseregeln
 
-Der Leser merkt sich die Generation der ersten brauchbaren Antwort und
-vergleicht jede weitere damit:
+Sobald eine Generation existiert (also ab O3b), merkt sich der Leser die
+Generation der ersten brauchbaren Antwort und vergleicht jede weitere damit:
 
 | Fall | Verhalten |
 |---|---|
@@ -73,22 +116,37 @@ vergleicht jede weitere damit:
 | **ältere** Generation | verwerfen |
 
 Die zweite Regel ist der Kern des GameStar-Falls: der Rumpf *ist* bereits der
-neue Stand, ein erneuter Abruf wäre nur eine zusätzliche Runde. Ohne sie bliebe
-ein Browser dauerhaft auf einem alten Stand.
+neue Stand. Ohne sie bliebe ein Browser dauerhaft auf einem alten Stand.
 
 Die dritte Regel verhindert die Gegenrichtung: eine verspätete oder aus einem
 älteren Edge-Cache stammende Kopie kann den sichtbaren Stand nicht zurückdrehen.
+
+### Pinnen nur, was sichtbar ist
+
+Der Auto-Update-Pfad pollt im Hintergrund und zeigt nichts an. Er **pinnt
+deshalb nicht**. Artikel und ihre Generation wandern gemeinsam in die
+Warteschlange; gepinnt und lokal gespeichert wird erst, wenn der Benutzer die
+Aktualisierung annimmt.
+
+Ohne diese Trennung konnten vorgemerkte Artikel aus Generation B später unter
+einer inzwischen gepinnten Generation C gespeichert werden. `persistCachedArticles`
+verlangt seinen Snapshot deshalb als **ausdrücklichen Parameter** – die
+gefährliche Variante lässt sich gar nicht mehr versehentlich hinschreiben.
 
 ## Cache-Verhalten
 
 | Anfrage | `Cache-Control` | Warum |
 |---|---|---|
 | ohne `?snapshot` | `s-maxage=60, stale-while-revalidate=300` | unverändert, für bestehende Clients |
-| `?snapshot=` passend | `s-maxage=300, stale-while-revalidate=600` | der Inhalt zu einer Kennung ist unveränderlich |
-| `?snapshot=` abweichend | `no-store` | sonst läge die Antwort einer anderen Generation dauerhaft unter der angefragten Kennung |
+| `?snapshot=` passend | `s-maxage=60, stale-while-revalidate=300` | **wie sonst auch** |
+| `?snapshot=` abweichend | `no-store` | sonst läge die Antwort einer anderen Generation unter der angefragten Kennung |
 
-Der Query-Parameter macht den Edge-Cache **generationsspezifisch**: verschiedene
-Generationen liegen unter verschiedenen Cache-Keys.
+Eine frühere Fassung gab passenden Anfragen eine längere Frist mit der
+Begründung, der Inhalt unter einer Kennung sei unveränderlich. **Das gilt
+nicht**, solange die News-Keys überschrieben werden. Eine längere Frist wäre
+eine Zusage, die niemand einhält – deshalb bekommt eine gepinnte Anfrage exakt
+dieselbe Cache-Dauer wie jede andere. Erst mit den unveränderlichen
+Generationen aus O3b lässt sich das anders begründen.
 
 Bei Abweichung wird trotzdem **geliefert**, nicht verweigert. Der Rumpf ist ein
 gültiger Stand, und die Header sagen, welcher – der Leser entscheidet dann
@@ -100,63 +158,61 @@ selbst. Ein 409 ließe ihn ohne Daten zurück.
 
 | Situation | Verhalten |
 |---|---|
-| kein Zeiger in KV | alle Antworten ohne Header, Verhalten wie vor O3a |
-| Zeiger unlesbar (KV-Fehler) | Ausfall wird protokolliert, News kommen trotzdem |
-| Zeiger fehlerhaft oder unbekannte `schemaVersion` | gilt als Legacy |
+| kein Zeiger (der heutige Normalfall) | alle Antworten ohne Header, Verhalten wie vor O3a |
+| Snapshot-Quelle unlesbar | Ausfall wird protokolliert, News kommen trotzdem |
+| Zeiger fehlerhaft, unbekannt versioniert oder in sich widersprüchlich | gilt als Legacy |
 | Antwort ohne Header bei bereits gepinnter Generation | verworfen (Legacy gilt als älter) |
 | Antwort ohne Header, nichts gepinnt | übernommen |
 
-**Rollback auf Legacy:** Zeiger löschen. Alle Endpunkte antworten sofort wieder
-wie vor O3a; laufende Clients arbeiten weiter, neue pinnen nichts.
+**Rollback auf Legacy:** Zeiger löschen – exakt das, was der Cron ohnehin bei
+jedem Publish tut. Alle Endpunkte antworten sofort wieder wie vor O3a.
 
-**Rollback auf eine ältere Generation:** Zeiger auf die ältere Kennung setzen.
-Ein Client, der bereits auf der neueren steht, verwirft die ältere Antwort und
-behält seinen konsistenten Stand – er dreht sich nicht mitten im Betrieb
-zurück. Ein Reload beginnt sauber auf der zurückgesetzten Generation.
-
-Das setzt voraus, dass die zugehörigen Cache-Inhalte noch vorhanden sind. Das
-Vorhalten mehrerer Generationen ist **O3b** – heute existiert genau eine.
+**Rollback auf eine ältere Generation:** erst ab O3b sinnvoll, weil es dafür
+mehrere vorgehaltene Generationen braucht. Das Leseprotokoll ist darauf
+vorbereitet: ein Client auf der neueren Generation verwirft die ältere Antwort
+und behält seinen konsistenten Stand, ein Reload beginnt sauber auf der
+zurückgesetzten Generation. Contract-Tests decken beide Fälle ab.
 
 ## Migrationsreihenfolge
 
 1. **Leser zuerst** (dieses Paket): alle Consumer verstehen das Protokoll und
-   fallen ohne Zeiger auf Legacy zurück. Deploybar, solange noch kein Cron-Lauf
-   einen Zeiger geschrieben hat.
-2. **Publisher danach**: der erste Cron-Lauf schreibt den Zeiger. Ab dann pinnen
-   neue Clients; alte ignorieren die Header weiter.
-3. **Legacy-Keys bleiben.** `news_cache`, `news_cache_16` und `news_cache_64`
-   werden unverändert geschrieben und gelesen. Ihre Ablösung durch
-   generationsgebundene Keys ist **O3b**.
-
-Beide Schritte liegen im selben Commit, weil Leser und Publisher hier dasselbe
-Repository sind. Die Reihenfolge bleibt trotzdem gültig: ein Deploy ohne
-Cron-Lauf ist der Zustand aus Schritt 1.
+   fallen ohne Zeiger auf Legacy zurück. Der Cron entwertet bei jedem Publish.
+   Dieser Zustand ist deploybar und verhält sich wie vor O3a.
+2. **Unveränderliche Generationen** (O3b): erst dann kann ein Zeiger belegen,
+   wozu ein Inhalt gehört. O3b aktiviert die Snapshot-Quelle der Endpunkte
+   (`readSnapshot`) und schreibt den Zeiger.
+3. **Legacy-Keys bleiben** bis zur nachgewiesenen Umstellung aller Consumer.
 
 ## Consumer
 
-| Consumer | Rolle |
-|---|---|
-| `/api/get-news-preview`, `-medium`, `/api/get-news` | melden die Generation, akzeptieren `?snapshot=` |
-| `App.tsx` (progressive Ladekette, Refresh, Auto-Update) | pinnt und entscheidet nach den drei Regeln |
-| `/api/gaming-news` | meldet die Generation als Meta-Angabe und Header |
-| `/api/get-health-data` | meldet, auf welcher Generation `sourcesInCache` beruht |
-| Merge-Basis des Cron | liest weiterhin `news_cache`; es gibt genau eine Generation |
-| lokale Kopie (`cachedNews`) | speichert ihre Generation mit und pinnt sie beim Start |
+| Consumer | Rolle heute | ab O3b |
+|---|---|---|
+| `/api/get-news-preview`, `-medium`, `/api/get-news` | Legacy; `readSnapshot` unverdrahtet | melden die Generation, akzeptieren `?snapshot=` |
+| `App.tsx` (Ladekette, Refresh, Auto-Update) | pinnt und entscheidet – heute mangels Header inaktiv | voll wirksam |
+| `/api/gaming-news` | reiner Legacy-Consumer | Generation als Meta-Angabe und Header |
+| `/api/get-health-data` | prüft Bindung, meldet sonst `null` | meldet die Generation von `sourcesInCache` |
+| Merge-Basis des Cron | liest `news_cache` | unverändert, bis O3b umstellt |
+| lokale Kopie (`cachedNews`) | speichert ihre Generation mit | voll wirksam |
+
+Die Health-API liest den Zeiger **vor und nach** dem Artikelabruf und meldet ihn
+nur, wenn beide Lesevorgänge dieselbe Kennung liefern *und* die `articleCount`
+zum gelesenen Cache passt. Das ist eine **Konsistenzprüfung, kein Beweis** –
+zwei Generationen können dieselbe Artikelzahl haben. Sie verhindert die grobe
+Verwechslung; die belastbare Bindung bringt O3b.
 
 Die lokale 32-Artikel-Kopie ist **30 Minuten** gültig, der Edge-Cache nur 60
-Sekunden. Sie kann damit *neuer* sein als die Antwort, die zurückkommt. Ohne
-gespeicherte Generation würde sie von genau dieser älteren Antwort ersetzt –
-deshalb bringt sie ihre Generation mit und pinnt sie, bevor der erste Request
-läuft. Ein vor der Umstellung gespeicherter Eintrag hat das Feld nicht und gilt
-als Legacy.
+Sekunden. Sie kann damit *neuer* sein als die Antwort, die zurückkommt – deshalb
+bringt sie ihre Generation mit und pinnt sie, bevor der erste Request läuft. Ein
+vor der Umstellung gespeicherter Eintrag hat das Feld nicht und gilt als Legacy.
 
 Die Auswertung im Admin – „nicht im aktiven Snapshot" gegen „das Frontend sieht
 einen anderen Snapshot" – ist **A1b**. O3a stellt nur die Angabe bereit.
 
 ## Bewusst nicht enthalten
 
-- **O3b:** atomarer Publish, unveränderliche Generationen, Byte-Budget,
-  Garbage Collection, Lease/CAS gegen konkurrierende Writer.
+- **O3b:** unveränderliche Generationen, atomarer Publish, Byte-Budget, Garbage
+  Collection, Lease/CAS gegen konkurrierende Writer – **und damit die
+  Aktivierung dieses Protokolls**.
 - **F1:** „latest request wins", Abort-Strategie und die Neustrukturierung des
   News-Lifecycles. O3a prüft nur die Generation einer Antwort; die Reihenfolge
   der Requests bleibt unverändert.
@@ -164,10 +220,13 @@ einen anderen Snapshot" – ist **A1b**. O3a stellt nur die Angabe bereit.
 - Keine Änderung an Legacy-Keys, Workflow-Zeitplan, Secrets, Vercel, Cyon oder
   am PHP-Proxy.
 
-## Verbleibendes Risiko
+## Verbleibende Grenzen
 
-Zwischen dem Lesen des Zeigers und dem Lesen der Artikel kann der Cron
-schreiben. Die Lesereihenfolge macht daraus den **harmlosen** Fall (Etikett zu
-alt statt zu neu), beseitigt ihn aber nicht. Ein Leser holt dann eine Stufe mehr
-als nötig. Vollständig ausgeräumt wird das erst mit den unveränderlichen
-Generationen aus O3b.
+- **Das Protokoll ist inert.** Ohne Zeiger verhält sich alles wie vor O3a; die
+  Mischung aus verschiedenen Generationen ist damit **noch nicht verhindert**.
+  Der Schutz greift erst mit O3b.
+- **Die Bindungsprüfung der Health-API ist heuristisch** (siehe oben).
+- **Eine gescheiterte Entwertung** hinterlässt einen Zeiger neben neuem Inhalt.
+  Die Endpunkte würden ihn heute nicht verwenden (`readSnapshot` ist
+  unverdrahtet), der nächste Lauf räumt ihn weg – aber der Fall gehört
+  beobachtet.

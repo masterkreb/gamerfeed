@@ -45,17 +45,21 @@ interface Generation {
     articles: typeof ALTER_STAND;
 }
 
-const ALT: Generation = {
-    snapshotId: '1000-gha-1',
-    createdAt: '2026-07-29T10:00:00.000Z',
-    articles: ALTER_STAND,
-};
+/**
+ * Kennung und Zeitstempel muessen zueinander passen: der Zeitanteil der
+ * Kennung ist die Sortiergrundlage, und `normalizeSnapshotPointer` weist einen
+ * Widerspruch als Legacy ab.
+ */
+function generation(millis: number, lauf: string, articles: typeof ALTER_STAND): Generation {
+    return {
+        snapshotId: `${millis}-${lauf}`,
+        createdAt: new Date(millis).toISOString(),
+        articles,
+    };
+}
 
-const NEU: Generation = {
-    snapshotId: '2000-gha-2',
-    createdAt: '2026-07-29T10:20:00.000Z',
-    articles: NEUER_STAND,
-};
+const ALT = generation(Date.parse('2026-07-29T10:00:00.000Z'), 'gha-1', ALTER_STAND);
+const NEU = generation(Date.parse('2026-07-29T10:20:00.000Z'), 'gha-2', NEUER_STAND);
 
 function erfuelle(route: Route, generation: Generation | null, body?: unknown) {
     return route.fulfill({
@@ -141,7 +145,7 @@ test('gepinnte Folgeanfragen tragen die Generation in der Adresse', async ({ pag
 
     const [erste, ...folgende] = adressen;
     expect(erste).not.toContain('snapshot=');
-    expect(folgende.every(url => url.includes('snapshot=2000-gha-2'))).toBe(true);
+    expect(folgende.every(url => url.includes(`snapshot=${encodeURIComponent(NEU.snapshotId)}`))).toBe(true);
 });
 
 test('ohne Generations-Header bleibt das bisherige Verhalten', async ({ page }) => {

@@ -19,8 +19,20 @@ import {
 // Vertrag des generationsgebundenen Leseprotokolls (O3a). Reine Rechenregeln,
 // kein Netz, kein KV, keine Uhr.
 
+/**
+ * Baut einen Zeiger, dessen Kennung zum Zeitstempel passt.
+ *
+ * `normalizeSnapshotPointer` verlangt genau das - der Zeitanteil der Kennung
+ * ist die Sortiergrundlage.
+ */
 function pointer(snapshotId, createdAt) {
     return buildSnapshotPointer({ snapshotId, createdAt, articleCount: 10, runId: 'gha-1' });
+}
+
+/** Kennung und Zeitstempel aus demselben Moment. */
+function generation(millis, lauf = 'gha-1') {
+    const createdAt = new Date(millis).toISOString();
+    return pointer(`${millis}-${lauf}`, createdAt);
 }
 
 // === Kennung und Zeiger ===
@@ -46,18 +58,19 @@ test('ein Zeiger ohne Lauf-ID bleibt gueltig', () => {
 });
 
 test('ein gespeicherter Zeiger wird vollstaendig normalisiert', () => {
+    const erstellt = '2026-07-29T10:00:00.000Z';
     const normalisiert = normalizeSnapshotPointer({
         schemaVersion: 1,
-        snapshotId: '  1000-gha-1  ',
-        createdAt: '2026-07-29T10:00:00.000Z',
+        snapshotId: `  ${Date.parse(erstellt)}-gha-1  `,
+        createdAt: erstellt,
         articleCount: 42.7,
         runId: 'gha-1',
     });
 
     assert.deepEqual(normalisiert, {
         schemaVersion: 1,
-        snapshotId: '1000-gha-1',
-        createdAt: '2026-07-29T10:00:00.000Z',
+        snapshotId: `${Date.parse(erstellt)}-gha-1`,
+        createdAt: erstellt,
         articleCount: 42,
         runId: 'gha-1',
     });
@@ -81,15 +94,78 @@ test('ein unbrauchbarer Zeiger gilt als Legacy, nicht als Fehler', () => {
     }
 });
 
-test('ein kaputter Zeitstempel macht den Zeiger nicht unbrauchbar', () => {
-    const normalisiert = normalizeSnapshotPointer({
+test('ein kaputter Zeitstempel macht den Zeiger unbrauchbar', () => {
+    // Frueher blieb ein solcher Zeiger gueltig und wurde rein lexikografisch
+    // verglichen. Ein beschaedigter Wert konnte sich dadurch dauerhaft als
+    // „neuer" durchsetzen und jede echte Generation blockieren.
+    for (const createdAt of ['irgendwann', '', null, undefined, 'NaN', {}]) {
+        assert.equal(
+            normalizeSnapshotPointer({ schemaVersion: 1, snapshotId: '1000-gha-1', createdAt }),
+            null,
+            JSON.stringify(createdAt),
+        );
+    }
+});
+
+test('eine Kennung ausserhalb des vereinbarten Formats gilt als Legacy', () => {
+    const createdAt = new Date(1000).toISOString();
+
+    for (const snapshotId of [
+        'zzz',
+        'gha-1',
+        '1000',
+        '1000-',
+        '-gha-1',
+        '1000 gha-1',
+        '1000-gha 1',
+        '1000-gha/1',
+        `${'9'.repeat(16)}-gha-1`,
+        `1000-${'x'.repeat(65)}`,
+    ]) {
+        assert.equal(
+            normalizeSnapshotPointer({ schemaVersion: 1, snapshotId, createdAt }),
+            null,
+            snapshotId,
+        );
+    }
+});
+
+test('Kennung und Zeitstempel muessen zueinander passen', () => {
+    // Der Zeitanteil der Kennung ist die Sortiergrundlage. Widersprechen sich
+    // beide Werte, ist mindestens einer beschaedigt.
+    assert.equal(
+        normalizeSnapshotPointer({
+            schemaVersion: 1,
+            snapshotId: '1000-gha-1',
+            createdAt: new Date(2000).toISOString(),
+        }),
+        null,
+    );
+
+    assert.ok(normalizeSnapshotPointer({
         schemaVersion: 1,
         snapshotId: '1000-gha-1',
-        createdAt: 'irgendwann',
+        createdAt: new Date(1000).toISOString(),
+    }));
+});
+
+test('ein beschaedigter Wert kann sich nicht als neuer durchsetzen', () => {
+    // Der eigentliche Schaden des alten Verhaltens: `zzz` haette jede echte
+    // Kennung lexikografisch geschlagen. Jetzt ist es schlicht Legacy - und
+    // Legacy gilt als aelter.
+    const echt = pointer(`${Date.parse('2026-07-29T10:00:00.000Z')}-gha-1`, '2026-07-29T10:00:00.000Z');
+    const beschaedigt = normalizeSnapshotPointer({
+        schemaVersion: 1,
+        snapshotId: 'zzz',
+        createdAt: '2026-07-29T10:00:00.000Z',
     });
 
-    assert.equal(normalisiert.snapshotId, '1000-gha-1');
-    assert.equal(normalisiert.createdAt, null);
+    assert.equal(beschaedigt, null);
+    assert.equal(compareSnapshots(beschaedigt, echt), -1);
+    assert.equal(
+        decideSnapshotAcceptance({ pinned: echt, incoming: beschaedigt }).accept,
+        false,
+    );
 });
 
 // === Header ===
@@ -107,7 +183,7 @@ test('ohne Zeiger gibt es keine Header', () => {
 });
 
 test('Header und Zeiger sind zueinander umkehrbar', () => {
-    const original = pointer('1000-gha-1', '2026-07-29T10:00:00.000Z');
+    const original = generation(Date.parse('2026-07-29T10:00:00.000Z'));
     const gelesen = readSnapshotHeaders(new Headers(snapshotHeaders(original)));
 
     assert.equal(gelesen.snapshotId, original.snapshotId);
@@ -148,11 +224,15 @@ test('bei gleichem Zeitpunkt entscheidet die Kennung', () => {
     assert.equal(compareSnapshots(b, a), 1);
 });
 
-test('ohne Zeitstempel entscheidet weiterhin die sortierbare Kennung', () => {
+test('ohne Zeitstempel gibt es keine Generation mehr zu vergleichen', () => {
+    // Ein Zeiger ohne `createdAt` ist Legacy - und Legacy vergleicht sich
+    // nicht mit sich selbst, sondern gilt schlicht als aelter.
     const alt = normalizeSnapshotPointer({ schemaVersion: 1, snapshotId: '1000-gha-1' });
     const neu = normalizeSnapshotPointer({ schemaVersion: 1, snapshotId: '2000-gha-2' });
 
-    assert.equal(compareSnapshots(alt, neu), -1);
+    assert.equal(alt, null);
+    assert.equal(neu, null);
+    assert.equal(compareSnapshots(alt, neu), 0);
 });
 
 test('Legacy gilt als aelter als jede echte Generation', () => {

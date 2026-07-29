@@ -14,6 +14,13 @@ import {
 
 // Contract-Tests des generationsgebundenen Leseprotokolls an den drei
 // News-Endpunkten (Roadmap O3a). Kein Netz, kein KV, keine Uhr.
+//
+// **Wichtig:** Diese Tests reichen den Endpunkten ausdruecklich eine
+// Snapshot-Quelle herein (`readSnapshot`). In Produktion gibt es die bis O3b
+// nicht - die veraenderlichen News-Keys koennen die Zugehoerigkeit einer
+// Kennung nicht belegen. Geprueft wird hier also die **Bereitschaft** des
+// Leseprotokolls, nicht das heutige Produktionsverhalten. Letzteres steht in
+// news-generation-binding.test.js und news-cache-handler.test.js.
 
 function createArticle(id, source = 'GameZone') {
     return {
@@ -28,8 +35,20 @@ function createArticle(id, source = 'GameZone') {
     };
 }
 
-function pointerFor(snapshotId, createdAt, articleCount = 3) {
-    return buildSnapshotPointer({ snapshotId, createdAt, articleCount, runId: 'gha-1' });
+/**
+ * Zeiger, dessen Kennung zum Zeitstempel passt.
+ *
+ * `normalizeSnapshotPointer` verlangt genau das - der Zeitanteil der Kennung
+ * ist die Sortiergrundlage des Vergleichs.
+ */
+function pointerFor(millis, lauf, articleCount = 3) {
+    const createdAt = new Date(millis).toISOString();
+    return buildSnapshotPointer({
+        snapshotId: `${millis}-${lauf}`,
+        createdAt,
+        articleCount,
+        runId: lauf,
+    });
 }
 
 function createCache(values = {}, { pointerError = null } = {}) {
@@ -54,9 +73,17 @@ const ENDPOINTS = Object.freeze({
     full: { cacheKey: 'news_cache', endpointPath: '/api/get-news' },
 });
 
+/**
+ * Ruft einen Endpunkt mit injizierter Snapshot-Quelle auf.
+ *
+ * Die Quelle liest denselben Attrappen-Cache; in Produktion uebernimmt diese
+ * Rolle erst O3b mit unveraenderlichen Generationen.
+ */
 function callEndpoint(cache, name, { snapshot = null, logger } = {}) {
     const endpoint = ENDPOINTS[name];
-    const handler = createNewsCacheHandler(cache.client, endpoint, logger);
+    const handler = createNewsCacheHandler(cache.client, endpoint, logger, {
+        readSnapshot: () => cache.client.get(NEWS_SNAPSHOT_POINTER_KEY),
+    });
     const url = withSnapshotQuery(`https://gamerfeed.example${endpoint.endpointPath}`, snapshot);
     return handler(new Request(url));
 }
@@ -64,7 +91,7 @@ function callEndpoint(cache, name, { snapshot = null, logger } = {}) {
 // === Jeder Consumer trägt seine Generation ===
 
 test('alle drei News-Endpunkte melden dieselbe aktive Generation', async () => {
-    const zeiger = pointerFor('2000-gha-2', '2026-07-29T10:20:00.000Z');
+    const zeiger = pointerFor(2000, 'gha-2');
     const artikel = [createArticle('a1'), createArticle('a2')];
     const cache = createCache({
         [NEWS_SNAPSHOT_POINTER_KEY]: zeiger,
@@ -81,30 +108,39 @@ test('alle drei News-Endpunkte melden dieselbe aktive Generation', async () => {
         assert.equal(response.headers.get(SNAPSHOT_SCHEMA_HEADER), '1', name);
         assert.equal(
             response.headers.get(SNAPSHOT_CREATED_AT_HEADER),
-            '2026-07-29T10:20:00.000Z',
+            new Date(2000).toISOString(),
             name,
         );
         assert.ok(Array.isArray(await response.json()), `${name}: der Rumpf bleibt ein Array`);
     }
 });
 
-test('der Zeiger wird vor den Artikeln gelesen', async () => {
-    // Die Reihenfolge ist Teil des Vertrags: schreibt der Cron dazwischen, ist
-    // das Etikett höchstens älter als die Daten - nie neuer. Ein zu neues
-    // Etikett auf altem Inhalt könnte niemand mehr bemerken.
+test('die Snapshot-Quelle sieht die tatsaechlich gelesenen Artikel', async () => {
+    // Die Quelle bekommt die Artikel gereicht. Nur so kann eine spaetere
+    // Implementierung (O3b) belegen, dass Kennung und Inhalt zusammengehoeren -
+    // eine blosse Lesereihenfolge kann das nicht.
+    const artikel = [createArticle('a1')];
     const cache = createCache({
-        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor('1000-gha-1', '2026-07-29T10:00:00.000Z'),
-        news_cache: [createArticle('a1')],
+        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor(1000, 'gha-1'),
+        news_cache: artikel,
     });
 
-    await callEndpoint(cache, 'full');
+    let gesehen = null;
+    const handler = createNewsCacheHandler(cache.client, ENDPOINTS.full, undefined, {
+        readSnapshot: gelesen => {
+            gesehen = gelesen;
+            return cache.client.get(NEWS_SNAPSHOT_POINTER_KEY);
+        },
+    });
+    await handler(new Request('https://gamerfeed.example/api/get-news'));
 
-    assert.deepEqual(cache.calls, [NEWS_SNAPSHOT_POINTER_KEY, 'news_cache']);
+    assert.deepEqual(gesehen, artikel);
+    assert.deepEqual(cache.calls, ['news_cache', NEWS_SNAPSHOT_POINTER_KEY]);
 });
 
 test('auch der Fallback auf den Full-Cache behaelt die Generation', async () => {
     const cache = createCache({
-        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor('1000-gha-1', '2026-07-29T10:00:00.000Z'),
+        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor(1000, 'gha-1'),
         news_cache_16: null,
         news_cache: [createArticle('a1'), createArticle('a2')],
     });
@@ -112,13 +148,16 @@ test('auch der Fallback auf den Full-Cache behaelt die Generation', async () => 
     const response = await callEndpoint(cache, 'preview');
 
     assert.equal(response.headers.get(SNAPSHOT_ID_HEADER), '1000-gha-1');
-    assert.deepEqual(cache.calls, [NEWS_SNAPSHOT_POINTER_KEY, 'news_cache_16', 'news_cache']);
+    assert.deepEqual(cache.calls, ['news_cache_16', 'news_cache', NEWS_SNAPSHOT_POINTER_KEY]);
 });
 
 // === Generationsspezifische Cache-Keys ===
 
-test('eine passende gepinnte Anfrage darf laenger am Edge liegen', async () => {
-    const zeiger = pointerFor('1000-gha-1', '2026-07-29T10:00:00.000Z');
+test('eine passende gepinnte Anfrage behaelt die uebliche Cache-Dauer', async () => {
+    // Bewusst **kein** verlaengerter Edge-Cache: der Inhalt unter einer Kennung
+    // ist nicht unveraenderlich, solange die News-Keys ueberschrieben werden.
+    // Eine laengere Frist wuerde eine Zusage geben, die niemand einhaelt.
+    const zeiger = pointerFor(1000, 'gha-1');
     const cache = createCache({
         [NEWS_SNAPSHOT_POINTER_KEY]: zeiger,
         news_cache: [createArticle('a1')],
@@ -127,14 +166,14 @@ test('eine passende gepinnte Anfrage darf laenger am Edge liegen', async () => {
     const response = await callEndpoint(cache, 'full', { snapshot: zeiger });
 
     assert.equal(response.status, 200);
-    assert.equal(response.headers.get('cache-control'), 's-maxage=300, stale-while-revalidate=600');
+    assert.equal(response.headers.get('cache-control'), 's-maxage=60, stale-while-revalidate=300');
 });
 
 test('eine abweichende gepinnte Anfrage wird nicht am Edge konserviert', async () => {
     // Sonst läge die Antwort einer anderen Generation dauerhaft unter der
     // angefragten Kennung - die Verwechslung wäre damit festgeschrieben.
     const cache = createCache({
-        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor('2000-gha-2', '2026-07-29T10:20:00.000Z'),
+        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor(2000, 'gha-2'),
         news_cache: [createArticle('a1')],
     });
 
@@ -151,7 +190,7 @@ test('eine abweichende gepinnte Anfrage wird nicht am Edge konserviert', async (
 
 test('eine ungepinnte Anfrage behaelt den bisherigen kurzlebigen Cache', async () => {
     const cache = createCache({
-        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor('1000-gha-1', '2026-07-29T10:00:00.000Z'),
+        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor(1000, 'gha-1'),
         news_cache: [createArticle('a1')],
     });
 
@@ -162,7 +201,7 @@ test('eine ungepinnte Anfrage behaelt den bisherigen kurzlebigen Cache', async (
 
 test('ein leerer Snapshot-Parameter zaehlt als ungepinnt', async () => {
     const cache = createCache({
-        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor('1000-gha-1', '2026-07-29T10:00:00.000Z'),
+        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor(1000, 'gha-1'),
         news_cache: [createArticle('a1')],
     });
     const handler = createNewsCacheHandler(cache.client, ENDPOINTS.full);
@@ -204,23 +243,24 @@ test('ein fehlerhafter Zeiger faellt ebenfalls auf Legacy zurueck', async () => 
     }
 });
 
-test('ein unlesbarer Zeiger verhindert die News nicht', async () => {
-    // KV kann den Zeiger verweigern, ohne dass die Artikel betroffen sind.
-    // Dann gilt Legacy - die News zu verweigern wäre die schlechtere Antwort.
+test('eine unlesbare Snapshot-Quelle verhindert die News nicht', async () => {
+    // Die Quelle kann ausfallen, ohne dass die Artikel betroffen sind. Dann
+    // gilt Legacy - die News zu verweigern waere die schlechtere Antwort.
     const logCalls = [];
-    const cache = createCache(
-        { news_cache: [createArticle('a1')] },
-        { pointerError: new Error('KV nicht erreichbar') },
-    );
+    const cache = createCache({ news_cache: [createArticle('a1')] });
 
-    const response = await callEndpoint(cache, 'full', {
-        logger: { error: (...args) => logCalls.push(args) },
-    });
+    const handler = createNewsCacheHandler(
+        cache.client,
+        ENDPOINTS.full,
+        { error: (...args) => logCalls.push(args) },
+        { readSnapshot: () => { throw new Error('KV nicht erreichbar'); } },
+    );
+    const response = await handler(new Request('https://gamerfeed.example/api/get-news'));
 
     assert.equal(response.status, 200);
     assert.equal(response.headers.get(SNAPSHOT_ID_HEADER), null);
     assert.equal(logCalls.length, 1, 'der Ausfall wird protokolliert');
-    assert.match(String(logCalls[0][0]), /Snapshot pointer unavailable/);
+    assert.match(String(logCalls[0][0]), /Snapshot unavailable/);
 });
 
 test('eine gepinnte Anfrage ohne lesbaren Zeiger wird nicht am Edge konserviert', async () => {
@@ -258,9 +298,9 @@ async function runLoadingChain(stages) {
     return { pinned, sichtbar, verlauf, quellen: new Set(sichtbar.map(a => a.source)) };
 }
 
-function cacheMitGeneration(snapshotId, createdAt, artikel) {
+function cacheMitGeneration(millis, lauf, artikel) {
     return createCache({
-        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor(snapshotId, createdAt, artikel.length),
+        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor(millis, lauf, artikel.length),
         news_cache: artikel,
         news_cache_16: artikel.slice(0, 16),
         news_cache_64: artikel.slice(0, 64),
@@ -271,8 +311,8 @@ const OHNE_GAMESTAR = [createArticle('a1', 'GameZone'), createArticle('a2', 'PC 
 const MIT_GAMESTAR = [...OHNE_GAMESTAR, createArticle('a3', 'GameStar')];
 
 test('ein Pointerwechsel zwischen Preview, Medium und Full mischt keine Generation', async () => {
-    const alt = cacheMitGeneration('1000-gha-1', '2026-07-29T10:00:00.000Z', OHNE_GAMESTAR);
-    const neu = cacheMitGeneration('2000-gha-2', '2026-07-29T10:20:00.000Z', MIT_GAMESTAR);
+    const alt = cacheMitGeneration(1000, 'gha-1', OHNE_GAMESTAR);
+    const neu = cacheMitGeneration(2000, 'gha-2', MIT_GAMESTAR);
 
     const ergebnis = await runLoadingChain([
         { endpoint: 'preview', cache: alt },
@@ -292,8 +332,8 @@ test('ein Pointerwechsel zwischen Preview, Medium und Full mischt keine Generati
 test('eine verspaetete aeltere Antwort dreht den sichtbaren Stand nicht zurueck', async () => {
     // Der Edge liefert für die letzte Stufe eine ältere Kopie. Ohne das
     // Protokoll überschriebe sie den bereits neueren Stand.
-    const alt = cacheMitGeneration('1000-gha-1', '2026-07-29T10:00:00.000Z', OHNE_GAMESTAR);
-    const neu = cacheMitGeneration('2000-gha-2', '2026-07-29T10:20:00.000Z', MIT_GAMESTAR);
+    const alt = cacheMitGeneration(1000, 'gha-1', OHNE_GAMESTAR);
+    const neu = cacheMitGeneration(2000, 'gha-2', MIT_GAMESTAR);
 
     const ergebnis = await runLoadingChain([
         { endpoint: 'preview', cache: neu },
@@ -309,9 +349,9 @@ test('eine verspaetete aeltere Antwort dreht den sichtbaren Stand nicht zurueck'
 test('unterschiedlich alte HTTP-Caches erzeugen keine gemischte Generation', async () => {
     // Jede Stufe kommt aus einem anders alten Edge-Cache. Sichtbar bleibt
     // trotzdem genau eine Generation.
-    const g1 = cacheMitGeneration('1000-gha-1', '2026-07-29T10:00:00.000Z', OHNE_GAMESTAR);
-    const g2 = cacheMitGeneration('2000-gha-2', '2026-07-29T10:20:00.000Z', MIT_GAMESTAR);
-    const g3 = cacheMitGeneration('3000-gha-3', '2026-07-29T10:40:00.000Z', MIT_GAMESTAR);
+    const g1 = cacheMitGeneration(1000, 'gha-1', OHNE_GAMESTAR);
+    const g2 = cacheMitGeneration(2000, 'gha-2', MIT_GAMESTAR);
+    const g3 = cacheMitGeneration(3000, 'gha-3', MIT_GAMESTAR);
 
     const ergebnis = await runLoadingChain([
         { endpoint: 'preview', cache: g2 },
@@ -356,8 +396,8 @@ test('der GameStar-Fall vom 29. Juli 2026 endet auf der vollstaendigen Generatio
         ...englischeQuellen.map(quelle => [quelle, 'en']),
     ]);
 
-    const alt = cacheMitGeneration('1000-gha-1', '2026-07-29T10:00:00.000Z', alterStand);
-    const neu = cacheMitGeneration('2000-gha-2', '2026-07-29T10:20:00.000Z', neuerStand);
+    const alt = cacheMitGeneration(1000, 'gha-1', alterStand);
+    const neu = cacheMitGeneration(2000, 'gha-2', neuerStand);
 
     const zaehleSprachen = ergebnis => ({
         de: new Set(ergebnis.sichtbar.filter(a => a.language === 'de').map(a => a.source)),
@@ -407,7 +447,7 @@ test('ein Browser auf einem Legacy-Stand uebernimmt die erste echte Generation',
         news_cache_16: OHNE_GAMESTAR,
         news_cache_64: OHNE_GAMESTAR,
     });
-    const neu = cacheMitGeneration('2000-gha-2', '2026-07-29T10:20:00.000Z', MIT_GAMESTAR);
+    const neu = cacheMitGeneration(2000, 'gha-2', MIT_GAMESTAR);
 
     const ergebnis = await runLoadingChain([
         { endpoint: 'preview', cache: legacy },
@@ -446,8 +486,8 @@ test('nach einem Rollback auf eine aeltere Generation gewinnt der neueste gesehe
     // Client bereits auf der neueren steht, verwirft er die ältere Antwort und
     // behält seinen konsistenten Stand. Ein Reload beginnt sauber auf der
     // zurückgesetzten Generation.
-    const alt = cacheMitGeneration('1000-gha-1', '2026-07-29T10:00:00.000Z', OHNE_GAMESTAR);
-    const neu = cacheMitGeneration('2000-gha-2', '2026-07-29T10:20:00.000Z', MIT_GAMESTAR);
+    const alt = cacheMitGeneration(1000, 'gha-1', OHNE_GAMESTAR);
+    const neu = cacheMitGeneration(2000, 'gha-2', MIT_GAMESTAR);
 
     const laufenderClient = await runLoadingChain([
         { endpoint: 'preview', cache: neu },
@@ -462,4 +502,93 @@ test('nach einem Rollback auf eine aeltere Generation gewinnt der neueste gesehe
     ]);
     assert.equal(neuerClient.pinned.snapshotId, '1000-gha-1');
     assert.equal(neuerClient.quellen.has('GameStar'), false, 'der Rollback-Stand ist konsistent');
+});
+
+// === Auto-Update: Pinnen erst bei der Uebernahme ===
+
+/**
+ * Spielt den Auto-Update-Pfad aus App.tsx nach.
+ *
+ * Der Unterschied zur Ladekette: eine Poll-Antwort wird **nicht** sichtbar und
+ * darf deshalb auch nicht pinnen. Artikel und ihre Generation wandern gemeinsam
+ * in die Warteschlange; gepinnt und gespeichert wird erst, wenn der Benutzer
+ * uebernimmt.
+ */
+function createAutoUpdateSimulation(sichtbareGeneration) {
+    let pinned = sichtbareGeneration;
+    let pending = { articles: [], snapshot: null };
+    let gespeichert = null;
+
+    return {
+        get pinned() { return pinned; },
+        get pending() { return pending; },
+        get gespeichert() { return gespeichert; },
+
+        /** Eine Poll-Antwort trifft ein. */
+        poll({ incoming, articles, hatNeuereArtikel }) {
+            const entscheidung = decideSnapshotAcceptance({ pinned, incoming });
+            if (!entscheidung.accept) return 'verworfen';
+
+            // Kein Umpinnen: der sichtbare Stand hat sich nicht geaendert.
+            if (!hatNeuereArtikel) return 'nichts neues';
+
+            pending = { articles, snapshot: incoming };
+            return 'vorgemerkt';
+        },
+
+        /** Der Benutzer uebernimmt die ausstehenden Artikel. */
+        uebernehmen() {
+            if (pending.articles.length === 0) return;
+            pinned = pending.snapshot;
+            gespeichert = { articles: pending.articles, snapshot: pending.snapshot };
+            pending = { articles: [], snapshot: null };
+        },
+    };
+}
+
+test('ausstehende Artikel werden unter ihrer eigenen Generation gespeichert', async () => {
+    // Der Reviewbefund: Poll 1 merkt Artikel aus Generation B vor, Poll 2 sieht
+    // Generation C ohne neuere Artikel. Wuerde Poll 2 pinnen, landeten die
+    // B-Artikel spaeter unter der Kennung C.
+    const generationA = pointerFor(1000, 'gha-1');
+    const generationB = pointerFor(2000, 'gha-2');
+    const generationC = pointerFor(3000, 'gha-3');
+
+    const simulation = createAutoUpdateSimulation(generationA);
+    const artikelB = [createArticle('b1'), createArticle('b2', 'GameStar')];
+
+    assert.equal(
+        simulation.poll({ incoming: generationB, articles: artikelB, hatNeuereArtikel: true }),
+        'vorgemerkt',
+    );
+    assert.equal(simulation.pinned.snapshotId, generationA.snapshotId, 'Poll 1 pinnt nicht');
+
+    assert.equal(
+        simulation.poll({ incoming: generationC, articles: [], hatNeuereArtikel: false }),
+        'nichts neues',
+    );
+    assert.equal(simulation.pinned.snapshotId, generationA.snapshotId, 'Poll 2 pinnt ebenfalls nicht');
+    assert.equal(simulation.pending.snapshot.snapshotId, generationB.snapshotId);
+
+    simulation.uebernehmen();
+
+    assert.equal(simulation.gespeichert.snapshot.snapshotId, generationB.snapshotId,
+        'die B-Artikel werden als Generation B gespeichert, nicht als C');
+    assert.deepEqual(simulation.gespeichert.articles, artikelB);
+    assert.equal(simulation.pinned.snapshotId, generationB.snapshotId,
+        'erst die Uebernahme pinnt');
+});
+
+test('eine aeltere Poll-Antwort wird weiterhin verworfen', async () => {
+    const generationB = pointerFor(2000, 'gha-2');
+    const generationA = pointerFor(1000, 'gha-1');
+
+    const simulation = createAutoUpdateSimulation(generationB);
+
+    assert.equal(
+        simulation.poll({ incoming: generationA, articles: [createArticle('a1')], hatNeuereArtikel: true }),
+        'verworfen',
+    );
+    assert.deepEqual(simulation.pending.articles, []);
+    assert.equal(simulation.pinned.snapshotId, generationB.snapshotId);
 });

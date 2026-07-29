@@ -91,24 +91,38 @@ function toNonNegativeInteger(value) {
 }
 
 /**
+ * Verbindliches Format einer Kennung: `<epochMs>-<lauf>`.
+ *
+ * Das Format ist Teil des Vertrags und wird beim Lesen erzwungen. Ohne diese
+ * Pruefung koennte ein beschaedigter Wert wie `"zzz"` im lexikografischen
+ * Vergleich dauerhaft als „neuer" gelten und jede echte Generation blockieren.
+ */
+export const SNAPSHOT_ID_PATTERN = /^(\d{1,15})-([A-Za-z0-9_-]{1,64})$/;
+
+/**
  * Bildet eine Kennung, die sich **sortieren** laesst.
  *
- * Der Zeitanteil steht vorn, damit zwei Generationen auch dann vergleichbar
- * bleiben, wenn `createdAt` einmal fehlt. Die Kennung ist nicht geheim: sie
- * enthaelt nur einen Zeitstempel und die ohnehin oeffentliche Lauf-ID.
+ * Der Zeitanteil steht vorn und muss mit `createdAt` uebereinstimmen - beim
+ * Lesen wird genau das geprueft. Die Kennung ist nicht geheim: sie enthaelt
+ * einen Zeitstempel und die ohnehin oeffentliche Lauf-ID.
  *
  * @param {unknown} publishedAt
  * @param {unknown} [runId]
- * @returns {string}
+ * @returns {string|null} `null`, wenn kein gueltiger Zeitpunkt vorliegt
  */
 export function createSnapshotId(publishedAt, runId) {
     const iso = toIsoTimestamp(publishedAt);
-    const millis = iso === null ? 0 : new Date(iso).getTime();
-    const suffix = typeof runId === 'string' && runId.trim() !== ''
-        ? runId.trim().replace(/[^a-zA-Z0-9_-]/g, '')
-        : 'unknown';
+    if (iso === null) return null;
 
-    return `${millis}-${suffix}`;
+    const millis = new Date(iso).getTime();
+    if (millis < 0) return null;
+
+    const suffix = (typeof runId === 'string' ? runId : '')
+        .trim()
+        .replace(/[^A-Za-z0-9_-]/g, '')
+        .slice(0, 64);
+
+    return `${millis}-${suffix === '' ? 'unknown' : suffix}`;
 }
 
 /**
@@ -127,12 +141,24 @@ export function buildSnapshotPointer({ snapshotId, createdAt, articleCount, runI
 }
 
 /**
- * Liest einen gespeicherten oder uebertragenen Zeiger.
+ * Liest einen gespeicherten oder uebertragenen Zeiger - **streng**.
  *
- * Liefert `null`, sobald irgendetwas nicht stimmt - fehlende Kennung, kaputter
- * Zeitstempel oder eine **unbekannte Schemaversion**. `null` heisst hier
- * ausdruecklich „Legacy“ und nicht „Fehler“: der Leser faellt damit auf das
- * Verhalten vor O3a zurueck, statt eine brauchbare Antwort wegzuwerfen.
+ * Liefert `null`, sobald irgendetwas nicht stimmt:
+ *
+ * - unbekannte Schemaversion (eine hoehere kann Felder anders meinen);
+ * - Kennung, die nicht dem vereinbarten Format entspricht;
+ * - fehlender oder unlesbarer `createdAt`;
+ * - Zeitanteil der Kennung und `createdAt` widersprechen sich.
+ *
+ * Die letzten beiden Punkte sind neu und nicht kosmetisch: der Vergleich zweier
+ * Generationen stuetzt sich auf beides. Ein beschaedigter Wert - etwa eine
+ * Kennung ohne Zeitanteil oder ein `createdAt`, das nicht dazu passt - koennte
+ * sich sonst dauerhaft als „neuer" durchsetzen und jede echte Generation
+ * blockieren. Lieber gar keine Generation als eine falsche.
+ *
+ * `null` heisst ausdruecklich „Legacy“ und nicht „Fehler“: der Leser faellt
+ * damit auf das Verhalten vor O3a zurueck, statt eine brauchbare Antwort
+ * wegzuwerfen.
  *
  * @param {unknown} raw
  * @returns {NewsSnapshotPointer|null}
@@ -140,17 +166,23 @@ export function buildSnapshotPointer({ snapshotId, createdAt, articleCount, runI
 export function normalizeSnapshotPointer(raw) {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
 
-    // Eine hoehere Version kann Felder anders meinen. Sie zu raten waere
-    // gefaehrlicher, als sie zu ignorieren.
     if (raw.schemaVersion !== NEWS_SNAPSHOT_SCHEMA_VERSION) return null;
 
     const snapshotId = typeof raw.snapshotId === 'string' ? raw.snapshotId.trim() : '';
-    if (snapshotId === '') return null;
+    const match = SNAPSHOT_ID_PATTERN.exec(snapshotId);
+    if (match === null) return null;
+
+    const createdAt = toIsoTimestamp(raw.createdAt);
+    if (createdAt === null) return null;
+
+    // Der Zeitanteil der Kennung ist die Sortiergrundlage; weicht er vom
+    // Zeitstempel ab, ist mindestens einer der beiden Werte beschaedigt.
+    if (Number(match[1]) !== Date.parse(createdAt)) return null;
 
     return {
         schemaVersion: NEWS_SNAPSHOT_SCHEMA_VERSION,
         snapshotId,
-        createdAt: toIsoTimestamp(raw.createdAt),
+        createdAt,
         articleCount: toNonNegativeInteger(raw.articleCount),
         runId: typeof raw.runId === 'string' && raw.runId !== '' ? raw.runId : null,
     };
@@ -165,14 +197,13 @@ export function normalizeSnapshotPointer(raw) {
 export function snapshotHeaders(pointer) {
     if (!pointer) return {};
 
-    const headers = {
+    // `createdAt` ist Pflicht: ein normalisierter Zeiger hat ihn immer, und ohne
+    // ihn koennte die Gegenseite den Zeiger gar nicht erst annehmen.
+    return {
         [SNAPSHOT_ID_HEADER]: pointer.snapshotId,
         [SNAPSHOT_SCHEMA_HEADER]: String(pointer.schemaVersion),
+        [SNAPSHOT_CREATED_AT_HEADER]: pointer.createdAt,
     };
-    if (pointer.createdAt !== null) {
-        headers[SNAPSHOT_CREATED_AT_HEADER] = pointer.createdAt;
-    }
-    return headers;
 }
 
 /**
@@ -199,9 +230,10 @@ export function readSnapshotHeaders(headers) {
 /**
  * Vergleicht zwei Generationen.
  *
- * Zuerst nach `createdAt`, bei Gleichstand nach der Kennung. Die Kennung
- * beginnt mit dem Zeitanteil, deshalb bleibt der Vergleich auch ohne
- * `createdAt` sinnvoll.
+ * Zuerst nach `createdAt`, bei Gleichstand nach der Kennung. Beide Werte sind
+ * durch `normalizeSnapshotPointer` garantiert vorhanden und widerspruchsfrei -
+ * ein lexikografischer Vergleich auf einem beschaedigten Wert kann hier also
+ * nicht mehr entstehen.
  *
  * @param {NewsSnapshotPointer|null} a
  * @param {NewsSnapshotPointer|null} b
@@ -217,13 +249,14 @@ export function compareSnapshots(a, b) {
 
     if (a.snapshotId === b.snapshotId) return 0;
 
-    const aTime = a.createdAt === null ? null : Date.parse(a.createdAt);
-    const bTime = b.createdAt === null ? null : Date.parse(b.createdAt);
+    const aTime = Date.parse(a.createdAt);
+    const bTime = Date.parse(b.createdAt);
 
-    if (aTime !== null && bTime !== null && aTime !== bTime) {
-        return aTime < bTime ? -1 : 1;
-    }
+    if (aTime !== bTime) return aTime < bTime ? -1 : 1;
 
+    // Gleicher Zeitpunkt, verschiedene Laeufe: die Kennung entscheidet
+    // deterministisch, damit zwei Leser nie zu verschiedenen Ergebnissen
+    // kommen.
     return a.snapshotId < b.snapshotId ? -1 : 1;
 }
 

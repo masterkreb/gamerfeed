@@ -232,9 +232,10 @@ test('ein KV-Fehler wird protokolliert, aber nicht ausgeliefert', async () => {
     assert.equal(calls.length, 1, 'der Originaltext landet ausschliesslich im Log');
 });
 
-test('es werden nur die fuenf erwarteten KV-Schluessel gelesen', async () => {
-    // Seit O3a kommt der Generationszeiger dazu: er sagt, auf welchem Stand
-    // `sourcesInCache` beruht.
+test('es werden nur die erwarteten KV-Schluessel gelesen', async () => {
+    // Seit O3a kommt der Generationszeiger dazu - und zwar **zweimal**: vor und
+    // nach dem Artikelabruf. Nur so laesst sich pruefen, ob beide Werte
+    // denselben Stand beschreiben.
     const { handler, cache } = createHandler(healthyStore());
     await handler(new Request('https://example.com/x'));
 
@@ -243,6 +244,7 @@ test('es werden nur die fuenf erwarteten KV-Schluessel gelesen', async () => {
         'feed_publish_status',
         'feed_run_status',
         'news_cache',
+        'news_snapshot_pointer',
         'news_snapshot_pointer',
     ]);
 });
@@ -253,10 +255,12 @@ test('die Antwort nennt die Generation, auf der sourcesInCache beruht', async ()
     // Ohne diese Angabe laesst sich „nicht im aktiven Snapshot" nicht von
     // „das Frontend sieht einen anderen Snapshot" unterscheiden.
     const store = healthyStore();
+    const createdAt = new Date(2000).toISOString();
     store.news_snapshot_pointer = {
         schemaVersion: 1,
         snapshotId: '2000-gha-2',
-        createdAt: '2026-07-29T10:20:00.000Z',
+        createdAt,
+        // Muss zur Zahl der gelesenen Artikel passen, sonst gilt Legacy.
         articleCount: 1,
         runId: 'gha-2',
     };
@@ -280,7 +284,15 @@ test('ohne Zeiger meldet die Health-API null statt zu scheitern', async () => {
 });
 
 test('ein fehlerhafter Zeiger wird in der Health-API zu null', async () => {
-    for (const kaputt of ['kein objekt', [], {}, { schemaVersion: 99, snapshotId: 'x' }]) {
+    for (const kaputt of [
+        'kein objekt',
+        [],
+        {},
+        { schemaVersion: 99, snapshotId: '2000-gha-2', createdAt: new Date(2000).toISOString() },
+        { schemaVersion: 1, snapshotId: 'zzz', createdAt: new Date(2000).toISOString() },
+        { schemaVersion: 1, snapshotId: '2000-gha-2', createdAt: 'irgendwann' },
+        { schemaVersion: 1, snapshotId: '2000-gha-2', createdAt: new Date(3000).toISOString() },
+    ]) {
         const store = healthyStore();
         store.news_snapshot_pointer = kaputt;
 

@@ -1,6 +1,5 @@
 import type { Article } from '../types';
 import {
-    NEWS_SNAPSHOT_POINTER_KEY,
     SNAPSHOT_QUERY_PARAM,
     normalizeSnapshotPointer,
     snapshotHeaders,
@@ -23,13 +22,18 @@ interface NewsCacheEndpoint {
     fallback?: NewsCacheFallback;
 }
 
+interface NewsCacheOptions {
+    /**
+     * Liefert die Generation, zu der die gelesenen Artikel **nachweisbar**
+     * gehören.
+     *
+     * Bewusst ohne Vorgabe: siehe die Erklärung an `createNewsCacheHandler`.
+     * Solange niemand das belegen kann, antwortet der Endpunkt wie vor O3a.
+     */
+    readSnapshot?: (articles: Article[]) => Promise<unknown> | unknown;
+}
+
 const SUCCESS_CACHE_CONTROL = 's-maxage=60, stale-while-revalidate=300';
-/**
- * Eine Antwort zu einer bestimmten Generation ist unveränderlich – ihr Inhalt
- * kann sich unter derselben Kennung nicht mehr ändern. Deshalb darf sie länger
- * am Edge liegen als der ungepinnte Pfad.
- */
-const PINNED_CACHE_CONTROL = 's-maxage=300, stale-while-revalidate=600';
 /**
  * Der Leser hat eine andere Generation angefragt, als hier vorliegt. Diese
  * Antwort darf **nicht** unter der angefragten Kennung im Edge liegen bleiben:
@@ -75,36 +79,36 @@ function requestedSnapshotId(request: Request): string | null {
  * unverändert weiter. Die Generation reist in Headern mit, die ein alter Client
  * stillschweigend ignoriert – genau das braucht eine Dual-Read-Migration.
  *
- * ## Lesereihenfolge
+ * ## Warum in Produktion (noch) keine Generation gemeldet wird
  *
- * Der Zeiger wird **vor** den Artikeln gelesen. Das ist kein Zufall: schreibt
- * der Cron genau dazwischen, ist das Etikett höchstens *älter* als die Daten,
- * nie neuer. Ein Leser, der eine ältere Kennung sieht, holt die nächste Stufe
- * und übernimmt dort die neuere Generation – die Verwechslung heilt sich also
- * selbst. In der umgekehrten Reihenfolge trüge alter Inhalt eine neue Kennung,
- * und niemand könnte das noch bemerken.
+ * `news_cache`, `news_cache_16` und `news_cache_64` sind **veränderliche**
+ * Schlüssel: der Cron überschreibt sie an Ort und Stelle. Zwischen dem Lesen
+ * eines Zeigers und dem Lesen der Artikel kann also ein Publish liegen – und
+ * **keine** Lesereihenfolge kann das ausschließen:
  *
- * Ein wirklich atomarer Publish samt unveränderlicher Generationen bleibt O3b.
+ * - Zeiger zuerst → die Antwort trägt eine alte Kennung auf neuem Inhalt.
+ * - Artikel zuerst → sie trägt eine neue Kennung auf altem Inhalt.
+ *
+ * Beides ist eine Falschaussage, und die zweite ist über einen gepinnten
+ * Edge-Cache sogar dauerhaft: unter derselben Kennung lägen dann verschiedene
+ * Inhalte. Damit wäre die Grundannahme des Protokolls verletzt.
+ *
+ * Deshalb meldet dieser Endpunkt eine Generation **nur**, wenn ihm über
+ * `readSnapshot` eine Quelle gegeben wird, die die Zugehörigkeit belegen kann.
+ * Die unveränderlichen Generationen dafür bringt **O3b**; bis dahin bleibt die
+ * Vorgabe „keine Quelle“ und der Endpunkt antwortet exakt wie vor O3a.
+ *
+ * Das Leseprotokoll selbst ist damit nicht ungetestet: die Contract-Tests
+ * reichen eine Quelle herein und prüfen den vollständigen Ablauf.
  */
 export function createNewsCacheHandler(
     cache: NewsCacheClient,
     endpoint: NewsCacheEndpoint,
     logger: Pick<Console, 'error'> = console,
+    { readSnapshot }: NewsCacheOptions = {},
 ) {
     return async function handler(request: Request): Promise<Response> {
         try {
-            // Zuerst der Zeiger, dann die Daten – siehe Lesereihenfolge oben.
-            // Ein unlesbarer oder fehlender Zeiger ist kein Fehler, sondern
-            // Legacy: die Antwort geht ohne Generationsangabe hinaus.
-            let pointer = null;
-            try {
-                pointer = normalizeSnapshotPointer(
-                    await cache.get<unknown>(NEWS_SNAPSHOT_POINTER_KEY),
-                );
-            } catch (pointerError) {
-                logger.error(`Snapshot pointer unavailable in ${endpoint.endpointPath}:`, pointerError);
-            }
-
             let articles = await cache.get<Article[]>(endpoint.cacheKey);
 
             if (!articles && endpoint.fallback) {
@@ -122,26 +126,33 @@ export function createNewsCacheHandler(
                 );
             }
 
+            // Ohne belegbare Zugehörigkeit gibt es keine Kennung. Ein Ausfall
+            // der Quelle ist kein Grund, die News zu verweigern – dann gilt
+            // Legacy.
+            let pointer = null;
+            if (readSnapshot) {
+                try {
+                    pointer = normalizeSnapshotPointer(await readSnapshot(articles));
+                } catch (snapshotError) {
+                    logger.error(`Snapshot unavailable in ${endpoint.endpointPath}:`, snapshotError);
+                }
+            }
+
             const requestedId = requestedSnapshotId(request);
             const headers = snapshotHeaders(pointer);
 
-            if (requestedId === null) {
-                // Kein Wunsch, kein Pinning: der bisherige kurzlebige Cache.
-                return jsonResponse(articles, 200, SUCCESS_CACHE_CONTROL, headers);
-            }
-
+            // Eine Anfrage, die eine bestimmte Generation will, aber eine
+            // andere (oder gar keine) bekommt, darf nicht unter der
+            // angefragten Kennung am Edge liegen bleiben.
             const matches = pointer !== null && pointer.snapshotId === requestedId;
+            const cacheControl = requestedId !== null && !matches
+                ? MISMATCH_CACHE_CONTROL
+                : SUCCESS_CACHE_CONTROL;
 
-            // Auch bei Abweichung wird geliefert, nicht verweigert: der Rumpf
-            // ist ein gültiger Stand, und die Header sagen dem Leser, welcher.
-            // Er entscheidet dann selbst – übernehmen, wenn neuer, verwerfen,
-            // wenn älter. Ein 409 würde ihn nur ohne Daten zurücklassen.
-            return jsonResponse(
-                articles,
-                200,
-                matches ? PINNED_CACHE_CONTROL : MISMATCH_CACHE_CONTROL,
-                headers,
-            );
+            // Geliefert wird in jedem Fall: der Rumpf ist ein gültiger Stand,
+            // und die Header sagen, welcher. Ein 409 ließe den Leser ohne
+            // Daten zurück.
+            return jsonResponse(articles, 200, cacheControl, headers);
         } catch (error) {
             logger.error(`API Error in ${endpoint.endpointPath}:`, error);
             const message = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;

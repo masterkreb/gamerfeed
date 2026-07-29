@@ -135,7 +135,13 @@ const AppContent: React.FC = () => {
 
     // Auto-update state
     const [newArticlesCount, setNewArticlesCount] = useState(0);
-    const [pendingArticles, setPendingArticles] = useState<Article[]>([]);
+    // Ausstehende Artikel und die Generation, aus der sie stammen, gehören
+    // zusammen. Getrennt gespeichert könnten sie beim Übernehmen unter einer
+    // fremden Kennung landen (Roadmap O3a).
+    const [pending, setPending] = useState<{ articles: Article[]; snapshot: NewsSnapshotPointer | null }>({
+        articles: [],
+        snapshot: null,
+    });
     const autoUpdateIntervalRef = useRef<number | null>(null);
 
     // Announcement state
@@ -181,15 +187,25 @@ const AppContent: React.FC = () => {
         return isFresh ? cachedNews.articles : [];
     }, [cachedNews]);
 
-    const persistCachedArticles = useCallback((nextArticles: Article[]) => {
+    /**
+     * Speichert die lokale Kopie **mit** ihrer Generation.
+     *
+     * `snapshot` wird ausdrücklich übergeben und nicht aus der gepinnten
+     * Generation gelesen: beim Übernehmen ausstehender Artikel gehören die
+     * Artikel zu der Generation, aus der sie geholt wurden – nicht zu der,
+     * die inzwischen gepinnt sein könnte.
+     */
+    const persistCachedArticles = useCallback((
+        nextArticles: Article[],
+        snapshot: NewsSnapshotPointer | null,
+    ) => {
         setCachedNews({
             articles: nextArticles.slice(0, INITIAL_ARTICLE_CACHE_COUNT),
             timestamp: Date.now(),
-            // Die lokale Kopie merkt sich ihre Generation. Ohne sie koennte
-            // eine aeltere Antwort aus dem Edge-Cache einen neueren lokalen
-            // Stand ueberschreiben - die 30-Minuten-Kopie ist laenger gueltig
-            // als der 60-Sekunden-Edge-Cache.
-            snapshot: pinnedSnapshotRef.current,
+            // Ohne die Generation könnte eine ältere Antwort aus dem
+            // Edge-Cache einen neueren lokalen Stand überschreiben - die
+            // 30-Minuten-Kopie ist länger gültig als der 60-Sekunden-Cache.
+            snapshot,
         });
     }, [setCachedNews]);
 
@@ -280,7 +296,7 @@ const AppContent: React.FC = () => {
                 const fetchedArticles: Article[] = await response.json();
                 if (acceptSnapshotResponse(response)) {
                     setArticles(fetchedArticles);
-                    persistCachedArticles(fetchedArticles);
+                    persistCachedArticles(fetchedArticles, pinnedSnapshotRef.current);
                     console.log(`Refreshed ${fetchedArticles.length} articles from API`);
                 }
             } else {
@@ -292,7 +308,7 @@ const AppContent: React.FC = () => {
                     const previewArticles: Article[] = await previewResponse.json();
                     if (acceptSnapshotResponse(previewResponse)) {
                         setArticles(previewArticles);
-                        persistCachedArticles(previewArticles);
+                        persistCachedArticles(previewArticles, pinnedSnapshotRef.current);
                         console.log(`✅ Stage 1: Loaded ${previewArticles.length} preview articles`);
                     }
                     setIsBlockingLoading(false);
@@ -307,7 +323,7 @@ const AppContent: React.FC = () => {
                             const mediumArticles: Article[] = await response.json();
                             if (acceptSnapshotResponse(response)) {
                                 setArticles(mediumArticles);
-                                persistCachedArticles(mediumArticles);
+                                persistCachedArticles(mediumArticles, pinnedSnapshotRef.current);
                                 console.log(`✅ Stage 2: Loaded ${mediumArticles.length} medium articles`);
                             }
 
@@ -319,7 +335,7 @@ const AppContent: React.FC = () => {
                             const fullArticles: Article[] = await response.json();
                             if (acceptSnapshotResponse(response)) {
                                 setArticles(fullArticles);
-                                persistCachedArticles(fullArticles);
+                                persistCachedArticles(fullArticles, pinnedSnapshotRef.current);
                                 console.log(`✅ Stage 3: Loaded ${fullArticles.length} full articles`);
                             }
                         })
@@ -340,7 +356,7 @@ const AppContent: React.FC = () => {
                     const fetchedArticles: Article[] = await response.json();
                     if (acceptSnapshotResponse(response)) {
                         setArticles(fetchedArticles);
-                        persistCachedArticles(fetchedArticles);
+                        persistCachedArticles(fetchedArticles, pinnedSnapshotRef.current);
                         console.log(`Loaded ${fetchedArticles.length} articles (fallback)`);
                     }
                 }
@@ -364,7 +380,7 @@ const AppContent: React.FC = () => {
         loadNews(true);
         // Clear pending articles when manually refreshing
         setNewArticlesCount(0);
-        setPendingArticles([]);
+        setPending({ articles: [], snapshot: null });
         // Reset tab title
         document.title = 'GamerFeed';
     }, [loadNews]);
@@ -376,11 +392,19 @@ const AppContent: React.FC = () => {
             if (!response.ok) return;
             
             const fetchedArticles: Article[] = await response.json();
-            // Ein aelterer Stand darf keine neuen Artikel melden. Eine neuere
-            // Generation wird hier gepinnt, aber noch nicht angezeigt - sie
-            // wird erst sichtbar, wenn der Benutzer die Aktualisierung
-            // annimmt.
-            if (!acceptSnapshotResponse(response)) return;
+
+            // Hier wird **nicht** gepinnt. Der Benutzer hat die Artikel noch
+            // nicht übernommen; die gepinnte Generation muss zum *sichtbaren*
+            // Stand passen. Sonst könnten ausstehende Artikel aus Generation B
+            // später unter einer inzwischen gepinnten Generation C gespeichert
+            // werden.
+            const incoming = readSnapshotHeaders(response.headers);
+            const decision = decideSnapshotAcceptance({
+                pinned: pinnedSnapshotRef.current,
+                incoming,
+            });
+            // Ein älterer Stand darf keine neuen Artikel melden.
+            if (!decision.accept) return;
             
             // Get the newest article date from currently loaded articles
             const newestLoadedDate = articles.length > 0 
@@ -397,7 +421,8 @@ const AppContent: React.FC = () => {
             if (trulyNewArticles.length > 0) {
                 // Set count directly (not accumulate) since we're comparing against dates
                 setNewArticlesCount(trulyNewArticles.length);
-                setPendingArticles(fetchedArticles);
+                // Artikel und ihre Generation gemeinsam - sie gehören zusammen.
+                setPending({ articles: fetchedArticles, snapshot: incoming });
                 // Update tab title
                 document.title = `(${trulyNewArticles.length}) GamerFeed`;
                 console.log(`🆕 ${trulyNewArticles.length} neue Artikel verfügbar`);
@@ -410,16 +435,19 @@ const AppContent: React.FC = () => {
 
     // Load pending articles (when user clicks the toast or badge)
     const loadPendingArticles = useCallback(() => {
-        if (pendingArticles.length > 0) {
-            setArticles(pendingArticles);
-            persistCachedArticles(pendingArticles);
+        if (pending.articles.length > 0) {
+            // Erst jetzt wird die Generation der ausstehenden Artikel gepinnt:
+            // ab diesem Moment ist sie der sichtbare Stand.
+            pinnedSnapshotRef.current = pending.snapshot;
+            setArticles(pending.articles);
+            persistCachedArticles(pending.articles, pending.snapshot);
             setNewArticlesCount(0);
-            setPendingArticles([]);
+            setPending({ articles: [], snapshot: null });
             // Reset tab title
             document.title = 'GamerFeed';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-    }, [pendingArticles, persistCachedArticles]);
+    }, [pending, persistCachedArticles]);
 
     // Auto-update polling (every 5 minutes) - runs even when tab is inactive
     useEffect(() => {

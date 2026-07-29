@@ -104,14 +104,14 @@ zeitversetzt gecachten News-Endpunkten, die trotz Pointer verschiedene
 Generationen liefern können – dort setzt O3a an.
 
 **Stand 29. Juli 2026 (Branch `claude/o3a-generation-read-protocol`):** O3a ist
-abgeschlossen. Jede News-Antwort nennt ihre Cache-Generation, der Leser pinnt
-die erste brauchbare und misst jede weitere daran: neuere übernehmen, ältere
-verwerfen. Ein fehlender oder fehlerhafter Zeiger fällt kontrolliert auf das
-Legacy-Verhalten zurück, die bestehenden Keys bleiben unverändert. Der am
-29. Juli beobachtete GameStar-Fall ist als Regressionstest in beiden Richtungen
-abgedeckt. 560 zentrale Tests und 14 Browser-Abnahmen laufen erfolgreich. Als
-Nächstes steht die Ladekette selbst an – Reihenfolge, Abbruch und
-Fehlertrennung –, das ist F1.
+als sichere Dual-Read-Vorbereitung abgeschlossen. Vertrag, Leseregeln und alle
+Consumer stehen und sind getestet; der am 29. Juli beobachtete GameStar-Fall ist
+in beiden Richtungen als Regressionstest abgedeckt. **Aktiviert ist das
+Protokoll nicht:** neben veränderlichen Legacy-Keys kann eine Kennung ihre
+Zugehörigkeit nicht belegen, deshalb entwertet der Cron jeden Zeiger und alle
+Endpunkte antworten als Legacy. Der Schutz gegen gemischte Generationen greift
+damit erst mit **O3b**, das die unveränderlichen Generationen liefert. 569
+zentrale Tests und 14 Browser-Abnahmen laufen erfolgreich.
 
 ## Empfohlene Reihenfolge
 
@@ -437,23 +437,31 @@ nicht zuverlässig durch den normalen Fehlerpfad.
 
 ### O3a – Generationsgebundenes Leseprotokoll und Migration
 
-**Status:** erledigt. `shared/news-snapshot.js` legt den Vertrag fest:
-`schemaVersion`, eine sortierbare `snapshotId` und `createdAt` in einem Zeiger
-(`news_snapshot_pointer`), übertragen als **Header** statt als Umschlag – der
-Rumpf bleibt ein nacktes Array, bestehende Clients merken nichts. Der Cron
-schreibt den Zeiger **zuletzt**, nach allen drei News-Caches; ein Schreibfehler
-dort ist nicht fatal, ein gescheiterter Lauf fasst den bisherigen Zeiger nicht
-an. Die Endpunkte lesen den Zeiger **vor** den Artikeln, damit ein Etikett
-höchstens älter als die Daten sein kann und nie neuer. Der Leser pinnt die erste
+**Status:** erledigt als **sichere Dual-Read-Vorbereitung** – das Protokoll ist
+vollständig definiert, in allen Consumern verdrahtet und getestet, in Produktion
+aber bewusst **noch nicht aktiviert**.
+
+`shared/news-snapshot.js` legt den Vertrag fest: `schemaVersion`, eine
+sortierbare `snapshotId` (`<epochMs>-<lauf>`, Format und Übereinstimmung mit
+`createdAt` werden erzwungen) und `createdAt`, übertragen als **Header** statt
+als Umschlag – der Rumpf bleibt ein nacktes Array. Der Leser pinnt die erste
 brauchbare Generation, hängt sie als `?snapshot=` an jede Folgeanfrage und
 entscheidet nach drei Regeln: gleiche übernehmen, neuere übernehmen und
-umpinnen, ältere verwerfen. `?snapshot=` macht den Edge-Cache
-generationsspezifisch – passend länger cachebar, abweichend `no-store`,
-ungepinnt unverändert. Ein fehlender, unlesbarer oder unbekannt versionierter
-Zeiger gilt überall als „Legacy" und nie als Fehler. Consumer sind die drei
-News-Endpunkte, `App.tsx`, `/api/gaming-news` und die Health-API; die
-Merge-Basis des Cron liest weiterhin `news_cache`. Einzelheiten, Rollback und
-Migrationsreihenfolge:
+umpinnen, ältere verwerfen. Gepinnt wird nur, was auch sichtbar ist – der
+Auto-Update-Pfad merkt Artikel samt ihrer Generation vor und pinnt erst bei der
+Übernahme.
+
+**Warum noch nicht aktiviert:** Eine Kennung darf nur Inhalt bezeichnen, der
+nachweisbar zu ihr gehört. `news_cache`, `news_cache_16` und `news_cache_64`
+sind veränderlich; ein Leser kann den Zeiger vor und die Artikel nach einem
+Publish erwischen, und **keine Lesereihenfolge** schließt das aus. Der Cron
+schreibt deshalb keinen Zeiger, sondern entwertet einen vorhandenen vor jedem
+Publish; die Endpunkte melden eine Generation nur über eine ausdrücklich
+injizierte Quelle, die in Produktion unverdrahtet bleibt. Die unveränderlichen
+Generationen dafür bringt **O3b** – erst damit greift der Schutz gegen gemischte
+Generationen wirklich.
+
+Einzelheiten, Grenzen und Migrationsreihenfolge:
 [`docs/deployment/news-generations.md`](../deployment/news-generations.md).
 
 **Warum:** Ein einzelner Active-Pointer reicht bei drei zeitversetzten,
@@ -496,6 +504,13 @@ Regressionstest für das generationsgebundene Protokoll und später F1.
 - Contract-Tests decken jeden Consumer und einen Rollback ab.
 
 ### O3b – Konsistenter, größenbegrenzter Publish
+
+**Zusätzlich seit O3a:** O3b **aktiviert** das generationsgebundene
+Leseprotokoll. Erst unveränderliche Generationen können belegen, dass eine
+Kennung zu einem Inhalt gehört; bis dahin bleibt der Zeiger leer und alle
+Endpunkte antworten als Legacy. Konkret gehört dazu, die Snapshot-Quelle der
+News-Endpunkte (`readSnapshot`) zu verdrahten, den Zeiger wieder zu schreiben
+und `/api/gaming-news` an die Generation zu binden.
 
 **Warum:** Eine Artikelanzahl garantiert keine maximale Byte-Größe. Die drei
 News-Keys werden zudem nacheinander geschrieben und können bei Fehlern
@@ -588,10 +603,11 @@ eine kleine, neutrale Infrastruktur.
 
 ### F1 – Progressive Ladekette: „latest request wins“
 
-**Status:** bereit – nächstes Code-Arbeitspaket. O3a stellt sicher, dass keine
-*ältere Generation* den sichtbaren Stand überschreibt; die Reihenfolge der
-Requests selbst, Abbruch bei Unmount und die Trennung blockierender von nicht
-blockierenden Fehlern bleiben offen.
+**Status:** bereit – nächstes Code-Arbeitspaket. O3a hat das Leseprotokoll
+bereitgestellt, das eine *ältere Generation* verwirft; wirksam wird es aber erst
+mit O3b. Unabhängig davon offen bleiben die Reihenfolge der Requests selbst,
+Abbruch bei Unmount und die Trennung blockierender von nicht blockierenden
+Fehlern.
 
 **Warum:** Eine verspätete Medium- oder Full-Antwort der initialen Ladekette
 kann momentan einen neueren manuellen Refresh wieder überschreiben. Scheitert

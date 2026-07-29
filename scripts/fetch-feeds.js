@@ -10,11 +10,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeContentUrl } from '../shared/url-policy.js';
 import { resolveRunResult, sanitizeErrorMessage } from '../shared/feed-health-model.js';
-import {
-    NEWS_SNAPSHOT_POINTER_KEY,
-    buildSnapshotPointer,
-    createSnapshotId,
-} from '../shared/news-snapshot.js';
+import { NEWS_SNAPSHOT_POINTER_KEY } from '../shared/news-snapshot.js';
 import { createFeedRunRecorder } from './feed-run-recorder.js';
 import { readFeedRunConfiguration } from './feed-run-config.js';
 import {
@@ -908,6 +904,37 @@ async function generateAndSaveTrends(articles, { groqApiKey, groqFetch, logger =
     logger.log('   🧠 Trend analysis complete!\n');
 }
 
+/**
+ * Entwertet einen vorhandenen Generationszeiger vor einem Publish (O3a).
+ *
+ * Der Lauf schreibt gleich die **veraenderlichen** News-Keys. Ein danach noch
+ * bestehender Zeiger wuerde neuen Inhalt mit einer alten Kennung beschriften -
+ * und ueber einen gepinnten Edge-Cache liesse sich das sogar festschreiben.
+ *
+ * Scheitert das Entfernen, laeuft der Publish trotzdem weiter: die Artikel sind
+ * wichtiger als das Etikett. Der Fall wird laut gemeldet, damit er nicht
+ * unbemerkt bleibt, und der naechste Lauf versucht es erneut.
+ *
+ * @returns {Promise<boolean>} ob der Zeiger sicher entwertet ist
+ */
+export async function invalidateSnapshotPointer({ store, logger = console, redact = message => String(message) }) {
+    try {
+        if (typeof store.del === 'function') {
+            await store.del(NEWS_SNAPSHOT_POINTER_KEY);
+        } else {
+            // Ein Speicher ohne `del` bekommt wenigstens einen leeren Wert -
+            // `normalizeSnapshotPointer` liest daraus Legacy.
+            await store.set(NEWS_SNAPSHOT_POINTER_KEY, null);
+        }
+        return true;
+    } catch (error) {
+        logger.warn?.(`   ⚠️  Generationszeiger konnte nicht entwertet werden: ${redact(
+            error instanceof Error ? error.message : String(error),
+        )}`);
+        return false;
+    }
+}
+
 // === HEARTBEAT (Roadmap O1) ===
 
 // Die Actions-Run-ID ist nicht geheim und laesst einen Lauf im Admin direkt dem
@@ -1453,6 +1480,24 @@ export async function main({
         logger.log('\n💾 Saving data to Vercel KV...');
         const publishStartMs = Date.now();
 
+        // === Generationszeiger entwerten (Roadmap O3a) ===
+        //
+        // `news_cache`, `news_cache_16` und `news_cache_64` sind veränderliche
+        // Schlüssel: gleich werden sie an Ort und Stelle überschrieben. Ein
+        // Zeiger daneben kann deshalb **nicht** belegen, dass ein gelesener
+        // Inhalt zu ihm gehört – ein Leser kann den Zeiger vor und die Artikel
+        // nach dem Überschreiben erwischen, ohne das bemerken zu können.
+        //
+        // Deshalb schreibt dieser Lauf keinen Zeiger, sondern entfernt einen
+        // vorhandenen, **bevor** er die Keys anfasst. Zwischen Entwertung und
+        // Publish gibt es damit keinen Moment, in dem eine alte Kennung neuen
+        // Inhalt beschriften könnte.
+        //
+        // Aktiviert wird das Protokoll mit den unveränderlichen Generationen
+        // aus O3b. Bis dahin antworten alle Endpunkte als Legacy – siehe
+        // docs/deployment/news-generations.md.
+        await invalidateSnapshotPointer({ store, logger, redact: redactMessage });
+
         // Save full cache
         await store.set('news_cache', sortedArticles);
         logger.log(`   ✅ Saved ${sortedArticles.length} articles to KV key 'news_cache'`);
@@ -1463,33 +1508,6 @@ export async function main({
 
         await store.set('news_cache_64', sortedArticles.slice(0, 64));
         logger.log(`   ⚡ Saved 64 medium articles to KV key 'news_cache_64'`);
-
-        // Der Zeiger auf die Generation kommt **zuletzt** (O3a). Damit zeigt er
-        // nie auf Daten, die noch gar nicht vollständig geschrieben sind.
-        //
-        // Ein Schreibfehler hier ist ausdrücklich **nicht** fatal: die drei
-        // News-Caches stehen bereits, und ein Leser ohne Zeiger fällt
-        // kontrolliert auf das Legacy-Verhalten zurück. Den Kern-Publish
-        // deshalb scheitern zu lassen wäre der schlechtere Tausch.
-        // Ein einziger Zeitpunkt fuer Kennung und `createdAt`: zwei Aufrufe
-        // koennten sich um eine Millisekunde unterscheiden, und dann passten
-        // der sortierbare Zeitanteil der Kennung und der Zeitstempel nicht
-        // mehr zueinander.
-        const publishedAt = new Date();
-        const snapshot = buildSnapshotPointer({
-            snapshotId: createSnapshotId(publishedAt, recorder.runId),
-            createdAt: publishedAt,
-            articleCount: sortedArticles.length,
-            runId: recorder.runId,
-        });
-        try {
-            await store.set(NEWS_SNAPSHOT_POINTER_KEY, snapshot);
-            logger.log(`   🔖 Generation ${snapshot.snapshotId} veröffentlicht`);
-        } catch (pointerError) {
-            logger.warn(`   ⚠️  Generationszeiger konnte nicht gespeichert werden: ${redactMessage(
-                pointerError instanceof Error ? pointerError.message : String(pointerError),
-            )}`);
-        }
 
         durations.publishMs = Date.now() - publishStartMs;
         durations.totalMs = Date.now() - runStartMs;

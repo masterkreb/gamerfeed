@@ -1,11 +1,6 @@
 import { kv } from '@vercel/kv';
 import type { Article } from '../types';
 import { normalizeContentUrl } from '../shared/url-policy.js';
-import {
-    NEWS_SNAPSHOT_POINTER_KEY,
-    normalizeSnapshotPointer,
-    snapshotHeaders,
-} from '../shared/news-snapshot.js';
 
 export const config = {
     runtime: 'edge',
@@ -44,16 +39,12 @@ function formatDateDE(date: Date): string {
 
 export default async function handler(_req: Request) {
     try {
-        // Dieselbe Lesereihenfolge wie in den News-Endpunkten: erst der Zeiger,
-        // dann die Artikel. Ein fehlender oder unlesbarer Zeiger ist kein
-        // Grund, die Seite zu verweigern - dann gilt Legacy.
-        let snapshot = null;
-        try {
-            snapshot = normalizeSnapshotPointer(await kv.get<unknown>(NEWS_SNAPSHOT_POINTER_KEY));
-        } catch (pointerError) {
-            console.error('Snapshot pointer unavailable in /api/gaming-news:', pointerError);
-        }
-
+        // Diese Seite liest den **veränderlichen** `news_cache` und ist damit
+        // bis O3b ein reiner Legacy-Consumer des Leseprotokolls: eine Kennung
+        // hier würde Inhalt beschriften, dessen Zugehörigkeit niemand belegen
+        // kann. Sobald O3b unveränderliche Generationen bereitstellt, bekommt
+        // die Seite ihre Generation als Meta-Angabe und Header.
+        // Siehe docs/deployment/news-generations.md.
         const articles = await kv.get<Article[]>('news_cache');
 
         if (!articles || articles.length === 0) {
@@ -113,9 +104,6 @@ export default async function handler(_req: Request) {
     <meta name="description" content="${metaDesc}">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://gamerfeed.vercel.app/gaming-news">
-${snapshot ? `    <meta name="gamerfeed-snapshot" content="${escapeHtml(snapshot.snapshotId)}">
-    <meta name="gamerfeed-snapshot-schema" content="${snapshot.schemaVersion}">
-` : ''}
 
     <meta property="og:title" content="Gaming News heute — ${escapeHtml(todayStr)} | GamerFeed">
     <meta property="og:description" content="${articles.length} aktuelle Gaming-Artikel aus ${sourcesCount} Quellen">
@@ -334,10 +322,6 @@ ${snapshot ? `    <meta name="gamerfeed-snapshot" content="${escapeHtml(snapshot
                 'Content-Type': 'text/html; charset=utf-8',
                 // Cache 20 minutes on edge (matches cron interval), stale ok for 1 hour
                 'Cache-Control': 's-maxage=1200, stale-while-revalidate=3600',
-                // Die statische Ausgabe ist ein eigener Consumer des Protokolls:
-                // eine ausgelieferte Seite bleibt so einer Generation zuordenbar,
-                // auch wenn sie lange am Edge liegt.
-                ...snapshotHeaders(snapshot),
             },
         });
 
