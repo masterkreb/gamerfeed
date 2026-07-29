@@ -449,8 +449,15 @@ auf altem. Die Bindung muss aus der Speicherung kommen, und das ist **O3b**.
   umpinnen, ältere verwerfen.
 - **Gepinnt wird nur, was sichtbar ist.** Der Auto-Update-Pfad pollt im
   Hintergrund und pinnt deshalb nicht; Artikel und Generation wandern gemeinsam
-  in die Warteschlange. `persistCachedArticles` verlangt den Snapshot als
-  ausdrücklichen Parameter.
+  in die Warteschlange und werden beim Klick über `planPendingAdoption` erneut
+  geprüft. `persistCachedArticles` verlangt den Snapshot als ausdrücklichen
+  Parameter.
+- **Rollback braucht ein Signal.** Eine bloß fehlende Generationsangabe ist
+  meistens eine alte Kopie und darf nichts zurückdrehen. Ein bewusster Rückfall
+  meldet sich mit `x-gamerfeed-snapshot-rollback: legacy` und löscht die
+  gepinnte Generation – auch in der lokalen Kopie.
+- **Die Health-API meldet bis O3b `snapshot: null`.** Eine Zuordnung über die
+  Artikelzahl wäre geraten: zwei Generationen können dieselbe haben.
 - **`?snapshot=<id>`**: abweichend `no-store`, passend und ungepinnt dieselbe
   Cache-Dauer wie bisher. **Kein** verlängerter Edge-Cache – der Inhalt unter
   einer Kennung ist nicht unveränderlich, solange die Keys überschrieben werden.

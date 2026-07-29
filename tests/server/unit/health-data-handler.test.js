@@ -232,10 +232,9 @@ test('ein KV-Fehler wird protokolliert, aber nicht ausgeliefert', async () => {
     assert.equal(calls.length, 1, 'der Originaltext landet ausschliesslich im Log');
 });
 
-test('es werden nur die erwarteten KV-Schluessel gelesen', async () => {
-    // Seit O3a kommt der Generationszeiger dazu - und zwar **zweimal**: vor und
-    // nach dem Artikelabruf. Nur so laesst sich pruefen, ob beide Werte
-    // denselben Stand beschreiben.
+test('es werden nur die vier erwarteten KV-Schluessel gelesen', async () => {
+    // Ohne injizierte Snapshot-Quelle wird der Zeiger gar nicht erst gelesen:
+    // eine Zuordnung, die niemand belegen kann, gehoert nicht in die Antwort.
     const { handler, cache } = createHandler(healthyStore());
     await handler(new Request('https://example.com/x'));
 
@@ -244,33 +243,105 @@ test('es werden nur die erwarteten KV-Schluessel gelesen', async () => {
         'feed_publish_status',
         'feed_run_status',
         'news_cache',
-        'news_snapshot_pointer',
-        'news_snapshot_pointer',
     ]);
 });
 
 // === Generation der Quellenzaehlung (Roadmap O3a) ===
 
-test('die Antwort nennt die Generation, auf der sourcesInCache beruht', async () => {
-    // Ohne diese Angabe laesst sich „nicht im aktiven Snapshot" nicht von
-    // „das Frontend sieht einen anderen Snapshot" unterscheiden.
+test('eine belegbar gebundene Quelle wird gemeldet', async () => {
+    // So sieht der Zustand ab O3b aus: die Quelle kann die Zugehoerigkeit
+    // belegen, deshalb darf die Angabe in die Antwort.
     const store = healthyStore();
-    const createdAt = new Date(2000).toISOString();
-    store.news_snapshot_pointer = {
-        schemaVersion: 1,
-        snapshotId: '2000-gha-2',
-        createdAt,
-        // Muss zur Zahl der gelesenen Artikel passen, sonst gilt Legacy.
-        articleCount: 1,
-        runId: 'gha-2',
-    };
+    const { handler } = createHandler(store, {
+        readSnapshot: () => ({
+            schemaVersion: 1,
+            snapshotId: '2000-gha-2',
+            createdAt: new Date(2000).toISOString(),
+            articleCount: 1,
+            runId: 'gha-2',
+        }),
+    });
 
-    const { handler } = createHandler(store);
     const body = await (await handler(new Request('https://example.com/x'))).json();
 
     assert.equal(body.snapshot.snapshotId, '2000-gha-2');
     assert.equal(body.snapshot.schemaVersion, 1);
     assert.deepEqual(body.sourcesInCache, ['GameStar']);
+});
+
+test('die gebundene Quelle sieht die tatsaechlich gelesenen Artikel', async () => {
+    let gesehen = null;
+    const { handler } = createHandler(healthyStore(), {
+        readSnapshot: artikel => {
+            gesehen = artikel;
+            return null;
+        },
+    });
+
+    await handler(new Request('https://example.com/x'));
+
+    assert.equal(Array.isArray(gesehen), true);
+    assert.equal(gesehen.length, 1);
+});
+
+test('ein stabiler alter Zeiger mit passender Artikelzahl wird NICHT gemeldet', async () => {
+    // Der Reviewbefund: `1000-old` mit articleCount 2 und zwei voellig anderen
+    // Artikeln. Eine Artikelzahl belegt keine Zugehoerigkeit - zwei
+    // Generationen koennen dieselbe haben. Ohne gebundene Quelle gilt Legacy.
+    const store = healthyStore();
+    store.news_cache = [
+        createArticle('GameStar', isoAgo(60_000)),
+        createArticle('GameZone', isoAgo(60_000)),
+    ];
+    store.news_snapshot_pointer = {
+        schemaVersion: 1,
+        snapshotId: '1000-old',
+        createdAt: new Date(1000).toISOString(),
+        articleCount: 2,
+        runId: 'old',
+    };
+
+    const { handler } = createHandler(store);
+    const body = await (await handler(new Request('https://example.com/x'))).json();
+
+    assert.equal(body.snapshot, null, 'keine geratene Zuordnung');
+    assert.deepEqual(body.sourcesInCache, ['GameStar', 'GameZone']);
+});
+
+test('ein Fehler beim Lesen der Quelle beendet die Health-API nicht', async () => {
+    // Der Zeiger ist Diagnosebeiwerk. Sein Ausfall darf die Health-Daten nicht
+    // mit 500 wegnehmen - dann gilt kontrolliert Legacy.
+    const { handler, loggerCalls } = createHandler(healthyStore(), {
+        readSnapshot: () => {
+            throw new Error('KV nicht erreichbar');
+        },
+    });
+
+    const response = await handler(new Request('https://example.com/x'));
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.snapshot, null);
+    assert.deepEqual(body.sourcesInCache, ['GameStar']);
+    assert.equal(loggerCalls.length, 1, 'der Ausfall wird protokolliert');
+    assert.match(String(loggerCalls[0][0]), /Snapshot unavailable/);
+});
+
+test('eine unbrauchbare Angabe der Quelle gilt als Legacy', async () => {
+    for (const kaputt of [
+        'kein objekt',
+        [],
+        {},
+        { schemaVersion: 99, snapshotId: '2000-gha-2', createdAt: new Date(2000).toISOString() },
+        { schemaVersion: 1, snapshotId: 'zzz', createdAt: new Date(2000).toISOString() },
+        { schemaVersion: 1, snapshotId: '2000-gha-2', createdAt: 'irgendwann' },
+        { schemaVersion: 1, snapshotId: '2000-gha-2', createdAt: new Date(3000).toISOString() },
+    ]) {
+        const { handler } = createHandler(healthyStore(), { readSnapshot: () => kaputt });
+        const body = await (await handler(new Request('https://example.com/x'))).json();
+
+        assert.equal(body.snapshot, null, JSON.stringify(kaputt));
+    }
 });
 
 test('ohne Zeiger meldet die Health-API null statt zu scheitern', async () => {
@@ -281,25 +352,4 @@ test('ohne Zeiger meldet die Health-API null statt zu scheitern', async () => {
     assert.equal(response.status, 200);
     assert.equal(body.snapshot, null);
     assert.deepEqual(body.sourcesInCache, ['GameStar']);
-});
-
-test('ein fehlerhafter Zeiger wird in der Health-API zu null', async () => {
-    for (const kaputt of [
-        'kein objekt',
-        [],
-        {},
-        { schemaVersion: 99, snapshotId: '2000-gha-2', createdAt: new Date(2000).toISOString() },
-        { schemaVersion: 1, snapshotId: 'zzz', createdAt: new Date(2000).toISOString() },
-        { schemaVersion: 1, snapshotId: '2000-gha-2', createdAt: 'irgendwann' },
-        { schemaVersion: 1, snapshotId: '2000-gha-2', createdAt: new Date(3000).toISOString() },
-    ]) {
-        const store = healthyStore();
-        store.news_snapshot_pointer = kaputt;
-
-        const { handler } = createHandler(store);
-        const body = await (await handler(new Request('https://example.com/x'))).json();
-
-        assert.equal(body.snapshot, null, JSON.stringify(kaputt));
-        assert.deepEqual(body.sourcesInCache, ['GameStar'], JSON.stringify(kaputt));
-    }
 });

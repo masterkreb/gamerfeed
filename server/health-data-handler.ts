@@ -8,49 +8,25 @@ import {
     FEED_STALE_AFTER_MS,
     buildFreshnessReport,
 } from '../shared/feed-health-model.js';
-import {
-    NEWS_SNAPSHOT_POINTER_KEY,
-    normalizeSnapshotPointer,
-} from '../shared/news-snapshot.js';
+import { normalizeSnapshotPointer } from '../shared/news-snapshot.js';
 
 interface HealthCacheClient {
     get<T>(key: string): Promise<T | null>;
-}
-
-/**
- * Bindet den Zeiger an die gelesenen Artikel – oder meldet Legacy.
- *
- * Zwei Bedingungen müssen erfüllt sein:
- *
- * 1. Der Zeiger ist vor und nach dem Artikelabruf derselbe. Ein Wechsel
- *    dazwischen heißt, dass ein Publish lief.
- * 2. Seine `articleCount` passt zum gelesenen Full-Cache.
- *
- * Beides zusammen ist eine **Konsistenzprüfung, kein Beweis**: zwei
- * Generationen können dieselbe Artikelzahl haben. Ein Beweis ist mit
- * veränderlichen Schlüsseln nicht möglich – deshalb schreibt der Cron bis O3b
- * gar keinen Zeiger, und diese Prüfung liefert heute immer `null`.
- */
-function bindSnapshotToArticles(
-    before: unknown,
-    after: unknown,
-    articles: Article[],
-): NewsSnapshotPointer | null {
-    const pointer = normalizeSnapshotPointer(before);
-    if (pointer === null) return null;
-
-    const second = normalizeSnapshotPointer(after);
-    if (second === null || second.snapshotId !== pointer.snapshotId) return null;
-
-    if (pointer.articleCount !== articles.length) return null;
-
-    return pointer;
 }
 
 interface HealthHandlerOptions {
     /** Injizierbare Uhr: Grenzfälle der Frische sind so ohne Wartezeit testbar. */
     now?: () => Date;
     staleAfterMs?: number;
+    /**
+     * Liefert die Generation, zu der die gelesenen Artikel **nachweisbar**
+     * gehören.
+     *
+     * Bewusst ohne Vorgabe: solange die News-Keys veränderlich sind, kann das
+     * niemand belegen – jede Näherung (etwa über die Artikelzahl) würde im
+     * Admin eine falsche Zuordnung anzeigen. Die belegbare Quelle bringt O3b.
+     */
+    readSnapshot?: (articles: Article[]) => Promise<unknown> | unknown;
 }
 
 // Neutral formuliert: die Meldung geht an den Client und soll weder den
@@ -67,24 +43,21 @@ const MISSING_DATA_MESSAGE = 'Health-Daten sind derzeit nicht verfügbar.';
  */
 export function createHealthDataHandler(
     cache: HealthCacheClient,
-    { now = () => new Date(), staleAfterMs = FEED_STALE_AFTER_MS }: HealthHandlerOptions = {},
+    {
+        now = () => new Date(),
+        staleAfterMs = FEED_STALE_AFTER_MS,
+        readSnapshot,
+    }: HealthHandlerOptions = {},
     logger: Pick<Console, 'error'> = console,
 ) {
     return async function handler(_request: Request): Promise<Response> {
         try {
-            // Der Zeiger wird **vor** und **nach** den Artikeln gelesen. Beide
-            // Lesevorgaenge parallel abzusetzen wuerde die Frage, ob sie
-            // denselben Stand beschreiben, gar nicht erst stellen.
-            const pointerBefore = await cache.get<unknown>(NEWS_SNAPSHOT_POINTER_KEY);
-
             const [healthStatus, articles, runStatus, publishStatus] = await Promise.all([
                 cache.get<BackendHealthStatus>(FEED_HEALTH_STATUS_KEY),
                 cache.get<Article[]>('news_cache'),
                 cache.get<unknown>(FEED_RUN_STATUS_KEY),
                 cache.get<unknown>(FEED_PUBLISH_STATUS_KEY),
             ]);
-
-            const pointerAfter = await cache.get<unknown>(NEWS_SNAPSHOT_POINTER_KEY);
 
             if (!healthStatus || !articles) {
                 return adminErrorResponse(404, API_ERROR_CODES.NOT_FOUND, MISSING_DATA_MESSAGE);
@@ -106,15 +79,21 @@ export function createHealthDataHandler(
             // nicht von „das Frontend sieht einen anderen Snapshot"
             // unterscheiden - genau die Frage, die der beobachtete
             // GameStar-Fall aufgeworfen hat. Die Auswertung im Admin bleibt
-            // A1b vorbehalten; hier wird die Angabe nur bereitgestellt.
+            // A1b vorbehalten.
             //
-            // Gemeldet wird sie **nur**, wenn beide Werte belegbar denselben
-            // Stand beschreiben: derselbe Zeiger vor und nach dem Artikelabruf
-            // *und* eine passende Artikelzahl. Sonst gilt kontrolliert Legacy.
-            // Das ist eine Konsistenzpruefung und kein Beweis - solange die
-            // News-Keys veraenderlich sind, gibt es keinen. Deshalb schreibt
-            // der Cron bis O3b auch gar keinen Zeiger.
-            const snapshot = bindSnapshotToArticles(pointerBefore, pointerAfter, articles);
+            // Gemeldet wird nur, was eine **belegbar gebundene** Quelle
+            // liefert. Eine Heuristik waere hier besonders gefaehrlich: zwei
+            // Generationen koennen dieselbe Artikelzahl haben, und dann stuende
+            // im Admin eine falsche Zuordnung. Ein Fehler beim Lesen ist kein
+            // Grund, die Health-Daten zu verweigern - dann gilt Legacy.
+            let snapshot: NewsSnapshotPointer | null = null;
+            if (readSnapshot) {
+                try {
+                    snapshot = normalizeSnapshotPointer(await readSnapshot(articles));
+                } catch (snapshotError) {
+                    logger.error('Snapshot unavailable in /api/get-health-data:', snapshotError);
+                }
+            }
 
             // Immer der aktuelle Stand und niemals zwischengespeichert: der
             // Frischebericht wäre sonst genau das, was er melden soll – alt.

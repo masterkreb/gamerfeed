@@ -2,6 +2,7 @@ import type { Article } from '../types';
 import {
     SNAPSHOT_QUERY_PARAM,
     normalizeSnapshotPointer,
+    rollbackHeaders,
     snapshotHeaders,
 } from '../shared/news-snapshot.js';
 
@@ -31,6 +32,15 @@ interface NewsCacheOptions {
      * Solange niemand das belegen kann, antwortet der Endpunkt wie vor O3a.
      */
     readSnapshot?: (articles: Article[]) => Promise<unknown> | unknown;
+    /**
+     * Meldet einen **ausdrücklichen** Rückfall auf Legacy.
+     *
+     * Eine Antwort ohne Generationsangabe kann zweierlei bedeuten: eine alte
+     * Kopie aus einem Edge-Cache – die einen neueren Stand nicht zurückdrehen
+     * darf – oder einen bewussten Rollback, der genau das darf. Nur dieses
+     * Signal macht den Unterschied für den Leser sichtbar.
+     */
+    legacyRollback?: boolean;
 }
 
 const SUCCESS_CACHE_CONTROL = 's-maxage=60, stale-while-revalidate=300';
@@ -105,7 +115,7 @@ export function createNewsCacheHandler(
     cache: NewsCacheClient,
     endpoint: NewsCacheEndpoint,
     logger: Pick<Console, 'error'> = console,
-    { readSnapshot }: NewsCacheOptions = {},
+    { readSnapshot, legacyRollback = false }: NewsCacheOptions = {},
 ) {
     return async function handler(request: Request): Promise<Response> {
         try {
@@ -130,7 +140,7 @@ export function createNewsCacheHandler(
             // der Quelle ist kein Grund, die News zu verweigern – dann gilt
             // Legacy.
             let pointer = null;
-            if (readSnapshot) {
+            if (readSnapshot && !legacyRollback) {
                 try {
                     pointer = normalizeSnapshotPointer(await readSnapshot(articles));
                 } catch (snapshotError) {
@@ -139,7 +149,10 @@ export function createNewsCacheHandler(
             }
 
             const requestedId = requestedSnapshotId(request);
-            const headers = snapshotHeaders(pointer);
+            // Beim Rollback ersetzt das Signal die Generationsangaben: der
+            // Leser soll seine gepinnte Generation aufgeben, nicht eine neue
+            // annehmen.
+            const headers = legacyRollback ? rollbackHeaders() : snapshotHeaders(pointer);
 
             // Eine Anfrage, die eine bestimmte Generation will, aber eine
             // andere (oder gar keine) bekommt, darf nicht unter der

@@ -11,6 +11,7 @@ import type { Page, Route } from '@playwright/test';
 const SNAPSHOT_ID_HEADER = 'x-gamerfeed-snapshot-id';
 const SNAPSHOT_SCHEMA_HEADER = 'x-gamerfeed-snapshot-schema';
 const SNAPSHOT_CREATED_AT_HEADER = 'x-gamerfeed-snapshot-created-at';
+const SNAPSHOT_ROLLBACK_HEADER = 'x-gamerfeed-snapshot-rollback';
 
 /**
  * Jede Quelle bekommt genau einen Artikel mit eindeutigem Titel. So laesst sich
@@ -61,7 +62,24 @@ function generation(millis: number, lauf: string, articles: typeof ALTER_STAND):
 const ALT = generation(Date.parse('2026-07-29T10:00:00.000Z'), 'gha-1', ALTER_STAND);
 const NEU = generation(Date.parse('2026-07-29T10:20:00.000Z'), 'gha-2', NEUER_STAND);
 
-function erfuelle(route: Route, generation: Generation | null, body?: unknown) {
+/**
+ * Ausdrücklicher Legacy-Rollback: kein Generations-Header, dafür das Signal.
+ *
+ * `null` als Generation heißt dagegen „headerlose alte Kopie" – die darf einen
+ * neueren Stand nicht zurückdrehen.
+ */
+const ROLLBACK = Symbol('legacy-rollback');
+
+function erfuelle(route: Route, generation: Generation | null | typeof ROLLBACK, body?: unknown) {
+    if (generation === ROLLBACK) {
+        return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            headers: { [SNAPSHOT_ROLLBACK_HEADER]: 'legacy' },
+            body: JSON.stringify(body ?? []),
+        });
+    }
+
     return route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -83,17 +101,23 @@ function erfuelle(route: Route, generation: Generation | null, body?: unknown) {
  * Registrierungsreihenfolge ab.
  */
 async function stelleLadekette(page: Page, stufen: {
-    preview: Generation | null;
-    medium: Generation | null;
-    full: Generation | null;
+    preview: Generation | null | typeof ROLLBACK;
+    medium: Generation | null | typeof ROLLBACK;
+    full: Generation | null | typeof ROLLBACK;
 }, legacyBody?: unknown) {
     await installApiMocks(page);
 
+    // `legacyBody` gilt nur fuer Stufen ohne eigene Generation: eine Stufe mit
+    // Generation liefert immer deren Artikel.
+    const koerper = (stufe: Generation | null | typeof ROLLBACK) => (
+        stufe === null || stufe === ROLLBACK ? legacyBody : undefined
+    );
+
     await page.route('**/api/get-news*', route => {
         const pfad = new URL(route.request().url()).pathname;
-        if (pfad.endsWith('/get-news-preview')) return erfuelle(route, stufen.preview, legacyBody);
-        if (pfad.endsWith('/get-news-medium')) return erfuelle(route, stufen.medium, legacyBody);
-        return erfuelle(route, stufen.full, legacyBody);
+        if (pfad.endsWith('/get-news-preview')) return erfuelle(route, stufen.preview, koerper(stufen.preview));
+        if (pfad.endsWith('/get-news-medium')) return erfuelle(route, stufen.medium, koerper(stufen.medium));
+        return erfuelle(route, stufen.full, koerper(stufen.full));
     });
 
     await blockExternalRequests(page);
@@ -177,6 +201,67 @@ test('eine neuere lokale Kopie wird nicht von einer aelteren Antwort ersetzt', a
         articleCount: NEUER_STAND.length,
         runId: 'gha-2',
     }] as const);
+
+    await page.goto('/');
+
+    await expect(page.getByText(GAMESTAR_TITEL)).toBeVisible();
+    await page.waitForTimeout(500);
+    await expect(page.getByText(GAMESTAR_TITEL)).toBeVisible();
+});
+
+test('ein ausdruecklicher Rollback loest eine gepinnte Generation ab', async ({ page }) => {
+    // Der Reviewbefund: ohne Signal koennte ein bereits gepinnter Client einen
+    // Rollback auf Legacy nie annehmen. Die erste Stufe pinnt hier die neuere
+    // Generation, die spaeteren melden den Rollback.
+    await stelleLadekette(page, { preview: NEU, medium: ROLLBACK, full: ROLLBACK }, ALTER_STAND);
+
+    await page.goto('/');
+
+    await expect(page.getByText(GAMEZONE_TITEL)).toBeVisible();
+    // GameStar stammte nur aus der gepinnten Generation - nach dem Rollback ist
+    // der Legacy-Stand sichtbar.
+    await expect(page.getByText(GAMESTAR_TITEL)).toHaveCount(0);
+
+    // Und die lokale Kopie ist danach ungepinnt, damit auch ein Reload sauber
+    // beginnt.
+    const gespeichert = await page.evaluate(() => JSON.parse(
+        window.localStorage.getItem('cachedNews') ?? 'null',
+    ));
+    expect(gespeichert?.snapshot ?? null).toBeNull();
+});
+
+test('ein Reload nach dem Rollback pinnt die alte Generation nicht erneut', async ({ page }) => {
+    // Die lokale Kopie traegt noch Generation B. Meldet der Server einen
+    // Rollback, darf der Reload nicht wieder auf B festhalten.
+    await stelleLadekette(page, { preview: ROLLBACK, medium: ROLLBACK, full: ROLLBACK }, ALTER_STAND);
+
+    await page.addInitScript(([artikel, zeiger]) => {
+        window.localStorage.setItem('cachedNews', JSON.stringify({
+            articles: artikel,
+            timestamp: Date.now(),
+            snapshot: zeiger,
+        }));
+    }, [NEUER_STAND, {
+        schemaVersion: 1,
+        snapshotId: NEU.snapshotId,
+        createdAt: NEU.createdAt,
+        articleCount: NEUER_STAND.length,
+        runId: 'gha-2',
+    }] as const);
+
+    await page.goto('/');
+
+    await expect(page.getByText(GAMEZONE_TITEL)).toBeVisible();
+    await expect.poll(async () => page.evaluate(() => {
+        const roh = window.localStorage.getItem('cachedNews');
+        return roh === null ? 'fehlt' : (JSON.parse(roh).snapshot ?? null);
+    })).toBeNull();
+});
+
+test('eine headerlose Antwort ohne Rollback-Signal bleibt verworfen', async ({ page }) => {
+    // Die Gegenprobe: dieselbe Lage, aber ohne Signal. Dann ist es eine alte
+    // Kopie und der neuere Stand bleibt stehen.
+    await stelleLadekette(page, { preview: NEU, medium: null, full: null }, ALTER_STAND);
 
     await page.goto('/');
 

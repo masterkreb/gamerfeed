@@ -71,6 +71,20 @@ export const SNAPSHOT_SCHEMA_HEADER = 'x-gamerfeed-snapshot-schema';
 export const SNAPSHOT_QUERY_PARAM = 'snapshot';
 
 /**
+ * Ausdrueckliches Rollback-Signal des Servers.
+ *
+ * Eine Antwort **ohne** Generationsangabe kann zweierlei bedeuten: eine alte
+ * Kopie aus einem Edge-Cache von vor der Umstellung - oder einen bewussten
+ * Rueckfall auf Legacy. Der Leser darf das nicht raten: die erste darf einen
+ * neueren Stand nicht zurueckdrehen, die zweite muss genau das duerfen.
+ *
+ * Deshalb sagt der Server es ausdruecklich. Nur wer dieses Signal sieht, gibt
+ * seine gepinnte Generation auf.
+ */
+export const SNAPSHOT_ROLLBACK_HEADER = 'x-gamerfeed-snapshot-rollback';
+export const SNAPSHOT_ROLLBACK_VALUE = 'legacy';
+
+/**
  * Ergebnis von `decideSnapshotAcceptance`.
  *
  * `accept` entscheidet ueber die Antwort, `pin` ueber die kuenftig gepinnte
@@ -84,6 +98,7 @@ export const SNAPSHOT_DECISIONS = Object.freeze({
     NEWER_GENERATION: 'newer_generation',
     OLDER_GENERATION: 'older_generation',
     LEGACY_AFTER_GENERATION: 'legacy_after_generation',
+    LEGACY_ROLLBACK: 'legacy_rollback',
 });
 
 function toIsoTimestamp(value) {
@@ -238,6 +253,28 @@ export function readSnapshotHeaders(headers) {
 }
 
 /**
+ * Meldet der Server einen ausdruecklichen Rueckfall auf Legacy?
+ *
+ * @param {{ get(name: string): string|null }|null} headers
+ * @returns {boolean}
+ */
+export function readSnapshotRollback(headers) {
+    if (!headers || typeof headers.get !== 'function') return false;
+
+    const value = headers.get(SNAPSHOT_ROLLBACK_HEADER);
+    return typeof value === 'string' && value.trim().toLowerCase() === SNAPSHOT_ROLLBACK_VALUE;
+}
+
+/**
+ * Header eines ausdruecklichen Legacy-Rollbacks.
+ *
+ * @returns {Record<string, string>}
+ */
+export function rollbackHeaders() {
+    return { [SNAPSHOT_ROLLBACK_HEADER]: SNAPSHOT_ROLLBACK_VALUE };
+}
+
+/**
  * Vergleicht zwei Generationen.
  *
  * Zuerst nach `createdAt`, bei Gleichstand nach der Kennung. Beide Werte sind
@@ -287,10 +324,25 @@ export function compareSnapshots(a, b) {
  * ist. Ist bereits eine echte Generation gepinnt, gilt Legacy als aelter und
  * wird verworfen.
  *
- * @param {{ pinned?: NewsSnapshotPointer|null, incoming?: NewsSnapshotPointer|null }} [params]
+ * Ein ausdrueckliches `rollback` ist der einzige Weg, eine gepinnte Generation
+ * wieder aufzugeben. Ohne dieses Signal bleibt eine headerlose Antwort das, was
+ * sie meistens ist: eine alte Kopie.
+ *
+ * @param {{
+ *   pinned?: NewsSnapshotPointer|null,
+ *   incoming?: NewsSnapshotPointer|null,
+ *   rollback?: boolean,
+ * }} [params]
  * @returns {{ accept: boolean, pin: NewsSnapshotPointer|null, reason: string }}
  */
-export function decideSnapshotAcceptance({ pinned = null, incoming = null } = {}) {
+export function decideSnapshotAcceptance({ pinned = null, incoming = null, rollback = false } = {}) {
+    // Der Server gibt das Protokoll ausdruecklich auf. Die gepinnte Generation
+    // wird dabei geloescht - sonst pinnte ein Reload aus der lokalen Kopie
+    // sofort wieder die alte Generation und der Client bliebe haengen.
+    if (rollback) {
+        return { accept: true, pin: null, reason: SNAPSHOT_DECISIONS.LEGACY_ROLLBACK };
+    }
+
     if (!incoming) {
         if (!pinned) {
             return { accept: true, pin: null, reason: SNAPSHOT_DECISIONS.LEGACY };
@@ -311,6 +363,47 @@ export function decideSnapshotAcceptance({ pinned = null, incoming = null } = {}
     }
 
     return { accept: false, pin: pinned, reason: SNAPSHOT_DECISIONS.OLDER_GENERATION };
+}
+
+/**
+ * Entscheidet ueber die Uebernahme vorgemerkter Auto-Update-Artikel.
+ *
+ * Zwischen dem Vormerken und dem Klick des Benutzers koennen Minuten liegen -
+ * genug Zeit, damit der sichtbare Stand laengst weiter ist. Die Warteschlange
+ * wird deshalb **beim Uebernehmen erneut** gegen die gepinnte Generation
+ * geprueft, nicht nur beim Befuellen.
+ *
+ * Ohne diese Pruefung setzte ein Klick auf eine Warteschlange aus Generation B
+ * eine bereits sichtbare Generation C wieder zurueck - inklusive der lokalen
+ * Kopie.
+ *
+ * Diese Funktion ist die **einzige** Stelle, an der das entschieden wird;
+ * `App.tsx` ruft genau sie auf.
+ *
+ * @param {{
+ *   pinned?: NewsSnapshotPointer|null,
+ *   pending?: { articles?: unknown[], snapshot?: NewsSnapshotPointer|null }|null,
+ * }} [params]
+ * @returns {{ adopt: boolean, snapshot: NewsSnapshotPointer|null, reason: string|null }}
+ */
+export function planPendingAdoption({ pinned = null, pending = null } = {}) {
+    const articles = Array.isArray(pending?.articles) ? pending.articles : [];
+    if (articles.length === 0) {
+        return { adopt: false, snapshot: pinned, reason: null };
+    }
+
+    const decision = decideSnapshotAcceptance({
+        pinned,
+        incoming: pending?.snapshot ?? null,
+    });
+
+    return {
+        adopt: decision.accept,
+        // Bei Ablehnung bleibt die gepinnte Generation stehen: der sichtbare
+        // Stand aendert sich nicht.
+        snapshot: decision.accept ? (pending?.snapshot ?? null) : pinned,
+        reason: decision.reason,
+    };
 }
 
 /**

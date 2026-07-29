@@ -163,34 +163,39 @@ function healthStore(pointerFolge) {
     };
 }
 
-test('die Health-API meldet keine Generation, die nicht zu ihren Quellen passt', async () => {
-    // `sourcesInCache` und `snapshot` muessen denselben Stand beschreiben.
-    // Wechselt der Zeiger zwischen den Lesevorgaengen, ist das nicht mehr
-    // belegbar - dann gilt kontrolliert Legacy.
-    const store = healthStore([
-        ALTER_ZEIGER,
-        buildSnapshotPointer({
-            snapshotId: '2000-gha-2',
-            createdAt: new Date(2000).toISOString(),
-            articleCount: NEUER_STAND.length,
-            runId: 'gha-2',
-        }),
-    ]);
+test('die Health-API meldet ohne gebundene Quelle gar keine Generation', async () => {
+    // Der gespeicherte Zeiger wird nicht einmal gelesen: `sourcesInCache` und
+    // `snapshot` muessen denselben Stand beschreiben, und das kann neben
+    // veraenderlichen Keys niemand belegen.
+    const store = healthStore([ALTER_ZEIGER]);
 
     const handler = createHealthDataHandler(store.client, { now: () => new Date(5000) });
     const body = await (await handler(new Request('https://example.com/x'))).json();
 
     assert.equal(body.snapshot, null, 'kontrolliert Legacy statt einer geratenen Zuordnung');
     assert.deepEqual(body.sourcesInCache, ['GameZone', 'GameStar']);
+    assert.equal(
+        store.calls.includes(NEWS_SNAPSHOT_POINTER_KEY),
+        false,
+        'der Zeiger wird gar nicht erst gelesen',
+    );
 });
 
-test('die Health-API meldet auch bei stabilem, aber unpassendem Zeiger Legacy', async () => {
-    // Der Zeiger bleibt stabil, nennt aber eine andere Artikelzahl als der
-    // gelesene Cache. Auch dann ist die Zuordnung nicht belegt.
-    const store = healthStore([ALTER_ZEIGER]);
+test('eine passende Artikelzahl macht aus einem alten Zeiger keine Zuordnung', async () => {
+    // Der Reviewbefund: `1000-old` mit articleCount 2 und zwei voellig anderen
+    // Artikeln. Eine Artikelzahl belegt nichts - zwei Generationen koennen
+    // dieselbe haben.
+    const passenderAlterZeiger = buildSnapshotPointer({
+        snapshotId: '1000-old',
+        createdAt: new Date(1000).toISOString(),
+        articleCount: NEUER_STAND.length,
+        runId: 'old',
+    });
+    const store = healthStore([passenderAlterZeiger]);
 
     const handler = createHealthDataHandler(store.client, { now: () => new Date(5000) });
     const body = await (await handler(new Request('https://example.com/x'))).json();
 
     assert.equal(body.snapshot, null);
+    assert.deepEqual(body.sourcesInCache, ['GameZone', 'GameStar']);
 });

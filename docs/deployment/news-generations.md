@@ -63,6 +63,7 @@ kommen – und das ist O3b.
 | `schemaVersion` | `1` |
 | `snapshotId` | `<epochMs>-<lauf>`, Format erzwungen |
 | Header | `x-gamerfeed-snapshot-id`, `-schema`, `-created-at` |
+| Rollback-Signal | `x-gamerfeed-snapshot-rollback: legacy` |
 | Query-Parameter | `?snapshot=<id>` |
 
 Die Rechenregeln stehen an genau einer Stelle: `shared/news-snapshot.js`. Sie
@@ -121,6 +122,29 @@ neue Stand. Ohne sie bliebe ein Browser dauerhaft auf einem alten Stand.
 Die dritte Regel verhindert die Gegenrichtung: eine verspätete oder aus einem
 älteren Edge-Cache stammende Kopie kann den sichtbaren Stand nicht zurückdrehen.
 
+### Rollback braucht ein ausdrückliches Signal
+
+Eine Antwort **ohne** Generationsangabe kann zweierlei bedeuten:
+
+- eine alte Kopie aus einem Edge-Cache – die darf einen neueren Stand **nicht**
+  zurückdrehen;
+- einen bewussten Rückfall auf Legacy – der muss genau das dürfen.
+
+Der Leser kann das nicht raten. Ohne Unterscheidung wäre der dokumentierte
+Rollback für einen bereits gepinnten Client wirkungslos: er verwürfe jede
+headerlose Antwort, und nach einem Reload pinnte die lokale Kopie dieselbe
+Generation erneut – bis zum Ablauf der 30-Minuten-Kopie bliebe er auf dem alten
+Stand.
+
+Deshalb sagt der Server es ausdrücklich: `x-gamerfeed-snapshot-rollback: legacy`.
+Nur wer dieses Signal sieht, gibt seine gepinnte Generation auf – und zwar
+vollständig, inklusive der Generation in der lokalen Kopie, damit auch ein
+Reload sauber beginnt. Eine Rollback-Antwort nennt **keine** Generation; sie
+gibt eine auf.
+
+Gesteuert wird das über `legacyRollback` an `createNewsCacheHandler` – eine
+bewusste Betriebsentscheidung, kein Automatismus.
+
 ### Pinnen nur, was sichtbar ist
 
 Der Auto-Update-Pfad pollt im Hintergrund und zeigt nichts an. Er **pinnt
@@ -132,6 +156,13 @@ Ohne diese Trennung konnten vorgemerkte Artikel aus Generation B später unter
 einer inzwischen gepinnten Generation C gespeichert werden. `persistCachedArticles`
 verlangt seinen Snapshot deshalb als **ausdrücklichen Parameter** – die
 gefährliche Variante lässt sich gar nicht mehr versehentlich hinschreiben.
+
+Zusätzlich wird die Warteschlange **beim Klick erneut geprüft**
+(`planPendingAdoption`): zwischen dem Vormerken und der Übernahme können
+Minuten liegen. Ist der sichtbare Stand inzwischen weiter, wird die
+Warteschlange verworfen statt eingespielt – State und lokale Kopie bleiben
+unangetastet. Dieselbe Funktion nutzt `App.tsx`; die Regeln stehen also nur an
+einer Stelle.
 
 ## Cache-Verhalten
 
@@ -163,9 +194,12 @@ selbst. Ein 409 ließe ihn ohne Daten zurück.
 | Zeiger fehlerhaft, unbekannt versioniert oder in sich widersprüchlich | gilt als Legacy |
 | Antwort ohne Header bei bereits gepinnter Generation | verworfen (Legacy gilt als älter) |
 | Antwort ohne Header, nichts gepinnt | übernommen |
+| Antwort **mit** Rollback-Signal | übernommen, gepinnte Generation wird gelöscht |
 
 **Rollback auf Legacy:** Zeiger löschen – exakt das, was der Cron ohnehin bei
-jedem Publish tut. Alle Endpunkte antworten sofort wieder wie vor O3a.
+jedem Publish tut – **und** `legacyRollback` an den Endpunkten setzen. Ohne das
+Signal käme der Rollback bei bereits gepinnten Clients nicht an. Beide Schritte
+gehören zusammen.
 
 **Rollback auf eine ältere Generation:** erst ab O3b sinnvoll, weil es dafür
 mehrere vorgehaltene Generationen braucht. Das Leseprotokoll ist darauf
@@ -190,15 +224,22 @@ zurückgesetzten Generation. Contract-Tests decken beide Fälle ab.
 | `/api/get-news-preview`, `-medium`, `/api/get-news` | Legacy; `readSnapshot` unverdrahtet | melden die Generation, akzeptieren `?snapshot=` |
 | `App.tsx` (Ladekette, Refresh, Auto-Update) | pinnt und entscheidet – heute mangels Header inaktiv | voll wirksam |
 | `/api/gaming-news` | reiner Legacy-Consumer | Generation als Meta-Angabe und Header |
-| `/api/get-health-data` | prüft Bindung, meldet sonst `null` | meldet die Generation von `sourcesInCache` |
+| `/api/get-health-data` | meldet `null`; `readSnapshot` unverdrahtet | meldet die Generation von `sourcesInCache` |
 | Merge-Basis des Cron | liest `news_cache` | unverändert, bis O3b umstellt |
 | lokale Kopie (`cachedNews`) | speichert ihre Generation mit | voll wirksam |
 
-Die Health-API liest den Zeiger **vor und nach** dem Artikelabruf und meldet ihn
-nur, wenn beide Lesevorgänge dieselbe Kennung liefern *und* die `articleCount`
-zum gelesenen Cache passt. Das ist eine **Konsistenzprüfung, kein Beweis** –
-zwei Generationen können dieselbe Artikelzahl haben. Sie verhindert die grobe
-Verwechslung; die belastbare Bindung bringt O3b.
+Die Health-API liest den gespeicherten Zeiger **gar nicht**. Sie meldet nur,
+was eine ausdrücklich injizierte, belegbar gebundene Quelle liefert – und die
+gibt es bis O3b nicht, also `snapshot: null`.
+
+Eine frühere Fassung prüfte stattdessen, ob derselbe Zeiger vor und nach dem
+Artikelabruf steht *und* seine `articleCount` zur gelesenen Artikelzahl passt.
+**Das reicht nicht:** zwei Generationen können dieselbe Artikelzahl haben, und
+dann stünde im Admin eine falsche Zuordnung – genau der Fehler, gegen den das
+Protokoll antritt. Eine Heuristik ist hier schlimmer als gar keine Angabe.
+
+Ein Fehler beim Lesen der Quelle beendet die Health-API nicht: der Zeiger ist
+Diagnosebeiwerk, sein Ausfall wird protokolliert und gilt als Legacy.
 
 Die lokale 32-Artikel-Kopie ist **30 Minuten** gültig, der Edge-Cache nur 60
 Sekunden. Sie kann damit *neuer* sein als die Antwort, die zurückkommt – deshalb
@@ -225,7 +266,8 @@ einen anderen Snapshot" – ist **A1b**. O3a stellt nur die Angabe bereit.
 - **Das Protokoll ist inert.** Ohne Zeiger verhält sich alles wie vor O3a; die
   Mischung aus verschiedenen Generationen ist damit **noch nicht verhindert**.
   Der Schutz greift erst mit O3b.
-- **Die Bindungsprüfung der Health-API ist heuristisch** (siehe oben).
+- **Die Health-API meldet bis O3b nie eine Generation.** Das ist bewusst so:
+  ohne belegbare Bindung wäre jede Angabe geraten.
 - **Eine gescheiterte Entwertung** hinterlässt einen Zeiger neben neuem Inhalt.
   Die Endpunkte würden ihn heute nicht verwenden (`readSnapshot` ist
   unverdrahtet), der nächste Lauf räumt ihn weg – aber der Fall gehört

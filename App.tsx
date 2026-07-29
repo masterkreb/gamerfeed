@@ -19,7 +19,9 @@ import { filterArticles } from './shared/article-filters';
 import {
     decideSnapshotAcceptance,
     normalizeSnapshotPointer,
+    planPendingAdoption,
     readSnapshotHeaders,
+    readSnapshotRollback,
     withSnapshotQuery,
 } from './shared/news-snapshot.js';
 
@@ -164,10 +166,13 @@ const AppContent: React.FC = () => {
      * 25 statt 26 deutsche Quellen zeigte.
      */
     const acceptSnapshotResponse = useCallback((response: Response): boolean => {
-        const incoming = readSnapshotHeaders(response.headers);
         const decision = decideSnapshotAcceptance({
             pinned: pinnedSnapshotRef.current,
-            incoming,
+            incoming: readSnapshotHeaders(response.headers),
+            // Nur ein ausdrückliches Serversignal gibt eine gepinnte Generation
+            // wieder frei. Eine bloß fehlende Angabe ist meistens eine alte
+            // Kopie und darf den Stand nicht zurückdrehen.
+            rollback: readSnapshotRollback(response.headers),
         });
 
         pinnedSnapshotRef.current = decision.pin;
@@ -402,6 +407,7 @@ const AppContent: React.FC = () => {
             const decision = decideSnapshotAcceptance({
                 pinned: pinnedSnapshotRef.current,
                 incoming,
+                rollback: readSnapshotRollback(response.headers),
             });
             // Ein älterer Stand darf keine neuen Artikel melden.
             if (!decision.accept) return;
@@ -435,18 +441,37 @@ const AppContent: React.FC = () => {
 
     // Load pending articles (when user clicks the toast or badge)
     const loadPendingArticles = useCallback(() => {
-        if (pending.articles.length > 0) {
-            // Erst jetzt wird die Generation der ausstehenden Artikel gepinnt:
-            // ab diesem Moment ist sie der sichtbare Stand.
-            pinnedSnapshotRef.current = pending.snapshot;
-            setArticles(pending.articles);
-            persistCachedArticles(pending.articles, pending.snapshot);
+        if (pending.articles.length === 0) return;
+
+        // Zwischen dem Vormerken und diesem Klick können Minuten liegen - genug
+        // Zeit, damit der sichtbare Stand längst weiter ist. Die Warteschlange
+        // wird deshalb **hier erneut** geprüft, nicht nur beim Befüllen.
+        const plan = planPendingAdoption({
+            pinned: pinnedSnapshotRef.current,
+            pending,
+        });
+
+        if (!plan.adopt) {
+            // Verworfen, aber nicht vergessen: die Warteschlange wird geleert
+            // und das Abzeichen zurückgesetzt, State und lokale Kopie bleiben
+            // unangetastet.
+            console.warn(`Ausstehende Artikel verworfen (${plan.reason})`);
             setNewArticlesCount(0);
             setPending({ articles: [], snapshot: null });
-            // Reset tab title
             document.title = 'GamerFeed';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
         }
+
+        // Erst jetzt wird die Generation der ausstehenden Artikel gepinnt:
+        // ab diesem Moment ist sie der sichtbare Stand.
+        pinnedSnapshotRef.current = plan.snapshot;
+        setArticles(pending.articles);
+        persistCachedArticles(pending.articles, plan.snapshot);
+        setNewArticlesCount(0);
+        setPending({ articles: [], snapshot: null });
+        // Reset tab title
+        document.title = 'GamerFeed';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [pending, persistCachedArticles]);
 
     // Auto-update polling (every 5 minutes) - runs even when tab is inactive

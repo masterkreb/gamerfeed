@@ -110,8 +110,8 @@ in beiden Richtungen als Regressionstest abgedeckt. **Aktiviert ist das
 Protokoll nicht:** neben veränderlichen Legacy-Keys kann eine Kennung ihre
 Zugehörigkeit nicht belegen, deshalb entwertet der Cron jeden Zeiger und alle
 Endpunkte antworten als Legacy. Der Schutz gegen gemischte Generationen greift
-damit erst mit **O3b**, das die unveränderlichen Generationen liefert. 569
-zentrale Tests und 14 Browser-Abnahmen laufen erfolgreich.
+damit erst mit **O3b**, das die unveränderlichen Generationen liefert. 585
+zentrale Tests und 17 Browser-Abnahmen laufen erfolgreich.
 
 ## Empfohlene Reihenfolge
 
@@ -448,8 +448,12 @@ als Umschlag – der Rumpf bleibt ein nacktes Array. Der Leser pinnt die erste
 brauchbare Generation, hängt sie als `?snapshot=` an jede Folgeanfrage und
 entscheidet nach drei Regeln: gleiche übernehmen, neuere übernehmen und
 umpinnen, ältere verwerfen. Gepinnt wird nur, was auch sichtbar ist – der
-Auto-Update-Pfad merkt Artikel samt ihrer Generation vor und pinnt erst bei der
-Übernahme.
+Auto-Update-Pfad merkt Artikel samt ihrer Generation vor und prüft sie bei der
+Übernahme erneut gegen den inzwischen sichtbaren Stand. Ein Rückfall auf Legacy
+verlangt ein **ausdrückliches Signal** (`x-gamerfeed-snapshot-rollback`); eine
+bloß fehlende Angabe bleibt eine alte Kopie und dreht nichts zurück. Die
+Health-API meldet bis O3b `snapshot: null` – eine Zuordnung über die Artikelzahl
+wäre geraten, weil zwei Generationen dieselbe haben können.
 
 **Warum noch nicht aktiviert:** Eine Kennung darf nur Inhalt bezeichnen, der
 nachweisbar zu ihr gehört. `news_cache`, `news_cache_16` und `news_cache_64`
@@ -509,8 +513,9 @@ Regressionstest für das generationsgebundene Protokoll und später F1.
 Leseprotokoll. Erst unveränderliche Generationen können belegen, dass eine
 Kennung zu einem Inhalt gehört; bis dahin bleibt der Zeiger leer und alle
 Endpunkte antworten als Legacy. Konkret gehört dazu, die Snapshot-Quelle der
-News-Endpunkte (`readSnapshot`) zu verdrahten, den Zeiger wieder zu schreiben
-und `/api/gaming-news` an die Generation zu binden.
+News-Endpunkte (`readSnapshot`) zu verdrahten, den Zeiger wieder zu schreiben,
+`/api/gaming-news` an die Generation zu binden und die gebundene Quelle der
+Health-API bereitzustellen.
 
 **Warum:** Eine Artikelanzahl garantiert keine maximale Byte-Größe. Die drei
 News-Keys werden zudem nacheinander geschrieben und können bei Fehlern

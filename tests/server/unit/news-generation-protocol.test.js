@@ -5,10 +5,13 @@ import {
     NEWS_SNAPSHOT_POINTER_KEY,
     SNAPSHOT_CREATED_AT_HEADER,
     SNAPSHOT_ID_HEADER,
+    SNAPSHOT_ROLLBACK_HEADER,
     SNAPSHOT_SCHEMA_HEADER,
     buildSnapshotPointer,
     decideSnapshotAcceptance,
+    planPendingAdoption,
     readSnapshotHeaders,
+    readSnapshotRollback,
     withSnapshotQuery,
 } from '../../../shared/news-snapshot.js';
 
@@ -505,90 +508,182 @@ test('nach einem Rollback auf eine aeltere Generation gewinnt der neueste gesehe
 });
 
 // === Auto-Update: Pinnen erst bei der Uebernahme ===
+//
+// Getestet wird `planPendingAdoption` - genau die Funktion, die `App.tsx`
+// aufruft. Eine nachgebaute Simulation waere gruen geblieben, wenn App.tsx die
+// Pruefung wieder verliert.
 
-/**
- * Spielt den Auto-Update-Pfad aus App.tsx nach.
- *
- * Der Unterschied zur Ladekette: eine Poll-Antwort wird **nicht** sichtbar und
- * darf deshalb auch nicht pinnen. Artikel und ihre Generation wandern gemeinsam
- * in die Warteschlange; gepinnt und gespeichert wird erst, wenn der Benutzer
- * uebernimmt.
- */
-function createAutoUpdateSimulation(sichtbareGeneration) {
-    let pinned = sichtbareGeneration;
-    let pending = { articles: [], snapshot: null };
-    let gespeichert = null;
+test('eine inzwischen aeltere Warteschlange wird beim Klick verworfen', async () => {
+    // Der Reviewbefund: B wird vorgemerkt, der sichtbare Stand erreicht C, und
+    // der Klick setzte die Anwendung auf B zurueck.
+    const B = pointerFor(2000, 'gha-2');
+    const C = pointerFor(3000, 'gha-3');
 
-    return {
-        get pinned() { return pinned; },
-        get pending() { return pending; },
-        get gespeichert() { return gespeichert; },
+    const plan = planPendingAdoption({
+        pinned: C,
+        pending: { articles: [createArticle('b1')], snapshot: B },
+    });
 
-        /** Eine Poll-Antwort trifft ein. */
-        poll({ incoming, articles, hatNeuereArtikel }) {
-            const entscheidung = decideSnapshotAcceptance({ pinned, incoming });
-            if (!entscheidung.accept) return 'verworfen';
-
-            // Kein Umpinnen: der sichtbare Stand hat sich nicht geaendert.
-            if (!hatNeuereArtikel) return 'nichts neues';
-
-            pending = { articles, snapshot: incoming };
-            return 'vorgemerkt';
-        },
-
-        /** Der Benutzer uebernimmt die ausstehenden Artikel. */
-        uebernehmen() {
-            if (pending.articles.length === 0) return;
-            pinned = pending.snapshot;
-            gespeichert = { articles: pending.articles, snapshot: pending.snapshot };
-            pending = { articles: [], snapshot: null };
-        },
-    };
-}
-
-test('ausstehende Artikel werden unter ihrer eigenen Generation gespeichert', async () => {
-    // Der Reviewbefund: Poll 1 merkt Artikel aus Generation B vor, Poll 2 sieht
-    // Generation C ohne neuere Artikel. Wuerde Poll 2 pinnen, landeten die
-    // B-Artikel spaeter unter der Kennung C.
-    const generationA = pointerFor(1000, 'gha-1');
-    const generationB = pointerFor(2000, 'gha-2');
-    const generationC = pointerFor(3000, 'gha-3');
-
-    const simulation = createAutoUpdateSimulation(generationA);
-    const artikelB = [createArticle('b1'), createArticle('b2', 'GameStar')];
-
-    assert.equal(
-        simulation.poll({ incoming: generationB, articles: artikelB, hatNeuereArtikel: true }),
-        'vorgemerkt',
-    );
-    assert.equal(simulation.pinned.snapshotId, generationA.snapshotId, 'Poll 1 pinnt nicht');
-
-    assert.equal(
-        simulation.poll({ incoming: generationC, articles: [], hatNeuereArtikel: false }),
-        'nichts neues',
-    );
-    assert.equal(simulation.pinned.snapshotId, generationA.snapshotId, 'Poll 2 pinnt ebenfalls nicht');
-    assert.equal(simulation.pending.snapshot.snapshotId, generationB.snapshotId);
-
-    simulation.uebernehmen();
-
-    assert.equal(simulation.gespeichert.snapshot.snapshotId, generationB.snapshotId,
-        'die B-Artikel werden als Generation B gespeichert, nicht als C');
-    assert.deepEqual(simulation.gespeichert.articles, artikelB);
-    assert.equal(simulation.pinned.snapshotId, generationB.snapshotId,
-        'erst die Uebernahme pinnt');
+    assert.equal(plan.adopt, false);
+    assert.equal(plan.snapshot.snapshotId, C.snapshotId, 'der sichtbare Stand bleibt C');
+    assert.equal(plan.reason, 'older_generation');
 });
 
-test('eine aeltere Poll-Antwort wird weiterhin verworfen', async () => {
-    const generationB = pointerFor(2000, 'gha-2');
-    const generationA = pointerFor(1000, 'gha-1');
+test('eine neuere Warteschlange wird uebernommen und gepinnt', async () => {
+    const A = pointerFor(1000, 'gha-1');
+    const B = pointerFor(2000, 'gha-2');
 
-    const simulation = createAutoUpdateSimulation(generationB);
+    const plan = planPendingAdoption({
+        pinned: A,
+        pending: { articles: [createArticle('b1')], snapshot: B },
+    });
 
+    assert.equal(plan.adopt, true);
+    assert.equal(plan.snapshot.snapshotId, B.snapshotId);
+    assert.equal(plan.reason, 'newer_generation');
+});
+
+test('dieselbe Generation in der Warteschlange wird uebernommen', async () => {
+    const B = pointerFor(2000, 'gha-2');
+
+    const plan = planPendingAdoption({
+        pinned: B,
+        pending: { articles: [createArticle('b1')], snapshot: pointerFor(2000, 'gha-2') },
+    });
+
+    assert.equal(plan.adopt, true);
+    assert.equal(plan.snapshot.snapshotId, B.snapshotId);
+});
+
+test('eine Legacy-Warteschlange setzt eine echte Generation nicht zurueck', async () => {
+    const B = pointerFor(2000, 'gha-2');
+
+    const plan = planPendingAdoption({
+        pinned: B,
+        pending: { articles: [createArticle('x1')], snapshot: null },
+    });
+
+    assert.equal(plan.adopt, false);
+    assert.equal(plan.snapshot.snapshotId, B.snapshotId);
+    assert.equal(plan.reason, 'legacy_after_generation');
+});
+
+test('eine Legacy-Warteschlange ohne gepinnte Generation wird uebernommen', async () => {
+    const plan = planPendingAdoption({
+        pinned: null,
+        pending: { articles: [createArticle('x1')], snapshot: null },
+    });
+
+    assert.equal(plan.adopt, true);
+    assert.equal(plan.snapshot, null);
+});
+
+test('eine leere Warteschlange aendert nichts', async () => {
+    const B = pointerFor(2000, 'gha-2');
+
+    for (const pending of [null, undefined, { articles: [], snapshot: B }]) {
+        const plan = planPendingAdoption({ pinned: B, pending });
+
+        assert.equal(plan.adopt, false, JSON.stringify(pending));
+        assert.equal(plan.snapshot.snapshotId, B.snapshotId, JSON.stringify(pending));
+    }
+});
+
+// === Ausdruecklicher Legacy-Rollback ===
+
+test('ein Rollback-Signal gibt eine gepinnte Generation wieder frei', async () => {
+    // Ohne dieses Signal koennte ein laufender Client einen Rollback auf Legacy
+    // nie annehmen - er bliebe bis zum Ablauf seiner lokalen Kopie auf dem
+    // alten Stand.
+    const B = pointerFor(2000, 'gha-2');
+
+    const entscheidung = decideSnapshotAcceptance({ pinned: B, incoming: null, rollback: true });
+
+    assert.equal(entscheidung.accept, true);
+    assert.equal(entscheidung.pin, null, 'die Generation wird geloescht, nicht behalten');
+    assert.equal(entscheidung.reason, 'legacy_rollback');
+});
+
+test('ohne Signal bleibt eine headerlose Antwort eine alte Kopie', async () => {
+    const B = pointerFor(2000, 'gha-2');
+
+    const entscheidung = decideSnapshotAcceptance({ pinned: B, incoming: null });
+
+    assert.equal(entscheidung.accept, false);
+    assert.equal(entscheidung.pin.snapshotId, B.snapshotId);
+    assert.equal(entscheidung.reason, 'legacy_after_generation');
+});
+
+test('der Endpunkt sendet das Rollback-Signal nur auf Anweisung', async () => {
+    const cache = createCache({
+        [NEWS_SNAPSHOT_POINTER_KEY]: pointerFor(2000, 'gha-2'),
+        news_cache: [createArticle('a1')],
+    });
+
+    const ohne = createNewsCacheHandler(cache.client, ENDPOINTS.full, undefined, {
+        readSnapshot: () => cache.client.get(NEWS_SNAPSHOT_POINTER_KEY),
+    });
+    const ohneAntwort = await ohne(new Request('https://gamerfeed.example/api/get-news'));
+    assert.equal(ohneAntwort.headers.get(SNAPSHOT_ROLLBACK_HEADER), null);
+    assert.equal(ohneAntwort.headers.get(SNAPSHOT_ID_HEADER), '2000-gha-2');
+
+    const mit = createNewsCacheHandler(cache.client, ENDPOINTS.full, undefined, {
+        readSnapshot: () => cache.client.get(NEWS_SNAPSHOT_POINTER_KEY),
+        legacyRollback: true,
+    });
+    const mitAntwort = await mit(new Request('https://gamerfeed.example/api/get-news'));
+    assert.equal(mitAntwort.headers.get(SNAPSHOT_ROLLBACK_HEADER), 'legacy');
     assert.equal(
-        simulation.poll({ incoming: generationA, articles: [createArticle('a1')], hatNeuereArtikel: true }),
-        'verworfen',
+        mitAntwort.headers.get(SNAPSHOT_ID_HEADER),
+        null,
+        'ein Rollback nennt keine Generation - er gibt sie auf',
     );
-    assert.deepEqual(simulation.pending.articles, []);
-    assert.equal(simulation.pinned.snapshotId, generationB.snapshotId);
+    assert.equal(mitAntwort.status, 200);
+    assert.ok(Array.isArray(await mitAntwort.json()));
+});
+
+test('ein laufender Client folgt einem ausdruecklichen Rollback', async () => {
+    // Der vollstaendige Ablauf: der Client steht auf einer Generation, der
+    // Server faellt auf Legacy zurueck, der Client uebernimmt und ist danach
+    // ungepinnt - auch ein Reload beginnt damit sauber.
+    const neu = cacheMitGeneration(2000, 'gha-2', MIT_GAMESTAR);
+    const legacy = createCache({
+        news_cache: OHNE_GAMESTAR,
+        news_cache_16: OHNE_GAMESTAR,
+        news_cache_64: OHNE_GAMESTAR,
+    });
+
+    let pinned = null;
+    let sichtbar = [];
+
+    const ersteAntwort = await callEndpoint(neu, 'full', { snapshot: pinned });
+    const ersteArtikel = await ersteAntwort.json();
+    const ersteEntscheidung = decideSnapshotAcceptance({
+        pinned,
+        incoming: readSnapshotHeaders(ersteAntwort.headers),
+        rollback: readSnapshotRollback(ersteAntwort.headers),
+    });
+    pinned = ersteEntscheidung.pin;
+    if (ersteEntscheidung.accept) sichtbar = ersteArtikel;
+
+    assert.equal(pinned.snapshotId, '2000-gha-2');
+
+    const rollbackHandler = createNewsCacheHandler(legacy.client, ENDPOINTS.full, undefined, {
+        legacyRollback: true,
+    });
+    const zweiteAntwort = await rollbackHandler(
+        new Request(withSnapshotQuery('https://gamerfeed.example/api/get-news', pinned)),
+    );
+    const zweiteArtikel = await zweiteAntwort.json();
+    const zweiteEntscheidung = decideSnapshotAcceptance({
+        pinned,
+        incoming: readSnapshotHeaders(zweiteAntwort.headers),
+        rollback: readSnapshotRollback(zweiteAntwort.headers),
+    });
+    pinned = zweiteEntscheidung.pin;
+    if (zweiteEntscheidung.accept) sichtbar = zweiteArtikel;
+
+    assert.equal(zweiteEntscheidung.accept, true, 'der Rollback wird angenommen');
+    assert.equal(pinned, null, 'danach ist nichts mehr gepinnt');
+    assert.deepEqual(sichtbar, OHNE_GAMESTAR, 'der Legacy-Stand ist sichtbar');
 });
