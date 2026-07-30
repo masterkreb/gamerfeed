@@ -56,8 +56,10 @@ export const AnnouncementTab: React.FC = () => {
     const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Speichern und Löschen teilen sich bewusst einen Latch: sonst könnten ein
-    // POST und ein DELETE synchron nebeneinander starten.
+    // POST und ein DELETE synchron nebeneinander starten. Welche der beiden
+    // Aktionen läuft, entscheidet nur noch über die Beschriftung.
     const { isMutating, runExclusive } = useMutationLatch();
+    const [pendingMutation, setPendingMutation] = useState<'save' | 'delete' | null>(null);
 
     const announceSuccess = (text: string) => {
         setSuccessMessage(text);
@@ -125,6 +127,7 @@ export const AnnouncementTab: React.FC = () => {
         // Der Latch wird synchron gesetzt, damit ein zweiter Klick im selben
         // Render-Zyklus keinen zweiten POST auslöst.
         await runExclusive(async () => {
+            setPendingMutation('save');
             setError(null);
             setSuccessMessage(null);
 
@@ -146,6 +149,8 @@ export const AnnouncementTab: React.FC = () => {
                 // Nachricht, Typ und Aktiv-Status bleiben unverändert stehen.
                 console.error('Failed to save announcement:', err);
                 setError(t('admin.announcement.errorSaving'));
+            } finally {
+                setPendingMutation(null);
             }
         });
     };
@@ -158,6 +163,7 @@ export const AnnouncementTab: React.FC = () => {
     const confirmDelete = async () => {
         // Derselbe Latch wie beim Speichern, ebenfalls synchron gesetzt.
         await runExclusive(async () => {
+            setPendingMutation('delete');
             setError(null);
             setDeleteError(null);
 
@@ -178,6 +184,8 @@ export const AnnouncementTab: React.FC = () => {
                 // Ankündigung und Bestätigungsdialog bleiben erhalten.
                 console.error('Failed to delete announcement:', err);
                 setDeleteError(t('admin.announcement.errorDeleting'));
+            } finally {
+                setPendingMutation(null);
             }
         });
     };
@@ -290,7 +298,9 @@ export const AnnouncementTab: React.FC = () => {
                         disabled={isMutating || !message.trim()}
                         className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                        {isMutating ? t('admin.announcement.saving') : t('admin.announcement.save')}
+                        {pendingMutation === 'save'
+                            ? t('admin.announcement.saving')
+                            : t('admin.announcement.save')}
                     </button>
                     {announcement && (
                         <button
@@ -372,7 +382,9 @@ export const AnnouncementTab: React.FC = () => {
                             disabled={isMutating}
                             className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {isMutating ? t('admin.announcement.deleting') : t('admin.announcement.delete')}
+                            {pendingMutation === 'delete'
+                                ? t('admin.announcement.deleting')
+                                : t('admin.announcement.delete')}
                         </button>
                     </div>
                 </div>

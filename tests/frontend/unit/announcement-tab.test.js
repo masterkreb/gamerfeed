@@ -276,6 +276,12 @@ test('das Löschen einer Ankündigung sendet erst nach der Bestätigung genau ei
         });
         assert.equal(api.countOf('DELETE'), 1, 'zwei synchrone Klicks erzeugten mehr als ein DELETE');
 
+        // Der gemeinsame Latch sperrt auch das Speichern, beschriftet es aber
+        // nicht als laufenden Speichervorgang.
+        assert.equal(getDialogButtons(testRoot.container)[1].textContent, 'Lösche...');
+        assert.equal(getSaveButton(testRoot.container).textContent, 'Ankündigung speichern');
+        assert.equal(getSaveButton(testRoot.container).disabled, true);
+
         // Solange der Request offen ist, entsteht keine zweite Anfrage.
         await act(async () => {
             click(testRoot.window, getDialogButtons(testRoot.container)[1]);
