@@ -178,6 +178,14 @@ Die Reiter im Einstellungsdialog sind vollwertige ARIA-Tabs: `role="tablist"`,
 Die textlastigen Reiter „Rechtliches" und „Über uns" haben `tabIndex={0}`, damit
 sie ohne Bedienelemente per Tastatur erreichbar und scrollbar sind.
 
+Gespeicherte Suchen verwenden native Buttons und funktionieren mit Enter und
+Leertaste. Suchfeld, Speichern und Entfernen besitzen lokalisierte Accessible
+Names. `ArticleCard` ist in allen Layouts ein semantischer `article`; nur der
+Titel ist der über ein Pseudoelement gestreckte Artikel-Link. Favorisieren,
+Optionsdialog und Share-Links liegen als Geschwister außerhalb dieses Links.
+Der benannte Optionsdialog ist geschlossen `inert`, räumt verzögerten Fokus
+beim Schließen auf und gibt ihn mit Escape an seinen Auslöser zurück.
+
 ### Kontaktformular
 
 Integriert im Reiter „Kontakt" von `SettingsModal`, Gegenstelle ist
@@ -655,6 +663,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Generationsgebundenes Leseprotokoll (O3a): Vertrag, Leseregeln und alle Consumer stehen; aktiviert wird es erst mit den unveränderlichen Generationen aus O3b, bis dahin entwertet der Cron jeden Zeiger und alles antwortet als Legacy
 - **Juli 2026:** Progressive Ladekette (F1): zentraler Request-Controller mit Abort und Epoche, Full läuft auch nach Medium-Fehlern, alte Antworten und Polls dürfen State oder lokale Kopie nicht mehr überschreiben
 - **Juli 2026:** Konsistenter News-Publish (O3b): unveränderliche, bytebegrenzte Generationen mit Manifest, Pointer-last-Aktivierung, Writer-Lease, vorheriger Generation, Rollback und Garbage Collection
+- **Juli 2026:** Tastatur und ArticleCard-DOM (F3a): gespeicherte Suchen per Enter/Leertaste, lokalisierte Accessible Names, Artikelaktionen außerhalb des gestreckten Links und zuverlässige Fokus-Rückgabe im Optionsdialog
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 

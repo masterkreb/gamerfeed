@@ -133,6 +133,16 @@ Consumer lesen belegbar gebundene Daten; Health benötigt dafür nicht mehr den
 Full-Payload. 626 zentrale Tests und 21 Browser-Abnahmen laufen erfolgreich.
 Damit sind alle P1-Codepakete der Roadmap abgeschlossen.
 
+**Stand 30. Juli 2026 (Branch `codex/f3a-keyboard-dom`):** F3a ist
+abgeschlossen. Gespeicherte Suchen lassen sich mit Enter auswählen und mit
+Leertaste löschen; Suchfeld, Speichern und Löschen besitzen lokalisierte
+Accessible Names. `ArticleCard` verwendet in allen drei Layouts einen
+gestreckten Titel-Link innerhalb eines semantischen `article`, während
+Favoriten- und Optionsaktionen außerhalb des Links liegen. Der benannte
+Optionsdialog räumt seinen verzögerten Fokus beim Schließen auf und gibt den
+Fokus auch bei schnellem Escape zuverlässig zurück. 628 zentrale Tests und 23
+Browser-Abnahmen laufen erfolgreich.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -149,7 +159,7 @@ Damit sind alle P1-Codepakete der Roadmap abgeschlossen.
 | O3a | P1 | erledigt | Generationsgebundenes Leseprotokoll und Migration vorbereiten |
 | F1 | P1 | erledigt | Progressive News-Ladekette gegen veraltete Antworten absichern |
 | O3b | P1 | erledigt | News-Caches größenbegrenzt und konsistent veröffentlichen |
-| F3a | P2 | geplant | Zentrale Tastatur- und DOM-Probleme im Frontend beheben |
+| F3a | P2 | erledigt | Zentrale Tastatur- und DOM-Probleme im Frontend beheben |
 | F3b | P2 | geplant | Veraltetes ArticleCard-Rendering verhindern |
 | F4a | P2 | geplant | Persistierten Zustand robust validieren |
 | F4b | P2 | geplant | Verbliebene i18n-Inkonsistenzen schließen |
@@ -709,6 +719,17 @@ erreichbar.
   fachliche Aufgabe, kein stillschweigender Codeentscheid.
 
 ### F3a – Tastatur und gültige DOM-Struktur
+
+**Status:** erledigt. Gespeicherte Suchen verwenden native Buttons mit
+`onClick`, sodass Browser Enter und Leertaste korrekt abbilden. Suchfeld,
+Speichern und Entfernen sind in DE/EN eindeutig benannt. Die drei
+`ArticleCard`-Layouts sind semantische `article`-Container mit einem
+gestreckten Titel-Link; sämtliche Aktionsbuttons und Share-Links sind dessen
+Geschwister statt ungültig verschachtelte Nachfahren. Der Optionsdialog trägt
+einen Accessible Name, ist geschlossen `inert`, schließt mit Escape und löscht
+vor der Fokus-Rückgabe seinen verzögerten Fokus-Timer. Unit-Tests prüfen die
+DOM-Struktur und den schnellen Escape-Fall, Chromium Enter, Leertaste, Maus,
+fehlende Navigation und Fokus-Rückgabe.
 
 **Umfang:**
 

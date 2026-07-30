@@ -33,6 +33,8 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
     - Focus-Ring nur bei Tastatur-Navigation sichtbar (nicht bei Mausklicks).
     - Dialoge halten den Fokus fest und geben ihn beim Schließen an das auslösende Element zurück. Escape schließt sie; Admin-Dialoge blockieren das bewusst, solange gespeichert oder gelöscht wird.
     - Die Reiter der Einstellungen sind echte ARIA-Tabs mit Pfeiltasten-, Home- und End-Navigation.
+    - Gespeicherte Suchen lassen sich mit Enter auswählen und mit Leertaste löschen; Such- und Icon-Schaltflächen besitzen eindeutige Namen.
+    - Artikelaktionen liegen semantisch außerhalb des Artikel-Links und öffnen weder beim Favorisieren noch beim Optionsdialog versehentlich den Artikel.
     - Erfolgs- und Fehlermeldungen des Kontaktformulars werden Screenreadern angekündigt.
 - **Admin-Panel**: Ein passwortgeschütztes Admin-Panel zur einfachen Verwaltung der Feed-Quellen, Überwachung ihres Status und Veröffentlichung von Ankündigungen.
 - **📢 Ankündigungs-Banner**: Admins können wichtige Nachrichten (Info, Warnung, Wartung, Feier) als Banner für alle Benutzer anzeigen. Benutzer können Banner schließen (wird im localStorage gespeichert).
