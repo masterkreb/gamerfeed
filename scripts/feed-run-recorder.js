@@ -24,6 +24,11 @@
 //    mit O1 hinzugekommenen Metadaten `feed_run_status` und
 //    `feed_publish_status` sind dagegen best effort: ihr Verlust kostet
 //    Beobachtbarkeit, aber keine Daten.
+// 5. Die Laufhistorie aus O4b (`feed_run_history`) ist der schwaechste dieser
+//    Schluessel. Sie wird ausschliesslich *nach* dem finalen Laufstatus
+//    geschrieben, nie vor dem Kern-Publish, und ihr Fehler wird ausschliesslich
+//    protokolliert. Ein Historienproblem darf `success`, `degraded`, `fatal`
+//    und den Exit-Code unter keinen Umstaenden veraendern.
 
 import {
     FEED_HEALTH_STATUS_KEY,
@@ -38,6 +43,8 @@ import {
     progressRunStatus,
     summarizeFeedHealth,
 } from '../shared/feed-health-model.js';
+import { buildRunHistoryEntry } from '../shared/feed-run-history.js';
+import { appendRunHistoryEntry } from '../shared/feed-run-history-store.js';
 
 /**
  * Ergebniszustaende, die ein **abgeschlossener** Kernlauf haben kann.
@@ -55,6 +62,7 @@ const FINISHABLE_RUN_RESULTS = Object.freeze(['success', 'degraded']);
  *   now?: () => Date,
  *   logger?: { log?: Function, warn?: Function },
  *   redact?: (message: string) => string,
+ *   appendHistory?: (store: object, entry: object) => Promise<{ ok: boolean, error: string|null }>,
  * }} options
  */
 export function createFeedRunRecorder({
@@ -64,6 +72,9 @@ export function createFeedRunRecorder({
     now = () => new Date(),
     logger = console,
     redact = message => message,
+    // Injizierbar, damit Tests einen Schreibfehler der Historie erzwingen
+    // koennen, ohne einen echten Sorted Set zu brauchen.
+    appendHistory = appendRunHistoryEntry,
 }) {
     const runStatus = createRunStatus({ runId, startedAt });
 
@@ -130,6 +141,43 @@ export function createFeedRunRecorder({
 
         previousHealth = merged;
         return merged;
+    }
+
+    /**
+     * Haengt einen abgeschlossenen Lauf an die begrenzte Historie an (O4b).
+     *
+     * Ausdruecklich best effort und ausdruecklich **nach** dem finalen
+     * `feed_run_status`: der Heartbeat ist der Vertrag, die Historie nur seine
+     * Ergaenzung. Ein Fehler – ob beim Bauen des Eintrags, beim Speichern oder
+     * durch einen Speicher ganz ohne Sorted-Set-Unterstuetzung – wird hier
+     * bereinigt protokolliert und geht nicht weiter nach oben. Er darf weder
+     * werfen noch das Laufergebnis oder den Exit-Code veraendern.
+     *
+     * Bewusst nicht abgedeckt: ein harter Abbruch des Prozesses und ein
+     * Abbruch in der Vorpruefung ohne KV-Konfiguration. Beide erreichen diese
+     * Stelle konstruktionsbedingt nie und hinterlassen deshalb keinen
+     * Historieneintrag.
+     */
+    async function recordHistory(finalRun) {
+        try {
+            const entry = buildRunHistoryEntry(finalRun, { redact });
+            if (entry === null) {
+                warn('Laufhistorie übersprungen: der Lauf ist nicht als abgeschlossen verwertbar.');
+                return null;
+            }
+
+            const result = await appendHistory(store, entry);
+            if (!result?.ok) {
+                warn(`Laufhistorie konnte nicht ergänzt werden: ${redact(result?.error ?? 'unbekannter Fehler')}`);
+                return null;
+            }
+
+            return entry;
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            warn(`Laufhistorie konnte nicht ergänzt werden: ${redact(message)}`);
+            return null;
+        }
     }
 
     // Die beiden Reads sind bewusst getrennt: ein kaputter Publish-Datensatz
@@ -279,6 +327,9 @@ export function createFeedRunRecorder({
             });
 
             await saveSafely(FEED_RUN_STATUS_KEY, finished);
+            // Genau ein Historieneintrag je abgeschlossenem Lauf, und erst
+            // nachdem der finale Laufstatus geschrieben wurde.
+            await recordHistory(finished);
             return finished;
         },
 
@@ -303,6 +354,9 @@ export function createFeedRunRecorder({
             });
 
             await saveSafely(FEED_RUN_STATUS_KEY, failed);
+            // Auch ein Abbruch gehoert in die Historie: erst dadurch wird eine
+            // Haeufung gescheiterter Laeufe ueberhaupt sichtbar.
+            await recordHistory(failed);
             return { health, run: failed };
         },
     };
