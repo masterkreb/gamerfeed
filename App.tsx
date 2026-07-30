@@ -12,6 +12,7 @@ import { ScrollToTopButton } from './components/ScrollToTopButton';
 import { FavoritesHeader } from './components/FavoritesHeader';
 import { SettingsModal } from './components/SettingsModal';
 import { AnnouncementBanner } from './components/AnnouncementBanner';
+import { Footer } from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useCookieConsent } from './components/CookieConsent';
 import { createAnalyticsLifecycle } from './shared/analytics-lifecycle.js';
@@ -933,6 +934,7 @@ const AppContent: React.FC = () => {
                 </>
                 )}
             </main>
+            <Footer />
             <ScrollToTopButton />
             <SettingsModal
                 isOpen={isSettingsModalOpen}

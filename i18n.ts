@@ -208,6 +208,7 @@ const resources = {
             // Footer
             "footer.rights": "All rights reserved.",
             "footer.tagline": "Made with ❤️ for gaming enthusiasts. News sourced from various public RSS feeds.",
+            "footer.gamingNews": "Today's gaming news overview",
 
             // Loading & Errors
             "loading.articles": "Loading articles...",
@@ -648,6 +649,7 @@ const resources = {
             // Footer
             "footer.rights": "Alle Rechte vorbehalten.",
             "footer.tagline": "Mit ❤️ für Gaming-Enthusiasten gemacht. News von verschiedenen öffentlichen RSS-Feeds.",
+            "footer.gamingNews": "Übersicht der aktuellen Gaming-News",
 
             // Loading & Errors
             "loading.articles": "Lade Artikel...",

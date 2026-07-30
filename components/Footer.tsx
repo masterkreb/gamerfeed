@@ -11,6 +11,19 @@ export const Footer: React.FC = () => {
                 <p className="mt-1">
                     {t('footer.tagline')}
                 </p>
+                {/*
+                    Gewoehnlicher Link statt Router-Navigation: /gaming-news ist
+                    eine eigene servergerenderte Seite und soll auch fuer
+                    Crawler eine normale interne Verbindung sein.
+                */}
+                <p className="mt-2">
+                    <a
+                        href="/gaming-news"
+                        className="text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"
+                    >
+                        {t('footer.gamingNews')}
+                    </a>
+                </p>
             </div>
         </footer>
     );
