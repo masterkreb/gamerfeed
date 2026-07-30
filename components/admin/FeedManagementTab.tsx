@@ -5,7 +5,7 @@ import type { FeedHealth } from './AdminPanel';
 import type { HealthState } from './healthTypes';
 import {
     PencilIcon, PlusIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon,
-    CheckCircleIcon, XCircleIcon, QuestionMarkCircleIcon, LoadingSpinner, ResetIcon, WarningIcon
+    CheckCircleIcon, XCircleIcon, QuestionMarkCircleIcon, LoadingSpinner, WarningIcon
 } from '../Icons';
 
 type SortableKey = keyof Omit<FeedSource, 'needsScraping' | 'id'> | 'health';
@@ -64,7 +64,6 @@ interface FeedManagementTabProps {
     onAddNew: () => void;
     onEdit: (feed: FeedSource) => void;
     onDelete: (feed: FeedSource) => void;
-    onCheckHealth: () => void;
 }
 
 export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
@@ -74,7 +73,6 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                                                                         onAddNew,
                                                                         onEdit,
                                                                         onDelete,
-                                                                        onCheckHealth
                                                                     }) => {
     const { t } = useTranslation();
     const [sortConfig, setSortConfig] = useState<{ key: SortableKey; direction: SortDirection } | null>({ key: 'name', direction: 'ascending' });
@@ -160,7 +158,6 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                                 <HealthStatusIcon state={feedHealth[feed.id]} />
                             </div></td>
                             <td className="p-4 text-right"><div className="flex justify-end items-center gap-1">
-                                <button onClick={onCheckHealth} className="p-2 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors" aria-label={t('admin.management.ariaCheckHealth', { name: feed.name })}><ResetIcon className="w-4 h-4"/></button>
                                 <button onClick={() => onEdit(feed)} className="p-2 text-slate-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors" aria-label={t('admin.management.ariaEdit', { name: feed.name })}><PencilIcon className="w-5 h-5"/></button>
                                 <button onClick={() => onDelete(feed)} className="p-2 text-slate-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors" aria-label={t('admin.management.ariaDelete', { name: feed.name })}><TrashIcon className="w-5 h-5"/></button>
                             </div></td>
@@ -188,7 +185,6 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                             <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">{t('admin.management.headerLang')}</p><p className="font-bold uppercase">{feed.language}</p></div>
                         </div>
                         <div className="flex items-center justify-end gap-2 border-t border-slate-200 dark:border-zinc-700 pt-3 mt-3">
-                            <button onClick={onCheckHealth} className="p-2 text-slate-500 dark:text-zinc-400 rounded-md" aria-label={t('admin.management.ariaCheckHealth', { name: feed.name })}><ResetIcon className="w-5 h-5"/></button>
                             <button onClick={() => onEdit(feed)} className="p-2 text-slate-500 dark:text-zinc-400 rounded-md" aria-label={t('admin.management.ariaEdit', { name: feed.name })}><PencilIcon className="w-5 h-5"/></button>
                             <button onClick={() => onDelete(feed)} className="p-2 text-slate-500 dark:text-zinc-400 rounded-md" aria-label={t('admin.management.ariaDelete', { name: feed.name })}><TrashIcon className="w-5 h-5"/></button>
                         </div>

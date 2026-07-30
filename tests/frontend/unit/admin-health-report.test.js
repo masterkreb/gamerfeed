@@ -310,7 +310,11 @@ async function renderHealthTab() {
             heartbeat: null,
             snapshot: ACTIVE_SNAPSHOT,
         },
-        localStorageEntries: { [LOCAL_NEWS_CACHE_KEY]: localCacheEntry() },
+        // Die gerenderte Komponente liest die echte Uhr; der Eintrag muss
+        // deshalb relativ dazu innerhalb der 30-Minuten-Frist liegen.
+        localStorageEntries: {
+            [LOCAL_NEWS_CACHE_KEY]: localCacheEntry({ timestamp: Date.now() - 5 * 60 * 1000 }),
+        },
     });
 
     await act(async () => {

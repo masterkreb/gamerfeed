@@ -106,8 +106,8 @@ test('die Admin-Reiter tragen IDs, aria-controls, aria-labelledby und genau eine
             ['true', 'false', 'false', 'false'],
         );
         assert.deepEqual(
-            tabs.map(tab => tab.tabIndex),
-            [0, -1, -1, -1],
+            tabs.map(tab => tab.getAttribute('tabindex')),
+            ['0', '-1', '-1', '-1'],
             'genau der aktive Reiter liegt in der Tab-Reihenfolge',
         );
         assert.deepEqual(
@@ -190,7 +190,7 @@ test('ein Mausklick wählt denselben Reiter wie die Tastatur', async () => {
 
         const tabs = getTabs(testRoot.container);
         assert.equal(tabs[2].getAttribute('aria-selected'), 'true');
-        assert.deepEqual(tabs.map(tab => tab.tabIndex), [-1, -1, 0, -1]);
+        assert.deepEqual(tabs.map(tab => tab.getAttribute('tabindex')), ['-1', '-1', '0', '-1']);
         assert.equal(
             testRoot.container.querySelector('#admin-panel-announcement').hasAttribute('hidden'),
             false,
