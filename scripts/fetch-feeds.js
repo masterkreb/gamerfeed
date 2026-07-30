@@ -1209,7 +1209,9 @@ export async function main({
                     lastSuccessAt: recorder.lastSuccessAtFor(feed.id),
                     durationMs: null,
                     articleCount: null,
-                    skippedItemCount: 0,
+                    // Nie geparst, also auch nie gemessen. Eine 0 waere hier
+                    // eine Aussage ueber Items, die niemand angesehen hat.
+                    skippedItemCount: null,
                 };
                 // Gar nicht abgerufen: kein Transport, kein erfundener Status.
                 feedTransports.set(feed.id, { transport: 'none', httpStatus: null });
@@ -1263,7 +1265,10 @@ export async function main({
                 lastSuccessAt: recorder.lastSuccessAtFor(feed.id),
                 durationMs: feedDurationMs,
                 articleCount: null,
-                skippedItemCount: 0,
+                // Beide Zahlen bleiben unbekannt, bis `parseFeedItems`
+                // wirklich einen Bericht geliefert hat. Abruffehler,
+                // Zurueckstellung und Parse-Abbruch messen nichts.
+                skippedItemCount: null,
             };
 
             if (xmlString) {

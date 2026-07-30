@@ -1,13 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { main } from '../../../scripts/fetch-feeds.js';
 import { createFeedRunRecorder } from '../../../scripts/feed-run-recorder.js';
+import { createRunBudget } from '../../../scripts/feed-run-budget.js';
 import {
     ALLE_SECRETS,
     FEED_ROW,
     GAMEPRO_ROW,
     VOLLSTAENDIGE_ENV,
+    createControlledClock,
     createSpies,
+    createTimeoutSignalFactory,
     feedFetch,
     rssFeed,
     runMain as startMain,
@@ -756,4 +760,177 @@ test('ein Abbruch nach geladener Feed-Liste erfindet für unbearbeitete Quellen 
     assert.match(zeile, /\| unknown \|/, 'sie ist als unbewertet erkennbar');
     assert.doesNotMatch(zeile, /\| 0 \|/, 'keine erfundene Null für nie untersuchte Items');
     assert.match(zeile, /\| – \| – \| – \|/, 'Dauer, Artikel und Übersprungene bleiben leer');
+});
+
+// === Übersprungene Items nur nach echtem Parsing ==============================
+//
+// „0 übersprungen" ist eine Messung. Ohne Parsing gab es keine, und der
+// gespeicherte Status muss das als `null` sagen - genauso wie die Summary mit
+// einem Gedankenstrich.
+
+/** Der zuletzt gespeicherte Feed-Status einer Quelle. */
+function gespeicherterStatus(spies, feedId) {
+    const eintrag = spies.kvSets
+        .filter(entry => entry.key === 'feed_health_status')
+        .at(-1);
+    return eintrag?.value?.[feedId] ?? null;
+}
+
+/** Die Zelle „Übersprungen" einer Quelle in der Zusammenfassung. */
+function uebersprungenZelle(markdown, name) {
+    const zeile = markdown.split('\n').find(line => line.startsWith(`| ${name} |`));
+    return zeile === undefined ? null : zeile.split('|')[5].trim();
+}
+
+test('ein endgültiger Abruffehler meldet keine gemessene Null', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: spies.makeFetchImpl(async () => new Response('kaputt', { status: 500 })),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.equal(gespeicherterStatus(spies, 'gamestar').status, 'error');
+    assert.equal(gespeicherterStatus(spies, 'gamestar').skippedItemCount, null);
+    assert.equal(uebersprungenZelle(writer.markdown, 'GameStar'), '–');
+});
+
+test('eine vor dem Abruf zurückgestellte Quelle meldet keine gemessene Null', async () => {
+    const uhr = createControlledClock();
+    const signale = createTimeoutSignalFactory();
+    const spies = createSpies({ feeds: [FEED_ROW, GAMEPRO_ROW] });
+    const writer = summaryWriter();
+
+    const budget = createRunBudget({
+        now: uhr.now,
+        setTimer: uhr.setTimer,
+        clearTimer: uhr.clearTimer,
+        createTimeoutSignal: signale.createTimeoutSignal,
+        deadlineMs: 60_000,
+    });
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        budget,
+        // Die erste Quelle verbraucht das gesamte Budget; die zweite kommt gar
+        // nicht mehr dran.
+        fetchImpl: spies.makeFetchImpl(async () => {
+            uhr.vor(90_000);
+            return new Response(rssFeed(), { status: 200 });
+        }),
+        writeSummary: writer.writeSummary,
+    });
+
+    const zurueckgestellt = gespeicherterStatus(spies, 'gamepro');
+    assert.equal(zurueckgestellt.status, 'warning');
+    assert.equal(zurueckgestellt.skippedItemCount, null, 'nie geparst, nie gemessen');
+    assert.equal(uebersprungenZelle(writer.markdown, 'GamePro'), '–');
+});
+
+test('der Parse-Abbruch übernimmt den unbekannten Basiseintrag', async () => {
+    // Diese Verzweigung ist von außen nicht erreichbar: linkedom erzeugt für
+    // fehlerhaftes Feed-XML keinen `parsererror`, sondern überspringt einzelne
+    // Elemente. Geprüft wird deshalb, dass sie denselben Basiseintrag
+    // übernimmt wie Abruffehler und Zurückstellung - und keine eigene Zahl
+    // setzt.
+    const quelltext = await readFile(
+        new URL('../../../scripts/fetch-feeds.js', import.meta.url),
+        'utf8',
+    );
+
+    const basis = quelltext.slice(
+        quelltext.indexOf('const baseEntry = {'),
+        quelltext.indexOf('if (xmlString) {'),
+    );
+    assert.match(basis, /skippedItemCount: null,/, 'der Basiseintrag misst nichts');
+
+    const parseZweig = quelltext.slice(
+        quelltext.indexOf('} catch (parseError) {'),
+        quelltext.indexOf('} else if (budgetExhausted) {'),
+    );
+    assert.match(parseZweig, /\.\.\.baseEntry,/, 'der Parse-Abbruch erbt den Basiseintrag');
+    assert.doesNotMatch(
+        parseZweig,
+        /skippedItemCount:/,
+        'und setzt keine eigene Zahl über nie gezählte Elemente',
+    );
+});
+
+test('ein erfolgreich geparster Feed ohne verworfene Items meldet eine echte Null', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    const status = gespeicherterStatus(spies, 'gamestar');
+    assert.equal(status.status, 'success');
+    assert.equal(status.skippedItemCount, 0, 'hier wurde wirklich gemessen');
+    assert.equal(uebersprungenZelle(writer.markdown, 'GameStar'), '0');
+});
+
+test('ein erfolgreich geparster Feed mit verworfenen Items meldet deren Zahl', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    // Ein Element ohne Titel und Link wird verworfen, das andere bleibt.
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>Quelle</title>
+<item>
+  <title>Gutes Element</title>
+  <link>https://www.gamestar.de/a1</link>
+  <guid isPermaLink="false">a1</guid>
+  <pubDate>Sat, 25 Jul 2026 18:37:34 +0000</pubDate>
+  <description><![CDATA[<p>Text</p>]]></description>
+</item>
+<item>
+  <title>Kaputtes Element</title>
+  <link>https://www.gamestar.de/a2</link>
+  <guid isPermaLink="false">a2</guid>
+  <pubDate>kein gueltiges Datum</pubDate>
+  <description><![CDATA[<p>Text</p>]]></description>
+</item>
+</channel></rss>`;
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: spies.makeFetchImpl(async () => new Response(xml, { status: 200 })),
+        writeSummary: writer.writeSummary,
+    });
+
+    const status = gespeicherterStatus(spies, 'gamestar');
+    assert.equal(status.status, 'success');
+    assert.equal(status.skippedItemCount, 1);
+    assert.equal(uebersprungenZelle(writer.markdown, 'GameStar'), '1');
+});
+
+test('die gerenderte Zusammenfassung enthält keine Zugangsdaten', async () => {
+    const spies = createSpies({
+        // Eine Verbindungszeichenfolge, die *nicht* dem konfigurierten Secret
+        // entspricht: die Bereinigung darf sich nicht auf einen exakten
+        // Treffer verlassen.
+        sqlError: new Error('connect ECONNREFUSED postgres://admin:fremdes-passwort@replica.example/db?sslmode=require'),
+    });
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(spies.exitCodes, [1]);
+    assert.doesNotMatch(writer.markdown, /fremdes-passwort/);
+    assert.doesNotMatch(writer.markdown, /admin:/);
+    assert.doesNotMatch(writer.markdown, /sslmode/);
 });
