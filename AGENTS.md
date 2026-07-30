@@ -769,6 +769,27 @@ sind. Deshalb ist SEO1 vor O4b priorisiert. Das Paket arbeitet nur an
 crawlbaren Einstiegen, ehrlichen zeitstabilen Metadaten und wechselseitiger
 Verlinkung. Zusätzliche Seitentypen beginnen erst nach dem Mess-Gate.
 
+**Umgesetzter Stand (SEO1):**
+
+- `index.html` liefert innerhalb von `#root` einen sichtbaren Fallback mit
+  genau einer H1, einer eigenen Beschreibung und einem gewöhnlichen Link auf
+  `/gaming-news`. Er trägt `data-seo="fallback"` und bringt seine wenigen
+  CSS-Regeln in einem `<style>`-Block selbst mit, weil Tailwind erst mit dem
+  Modul geladen wird.
+- **`createRoot` leert den Container vor dem ersten Rendern** – genau deshalb
+  darf der Fallback dort stehen und verschwindet ohne Zutun. Wer ihn nach
+  außerhalb von `#root` verschiebt, erzeugt eine zweite sichtbare H1.
+- Der Fallback ist weder versteckt noch aus dem Viewport geschoben und enthält
+  keine kopierte Artikelliste.
+- Statische Meta-, Open-Graph-, Twitter- und JSON-LD-Texte nennen keine feste
+  Quellenzahl mehr; die `SearchAction` ist entfernt.
+- `components/Footer.tsx` wird seit SEO1 in `App.tsx` tatsächlich gerendert und
+  trägt den lokalisierten Link `footer.gamingNews` auf `/gaming-news`.
+- `/gaming-news` hat unter der H1 einen eigenen Einleitungstext
+  (`data-seo="intro"`) zu Nutzen, Quellenprinzip und Aktualisierung. Er ist
+  zeitstabil und übernimmt keine fremden Artikeltexte. Die Zahlen daneben
+  bleiben gemessene Werte aus dem aktiven Bestand.
+
 Wichtige Leitplanken:
 
 - kein versteckter, außerhalb des Viewports platzierter oder mit `aria-hidden`
@@ -931,6 +952,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Lokaler Startcache im Admin (A1c): der bewusst auf 32 Artikel begrenzte Browsercache bewertet keine Feed-Zeile mehr, sondern steht global als eigene Kennzahl mit echter Artikel- und Quellenzahl
 - **Juli 2026:** Laufbericht (O4a): strukturierte Zusammenfassung je Lauf in der GitHub-Step-Summary mit Ergebnis, Dauern, Fehlerquote, Snapshot-Größen sowie Transport und beobachtetem HTTP-Status je Quelle – ohne neue KV-Schlüssel und ohne Einfluss auf Ergebnis oder Exit-Code
 - **Juli 2026:** SEO0: Search-Console-Baseline mit 0 indexierten URLs trotz erfolgreicher Sitemap und Live-Tests; SEO1 als kleiner hybrider Crawlability-Pilot vor O4b eingeordnet
+- **Juli 2026:** Crawlbare Einstiege (SEO1): sichtbarer HTML-Fallback in `#root` mit genau einer H1 und Link auf `/gaming-news`, gerenderter Footer mit lokalisiertem Rückweg, eigener Einleitungstext auf `/gaming-news`, zeitstabile Metadaten ohne feste Quellenzahl und ohne `SearchAction`
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 

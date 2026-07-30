@@ -41,11 +41,14 @@ ob eine technisch indexierbare URL tatsächlich in den Index aufgenommen wird.
 Die React-SPA wird nicht pauschal ersetzt:
 
 - Google kann die heutige Anwendung im Live-Test rendern.
-- Die Startseite liefert im ursprünglichen HTML trotzdem nur einen leeren
+- Die Startseite lieferte im ursprünglichen HTML trotzdem nur einen leeren
   React-Container. Ein zusätzlicher Render-Schritt bleibt unnötig fragil und
-  andere Crawler müssen JavaScript nicht ausführen.
+  andere Crawler müssen JavaScript nicht ausführen. Seit SEO1 steht dort
+  stattdessen ein kleiner, wahrer Fallback – kein Prerendering, keine
+  Artikelkopie.
 - `/gaming-news` liefert bereits fertiges HTML und bleibt die
-  servergerenderte SEO-Einstiegsseite.
+  servergerenderte SEO-Einstiegsseite. Seit SEO1 ist sie aus der laufenden App
+  über den Footer normal verlinkt und verweist ihrerseits zurück.
 - Speicherung und Darstellung sind getrennte Fragen. Ein Wechsel von KV zu
   einer Artikeldatenbank macht die Startseite nicht automatisch crawlbar oder
   schneller sichtbar.
@@ -81,7 +84,8 @@ HTML sinnvolle, crawlbare Inhalte und normale interne Links liefern.
 
 ### Phase 1 – Crawlbare Einstiege
 
-Arbeitspaket SEO1 setzt nur die technische und inhaltliche Grundlage:
+**Umgesetzt am 30. Juli 2026.** Arbeitspaket SEO1 setzt nur die technische und
+inhaltliche Grundlage:
 
 1. ehrliche, zeitstabile Metadaten auf der Startseite;
 2. Entfernung der nicht funktionierenden `SearchAction`;
@@ -97,7 +101,43 @@ Arbeitspaket SEO1 setzt nur die technische und inhaltliche Grundlage:
 Sitemap-Umbau, neue URL-Typen, Datenbankmigration, Search-Console-API und
 automatisierte Indexierungsanträge gehören nicht zu SEO1.
 
+#### Wie der Fallback verschwindet
+
+Der Fallback steht **innerhalb** von `#root` und trägt `data-seo="fallback"`.
+`ReactDOM.createRoot(container)` leert den Container vor dem ersten Rendern –
+genau deshalb braucht es weder ein Skript noch eine CSS-Regel, die ihn
+ausblendet. Wer ihn nach außerhalb von `#root` verschiebt, erzeugt eine zweite
+sichtbare H1 neben der Kopfzeile der App.
+
+Da Tailwind erst mit dem JavaScript-Modul geladen wird, bringt der Fallback
+seine wenigen CSS-Regeln in einem `<style>`-Block im `<head>` selbst mit. Keine
+dieser Regeln verbirgt etwas, verschiebt etwas aus dem Viewport oder schrumpft
+etwas auf Pixelgröße; die Tests prüfen genau das.
+
+#### Wo die Regeln getestet werden
+
+| Datei | Prüft |
+|---|---|
+| `tests/frontend/unit/seo-static-entry.test.js` | Quell-`index.html`: eine H1, eigene Beschreibung, interner Link, nichts Verstecktes, keine feste Quellenzahl, keine `SearchAction` |
+| `tests/frontend/unit/footer-gaming-news-link.test.js` | gerenderter Footer-Link, in DE und EN unterschiedlich |
+| `tests/server/unit/gaming-news-page.test.js` | `/gaming-news`: eine H1, eigener Einleitungstext, Canonical, Rückweg zur App |
+| `tests/e2e/seo-entry.spec.ts` | erzeugtes Production-HTML mit **und** ohne JavaScript, genau eine sichtbare H1 nach dem React-Start |
+
+#### Bewusst offen geblieben
+
+Die Meta-Description von `/gaming-news` entsteht weiterhin aus den ersten drei
+Artikeltiteln. Das ist eine Auflistung, kein eigener redaktioneller Fließtext,
+und liegt außerhalb des SEO1-Umfangs. Ob sie auf einen eigenen zeitstabilen
+Text umgestellt wird, entscheidet SEO2 anhand der dann sichtbaren Snippets.
+
+`?search=` bleibt keine adressierbare Suche. Eine `SearchAction` darf erst
+wieder entstehen, wenn dieser Parameter tatsächlich als URL-Suche funktioniert.
+
 ### Phase 2 – Indexierungs-Gate
+
+**Offen.** Diese Phase beginnt erst nach Merge und Production-Rollout von SEO1
+und besteht aus manuellen Schritten in der Search Console – kein Code, keine
+API, kein automatischer Antrag.
 
 Nach Production-Deployment von SEO1 werden beide URLs manuell live geprüft und
 einmal zur Indexierung eingereicht. Danach werden nach 7, 14 und 28 Tagen

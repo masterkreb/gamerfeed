@@ -115,6 +115,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     *   `/api/announcement`: Öffentlicher Abruf der aktiven Ankündigung, geschützte Verwaltung, geschützter Admin-Abruf über `?admin=1`
     *   `/api/get-trends`: Liefert KI-generierte Trends
     *   `/api/contact`: Prüft Kontaktanfragen und versendet sie per Gmail SMTP
+    *   `/api/gaming-news`: Servergerenderte HTML-Übersicht, über `vercel.json` als `/gaming-news` erreichbar
 6.  **Admin-Backend (mehrschichtiger Schutz)**: Die Middleware schützt die statische Admin-Seite. Die Admin-APIs prüfen Basic Authentication zusätzlich direkt im jeweiligen Handler und schützen schreibende Aufrufe per Same-Origin-Prüfung. Eingehendes JSON wird zur Laufzeit gegen gemeinsame Verträge geprüft; Fehler antworten mit stabilen Codes, interne Datenbank- und KV-Meldungen bleiben im Log. Einzelheiten: [Admin-API-Dokumentation](docs/deployment/admin-api.md).
 7.  **KI-Integration (Groq API)**: Automatische Trend-Analyse mit Groq's llama-3.1-8b-instant Modell für Gaming-News.
 
@@ -241,6 +242,33 @@ zurückgestellt. Der Grund steht direkt darunter im Panel.
 
 Datenformate, Grenzfälle und Betriebshinweise stehen in der
 [Heartbeat-Dokumentation](docs/deployment/feed-heartbeat.md).
+
+---
+
+### Crawlbare Einstiege ohne JavaScript
+
+Die interaktive Anwendung bleibt eine React-SPA, aber das ausgelieferte
+`index.html` ist kein leerer Container mehr. Innerhalb von `#root` steht ein
+kleiner Fallback mit **genau einer H1**, einer eigenen Beschreibung und einem
+gewöhnlichen Link auf `/gaming-news`. React ersetzt ihn beim Start, weil
+`createRoot` den Container vor dem ersten Rendern leert; danach bleibt die H1
+der Kopfzeile die einzige sichtbare H1.
+
+Der Fallback ist bewusst **nicht** versteckt, nicht aus dem Viewport geschoben
+und nicht mit `aria-hidden` markiert. Er enthält keine kopierte Artikelliste –
+ein Crawler sieht dort genau das, was ein Mensch ohne JavaScript sieht.
+
+`/gaming-news` bleibt die servergerenderte Einstiegsseite und ist über den
+Footer der laufenden App lokalisiert verlinkt. Beide Seiten verweisen damit
+wechselseitig aufeinander; eine Sitemap ersetzt diese Verlinkung nicht.
+
+Statische Meta-, Open-Graph-, Twitter- und JSON-LD-Texte sind zeitstabil
+formuliert und nennen **keine feste Quellenzahl** – die Zahl ändert sich, der
+Text nicht. Die frühere `SearchAction` ist entfernt: `?search=` ist keine
+adressierbare Suche, das Versprechen war also nicht einlösbar.
+
+Baseline, Leitplanken und das Mess-Gate stehen in
+[SEO und Indexierung](docs/development/seo-indexing.md).
 
 ---
 
