@@ -234,6 +234,21 @@ manuelle Maßnahme und kein Sicherheitsproblem. Damit ist SEO1 das nächste
 Arbeitspaket vor O4b. Baseline, Leitplanken und Mess-Gate:
 [`docs/development/seo-indexing.md`](seo-indexing.md).
 
+**Stand 30. Juli 2026 (Branch `claude/seo1-crawlable-entry`):** **SEO1** ist
+abgeschlossen. `index.html` liefert innerhalb von `#root` einen sichtbaren
+Fallback mit genau einer H1, eigener Beschreibung und einem gewöhnlichen Link
+auf `/gaming-news`; React ersetzt ihn beim Start, danach bleibt genau eine
+sichtbare H1. Der bisher nirgends gerenderte Footer ist eingehängt und trägt
+den lokalisierten Rückweg. `/gaming-news` hat unter der H1 einen eigenen
+Einleitungstext zu Nutzen, Quellenprinzip und Aktualisierung. Statische
+Metadaten nennen keine feste Quellenzahl mehr, und die nicht einlösbare
+`SearchAction` ist entfernt. 767 zentrale Tests und 30 Browser-Abnahmen laufen
+erfolgreich.
+
+Ob die Änderungen wirken, entscheidet **nicht** dieser Branch: SEO2 beginnt
+erst nach Merge und Production-Rollout und ist eine manuelle Abnahme in der
+Search Console. Ein technisch indexierbares HTML erzwingt keine Indexierung.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -260,8 +275,8 @@ Arbeitspaket vor O4b. Baseline, Leitplanken und Mess-Gate:
 | A1c | P2 | erledigt | Lokalen Startcache im Admin verständlich darstellen |
 | O4a | P2 | erledigt | Strukturierter Laufbericht und GitHub-Step-Summary |
 | SEO0 | P2 | erledigt | Search-Console-Baseline und SEO-Leitplanken festhalten |
-| SEO1 | P2 | bereit | Crawlbare Einstiege und ehrliche Metadaten herstellen |
-| SEO2 | P2 | geplant | Indexierungs- und Mess-Gate nach Production-Rollout |
+| SEO1 | P2 | erledigt | Crawlbare Einstiege und ehrliche Metadaten herstellen |
+| SEO2 | P2 | bereit | Indexierungs- und Mess-Gate nach Production-Rollout |
 | SEO3 | P3 | später | Genau einen eigenständigen Content-Pilot aus Messdaten ableiten |
 | SEO4 | P3 | Entscheidung nötig | Eigene Domain und externe Reichweite festlegen |
 | O4b | P2 | geplant | Begrenzte Laufhistorie |
@@ -1395,9 +1410,9 @@ Indexierung.
 
 ### SEO1 – Crawlbare Einstiege und ehrliche Metadaten
 
-**Status:** bereit. Priorität P2, ausdrücklich vor O4b eingeordnet.
+**Status:** erledigt. Priorität P2, ausdrücklich vor O4b eingeordnet.
 
-**Warum:** Die Startseite liefert im ursprünglichen HTML nur einen leeren
+**Warum:** Die Startseite lieferte im ursprünglichen HTML nur einen leeren
 React-Container. `/gaming-news` ist zwar servergerendert und in der Sitemap,
 wird aus der laufenden App aber nirgends mit einem normalen Link erschlossen.
 Statische Metadaten nennen eine längst veraltete exakte Quellenzahl, und die
@@ -1451,9 +1466,28 @@ nicht als Suche verarbeitet.
 - `npm test`, `npm run typecheck`, `npm run build`, `npm run test:e2e` und
   beide Diff-Checks sind erfolgreich.
 
+**Ergebnis:** Alle Abnahmepunkte sind erfüllt. 767 zentrale Tests und 30
+Browser-Abnahmen laufen erfolgreich.
+
+Bewusst **nicht** angefasst, weil außerhalb des Umfangs: Die Meta-Description
+von `/gaming-news` entsteht weiterhin aus den ersten drei Artikeltiteln. Das ist
+kein eigener redaktioneller Fließtext, sondern eine Auflistung – der neue
+Einleitungstext daneben ist davon unabhängig. Ob die Description auf einen
+eigenen zeitstabilen Text umgestellt wird, entscheidet SEO2 anhand der dann
+sichtbaren Snippets.
+
+Ebenfalls unverändert: `?search=` bleibt keine adressierbare Suche. Eine
+`SearchAction` darf erst wieder entstehen, wenn dieser Parameter tatsächlich
+als URL-Suche funktioniert.
+
+Das über `og:image` ausgelieferte `public/social-preview.png` trug sichtbar
+„Gaming-News aus allen Quellen“ und gehörte damit zu SEO1. Sein Untertitel
+lautet jetzt „Gaming-News aus vielen Redaktionen“, die Abmessungen bleiben
+1200 × 630.
+
 ### SEO2 – Indexierungs- und Mess-Gate
 
-**Status:** geplant. Erst nach Merge und Production-Rollout von SEO1.
+**Status:** bereit. Erst nach Merge und Production-Rollout von SEO1.
 
 SEO2 ist überwiegend eine manuelle Abnahme, kein neuer Funktionsblock:
 

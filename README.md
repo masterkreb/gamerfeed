@@ -27,7 +27,7 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
     - Filtere Artikel nach Zeitraum (Heute, Gestern, Letzte 7 Tage).
     - Filtere nach spezifischer Quelle oder Sprache (DE/EN).
     - Volltextsuche in Titeln und Zusammenfassungen.
-- **Automatische Aktualisierung**: Ein GitHub-Action-Workflow aktualisiert den News-Cache alle 20 Minuten, sodass die angezeigten Nachrichten immer aktuell sind.
+- **Automatische Aktualisierung**: Ein GitHub-Action-Workflow aktualisiert den News-Cache; der Lauf ist ungefähr alle 20 Minuten geplant. GitHub stellt geplante Workflows global in eine Warteschlange, Verzögerungen sind also möglich – der Takt ist ein Plan, keine Zusage.
 - **🤖 KI-gestützte Trend-Analyse**: Automatische Erkennung aktueller Gaming-Trends mit Groq AI (tägliche und wöchentliche Trends). Intelligente Deduplizierung von Artikeln gleicher Verlagsgruppen für akkuratere Trend-Berechnung.
 - **✉️ Kontaktformular**: In den Einstellungen integriert, versendet über Gmail SMTP und ist mit reCAPTCHA v3 gegen automatisierte Zusendungen abgesichert. Server- und clientseitige Prüfung von Pflichtfeldern, Feldlängen und E-Mail-Format.
 - **♿ Barrierefreiheit**:
@@ -115,6 +115,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     *   `/api/announcement`: Öffentlicher Abruf der aktiven Ankündigung, geschützte Verwaltung, geschützter Admin-Abruf über `?admin=1`
     *   `/api/get-trends`: Liefert KI-generierte Trends
     *   `/api/contact`: Prüft Kontaktanfragen und versendet sie per Gmail SMTP
+    *   `/api/gaming-news`: Servergerenderte HTML-Übersicht, über `vercel.json` als `/gaming-news` erreichbar
 6.  **Admin-Backend (mehrschichtiger Schutz)**: Die Middleware schützt die statische Admin-Seite. Die Admin-APIs prüfen Basic Authentication zusätzlich direkt im jeweiligen Handler und schützen schreibende Aufrufe per Same-Origin-Prüfung. Eingehendes JSON wird zur Laufzeit gegen gemeinsame Verträge geprüft; Fehler antworten mit stabilen Codes, interne Datenbank- und KV-Meldungen bleiben im Log. Einzelheiten: [Admin-API-Dokumentation](docs/deployment/admin-api.md).
 7.  **KI-Integration (Groq API)**: Automatische Trend-Analyse mit Groq's llama-3.1-8b-instant Modell für Gaming-News.
 
@@ -126,7 +127,7 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
 
 #### 1. Der Datensammler (GitHub Actions Cron Job)
 
-*   **Aufgabe:** Alle 20 Minuten sämtliche Feed-Quellen abrufen und die neuesten Nachrichten im zentralen Cache ablegen.
+*   **Aufgabe:** Die konfigurierten Feed-Quellen abrufen und die neuesten Nachrichten im zentralen Cache ablegen. Geplant ist der Lauf zu den Minuten 7, 27 und 47; tatsächlich startet er auch später, wenn GitHub die Warteschlange abarbeitet.
 *   **Ablauf:**
     1.  Der GitHub-Workflow (`.github/workflows/update-feeds.yml`) startet das `fetch-feeds.js`-Skript.
     2.  Das Skript holt die Feed-Liste aus der Postgres-Datenbank.
@@ -241,6 +242,33 @@ zurückgestellt. Der Grund steht direkt darunter im Panel.
 
 Datenformate, Grenzfälle und Betriebshinweise stehen in der
 [Heartbeat-Dokumentation](docs/deployment/feed-heartbeat.md).
+
+---
+
+### Crawlbare Einstiege ohne JavaScript
+
+Die interaktive Anwendung bleibt eine React-SPA, aber das ausgelieferte
+`index.html` ist kein leerer Container mehr. Innerhalb von `#root` steht ein
+kleiner Fallback mit **genau einer H1**, einer eigenen Beschreibung und einem
+gewöhnlichen Link auf `/gaming-news`. React ersetzt ihn beim Start, weil
+`createRoot` den Container vor dem ersten Rendern leert; danach bleibt die H1
+der Kopfzeile die einzige sichtbare H1.
+
+Der Fallback ist bewusst **nicht** versteckt, nicht aus dem Viewport geschoben
+und nicht mit `aria-hidden` markiert. Er enthält keine kopierte Artikelliste –
+ein Crawler sieht dort genau das, was ein Mensch ohne JavaScript sieht.
+
+`/gaming-news` bleibt die servergerenderte Einstiegsseite und ist über den
+Footer der laufenden App lokalisiert verlinkt. Beide Seiten verweisen damit
+wechselseitig aufeinander; eine Sitemap ersetzt diese Verlinkung nicht.
+
+Statische Meta-, Open-Graph-, Twitter- und JSON-LD-Texte sind zeitstabil
+formuliert und nennen **keine feste Quellenzahl** – die Zahl ändert sich, der
+Text nicht. Die frühere `SearchAction` ist entfernt: `?search=` ist keine
+adressierbare Suche, das Versprechen war also nicht einlösbar.
+
+Baseline, Leitplanken und das Mess-Gate stehen in
+[SEO und Indexierung](docs/development/seo-indexing.md).
 
 ---
 
@@ -413,7 +441,7 @@ dem Setzen des Secrets die
 [Feed-Proxy-Betriebsanleitung](docs/deployment/feed-proxy.md) vollständig
 abarbeiten.
 
-Der Workflow (`.github/workflows/update-feeds.yml`) wird nun alle 20 Minuten automatisch ausgeführt und hält deine Live-Daten aktuell.
+Der Workflow (`.github/workflows/update-feeds.yml`) ist nun zu den Minuten 7, 27 und 47 eingeplant und hält deine Live-Daten aktuell. Ein geplanter Lauf kann später starten als eingetragen; deshalb toleriert die Frischeprüfung bis zu 50 Minuten.
 
 ---
 

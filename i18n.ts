@@ -159,10 +159,10 @@ const resources = {
             "settings.legal.privacy.hosting.text": "This website is hosted on Vercel Inc. For details on their data processing, please refer to Vercel's privacy policy.",
             "settings.legal.contactReference": "For questions or feedback, please use the 'Contact' tab.",
             "settings.about.title": "About GamerFeed",
-            "settings.about.description": "GamerFeed is a gaming news aggregator that collects articles from 15+ German and English sources to keep you updated on the latest gaming news.",
+            "settings.about.description": "GamerFeed is a gaming news aggregator that collects articles from numerous German and international newsrooms to keep you updated on the latest gaming news.",
             "settings.about.sources": "All news articles are sourced from publicly available RSS feeds. We do not create original content but provide a convenient way to browse and discover gaming news from various trusted publishers.",
             "settings.about.features.title": "Features",
-            "settings.about.features.realtime": "Real-time news updates every 20 minutes",
+            "settings.about.features.realtime": "Automatic news updates, planned roughly every 20 minutes (delays possible)",
             "settings.about.features.filters": "Advanced filtering by time, source, and language",
             "settings.about.features.favorites": "Save your favorite articles locally",
             "settings.about.features.trends": "AI-powered trend analysis of gaming topics",
@@ -208,6 +208,7 @@ const resources = {
             // Footer
             "footer.rights": "All rights reserved.",
             "footer.tagline": "Made with ❤️ for gaming enthusiasts. News sourced from various public RSS feeds.",
+            "footer.gamingNews": "Today's gaming news overview",
 
             // Loading & Errors
             "loading.articles": "Loading articles...",
@@ -599,10 +600,10 @@ const resources = {
             "settings.legal.privacy.hosting.text": "Diese Website wird auf Vercel Inc. gehostet. Details zur Datenverarbeitung findest du in der Datenschutzerklärung von Vercel.",
             "settings.legal.contactReference": "Bei Fragen oder Feedback nutze bitte den 'Kontakt'-Tab.",
             "settings.about.title": "Über GamerFeed",
-            "settings.about.description": "GamerFeed ist ein Gaming-News-Aggregator, der Artikel aus 15+ deutschen und englischen Quellen sammelt, um dich über die neuesten Gaming-News auf dem Laufenden zu halten.",
+            "settings.about.description": "GamerFeed ist ein Gaming-News-Aggregator, der Artikel aus zahlreichen deutschen und internationalen Redaktionen sammelt, um dich über die neuesten Gaming-News auf dem Laufenden zu halten.",
             "settings.about.sources": "Alle Nachrichtenartikel stammen aus öffentlich zugänglichen RSS-Feeds. Wir erstellen keine eigenen Inhalte, sondern bieten eine bequeme Möglichkeit, Gaming-News von verschiedenen vertrauenswürdigen Verlagen zu durchsuchen und zu entdecken.",
             "settings.about.features.title": "Funktionen",
-            "settings.about.features.realtime": "Echtzeit-News-Updates alle 20 Minuten",
+            "settings.about.features.realtime": "Automatische News-Updates, ungefähr alle 20 Minuten geplant (Verzögerungen möglich)",
             "settings.about.features.filters": "Erweiterte Filterung nach Zeit, Quelle und Sprache",
             "settings.about.features.favorites": "Speichere deine Lieblingsartikel lokal",
             "settings.about.features.trends": "KI-gestützte Trendanalyse von Gaming-Themen",
@@ -648,6 +649,7 @@ const resources = {
             // Footer
             "footer.rights": "Alle Rechte vorbehalten.",
             "footer.tagline": "Mit ❤️ für Gaming-Enthusiasten gemacht. News von verschiedenen öffentlichen RSS-Feeds.",
+            "footer.gamingNews": "Übersicht der aktuellen Gaming-News",
 
             // Loading & Errors
             "loading.articles": "Lade Artikel...",
