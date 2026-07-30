@@ -21,10 +21,12 @@ const resources = {
 
             // Filter Bar
             "filter.search.placeholder": "Search articles by keyword...",
+            "filter.search.label": "Search articles",
             "filter.search.clear": "Clear search",
             "filter.search.save": "Save",
             "filter.search.saved": "Saved",
             "filter.search.savedSearches": "Saved Searches",
+            "filter.search.removeSaved": "Remove \"{{search}}\" from saved searches",
             "filter.time.label": "Time",
             "filter.time.all": "All Time",
             "filter.time.today": "Today",
@@ -410,10 +412,12 @@ const resources = {
 
             // Filter Bar
             "filter.search.placeholder": "Artikel nach Stichwort durchsuchen...",
+            "filter.search.label": "Artikel durchsuchen",
             "filter.search.clear": "Suche löschen",
             "filter.search.save": "Speichern",
             "filter.search.saved": "Gespeichert",
             "filter.search.savedSearches": "Gespeicherte Suchen",
+            "filter.search.removeSaved": "\"{{search}}\" aus gespeicherten Suchen entfernen",
             "filter.time.label": "Zeitraum",
             "filter.time.all": "Alle",
             "filter.time.today": "Heute",

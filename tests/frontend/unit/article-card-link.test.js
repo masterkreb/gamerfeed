@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import React from 'react';
+import React, { act } from 'react';
 import { createServer } from 'vite';
-import { createReactTestRoot } from '../helpers/react-test-root.js';
+import {
+    createReactTestRoot,
+    dispatchKeyboardEvent,
+} from '../helpers/react-test-root.js';
 
 const vite = await createServer({
     root: process.cwd(),
@@ -45,6 +48,13 @@ async function renderCard(testRoot, link) {
     // Der Kartenlink ist der Anker, der den Artikeltitel enthält.
     return Array.from(testRoot.container.querySelectorAll('a'))
         .find(anchor => anchor.textContent.includes('Beispielartikel')) ?? null;
+}
+
+function click(window, element) {
+    element.dispatchEvent(new window.Event('click', {
+        bubbles: true,
+        cancelable: true,
+    }));
 }
 
 test('gibt gültige Artikel-Links unverändert als anklickbaren Anker aus', async () => {
@@ -102,6 +112,87 @@ test('lädt unzulässige Bildadressen nicht', async () => {
         assert.notEqual(image, null, 'kein Bildelement gefunden');
         assert.equal(image.hasAttribute('src'), false, 'unzulässige Bildadresse wurde gesetzt');
         assert.equal(image.getAttribute('alt'), 'Beispielartikel');
+    } finally {
+        await testRoot.cleanup();
+    }
+});
+
+test('verschachtelt in keinem Layout Aktionsbuttons innerhalb des Artikel-Links', async () => {
+    await vite.ssrLoadModule('/i18n.ts');
+    const { ArticleCard } = await vite.ssrLoadModule('/components/ArticleCard.tsx');
+
+    for (const viewMode of ['grid', 'list', 'compact']) {
+        const testRoot = await createReactTestRoot();
+
+        try {
+            await testRoot.render(React.createElement(ArticleCard, {
+                article: createArticle('https://beispiel.example/artikel'),
+                viewMode,
+                isFavorite: false,
+                onToggleFavorite: () => {},
+                onMuteSource: () => {},
+            }));
+
+            const articleLink = Array.from(testRoot.container.querySelectorAll('a'))
+                .find(anchor => anchor.textContent.includes('Beispielartikel'));
+            assert.notEqual(articleLink, null, `kein Artikel-Link im Layout ${viewMode}`);
+            assert.equal(
+                articleLink.querySelectorAll('button').length,
+                0,
+                `Layout ${viewMode} enthält weiterhin einen Button im Link`,
+            );
+
+            for (const button of testRoot.container.querySelectorAll('button')) {
+                assert.equal(
+                    button.closest('a'),
+                    null,
+                    `Layout ${viewMode} verschachtelt ${button.getAttribute('aria-label') ?? 'einen Button'} im Link`,
+                );
+            }
+        } finally {
+            await testRoot.cleanup();
+        }
+    }
+});
+
+test('benennt den Optionsdialog und gibt den Fokus nach schnellem Escape dauerhaft zurück', async () => {
+    const testRoot = await createReactTestRoot();
+    await vite.ssrLoadModule('/i18n.ts');
+    const { ArticleCard } = await vite.ssrLoadModule('/components/ArticleCard.tsx');
+
+    try {
+        await testRoot.render(React.createElement(ArticleCard, {
+            article: createArticle('https://beispiel.example/artikel'),
+            viewMode: 'grid',
+            isFavorite: false,
+            onToggleFavorite: () => {},
+            onMuteSource: () => {},
+        }));
+
+        const trigger = testRoot.container.querySelector('button[aria-haspopup="dialog"]');
+        const dialog = testRoot.container.querySelector('[role="dialog"]');
+        assert.notEqual(trigger, null, 'Optionsauslöser fehlt');
+        assert.notEqual(dialog, null, 'Optionsdialog fehlt');
+        assert.ok(
+            dialog.getAttribute('aria-label') || dialog.getAttribute('aria-labelledby'),
+            'Optionsdialog besitzt keinen Accessible Name',
+        );
+
+        trigger.focus();
+        await act(async () => {
+            click(testRoot.window, trigger);
+        });
+        assert.equal(dialog.getAttribute('aria-hidden'), 'false');
+
+        await act(async () => {
+            dispatchKeyboardEvent(testRoot.window, 'Escape');
+        });
+        await act(async () => {
+            await new Promise(resolve => setTimeout(resolve, 70));
+        });
+
+        assert.equal(dialog.getAttribute('aria-hidden'), 'true');
+        assert.equal(testRoot.window.document.activeElement, trigger);
     } finally {
         await testRoot.cleanup();
     }
