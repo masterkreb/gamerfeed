@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FeedFreshness, FeedHeartbeat, FeedRunResult } from '../../types';
+import { getDateLocale } from '../../shared/i18n-locale';
 import { CheckCircleIcon, WarningIcon, QuestionMarkCircleIcon } from '../Icons';
 
 const MINUTE_MS = 60 * 1000;
@@ -18,7 +19,7 @@ function formatTimestamp(iso: string | null, language: string, fallback: string)
     const date = new Date(iso);
     if (Number.isNaN(date.getTime())) return fallback;
 
-    return date.toLocaleString(language);
+    return date.toLocaleString(getDateLocale(language));
 }
 
 interface HeartbeatCardProps {

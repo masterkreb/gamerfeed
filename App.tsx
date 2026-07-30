@@ -878,7 +878,6 @@ const AppContent: React.FC = () => {
                         className="mt-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
                     >
                         <p className="font-semibold">{t('error.refreshFailed')}</p>
-                        <p className="mt-1 text-sm">{backgroundError}</p>
                     </div>
                 )}
 
@@ -894,7 +893,6 @@ const AppContent: React.FC = () => {
                             </svg>
                         </div>
                         <h3 className="mt-4 text-2xl font-semibold text-red-600 dark:text-red-400">{t('error.couldNotLoad')}</h3>
-                        <p className="mt-2 text-slate-600 dark:text-zinc-400">{error}</p>
                         <button
                             onClick={() => void loadNews(true)}
                             className="mt-6 inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-zinc-900 transition-all duration-200 hover:shadow-lg"

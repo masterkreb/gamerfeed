@@ -7,11 +7,12 @@ export const LanguageSwitcher: React.FC = () => {
     const menuRef = useRef<HTMLDivElement>(null);
 
     const languages = [
-        { code: 'en', label: 'EN', flag: '🇬🇧', name: 'English' },
-        { code: 'de', label: 'DE', flag: '🇩🇪', name: 'Deutsch' },
+        { code: 'en', label: 'EN', flag: '🇬🇧', nameKey: 'language.english' },
+        { code: 'de', label: 'DE', flag: '🇩🇪', nameKey: 'language.german' },
     ];
 
     const currentLanguage = languages.find(lang => i18n.language.startsWith(lang.code)) || languages[0];
+    const currentLanguageName = t(currentLanguage.nameKey);
 
     const handleLanguageChange = (langCode: string) => {
         i18n.changeLanguage(langCode);
@@ -37,7 +38,7 @@ export const LanguageSwitcher: React.FC = () => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all font-medium text-sm"
-                aria-label={t('a11y.changeLanguage', { lang: currentLanguage.name })}
+                aria-label={t('a11y.changeLanguage', { lang: currentLanguageName })}
                 aria-haspopup="true"
                 aria-expanded={isOpen}
             >
@@ -59,7 +60,7 @@ export const LanguageSwitcher: React.FC = () => {
                                 }`}
                             >
                                 <span className="text-lg">{lang.flag}</span>
-                                <span>{lang.name}</span>
+                                <span>{t(lang.nameKey)}</span>
                             </button>
                         ))}
                     </div>

@@ -2,40 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Announcement, AnnouncementType } from '../../types';
 import { ANNOUNCEMENT_MESSAGE_MAX_LENGTH } from '../../shared/announcement-contract.js';
+import { getDateLocale } from '../../shared/i18n-locale';
 
 // Geschützter Abruf: nur so bekommt der Admin eine abgeschaltete Ankündigung
 // zu sehen. Der öffentliche Endpunkt liefert sie weiterhin nicht aus.
 const ADMIN_ANNOUNCEMENT_ENDPOINT = '/api/announcement?admin=1';
 
-const typeStyles: Record<AnnouncementType, { bg: string; border: string; text: string; label: string }> = {
+const typeStyles: Record<AnnouncementType, { bg: string; border: string; text: string; labelKey: string }> = {
     info: {
         bg: 'bg-blue-50 dark:bg-blue-900/20',
         border: 'border-blue-200 dark:border-blue-800',
         text: 'text-blue-800 dark:text-blue-200',
-        label: 'Info',
+        labelKey: 'admin.announcement.typeInfo',
     },
     warning: {
         bg: 'bg-amber-50 dark:bg-amber-900/20',
         border: 'border-amber-200 dark:border-amber-800',
         text: 'text-amber-800 dark:text-amber-200',
-        label: 'Warnung',
+        labelKey: 'admin.announcement.typeWarning',
     },
     maintenance: {
         bg: 'bg-red-50 dark:bg-red-900/20',
         border: 'border-red-200 dark:border-red-800',
         text: 'text-red-800 dark:text-red-200',
-        label: 'Wartung',
+        labelKey: 'admin.announcement.typeMaintenance',
     },
     celebration: {
         bg: 'bg-green-50 dark:bg-green-900/20',
         border: 'border-green-200 dark:border-green-800',
         text: 'text-green-800 dark:text-green-200',
-        label: 'Feier',
+        labelKey: 'admin.announcement.typeCelebration',
     },
 };
 
 export const AnnouncementTab: React.FC = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [announcement, setAnnouncement] = useState<Announcement | null>(null);
     const [message, setMessage] = useState('');
     const [type, setType] = useState<AnnouncementType>('info');
@@ -164,17 +165,17 @@ export const AnnouncementTab: React.FC = () => {
                         {t('admin.announcement.typeLabel')}
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        {(Object.keys(typeStyles) as AnnouncementType[]).map((t) => (
+                        {(Object.keys(typeStyles) as AnnouncementType[]).map((announcementType) => (
                             <button
-                                key={t}
-                                onClick={() => setType(t)}
+                                key={announcementType}
+                                onClick={() => setType(announcementType)}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium border-2 transition-all ${
-                                    type === t
-                                        ? `${typeStyles[t].bg} ${typeStyles[t].border} ${typeStyles[t].text}`
+                                    type === announcementType
+                                        ? `${typeStyles[announcementType].bg} ${typeStyles[announcementType].border} ${typeStyles[announcementType].text}`
                                         : 'bg-slate-100 dark:bg-zinc-700 border-transparent text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-600'
                                 }`}
                             >
-                                {typeStyles[t].label}
+                                {t(typeStyles[announcementType].labelKey)}
                             </button>
                         ))}
                     </div>
@@ -260,7 +261,11 @@ export const AnnouncementTab: React.FC = () => {
                             {announcement.isActive ? t('admin.announcement.statusActive') : t('admin.announcement.statusInactive')}
                         </span>
                         <span className="text-slate-500 dark:text-zinc-500">
-                            {t('admin.announcement.createdAt', { date: new Date(announcement.createdAt).toLocaleString() })}
+                            {t('admin.announcement.createdAt', {
+                                date: new Date(announcement.createdAt).toLocaleString(
+                                    getDateLocale(i18n.resolvedLanguage ?? i18n.language),
+                                ),
+                            })}
                         </span>
                     </div>
                 </div>

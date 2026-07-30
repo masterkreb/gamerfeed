@@ -14,8 +14,9 @@ type SortDirection = 'ascending' | 'descending';
 // --- Reusable Components ---
 
 const HealthStatusIcon: React.FC<{ state: HealthState }> = ({ state }) => {
+    const { t } = useTranslation();
     const status = state?.status || 'unknown';
-    const detail = state?.detail || 'No details available.';
+    const detail = state?.detail || t('admin.health.detailUnavailable');
 
     switch (status) {
         case 'ok':
@@ -25,7 +26,7 @@ const HealthStatusIcon: React.FC<{ state: HealthState }> = ({ state }) => {
         case 'error':
             return <div title={detail}><XCircleIcon className="w-5 h-5 text-red-500" /></div>;
         case 'checking':
-            return <div title="Checking..."><LoadingSpinner className="w-4 h-4 text-indigo-500" /></div>;
+            return <div title={t('admin.health.statusChecking')}><LoadingSpinner className="w-4 h-4 text-indigo-500" /></div>;
         default:
             return <div title={detail}><QuestionMarkCircleIcon className="w-5 h-5 text-slate-400" /></div>;
     }
@@ -153,7 +154,7 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                         <tr key={feed.id} className="border-b dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800/50">
                             <td className="p-4 font-medium truncate">{feed.name}</td>
                             <td className="p-4 text-slate-500 dark:text-zinc-400 truncate" title={feed.url}>{feed.url}</td>
-                            <td className="p-4"><span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${feed.priority === 'primary' ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'bg-slate-100 dark:bg-zinc-700 text-slate-600 dark:text-zinc-300'}`}>{feed.priority}</span></td>
+                            <td className="p-4"><span className={`px-2 py-1 text-xs font-semibold rounded-full ${feed.priority === 'primary' ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'bg-slate-100 dark:bg-zinc-700 text-slate-600 dark:text-zinc-300'}`}>{t(`admin.management.priority${feed.priority === 'primary' ? 'Primary' : 'Secondary'}`)}</span></td>
                             <td className="p-4 text-center"><span className="font-bold uppercase text-xs">{feed.language}</span></td>
                             <td className="p-4"><div className="flex justify-center items-center">
                                 <HealthStatusIcon state={feedHealth[feed.id]} />
@@ -183,7 +184,7 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
                             <a href={feed.url} target="_blank" rel="noopener noreferrer" className="text-indigo-500 break-all">{feed.url}</a>
                         </div>
                         <div className="grid grid-cols-2 gap-3 text-center text-sm pt-2">
-                            <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">{t('admin.management.headerPriority')}</p><p className="font-bold capitalize">{feed.priority}</p></div>
+                            <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">{t('admin.management.headerPriority')}</p><p className="font-bold">{t(`admin.management.priority${feed.priority === 'primary' ? 'Primary' : 'Secondary'}`)}</p></div>
                             <div><p className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">{t('admin.management.headerLang')}</p><p className="font-bold uppercase">{feed.language}</p></div>
                         </div>
                         <div className="flex items-center justify-end gap-2 border-t border-slate-200 dark:border-zinc-700 pt-3 mt-3">

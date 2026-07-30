@@ -59,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                         e.preventDefault();
                         onLogoClick();
                     }}
-                    aria-label="Go to homepage and reset filters"
+                    aria-label={t('header.home')}
                     className="flex-shrink-0 transition-transform duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100 dark:focus-visible:ring-offset-zinc-900 focus-visible:ring-indigo-500 rounded-lg"
                 >
                     <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-indigo-500 dark:text-indigo-400 whitespace-nowrap">
@@ -110,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                                             ? 'bg-white dark:bg-zinc-700 text-indigo-600 dark:text-indigo-400 shadow'
                                             : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-300/50 dark:hover:bg-zinc-700/50'
                                     }`}
-                                    aria-label={`Switch to ${option.mode} view`}
+                                    aria-label={t('viewMode.switchTo', { view: option.label })}
                                 >
                                     {option.icon}
                                 </button>
@@ -124,7 +124,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme, viewMode, setVi
                             <button
                                 onClick={() => setIsViewMenuOpen(!isViewMenuOpen)}
                                 className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 transition-all"
-                                aria-label="Change view mode"
+                                aria-label={t('viewMode.change')}
                                 aria-haspopup="true"
                                 aria-expanded={isViewMenuOpen}
                             >

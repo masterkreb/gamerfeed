@@ -381,7 +381,7 @@ export const AdminPanel: React.FC = () => {
                     </div>
                 )}
 
-                <nav className="mb-6 border-b border-slate-200 dark:border-zinc-700" role="tablist" aria-label="Admin Sections">
+                <nav className="mb-6 border-b border-slate-200 dark:border-zinc-700" role="tablist" aria-label={t('admin.tabsLabel')}>
                     <div className="flex items-center space-x-2 overflow-x-auto">
                         <TabButton isActive={activeTab === 'management'} onClick={() => setActiveTab('management')} icon={<NewspaperIcon className="w-5 h-5" />} label={t('admin.tabManagement')} />
                         <TabButton isActive={activeTab === 'health'} onClick={() => setActiveTab('health')} icon={<HeartbeatIcon className="w-5 h-5" />} label={t('admin.tabHealth')} />
