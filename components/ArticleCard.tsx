@@ -99,7 +99,7 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
     // Focus trap and keyboard handling
     useEffect(() => {
         if (isOpen) {
-            setTimeout(() => firstButtonRef.current?.focus(), 50);
+            const focusTimer = window.setTimeout(() => firstButtonRef.current?.focus(), 50);
 
             const handleKeyDown = (e: KeyboardEvent) => {
                 if (e.key === 'Escape') {
@@ -125,7 +125,10 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
             };
 
             document.addEventListener('keydown', handleKeyDown);
-            return () => document.removeEventListener('keydown', handleKeyDown);
+            return () => {
+                window.clearTimeout(focusTimer);
+                document.removeEventListener('keydown', handleKeyDown);
+            };
         }
     }, [isOpen, closeMenu, menuView]);
 
@@ -212,15 +215,9 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
                 <button
                     ref={triggerRef}
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(!isOpen); }}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            setIsOpen(true);
-                        }
-                    }}
                     className={`${buttonClassName || "p-2 rounded-full transition-colors duration-200 text-slate-400 bg-black/30 hover:text-white"} ${isOpen ? 'z-50' : ''}`}
                     aria-label={t('article.moreOptions')}
-                    aria-haspopup="true"
+                    aria-haspopup="dialog"
                     aria-expanded={isOpen}
                 >
                     <MoreIcon className="w-5 h-5" />
@@ -241,8 +238,10 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
                         ${!isOpen ? 'pointer-events-none' : ''}
                     `}
                     role="dialog"
-                    aria-modal="true"
+                    aria-label={t('article.articleOptions')}
+                    aria-modal={isOpen ? true : undefined}
                     aria-hidden={!isOpen}
+                    inert={!isOpen}
                 >
                     <div
                         className="
@@ -340,6 +339,14 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
     const prevIsFavorite = useRef(isFavorite);
 
     useEffect(() => {
+        return () => {
+            if (menuTimerRef.current !== null) {
+                window.clearTimeout(menuTimerRef.current);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
         if (isMenuOpen) {
             // FIX: Calculate scrollbar width before hiding it to prevent content shift
             const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
@@ -399,7 +406,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
         const moreButtonClass = "p-3 rounded-full transition-all duration-200 bg-slate-100 dark:bg-zinc-700 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-200 dark:hover:bg-zinc-600";
 
         return (
-            <a ref={ref as React.ForwardedRef<HTMLAnchorElement>} href={safeLink} target="_blank" rel="noopener noreferrer" className={`group ${cardBaseClasses} flex flex-col relative ${allowCardOverflow ? '!overflow-visible z-30' : 'overflow-hidden'} transition-shadow duration-300`}>
+            <article ref={ref} className={`group ${cardBaseClasses} flex flex-col relative ${allowCardOverflow ? '!overflow-visible z-30' : 'overflow-hidden'} transition-shadow duration-300`}>
                 <div className="relative overflow-hidden rounded-t-xl backface-hidden will-change-transform">
                     <img src={safeImageUrl} alt={article.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500 transform-gpu" loading="lazy" decoding="async" />
                     <div className="absolute top-3 left-3">
@@ -408,11 +415,20 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                     <div className="absolute bottom-0 left-0 bg-indigo-500 text-white px-2 py-1 text-xs font-bold rounded-tr-lg">{article.source}</div>
                 </div>
                 <div className="p-4 flex flex-col flex-grow">
-                    <h3 className="text-lg font-semibold mb-2 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">{article.title}</h3>
+                    <h3 className="text-lg font-semibold mb-2 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">
+                        <a
+                            href={safeLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="before:absolute before:inset-0 before:content-[''] focus-visible:outline-2 focus-visible:outline-indigo-500"
+                        >
+                            {article.title}
+                        </a>
+                    </h3>
                     <p className="text-sm text-slate-600 dark:text-zinc-400 flex-grow line-clamp-3">{article.summary}</p>
                     <div className="mt-auto pt-4 flex justify-between items-center">
                         <p className="text-sm text-slate-500 dark:text-zinc-400">{formatPublicationDate(article.publicationDate, t)}</p>
-                        <div className="flex items-center gap-1">
+                        <div className="relative z-10 flex items-center gap-1">
                             <button
                                 onClick={(e) => { e.preventDefault(); onToggleFavorite(article.id); }}
                                 className={`p-3 rounded-full transition-all duration-200 ${isFavorite ? favoriteActiveClass : favoriteInactiveClass}`}
@@ -432,7 +448,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                         </div>
                     </div>
                 </div>
-            </a>
+            </article>
         );
     }
 
@@ -441,11 +457,8 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
         const favoriteInactiveClass = 'bg-slate-100 dark:bg-zinc-700 text-slate-400 hover:text-yellow-400 hover:bg-slate-200 dark:hover:bg-zinc-600';
         const moreButtonClass = "p-3 rounded-full transition-all duration-200 bg-slate-100 dark:bg-zinc-700 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-200 dark:hover:bg-zinc-600";
         return (
-            <a
-                ref={ref as React.ForwardedRef<HTMLAnchorElement>}
-                href={safeLink}
-                target="_blank"
-                rel="noopener noreferrer"
+            <article
+                ref={ref}
                 className={`group ${cardBaseClasses} flex flex-col md:flex-row items-center relative ${allowCardOverflow ? '!overflow-visible z-30' : 'overflow-hidden'} transition-shadow duration-300`}
             >
                 <div className="relative w-full md:w-1/4 lg:w-1/5 h-44 flex-shrink-0 rounded-t-xl md:rounded-l-xl md:rounded-r-none overflow-hidden backface-hidden will-change-transform">
@@ -465,7 +478,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                             </span>
                             <LanguageTag language={article.language} />
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="relative z-10 flex items-center gap-1">
                             <button
                                 onClick={(e) => { e.preventDefault(); onToggleFavorite(article.id); }}
                                 className={`p-3 rounded-full transition-all duration-200 ${isFavorite ? favoriteActiveClass : favoriteInactiveClass}`}
@@ -485,7 +498,14 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                         </div>
                     </div>
                     <h3 className="text-xl font-bold mb-2 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">
-                        {article.title}
+                        <a
+                            href={safeLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="before:absolute before:inset-0 before:content-[''] focus-visible:outline-2 focus-visible:outline-indigo-500"
+                        >
+                            {article.title}
+                        </a>
                     </h3>
                     <p className="text-sm text-slate-600 dark:text-zinc-400 line-clamp-2 flex-grow">
                         {article.summary}
@@ -496,7 +516,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                         </span>
                     </div>
                 </div>
-            </a>
+            </article>
         );
     }
 
@@ -506,16 +526,20 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
         const moreButtonClass = 'p-3 rounded-full transition-all duration-200 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-200 dark:hover:bg-zinc-700';
 
         return (
-            <a
-                ref={ref as React.ForwardedRef<HTMLAnchorElement>}
-                href={safeLink}
-                target="_blank"
-                rel="noopener noreferrer"
+            <article
+                ref={ref}
                 className={`group ${cardBaseClasses} p-3 flex items-center justify-between gap-4 even:bg-slate-100 dark:even:bg-zinc-900/20 relative ${allowCardOverflow ? '!overflow-visible z-30' : ''} transition-shadow duration-200`}
             >
                 <div className="flex-grow overflow-hidden">
                     <h3 className="text-md font-semibold line-clamp-3 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">
-                        {article.title}
+                        <a
+                            href={safeLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="before:absolute before:inset-0 before:content-[''] focus-visible:outline-2 focus-visible:outline-indigo-500"
+                        >
+                            {article.title}
+                        </a>
                     </h3>
                     <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400 mt-1">
                         <span className="font-medium text-slate-700 dark:text-zinc-300 flex-shrink-0">{formatPublicationDate(article.publicationDate, t)}</span>
@@ -526,7 +550,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                     </div>
                 </div>
 
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="relative z-10 flex items-center gap-1 flex-shrink-0">
                     <button
                         onClick={(e) => {
                             e.preventDefault();
@@ -547,7 +571,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                         buttonClassName={moreButtonClass}
                     />
                 </div>
-            </a>
+            </article>
         );
     }
 

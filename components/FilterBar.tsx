@@ -140,7 +140,7 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
         setIsDropdownOpen(false);
     };
 
-    const handleRemoveSaved = (e: React.MouseEvent, search: string) => {
+    const handleRemoveSaved = (e: React.MouseEvent<HTMLButtonElement>, search: string) => {
         e.stopPropagation();
         setSavedSearches(prev => prev.filter(s => s !== search));
     };
@@ -182,12 +182,17 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
     ) => {
         const timeFilterId = `${idPrefix}-time-filter`;
         const sourceFilterId = `${idPrefix}-source-filter`;
+        const searchInputId = `${idPrefix}-article-search`;
 
         return (
             <div className="space-y-4">
             <div className="flex items-center gap-2">
                 <div ref={searchContainerRef} className="relative flex-grow">
+                    <label htmlFor={searchInputId} className="sr-only">
+                        {t('filter.search.label')}
+                    </label>
                     <input
+                        id={searchInputId}
                         type="text"
                         placeholder={t('filter.search.placeholder')}
                         value={inputValue}
@@ -217,14 +222,19 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
                             <p className="text-xs font-semibold text-slate-400 dark:text-zinc-500 px-2 pb-1 uppercase">{t('filter.search.savedSearches')}</p>
                             {savedSearches.map(search => (
                                 <div key={search} className="group flex items-center justify-between text-left w-full rounded-md hover:bg-slate-100 dark:hover:bg-zinc-700 active:bg-slate-200 dark:active:bg-zinc-600 transition-colors">
-                                    <button onMouseDown={() => handleSelectSaved(search)} className="flex items-center gap-2 flex-grow text-left px-3 py-2.5 text-base text-slate-700 dark:text-zinc-200 cursor-pointer overflow-hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSelectSaved(search)}
+                                        className="flex items-center gap-2 flex-grow text-left px-3 py-2.5 text-base text-slate-700 dark:text-zinc-200 cursor-pointer overflow-hidden"
+                                    >
                                         <SearchIcon className="w-5 h-5 text-slate-500 dark:text-zinc-400 flex-shrink-0" />
                                         <span className="truncate">{search}</span>
                                     </button>
                                     <button
-                                        onMouseDown={(e) => handleRemoveSaved(e, search)}
+                                        type="button"
+                                        onClick={(e) => handleRemoveSaved(e, search)}
                                         className="p-2.5 mr-2 text-slate-400 hover:text-red-500 dark:hover:text-red-400 rounded-full transition-colors flex-shrink-0 hover:bg-red-500/10"
-                                        aria-label={`Remove "${search}" from saved searches`}
+                                        aria-label={t('filter.search.removeSaved', { search })}
                                     >
                                         <TrashIcon className="w-5 h-5" />
                                     </button>
@@ -236,8 +246,12 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
 
                 {inputValue.length > 0 && (
                     <button
+                        type="button"
                         onClick={handleSaveSearch}
                         disabled={isCurrentSearchSaved}
+                        aria-label={isCurrentSearchSaved
+                            ? t('filter.search.saved')
+                            : t('filter.search.save')}
                         className={`flex-shrink-0 flex items-center justify-center gap-2 px-2 sm:px-4 rounded-lg text-sm font-semibold transition-all duration-200 border-2 h-11
                 ${ isCurrentSearchSaved
                             ? 'bg-indigo-500 border-indigo-500 text-white'
