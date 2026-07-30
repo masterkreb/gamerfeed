@@ -32,10 +32,13 @@ import {
     decodeTheme,
     decodeViewMode,
 } from './shared/persisted-state';
+import {
+    LOCAL_NEWS_CACHE_KEY,
+    LOCAL_NEWS_CACHE_TTL_MS,
+} from './shared/local-news-cache';
 
 const ARTICLES_PER_PAGE = 32;
 const INITIAL_ARTICLE_CACHE_COUNT = 32;
-const ARTICLE_CACHE_TTL_MS = 30 * 60 * 1000;
 
 // Analytics wird erst nach Zustimmung geladen und bei Widerruf wieder
 // stillgelegt. Der Lebenszyklus liegt in shared/analytics-lifecycle.js.
@@ -129,7 +132,7 @@ const AppContent: React.FC = () => {
     const [articles, setArticles] = useState<Article[]>([]);
     const articlesRef = useRef<Article[]>([]);
     const [cachedNews, setCachedNews] = useLocalStorage<CachedNews>(
-        'cachedNews',
+        LOCAL_NEWS_CACHE_KEY,
         { articles: [], timestamp: 0 },
         decodeCachedNews,
     );
@@ -180,7 +183,7 @@ const AppContent: React.FC = () => {
     ), []);
 
     const validCachedArticles = useMemo(() => {
-        const isFresh = Date.now() - cachedNews.timestamp < ARTICLE_CACHE_TTL_MS;
+        const isFresh = Date.now() - cachedNews.timestamp < LOCAL_NEWS_CACHE_TTL_MS;
         return isFresh ? cachedNews.articles : [];
     }, [cachedNews]);
 

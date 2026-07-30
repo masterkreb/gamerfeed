@@ -177,6 +177,21 @@ einer Ankündigung verlangt jetzt eine fokussierte Bestätigung im `alertdialog`
 und Fehler erhalten Eingaben, Datensätze und den jeweiligen Dialog. 650 zentrale
 Tests und 23 Browser-Abnahmen laufen erfolgreich. Als nächstes ist A1b bereit.
 
+**Stand 30. Juli 2026 (Branch `claude/a1b-admin-health-semantics`):** A1b ist
+abgeschlossen. Die vier Admin-Reiter sind vollwertige ARIA-Tabs mit stabilen
+IDs, `aria-controls`, `aria-labelledby`, roving `tabIndex` sowie Pfeiltasten,
+Home und End; die beiden Aufklapp-Schaltflächen tragen eindeutige lokalisierte
+Namen. Das Health Center nennt drei getrennte Kennzahlen – konfigurierte Feeds,
+Quellen im aktiven News-Snapshot und Quellen in der noch verwendbaren lokalen
+Browserkopie – und vergleicht Generationen nur, wenn beide Kennungen belegbar
+sind. Die unscharfe Namensnormalisierung ist entfernt: unzuordenbare
+Snapshot-Namen werden getrennt ausgewiesen, statt einen ähnlich geschriebenen
+Feed gesund zu melden. Die irreführenden Aktualisieren-Symbole je Feed-Zeile
+sind entfallen; der zentrale Knopf lädt ausdrücklich nur den gespeicherten
+Bericht. Der Legenden-Reiter beschreibt dieselbe Semantik ohne Verweise auf die
+alte Dateiarchitektur und ohne den nie gesetzten Zustand „Prüfe“. 672 zentrale
+Tests und 23 Browser-Abnahmen laufen erfolgreich. Als nächstes ist O4 bereit.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -198,8 +213,8 @@ Tests und 23 Browser-Abnahmen laufen erfolgreich. Als nächstes ist A1b bereit.
 | F4a | P2 | erledigt | Persistierten Zustand robust validieren |
 | F4b | P2 | erledigt | Verbliebene i18n-Inkonsistenzen schließen |
 | A1a | P2 | erledigt | Admin-Mutationen synchron absichern |
-| A1b | P2 | bereit | Admin-Tabs und Health-Beschriftung korrigieren |
-| O4 | P2 | geplant | Historie, Alarmierung und Proxy-Version beobachtbar machen |
+| A1b | P2 | erledigt | Admin-Tabs und Health-Beschriftung korrigieren |
+| O4 | P2 | bereit | Historie, Alarmierung und Proxy-Version beobachtbar machen |
 | D1 | P2 | Entscheidung nötig | Datenbankschema, Backup und Restore festlegen |
 | D2 | P2 | geplant | Lokale Produktionsschreibvorgänge explizit absichern |
 | S3 | P2 | Entscheidung nötig | Rate Limits und SMTP-Laufzeit festlegen |
@@ -634,7 +649,7 @@ unterschiedliche Generationen enthalten.
 
 ### O4 – Historie, Alarmierung und Versionsdrift
 
-**Status:** geplant, nachdem O1–O3b stehen.
+**Status:** bereit.
 
 - strukturierte Run- und Feed-Metriken sowie eine kurze
   `GITHUB_STEP_SUMMARY`;
@@ -894,7 +909,46 @@ Ausgangsstand, dass ohne Latch zwei Requests entstanden wären.
 
 ### A1b – Admin-Tabs und Health-Semantik
 
-**Status:** bereit.
+**Status:** erledigt. Die Reiterleiste folgt derselben Semantik wie der
+Einstellungsdialog (`admin-tab-<id>` / `admin-panel-<id>`, `aria-selected`,
+`aria-controls`, `aria-labelledby`, roving `tabIndex`, Pfeiltasten mit Umlauf,
+Home und End); Tastaturnavigation setzt Auswahl **und** Fokus. Die
+Aufklapp-Schaltflächen für Fehler- und Warnungsdetails unterscheiden in ihrem
+Namen Fehler von Warnungen und Ein- von Ausblenden und steuern dauerhaft
+gerenderte Bereiche.
+
+`services/admin-health-report.ts` leitet den Bericht rein und ohne i18n ab und
+trennt drei Kennzahlen: konfigurierte Feeds aus der Datenbank, Quellen mit
+Artikeln im aktiven News-Snapshot und Quellen in der lokalen Browserkopie.
+Letztere zählt nur, wenn sie derselbe Laufzeit-Decoder wie im Frontend annimmt
+und sie innerhalb der gemeinsamen 30-Minuten-Frist aus
+`shared/local-news-cache.ts` liegt – dieselbe Konstante verwendet auch
+`App.tsx`. Verglichen werden Generationen ausschließlich über zwei belegbare
+Kennungen; eine fehlende heißt „Legacy/unbekannt“, nie „gleich“. Damit trennt
+das Admin den Fall VG247 (erfolgreich abgerufen, aber nicht im aktiven
+Snapshot: Warnung) sauber von GameStar (im aktiven Snapshot, nur in einer
+älteren lokalen Kopie nicht: OK mit Hinweis, kein Feed-Ausfall).
+
+Der Legenden-Reiter beschreibt dieselben Regeln: keine Dateinamen der alten
+Architektur, keine behauptete Live-Prüfung einzelner Feeds und kein Eintrag
+„Prüfe“ mehr, weil dieser Zeilenstatus nirgends gesetzt wird.
+
+Backend-Abrufstatus und Snapshot-Präsenz bleiben getrennt. Eine Backend-Warnung
+bleibt deshalb immer eine Warnung: Der Cron vergibt sie für eine wegen
+Zeitbudget zurückgestellte Quelle und für einen erfolgreich abgerufenen, aber
+leeren Feed. Beide behalten ihre **älteren** Artikel im aktiven Snapshot, und
+deren Präsenz belegt keinen erfolgreichen Abruf. Die bereits cron-seitig
+bereinigte Meldung erscheint in einem lokalisierten Satz zusammen mit der
+getrennten Snapshot-Aussage.
+
+Die unscharfe Namensnormalisierung ist entfernt. Zugeordnet wird nur über exakt
+gleiche Quellennamen; Snapshot-Namen ohne passenden Feed werden separat
+aufgelistet, statt einen ähnlich geschriebenen Feed auf „OK“ zu setzen. Jeder
+konfigurierte Feed bleibt eine eigene Zeile. Die redundanten
+Aktualisieren-Symbole je Feed-Zeile führten in Wahrheit denselben globalen
+Abruf aus und sind entfallen; der zentrale Knopf heißt „Gespeicherten
+Statusbericht neu laden“ und nennt ausdrücklich, dass weder ein RSS-Abruf noch
+ein GitHub-Action-Lauf startet.
 
 **Umfang:**
 
@@ -929,6 +983,15 @@ Ausgangsstand, dass ohne Latch zwei Requests entstanden wären.
   bereitstellt;
 - gleiche, abweichend geschriebene oder derzeit artikelarme Quellennamen führen
   weder zu einer verschwundenen Zeile noch zu einer falschen Gesundmeldung.
+
+Erfüllt durch `tests/frontend/unit/admin-panel-a11y.test.js` und
+`tests/frontend/unit/admin-health-report.test.js`. Beide prüfen die echte
+Admin-Komponente; die reine Ableitung wird zusätzlich mit kontrollierter Uhr
+direkt getestet. Ein gerenderter Test prüft den Legenden-Reiter in DE und EN.
+Gegenproben: mit wiederhergestellter Namensnormalisierung beziehungsweise mit
+„fehlende Kennung gilt als gleich“ fallen jeweils zwei Tests, ohne die
+ausdrückliche Behandlung von `warning` fünf, mit den alten Legendentexten der
+Legenden-Test.
 
 Ein echter manueller Einzelquellen-Abruf ist ein separates, derzeit nicht
 geplantes Produktfeature.

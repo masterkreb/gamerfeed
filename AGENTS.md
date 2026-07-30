@@ -83,6 +83,7 @@
 │   └── useLocalStorage.ts  # localStorage Hook
 │
 ├── services/
+│   ├── admin-health-report.ts  # Reine Ableitung der Admin-Kennzahlen
 │   ├── feeds-api.ts        # HTTP-Zugriff für Feed-Verwaltung
 │   └── news-load-controller.ts # Latest-request-wins für Preview/Medium/Full
 │
@@ -108,6 +109,7 @@
 │   ├── news-snapshot.js         # Generationsgebundenes Leseprotokoll
 │   ├── news-snapshot-store.js   # Unveränderliche Keys, Manifest und Dual-Read
 │   ├── persisted-state.ts       # Decoder und Defaults für Browserzustand
+│   ├── local-news-cache.ts      # Schlüssel, Frist und Lesen der lokalen Kopie
 │   ├── i18n-locale.ts           # App-Sprache auf festes Datums-Locale abbilden
 │   ├── api-errors.js            # Stabile Fehlercodes und Cache-Vorgabe
 │   └── feed-health-model.js     # Cron-Heartbeat, Frische, FEED_STALE_AFTER_MS
@@ -230,6 +232,75 @@ Schaltfläche „Neuen Feed hinzufügen“ beziehungsweise das Ankündigungs-Tex
 Der Speichern-Knopf taugt dafür nicht: ohne Nachricht ist er deaktiviert und
 damit nicht fokussierbar.
 
+### Admin-Reiter und Health-Semantik
+
+Die vier Admin-Reiter sind vollwertige ARIA-Tabs mit derselben Semantik wie im
+Einstellungsdialog: stabile IDs (`admin-tab-<id>` / `admin-panel-<id>`),
+`aria-selected`, `aria-controls`, `aria-labelledby`, roving `tabIndex` sowie
+Pfeiltasten mit Umlauf, Home und End. Tastaturnavigation setzt Auswahl **und**
+Fokus. Die beiden Aufklapp-Schaltflächen für Fehler- und Warnungsdetails tragen
+lokalisierte Namen, die Fehler von Warnungen und Ein- von Ausblenden
+unterscheiden, und steuern über `aria-controls` dauerhaft gerenderte Bereiche.
+
+**Der Admin ruft keinen RSS-Feed live ab.** Die früheren Aktualisieren-Symbole
+je Feed-Zeile führten in Wahrheit denselben globalen Abruf aus und sind deshalb
+entfernt. Der zentrale Knopf heißt „Gespeicherten Statusbericht neu laden“ und
+sagt ausdrücklich, dass weder ein RSS-Abruf noch ein GitHub-Action-Lauf startet.
+Ein echter manueller Einzelquellen-Abruf ist bewusst kein Bestandteil.
+
+`services/admin-health-report.ts` leitet den Bericht rein und ohne i18n ab. Es
+unterscheidet **drei verschiedene Kennzahlen**, die voneinander abweichen dürfen:
+
+| Kennzahl | Herkunft | Warum sie schwankt |
+|---|---|---|
+| Konfigurierte Feeds | `feeds`-Tabelle | ändert sich nur beim Anlegen oder Entfernen |
+| Quellen im aktiven News-Snapshot | `sourcesInCache` der Health-API | je Lauf verschieden; eine Quelle ohne Artikel fehlt |
+| Quellen in der lokalen Browserkopie | `cachedNews` dieses Browsers | nur solange das Frontend sie verwenden würde |
+
+`shared/local-news-cache.ts` hält Schlüssel und Frist der lokalen Kopie an
+**einer** Stelle; `App.tsx` verwendet dieselbe Konstante. Als „vom Frontend
+verwendbar“ gilt eine Kopie nur, wenn sie derselbe Laufzeit-Decoder aus
+`shared/persisted-state.ts` annimmt **und** sie jünger als 30 Minuten ist.
+Fehlend, unlesbar und abgelaufen bleiben unterscheidbar und ergeben „unbekannt“.
+
+**Generationen werden nur verglichen, wenn beide Kennungen belegbar sind.** Eine
+fehlende `snapshotId` heißt „Legacy/unbekannt“, nie „gleich“. Daraus folgen die
+drei Aussagen `same`, `different` und `unknown` – und die Trennung zweier Fälle,
+die vorher gleich aussahen:
+
+- **VG247** wird erfolgreich abgerufen, hat aber keine Artikel im aktiven
+  Snapshot: Warnung, „nicht im aktiven News-Snapshot“.
+- **GameStar** steht im aktiven Snapshot und fehlt nur in einer älteren lokalen
+  Kopie: Status **OK** mit Hinweis auf den Snapshot-Unterschied – kein
+  Feed-Ausfall.
+
+**Die unscharfe Namensnormalisierung ist entfernt.** Zugeordnet wird
+ausschließlich über exakt gleiche Quellennamen. Ein Feed ohne exakte
+Entsprechung bleibt eine Warnung statt still gesund zu werden, und
+Snapshot-Quellennamen ohne passenden Feed werden separat als „nicht zugeordnet“
+aufgelistet, statt zu verschwinden. Jeder konfigurierte Feed bleibt in jedem
+Fall eine eigene Zeile: fehlend, ähnlich geschrieben, artikellos oder unbekannt.
+Backend-Abrufstatus und Snapshot-Präsenz sind zwei getrennte Aussagen. Eine
+Backend-**Warnung** bleibt deshalb immer eine Warnung, egal was der Snapshot
+sagt: Der Cron vergibt sie unter anderem für eine wegen Zeitbudget
+zurückgestellte Quelle, die ihre alten Artikel behält, und für einen erfolgreich
+abgerufenen, aber leeren Feed. In beiden Fällen können noch **ältere** Artikel im
+aktiven Snapshot liegen – ihre Präsenz belegt keinen erfolgreichen Abruf und darf
+die Warnung nie in „OK“ umschlagen lassen. Die Snapshot-Aussage steht trotzdem
+daneben, und die bereits cron-seitig bereinigte Backend-Meldung erscheint in
+einem lokalisierten Satz.
+
+Kann der gespeicherte Bericht gar nicht geladen werden, sind alle Zeilen
+**unbekannt**, nicht rot: Nicht die Feeds sind ausgefallen, sondern der Bericht
+über sie fehlt.
+Der textlastige Legenden-Reiter trägt `tabIndex={0}`, damit er ohne
+Bedienelemente per Tastatur erreichbar und scrollbar bleibt. Seine Texte
+beschreiben genau diese Semantik: kein Verweis mehr auf `news-cache.json` oder
+`feed-health-status.json`, OK nur bei `success` **und** exaktem Quellennamen im
+aktiven Snapshot, Warnung für beide Ursachen. Den Eintrag „Prüfe“ gibt es nicht
+mehr – es wird kein einzelner Feed live geprüft, und der Zeilenstatus `checking`
+ist ersatzlos aus `HealthState` entfernt.
+
 ### Persistierter Browserzustand
 
 `hooks/useLocalStorage.ts` akzeptiert nur noch Aufrufe mit einem
@@ -299,6 +370,8 @@ läuft).
 - ✅ Feed-Verwaltung (CRUD) mit Löschbestätigung
 - ✅ Mutationen gegen synchrone Doppelauslösung gesperrt
 - ✅ Health Center (Feed-Status, letzter Lauf, Kern-Publish, Inhaltsfrische)
+- ✅ Drei getrennte Quellen-Kennzahlen mit Snapshot-Vergleich
+- ✅ Vollwertige ARIA-Tabs mit Pfeiltasten, Home und End
 - ✅ Ankündigungs-System (Info, Warnung, Wartung, Feier) mit Löschbestätigung
 
 ---
@@ -749,6 +822,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Persistierter Zustand (F4a): verpflichtende Laufzeit-Decoder, feste Defaults, sichere Cross-Tab-Löschung und validierte lokale News-Kopien
 - **Juli 2026:** i18n-Konsistenz (F4b): Datumswerte an die App-Sprache gebunden, verbliebene UI- und ARIA-Texte nach DE/EN überführt und Sprachwechsel ohne Reload getestet
 - **Juli 2026:** Admin-Mutationen (A1a): synchroner `useRef`-Latch für Feed-POST/PUT/DELETE und die gemeinsam gesperrten Ankündigungs-Mutationen, Bestätigungsdialog vor dem Löschen einer Ankündigung, Fehlerpfade erhalten Eingaben und Datensätze
+- **Juli 2026:** Admin-Tabs und Health-Semantik (A1b): vollwertige ARIA-Tabs mit Pfeiltasten, benannte Aufklapp-Schaltflächen, drei getrennte Quellen-Kennzahlen mit belegbarem Snapshot-Vergleich, unscharfe Gesundmeldung entfernt, irreführende Einzelabruf-Symbole entfernt
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 

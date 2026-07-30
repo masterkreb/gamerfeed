@@ -21,31 +21,54 @@ import { HealthCenterTab } from './HealthCenterTab';
 import { HealthLegendTab } from './HealthLegendTab';
 import { AnnouncementTab } from './AnnouncementTab';
 import type { HealthState } from './healthTypes';
+import {
+    buildAdminHealthReport,
+    buildUnavailableHealthReport,
+    type AdminHealthReport,
+} from '../../services/admin-health-report';
+import {
+    LOCAL_NEWS_CACHE_KEY,
+    readLocalNewsCache,
+    type LocalNewsCacheState,
+} from '../../shared/local-news-cache';
 
 // Types
-type AdminTab = 'management' | 'health' | 'legend' | 'announcement';
+type AdminTab = 'management' | 'health' | 'announcement' | 'legend';
 export type FeedHealth = Record<string, HealthState>;
 
-const TabButton: React.FC<{
-    isActive: boolean;
-    onClick: () => void;
-    icon: React.ReactNode;
-    label: string;
-}> = ({ isActive, onClick, icon, label }) => (
-    <button
-        onClick={onClick}
-        className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-t-lg border-b-2 transition-colors ${
-            isActive
-                ? 'text-indigo-600 dark:text-indigo-400 border-indigo-500'
-                : 'text-slate-500 dark:text-zinc-400 border-transparent hover:border-slate-300 dark:hover:border-zinc-600 hover:text-slate-700 dark:hover:text-zinc-200'
-        }`}
-        role="tab"
-        aria-selected={isActive}
-    >
-        {icon}
-        {label}
-    </button>
-);
+const ADMIN_TABS: { id: AdminTab; labelKey: string }[] = [
+    { id: 'management', labelKey: 'admin.tabManagement' },
+    { id: 'health', labelKey: 'admin.tabHealth' },
+    { id: 'announcement', labelKey: 'admin.tabAnnouncement' },
+    { id: 'legend', labelKey: 'admin.tabLegend' },
+];
+
+const TAB_ICONS: Record<AdminTab, React.ReactNode> = {
+    management: <NewspaperIcon className="w-5 h-5" />,
+    health: <HeartbeatIcon className="w-5 h-5" />,
+    announcement: <MegaphoneIcon className="w-5 h-5" />,
+    legend: <QuestionMarkCircleIcon className="w-5 h-5" />,
+};
+
+const getTabId = (tab: AdminTab) => `admin-tab-${tab}`;
+const getPanelId = (tab: AdminTab) => `admin-panel-${tab}`;
+
+/**
+ * Liest die lokale Artikelkopie des Frontends. Das Admin liegt auf derselben
+ * Herkunft und sieht deshalb genau den Stand, mit dem der Browser arbeitet.
+ */
+function readLocalCacheState(): LocalNewsCacheState {
+    if (typeof window === 'undefined') {
+        return { status: 'missing' };
+    }
+
+    try {
+        return readLocalNewsCache(window.localStorage.getItem(LOCAL_NEWS_CACHE_KEY), Date.now());
+    } catch {
+        // Ein blockierter Speicher ist kein leerer Speicher.
+        return { status: 'unreadable' };
+    }
+}
 
 const FeedLoadState: React.FC<{
     isLoading: boolean;
@@ -104,38 +127,77 @@ export const AdminPanel: React.FC = () => {
     const [deleteError, setDeleteError] = useState<string | null>(null);
     const deleteCancelButtonRef = useRef<HTMLButtonElement>(null);
     const addFeedButtonRef = useRef<HTMLButtonElement>(null);
-    const [feedHealth, setFeedHealth] = useState<FeedHealth>({});
     const [heartbeat, setHeartbeat] = useState<FeedHeartbeat | null>(null);
     const [activeTab, setActiveTab] = useState<AdminTab>('management');
-    const [isCheckingAll, setIsCheckingAll] = useState(false);
+    const [isReloadingReport, setIsReloadingReport] = useState(false);
+    const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+    /** Zuletzt gelesener gespeicherter Statusbericht; `null` vor dem Laden. */
+    const [storedReport, setStoredReport] = useState<{
+        backendHealth: HealthDataResponse['healthStatus'];
+        sourcesInCache: string[] | null;
+        activeSnapshot: HealthDataResponse['snapshot'];
+    } | null>(null);
+    const [isReportUnavailable, setIsReportUnavailable] = useState(false);
+    const [localCache, setLocalCache] = useState<LocalNewsCacheState>(readLocalCacheState);
 
     // State for alert box visibility
     const [isErrorsExpanded, setIsErrorsExpanded] = useState(true);
     const [isWarningsExpanded, setIsWarningsExpanded] = useState(true);
 
-    // Initialize health status for any new feeds
-    useEffect(() => {
-        const initialHealth: FeedHealth = {};
-        feeds.forEach(feed => {
-            if (!feedHealth[feed.id]) {
-                initialHealth[feed.id] = { status: 'unknown', detail: null };
-            }
-        });
-        if (Object.keys(initialHealth).length > 0) {
-            setFeedHealth(prev => ({ ...prev, ...initialHealth }));
+    const healthReport: AdminHealthReport = useMemo(() => {
+        if (isReportUnavailable) {
+            return buildUnavailableHealthReport(feeds, localCache);
         }
-    }, [feeds, feedHealth]);
 
+        return buildAdminHealthReport({
+            feeds,
+            backendHealth: storedReport?.backendHealth ?? null,
+            sourcesInCache: storedReport?.sourcesInCache ?? null,
+            activeSnapshot: storedReport?.activeSnapshot ?? null,
+            localCache,
+        });
+    }, [feeds, isReportUnavailable, localCache, storedReport]);
 
-    const failingFeeds = useMemo(() => {
-        return feeds.filter(feed => feedHealth[feed.id]?.status === 'error')
-            .sort((a,b) => a.name.localeCompare(b.name));
-    }, [feeds, feedHealth]);
+    // Die Feed-Verwaltung zeigt nur Symbol und Kurztext; die Übersetzung
+    // passiert deshalb erst hier, nicht in der reinen Ableitung.
+    const feedHealth = useMemo<FeedHealth>(() => Object.fromEntries(
+        healthReport.rows.map(row => [row.feedId, {
+            status: row.status,
+            detail: t(row.detailKey, row.detailParams),
+        }]),
+    ), [healthReport, t]);
 
-    const warningFeeds = useMemo(() => {
-        return feeds.filter(feed => feedHealth[feed.id]?.status === 'warning')
-            .sort((a,b) => a.name.localeCompare(b.name));
-    }, [feeds, feedHealth]);
+    const failingFeeds = useMemo(() => (
+        feeds.filter(feed => feedHealth[feed.id]?.status === 'error')
+            .sort((a, b) => a.name.localeCompare(b.name))
+    ), [feeds, feedHealth]);
+
+    const warningFeeds = useMemo(() => (
+        feeds.filter(feed => feedHealth[feed.id]?.status === 'warning')
+            .sort((a, b) => a.name.localeCompare(b.name))
+    ), [feeds, feedHealth]);
+
+    const handleTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+        const lastIndex = ADMIN_TABS.length - 1;
+        let nextIndex: number | null = null;
+
+        if (event.key === 'ArrowRight') {
+            nextIndex = index === lastIndex ? 0 : index + 1;
+        } else if (event.key === 'ArrowLeft') {
+            nextIndex = index === 0 ? lastIndex : index - 1;
+        } else if (event.key === 'Home') {
+            nextIndex = 0;
+        } else if (event.key === 'End') {
+            nextIndex = lastIndex;
+        }
+
+        if (nextIndex === null) return;
+
+        event.preventDefault();
+        setActiveTab(ADMIN_TABS[nextIndex].id);
+        tabRefs.current[nextIndex]?.focus();
+    };
 
     const handleAddNew = () => { setEditingFeed(null); setIsModalOpen(true); };
     const handleEdit = (feed: FeedSource) => { setEditingFeed(feed); setIsModalOpen(true); };
@@ -171,12 +233,9 @@ export const AdminPanel: React.FC = () => {
             setDeleteError(null);
 
             try {
+                // Der Statusbericht ist eine Ableitung aus der Feed-Liste; ein
+                // gelöschter Feed verschwindet daraus von selbst.
                 await deleteFeed(targetFeed.id);
-                setFeedHealth(prev => {
-                    const newHealth = { ...prev };
-                    delete newHealth[targetFeed.id];
-                    return newHealth;
-                });
                 setFeedToDelete(null);
             } catch (error) {
                 // Feed und Bestätigungsdialog bleiben erhalten; der interne
@@ -187,122 +246,57 @@ export const AdminPanel: React.FC = () => {
         });
     };
 
-    // Health Check Logic
-    const refreshHealthStatus = useCallback(async () => {
-        setIsCheckingAll(true);
+    /**
+     * Lädt den **gespeicherten** Statusbericht des letzten Cron-Laufs erneut.
+     *
+     * Es wird bewusst kein RSS-Feed abgerufen und kein Workflow gestartet; die
+     * Oberfläche darf deshalb auch keine Einzelprüfung behaupten.
+     */
+    const reloadStoredReport = useCallback(async () => {
+        setIsReloadingReport(true);
+        // Die lokale Kopie kann sich im Frontend-Tab geändert haben.
+        setLocalCache(readLocalCacheState());
+
         try {
             const response = await fetch(`/api/get-health-data?t=${Date.now()}`);
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: `Could not fetch health data: ${response.statusText}` }));
-                throw new Error(errorData.error);
+                throw new Error(`Health request failed with status ${response.status}`);
             }
 
             const {
-                healthStatus: backendHealth,
-                sourcesInCache: sourcesInCacheArray,
+                healthStatus,
+                sourcesInCache,
                 heartbeat: backendHeartbeat,
+                snapshot,
             } = await response.json() as HealthDataResponse;
 
-            const sourcesInCache = new Set(sourcesInCacheArray);
             setHeartbeat(backendHeartbeat ?? null);
-
-            // Debug logging to help identify naming mismatches
-            console.log('🔍 Health Check Debug Info:');
-            console.log('  Sources in cache:', Array.from(sourcesInCache));
-            console.log('  Feeds being checked:', feeds.map(f => ({ id: f.id, name: f.name })));
-
-            const newHealthState: FeedHealth = {};
-            feeds.forEach(feed => {
-                const backendStatus = backendHealth[feed.id];
-
-                // Case 1: Feed not in backend health status
-                if (!backendStatus) {
-                    newHealthState[feed.id] = {
-                        status: 'error',
-                        detail: t('admin.health.detailNotProcessed')
-                    };
-                    return;
-                }
-
-                // Case 2: Feed steht im Status, wurde aber nicht verarbeitet –
-                // etwa weil der Lauf vorher abgebrochen ist.
-                if (backendStatus.status === 'unknown') {
-                    newHealthState[feed.id] = {
-                        status: 'unknown',
-                        detail: t('admin.health.detailNotProcessed')
-                    };
-                    return;
-                }
-
-                // Case 3: Backend reported an error
-                if (backendStatus.status === 'error') {
-                    newHealthState[feed.id] = {
-                        status: 'error',
-                        detail: t('admin.health.detailBackendError', { message: backendStatus.message })
-                    };
-                    return;
-                }
-
-                // Case 4: Backend was successful or has warning
-                if (backendStatus.status === 'success' || backendStatus.status === 'warning') {
-                    // First try exact match
-                    let isInCache = sourcesInCache.has(feed.name);
-
-                    // If no exact match, try fuzzy matching
-                    if (!isInCache) {
-                        const normalizedFeedName = feed.name.toLowerCase().replace(/[\s.]+/g, '');
-                        isInCache = Array.from(sourcesInCache).some(source =>
-                            source.toLowerCase().replace(/[\s.]+/g, '') === normalizedFeedName
-                        );
-
-                        if (isInCache) {
-                            console.warn(`⚠️ Feed "${feed.name}" found in cache with fuzzy matching. Consider updating the database name to match exactly.`);
-                        }
-                    }
-
-                    if (isInCache) {
-                        newHealthState[feed.id] = {
-                            status: 'ok',
-                            detail: t('admin.health.detailOk')
-                        };
-                    } else {
-                        newHealthState[feed.id] = {
-                            status: 'warning',
-                            detail: t('admin.health.detailWarningNotInCache', { feedName: feed.name })
-                        };
-                    }
-                }
+            setStoredReport({
+                backendHealth: healthStatus ?? {},
+                sourcesInCache: Array.isArray(sourcesInCache) ? sourcesInCache : null,
+                activeSnapshot: snapshot ?? null,
             });
-
-            setFeedHealth(newHealthState);
-            console.log('✅ Health check completed successfully');
-
+            setIsReportUnavailable(false);
         } catch (error) {
-            const message = error instanceof Error ? error.message : "An unknown error occurred";
-            console.error("❌ Error refreshing health status:", error);
+            // Der interne Text bleibt im Log; die Oberfläche zeigt eine
+            // lokalisierte Meldung.
+            console.error('Error reloading the stored health report:', error);
 
             // Ohne frische Antwort ist auch der Heartbeat nicht mehr belegt.
             setHeartbeat(null);
-
-            const errorState: FeedHealth = {};
-            feeds.forEach(feed => {
-                errorState[feed.id] = {
-                    status: 'error',
-                    detail: t('admin.health.detailFetchError', { message })
-                };
-            });
-            setFeedHealth(errorState);
+            setStoredReport(null);
+            setIsReportUnavailable(true);
         } finally {
-            setIsCheckingAll(false);
+            setIsReloadingReport(false);
         }
-    }, [feeds, t]);
+    }, []);
 
     useEffect(() => {
-        if(feeds.length > 0) {
-            refreshHealthStatus();
+        if (feeds.length > 0) {
+            void reloadStoredReport();
         }
-    }, [feeds.length]);
+    }, [feeds.length, reloadStoredReport]);
 
 
     return (
@@ -320,7 +314,7 @@ export const AdminPanel: React.FC = () => {
             <main className="container mx-auto p-4 md:p-6">
 
                 {failingFeeds.length > 0 && (
-                    <div className={`bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 text-red-800 dark:text-red-200 p-4 rounded-lg mb-6 animate-fade-in ${isCheckingAll ? 'animate-pulse' : ''}`}>
+                    <div className={`bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 text-red-800 dark:text-red-200 p-4 rounded-lg mb-6 animate-fade-in ${isReloadingReport ? 'animate-pulse' : ''}`}>
                         <div className="flex items-start">
                             <div className="flex-shrink-0 mt-0.5">
                                 <WarningIcon className="w-6 h-6 text-red-500" />
@@ -330,31 +324,40 @@ export const AdminPanel: React.FC = () => {
                                     <h3 className="text-lg font-medium">
                                         {t('admin.failedFeedsTitle', { count: failingFeeds.length })}
                                     </h3>
-                                    <button onClick={() => setIsErrorsExpanded(!isErrorsExpanded)} className="p-2 -m-2 rounded-full hover:bg-red-200 dark:hover:bg-red-800/50" aria-expanded={isErrorsExpanded}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsErrorsExpanded(!isErrorsExpanded)}
+                                        className="p-2 -m-2 rounded-full hover:bg-red-200 dark:hover:bg-red-800/50"
+                                        aria-expanded={isErrorsExpanded}
+                                        aria-controls="admin-failed-feeds-details"
+                                        aria-label={isErrorsExpanded
+                                            ? t('admin.failedFeedsHide')
+                                            : t('admin.failedFeedsShow')}
+                                    >
                                         {isErrorsExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
                                     </button>
                                 </div>
-                                {isErrorsExpanded && (
-                                    <div className="mt-2 text-sm">
-                                        <p>{t('admin.failedFeedsDesc')}</p>
-                                        <ul className="list-none mt-3 space-y-2 text-xs">
-                                            {failingFeeds.map(feed => (
-                                                <li key={feed.id} className="font-mono p-2 bg-slate-50 dark:bg-zinc-800/30 rounded">
-                                                    <p className="font-sans font-semibold text-base mr-2">{feed.name}</p>
-                                                    <p className="text-xs text-slate-500 dark:text-zinc-400 truncate mt-1" title={feed.url}>{feed.url}</p>
-                                                    <p className="mt-1 text-red-700 dark:text-red-300 font-sans">{feedHealth[feed.id]?.detail}</p>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
+                                {/* Immer gerendert: `aria-controls` darf nicht auf eine
+                                    fehlende ID zeigen. */}
+                                <div id="admin-failed-feeds-details" className="mt-2 text-sm" hidden={!isErrorsExpanded}>
+                                    <p>{t('admin.failedFeedsDesc')}</p>
+                                    <ul className="list-none mt-3 space-y-2 text-xs">
+                                        {failingFeeds.map(feed => (
+                                            <li key={feed.id} className="font-mono p-2 bg-slate-50 dark:bg-zinc-800/30 rounded">
+                                                <p className="font-sans font-semibold text-base mr-2">{feed.name}</p>
+                                                <p className="text-xs text-slate-500 dark:text-zinc-400 truncate mt-1" title={feed.url}>{feed.url}</p>
+                                                <p className="mt-1 text-red-700 dark:text-red-300 font-sans">{feedHealth[feed.id]?.detail}</p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
                 )}
 
                 {warningFeeds.length > 0 && (
-                    <div className={`bg-amber-100 dark:bg-amber-900/30 border-l-4 border-amber-500 text-amber-800 dark:text-amber-200 p-4 rounded-lg mb-6 animate-fade-in ${isCheckingAll ? 'animate-pulse' : ''}`}>
+                    <div className={`bg-amber-100 dark:bg-amber-900/30 border-l-4 border-amber-500 text-amber-800 dark:text-amber-200 p-4 rounded-lg mb-6 animate-fade-in ${isReloadingReport ? 'animate-pulse' : ''}`}>
                         <div className="flex items-start">
                             <div className="flex-shrink-0 mt-0.5">
                                 <WarningIcon className="w-6 h-6 text-amber-500" />
@@ -364,39 +367,72 @@ export const AdminPanel: React.FC = () => {
                                     <h3 className="text-lg font-medium">
                                         {t('admin.warningFeedsTitle', { count: warningFeeds.length })}
                                     </h3>
-                                    <button onClick={() => setIsWarningsExpanded(!isWarningsExpanded)} className="p-2 -m-2 rounded-full hover:bg-amber-200 dark:hover:bg-amber-800/50" aria-expanded={isWarningsExpanded}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsWarningsExpanded(!isWarningsExpanded)}
+                                        className="p-2 -m-2 rounded-full hover:bg-amber-200 dark:hover:bg-amber-800/50"
+                                        aria-expanded={isWarningsExpanded}
+                                        aria-controls="admin-warning-feeds-details"
+                                        aria-label={isWarningsExpanded
+                                            ? t('admin.warningFeedsHide')
+                                            : t('admin.warningFeedsShow')}
+                                    >
                                         {isWarningsExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
                                     </button>
                                 </div>
-                                {isWarningsExpanded && (
-                                    <div className="mt-2 text-sm">
-                                        <p>{t('admin.warningFeedsDesc')}</p>
-                                        <ul className="list-none mt-3 space-y-2 text-xs">
-                                            {warningFeeds.map(feed => (
-                                                <li key={feed.id} className="font-mono p-2 bg-slate-50 dark:bg-zinc-800/30 rounded">
-                                                    <p className="font-sans font-semibold text-base mr-2">{feed.name}</p>
-                                                    <p className="text-xs text-slate-500 dark:text-zinc-400 truncate mt-1" title={feed.url}>{feed.url}</p>
-                                                    <p className="mt-1 text-amber-700 dark:text-amber-300 font-sans">{feedHealth[feed.id]?.detail}</p>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
+                                <div id="admin-warning-feeds-details" className="mt-2 text-sm" hidden={!isWarningsExpanded}>
+                                    <p>{t('admin.warningFeedsDesc')}</p>
+                                    <ul className="list-none mt-3 space-y-2 text-xs">
+                                        {warningFeeds.map(feed => (
+                                            <li key={feed.id} className="font-mono p-2 bg-slate-50 dark:bg-zinc-800/30 rounded">
+                                                <p className="font-sans font-semibold text-base mr-2">{feed.name}</p>
+                                                <p className="text-xs text-slate-500 dark:text-zinc-400 truncate mt-1" title={feed.url}>{feed.url}</p>
+                                                <p className="mt-1 text-amber-700 dark:text-amber-300 font-sans">{feedHealth[feed.id]?.detail}</p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
                 )}
 
-                <nav className="mb-6 border-b border-slate-200 dark:border-zinc-700" role="tablist" aria-label={t('admin.tabsLabel')}>
-                    <div className="flex items-center space-x-2 overflow-x-auto">
-                        <TabButton isActive={activeTab === 'management'} onClick={() => setActiveTab('management')} icon={<NewspaperIcon className="w-5 h-5" />} label={t('admin.tabManagement')} />
-                        <TabButton isActive={activeTab === 'health'} onClick={() => setActiveTab('health')} icon={<HeartbeatIcon className="w-5 h-5" />} label={t('admin.tabHealth')} />
-                        <TabButton isActive={activeTab === 'announcement'} onClick={() => setActiveTab('announcement')} icon={<MegaphoneIcon className="w-5 h-5" />} label={t('admin.tabAnnouncement')} />
-                        <TabButton isActive={activeTab === 'legend'} onClick={() => setActiveTab('legend')} icon={<QuestionMarkCircleIcon className="w-5 h-5" />} label={t('admin.tabLegend')} />
+                <nav className="mb-6 border-b border-slate-200 dark:border-zinc-700">
+                    <div className="flex items-center space-x-2 overflow-x-auto" role="tablist" aria-label={t('admin.tabsLabel')}>
+                        {ADMIN_TABS.map((tab, index) => (
+                            <button
+                                key={tab.id}
+                                ref={element => { tabRefs.current[index] = element; }}
+                                type="button"
+                                id={getTabId(tab.id)}
+                                role="tab"
+                                aria-selected={activeTab === tab.id}
+                                aria-controls={getPanelId(tab.id)}
+                                // Roving tabIndex: nur der aktive Reiter liegt in der
+                                // Tab-Reihenfolge, innerhalb der Leiste wird mit den
+                                // Pfeiltasten navigiert.
+                                tabIndex={activeTab === tab.id ? 0 : -1}
+                                onClick={() => setActiveTab(tab.id)}
+                                onKeyDown={event => handleTabKeyDown(event, index)}
+                                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-t-lg border-b-2 transition-colors ${
+                                    activeTab === tab.id
+                                        ? 'text-indigo-600 dark:text-indigo-400 border-indigo-500'
+                                        : 'text-slate-500 dark:text-zinc-400 border-transparent hover:border-slate-300 dark:hover:border-zinc-600 hover:text-slate-700 dark:hover:text-zinc-200'
+                                }`}
+                            >
+                                {TAB_ICONS[tab.id]}
+                                {t(tab.labelKey)}
+                            </button>
+                        ))}
                     </div>
                 </nav>
 
-                <div role="tabpanel" hidden={activeTab !== 'management'}>
+                <div
+                    id={getPanelId('management')}
+                    role="tabpanel"
+                    aria-labelledby={getTabId('management')}
+                    hidden={activeTab !== 'management'}
+                >
                     {loadStatus === 'ready' ? (
                         <FeedManagementTab
                             feeds={feeds}
@@ -405,7 +441,6 @@ export const AdminPanel: React.FC = () => {
                             onAddNew={handleAddNew}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
-                            onCheckHealth={refreshHealthStatus}
                         />
                     ) : (
                         <FeedLoadState
@@ -414,14 +449,18 @@ export const AdminPanel: React.FC = () => {
                         />
                     )}
                 </div>
-                <div role="tabpanel" hidden={activeTab !== 'health'}>
+                <div
+                    id={getPanelId('health')}
+                    role="tabpanel"
+                    aria-labelledby={getTabId('health')}
+                    hidden={activeTab !== 'health'}
+                >
                     {loadStatus === 'ready' ? (
                         <HealthCenterTab
-                            feeds={feeds}
-                            feedHealth={feedHealth}
+                            report={healthReport}
                             heartbeat={heartbeat}
-                            onCheckAll={refreshHealthStatus}
-                            isCheckingAll={isCheckingAll}
+                            onReloadReport={reloadStoredReport}
+                            isReloadingReport={isReloadingReport}
                         />
                     ) : (
                         <FeedLoadState
@@ -430,10 +469,23 @@ export const AdminPanel: React.FC = () => {
                         />
                     )}
                 </div>
-                <div role="tabpanel" hidden={activeTab !== 'announcement'}>
+                <div
+                    id={getPanelId('announcement')}
+                    role="tabpanel"
+                    aria-labelledby={getTabId('announcement')}
+                    hidden={activeTab !== 'announcement'}
+                >
                     <AnnouncementTab />
                 </div>
-                <div role="tabpanel" hidden={activeTab !== 'legend'}>
+                <div
+                    id={getPanelId('legend')}
+                    role="tabpanel"
+                    aria-labelledby={getTabId('legend')}
+                    hidden={activeTab !== 'legend'}
+                    // Reiner Text ohne Bedienelemente: ohne tabIndex wäre der
+                    // Bereich per Tastatur weder erreichbar noch scrollbar.
+                    tabIndex={0}
+                >
                     <HealthLegendTab />
                 </div>
             </main>

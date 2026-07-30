@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircleIcon, WarningIcon, XCircleIcon, QuestionMarkCircleIcon, LoadingSpinner } from '../Icons';
+import { CheckCircleIcon, WarningIcon, XCircleIcon, QuestionMarkCircleIcon } from '../Icons';
 
 const LegendItem: React.FC<{
     icon: React.ReactNode;
@@ -35,7 +35,7 @@ export const HealthLegendTab: React.FC = () => {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <section className="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+            <section id="admin-legend-statuses" className="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
                 <h3 className="text-xl font-bold mb-4">{t('admin.legend.title')}</h3>
                 <p className="text-sm text-slate-500 dark:text-zinc-400 mb-4">
                     {t('admin.legend.description')}
@@ -56,11 +56,8 @@ export const HealthLegendTab: React.FC = () => {
                         title={t('admin.legend.errorTitle')}
                         description={t('admin.legend.errorDesc')}
                     />
-                    <LegendItem
-                        icon={<LoadingSpinner className="w-5 h-5 text-indigo-500" />}
-                        title={t('admin.legend.checkingTitle')}
-                        description={t('admin.legend.checkingDesc')}
-                    />
+                    {/* Kein „Prüfe"-Eintrag: Es gibt keine Live-Prüfung einzelner
+                        Feeds, und dieser Zeilenstatus wird nirgends gesetzt. */}
                     <LegendItem
                         icon={<QuestionMarkCircleIcon className="w-6 h-6 text-slate-400" />}
                         title={t('admin.legend.unknownTitle')}
