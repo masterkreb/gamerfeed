@@ -255,13 +255,20 @@ unterscheidet **drei verschiedene Kennzahlen**, die voneinander abweichen dürfe
 |---|---|---|
 | Konfigurierte Feeds | `feeds`-Tabelle | ändert sich nur beim Anlegen oder Entfernen |
 | Quellen im aktiven News-Snapshot | `sourcesInCache` der Health-API | je Lauf verschieden; eine Quelle ohne Artikel fehlt |
-| Quellen in der lokalen Browserkopie | `cachedNews` dieses Browsers | nur solange das Frontend sie verwenden würde |
+| Quellen im lokalen Startcache | `cachedNews` dieses Browsers | enthält nur die ersten 32 Artikel; hat deshalb **fast immer** weniger Quellen |
 
-`shared/local-news-cache.ts` hält Schlüssel und Frist der lokalen Kopie an
-**einer** Stelle; `App.tsx` verwendet dieselbe Konstante. Als „vom Frontend
+`shared/local-news-cache.ts` hält Schlüssel, Frist **und Größe** des Startcaches
+an **einer** Stelle; `App.tsx` verwendet dieselben Konstanten. Als „vom Frontend
 verwendbar“ gilt eine Kopie nur, wenn sie derselbe Laufzeit-Decoder aus
 `shared/persisted-state.ts` annimmt **und** sie jünger als 30 Minuten ist.
 Fehlend, unlesbar und abgelaufen bleiben unterscheidbar und ergeben „unbekannt“.
+
+**Der lokale Startcache bewertet keine Feed-Zeile.** `LOCAL_NEWS_CACHE_MAX_ARTICLES`
+beträgt 32; dass darin die meisten der aktiven Quellen fehlen, ist der Normalfall
+und keine Diagnose. Eine Zeile entsteht deshalb ausschließlich aus Backend-Status
+und aktivem News-Snapshot – `AdminFeedHealthRow` kennt den Startcache gar nicht.
+Er erscheint nur global als eigene Kennzahl mit seiner tatsächlichen Artikel- und
+Quellenzahl, ausdrücklich ohne Anspruch auf Gleichheit mit dem Snapshot.
 
 **Generationen werden nur verglichen, wenn beide Kennungen belegbar sind.** Eine
 fehlende `snapshotId` heißt „Legacy/unbekannt“, nie „gleich“. Daraus folgen die
@@ -270,9 +277,14 @@ die vorher gleich aussahen:
 
 - **VG247** wird erfolgreich abgerufen, hat aber keine Artikel im aktiven
   Snapshot: Warnung, „nicht im aktiven News-Snapshot“.
-- **GameStar** steht im aktiven Snapshot und fehlt nur in einer älteren lokalen
-  Kopie: Status **OK** mit Hinweis auf den Snapshot-Unterschied – kein
-  Feed-Ausfall.
+- **GameStar** steht im aktiven Snapshot: Status **OK**, ohne Zusatz. Ob die
+  Quelle zusätzlich im begrenzten Startcache liegt, spielt für die Zeile keine
+  Rolle.
+
+Gleiche `snapshotId` heißt **gleiche Generation**, auch wenn der Startcache
+weniger Quellen enthält – das liegt an seiner Größe, nicht an der Generation.
+Zwei belegbar verschiedene Kennungen bleiben dagegen deutlich als
+unterschiedliche Generationen ausgewiesen.
 
 **Die unscharfe Namensnormalisierung ist entfernt.** Zugeordnet wird
 ausschließlich über exakt gleiche Quellennamen. Ein Feed ohne exakte
@@ -835,6 +847,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Admin-Mutationen (A1a): synchroner `useRef`-Latch für Feed-POST/PUT/DELETE und die gemeinsam gesperrten Ankündigungs-Mutationen, Bestätigungsdialog vor dem Löschen einer Ankündigung, Fehlerpfade erhalten Eingaben und Datensätze
 - **Juli 2026:** Admin-Tabs und Health-Semantik (A1b): vollwertige ARIA-Tabs mit Pfeiltasten, benannte Aufklapp-Schaltflächen, drei getrennte Quellen-Kennzahlen mit belegbarem Snapshot-Vergleich, unscharfe Gesundmeldung entfernt, irreführende Einzelabruf-Symbole entfernt
 - **Juli 2026:** Snapshot-Entdeckung (F5): der erste Versuch jeder Ladung und der Auto-Update-Poll fragen ungebunden, damit ein Browser mit gepinnter alter Generation die inzwischen aktive überhaupt sieht; erst die angenommene Antwort bindet die Folgestufen
+- **Juli 2026:** Lokaler Startcache im Admin (A1c): der bewusst auf 32 Artikel begrenzte Browsercache bewertet keine Feed-Zeile mehr, sondern steht global als eigene Kennzahl mit echter Artikel- und Quellenzahl
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 

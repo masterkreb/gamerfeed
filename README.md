@@ -198,12 +198,19 @@ abweichen, ist normal und kein Zählfehler:
 |---|---|
 | **Konfigurierte Feeds** | Feed-Quellen in der Datenbank |
 | **Quellen im aktiven News-Snapshot** | Quellen mit Artikeln im zuletzt veröffentlichten Snapshot; schwankt von Lauf zu Lauf |
-| **Quellen in der lokalen Browserkopie** | Stand genau dieses Browsers, nur solange das Frontend ihn noch verwenden würde (30 Minuten) |
+| **Quellen im lokalen Startcache** | Stand genau dieses Browsers, begrenzt auf die ersten 32 Artikel und 30 Minuten gültig |
+
+Der Startcache ist absichtlich klein, damit die Seite schnell startet. Dass er
+**deutlich weniger Quellen** enthält als der aktive Snapshot, ist der Normalfall
+und kein Feed-Problem. Er wird deshalb nur als eigene Kennzahl mit seiner
+tatsächlichen Artikel- und Quellenzahl genannt und beeinflusst keine einzelne
+Feed-Zeile.
 
 Beide Generationen werden mit ihrer Kennung genannt und nur dann verglichen,
-wenn beide belegbar sind. Eine Quelle, die im aktiven Snapshot steht und nur in
-der älteren lokalen Kopie fehlt, ist ein Snapshot-Unterschied und **kein**
-Feed-Ausfall.
+wenn beide belegbar sind. Dieselbe Kennung heißt **dieselbe Generation**, auch
+wenn der Startcache weniger Quellen enthält. Zwei verschiedene Kennungen heißen,
+dass dieser Browser die aktuelle Generation noch nicht übernommen hat — auch das
+ist **kein** Feed-Ausfall.
 
 Die Schaltfläche **„Gespeicherten Statusbericht neu laden“** lädt genau das:
 den zuletzt vom Cron-Lauf gespeicherten Bericht. Sie ruft **keinen** RSS-Feed ab
