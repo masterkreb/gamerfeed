@@ -207,7 +207,7 @@ dass darin die meisten aktiven Quellen fehlen, ist der Normalfall. Trotzdem
 kommentierte fast jede gesunde Feed-Zeile das als Snapshot-Unterschied. Eine
 Zeile entsteht jetzt ausschließlich aus Backend-Status und aktivem
 News-Snapshot, während der Startcache nur noch global als eigene Kennzahl mit
-seiner tatsächlichen Artikel- und Quellenzahl erscheint. 687 zentrale Tests und
+seiner tatsächlichen Artikel- und Quellenzahl erscheint. 688 zentrale Tests und
 25 Browser-Abnahmen laufen erfolgreich. Als nächstes ist O4 bereit.
 
 ## Empfohlene Reihenfolge

@@ -268,7 +268,9 @@ beträgt 32; dass darin die meisten der aktiven Quellen fehlen, ist der Normalfa
 und keine Diagnose. Eine Zeile entsteht deshalb ausschließlich aus Backend-Status
 und aktivem News-Snapshot – `AdminFeedHealthRow` kennt den Startcache gar nicht.
 Er erscheint nur global als eigene Kennzahl mit seiner tatsächlichen Artikel- und
-Quellenzahl, ausdrücklich ohne Anspruch auf Gleichheit mit dem Snapshot.
+Quellenzahl, ausdrücklich ohne Anspruch auf Gleichheit mit dem Snapshot. Beide
+Zahlen werden getrennt pluralisiert – zwei Artikel können aus einer Quelle
+stammen.
 
 **Generationen werden nur verglichen, wenn beide Kennungen belegbar sind.** Eine
 fehlende `snapshotId` heißt „Legacy/unbekannt“, nie „gleich“. Daraus folgen die

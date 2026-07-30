@@ -833,3 +833,35 @@ test('die Warnungsliste nennt VG247 weiterhin sofort', async () => {
         restoreConsole();
     }
 });
+
+test('Artikel- und Quellenzahl werden getrennt pluralisiert', async () => {
+    // Zwei Artikel aus derselben Quelle: eine gemeinsame Pluralform haette
+    // hier "2 Artikel aus 1 Quellen" ergeben.
+    const restoreConsole = silenceConsole();
+    const { default: i18n } = await vite.ssrLoadModule('/i18n.ts');
+    const testRoot = await renderStartcache({
+        localSnapshot: ACTIVE_SNAPSHOT,
+        sources: ['Eurogamer', 'Eurogamer'],
+    });
+
+    try {
+        await act(async () => {
+            click(testRoot.window, testRoot.container.querySelector('#admin-tab-health'));
+        });
+        const panel = testRoot.container.querySelector('#admin-panel-health');
+
+        assert.equal(panel.querySelector('#admin-metric-local').textContent, '1');
+        assert.match(panel.textContent, /2 Artikel aus 1 Quelle(?!n)/);
+
+        await act(async () => {
+            await i18n.changeLanguage('en');
+        });
+        assert.match(panel.textContent, /2 articles from 1 source(?!s)/);
+    } finally {
+        await act(async () => {
+            await i18n.changeLanguage('de');
+        });
+        await testRoot.cleanup();
+        restoreConsole();
+    }
+});

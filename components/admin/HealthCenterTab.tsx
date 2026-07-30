@@ -85,8 +85,8 @@ const SourceMetric: React.FC<{
             {value}
         </dd>
         <p id={`${id}-hint`} className="mt-2 text-xs text-slate-500 dark:text-zinc-400">{hint}</p>
-        {notes.filter(Boolean).map(note => (
-            <p key={note} className="mt-1 text-xs text-slate-500 dark:text-zinc-400">{note}</p>
+        {notes.filter(Boolean).map((note, index) => (
+            <p key={index} className="mt-1 text-xs text-slate-500 dark:text-zinc-400">{note}</p>
         ))}
     </div>
 );
@@ -169,10 +169,15 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
     // vollständigen Snapshot zu behaupten.
     const localCacheNotes = report.localCacheStatus === 'usable'
         ? [
+            // Artikel und Quellen werden getrennt pluralisiert: zwei Artikel
+            // koennen aus einer einzigen Quelle stammen.
             t('admin.health.metrics.localCounts', {
-                articles: report.localCacheArticleCount ?? 0,
-                sources: report.localCacheSourceCount ?? 0,
-                count: report.localCacheArticleCount ?? 0,
+                articles: t('admin.health.metrics.localArticles', {
+                    count: report.localCacheArticleCount ?? 0,
+                }),
+                sources: t('admin.health.metrics.localSources', {
+                    count: report.localCacheSourceCount ?? 0,
+                }),
             }),
             snapshotLabel(report.localSnapshotId),
         ]
