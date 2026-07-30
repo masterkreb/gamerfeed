@@ -122,7 +122,13 @@ function toNonNegativeInteger(value) {
     return Math.floor(numeric);
 }
 
-function normalizeDurations(raw) {
+/**
+ * Normalisiert die Phasendauern eines Laufs.
+ *
+ * Exportiert, damit die Laufhistorie (O4b) dieselbe Regel verwendet und nicht
+ * eine zweite, leicht abweichende Auslegung von „unbrauchbare Dauer“ aufbaut.
+ */
+export function normalizeDurations(raw) {
     const durations = emptyDurations();
     if (!raw || typeof raw !== 'object') return durations;
 
@@ -133,7 +139,12 @@ function normalizeDurations(raw) {
     return durations;
 }
 
-function normalizeCounters(raw) {
+/**
+ * Normalisiert die Feed-Zähler eines Laufs.
+ *
+ * Exportiert aus demselben Grund wie `normalizeDurations`.
+ */
+export function normalizeCounters(raw) {
     const counters = emptyCounters();
     if (!raw || typeof raw !== 'object') return counters;
 
