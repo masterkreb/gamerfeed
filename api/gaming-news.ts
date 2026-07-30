@@ -196,6 +196,12 @@ async function renderGamingNews(
             font-size: 14px;
             color: #666;
         }
+        .hero-intro {
+            margin-top: 10px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #555;
+        }
         .section-label {
             font-size: 11px;
             font-weight: 700;
@@ -301,7 +307,17 @@ async function renderGamingNews(
 
     <div class="hero">
         <h1>Gaming News heute</h1>
-        <p>${articles.length} Artikel aus ${sourcesCount} Quellen &mdash; wird alle 20 Min. aktualisiert</p>
+        <p class="hero-count">${articles.length} Artikel aus ${sourcesCount} Quellen &mdash; wird alle 20 Min. aktualisiert</p>
+        <p class="hero-intro" data-seo="intro">
+            Diese Seite b&uuml;ndelt die aktuellen Meldungen zahlreicher deutscher
+            und internationaler Gaming-Redaktionen an einer Stelle, damit man
+            nicht mehrere Seiten nacheinander durchgehen muss. Grundlage sind
+            ausschlie&szlig;lich die &ouml;ffentlichen RSS-Feeds der Redaktionen;
+            jeder Eintrag verlinkt auf den Originalartikel, dort steht der
+            vollst&auml;ndige Text. Die &Uuml;bersicht wird rund um die Uhr etwa alle
+            20 Minuten neu aufgebaut, die Zahlen oben beschreiben genau den
+            aktuell abrufbaren Bestand.
+        </p>
     </div>
 
     <div class="section-label">Neueste Meldungen</div>
