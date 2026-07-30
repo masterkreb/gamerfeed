@@ -790,6 +790,10 @@ Verlinkung. Zusätzliche Seitentypen beginnen erst nach dem Mess-Gate.
   stellt geplante Läufe global in eine Warteschlange – deshalb „ungefähr alle
   20 Minuten geplant, Verzögerungen möglich“ statt „Echtzeit“.
   `tests/frontend/unit/honest-product-claims.test.js` prüft das für DE und EN.
+- Auch `public/social-preview.png` zählt als SEO-Text: Es wird über `og:image`
+  und `twitter:image` ausgeliefert. Sein Untertitel lautet „Gaming-News aus
+  vielen Redaktionen“, passend zu Titel und Alt-Texten. Format und Abmessungen
+  (1200 × 630) sind getestet, der Satz im Bild bleibt eine Sichtprüfung.
 - `components/Footer.tsx` wird seit SEO1 in `App.tsx` tatsächlich gerendert und
   trägt den lokalisierten Link `footer.gamingNews` auf `/gaming-news`.
 - `/gaming-news` hat unter der H1 einen eigenen Einleitungstext

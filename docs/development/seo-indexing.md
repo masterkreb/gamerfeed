@@ -131,6 +131,25 @@ etwas auf Pixelgröße; die Tests prüfen genau das.
 | `tests/server/unit/gaming-news-page.test.js` | `/gaming-news`: eine H1, eigener Einleitungstext, Canonical, Rückweg zur App |
 | `tests/e2e/seo-entry.spec.ts` | erzeugtes Production-HTML mit **und** ohne JavaScript, genau eine sichtbare H1 nach dem React-Start |
 
+#### Das Vorschaubild zählt mit
+
+`public/social-preview.png` wird über `og:image` und `twitter:image` öffentlich
+ausgeliefert und ist damit selbst ein SEO-Text. Es trug sichtbar
+„Gaming-News aus allen Quellen“ und widersprach nach der Textkorrektur den
+Titeln und Alt-Texten. Der Untertitel lautet jetzt
+**„Gaming-News aus vielen Redaktionen“**.
+
+Geändert wurde nur der Untertitel: Der alte Text wurde als Maske erkannt, der
+Hintergrund darunter harmonisch interpoliert und der neue Text an derselben
+linken Kante (x = 392, bündig mit der Wortmarke) und Grundlinie (y = 403)
+gesetzt. Hintergrundgrafik, Logo und Wortmarke sind unverändert. Die
+Abmessungen bleiben bei 1200 × 630; `seo-static-entry.test.js` prüft Format,
+Abmessungen und die `og:image`/`twitter:image`-Verweise.
+
+Wer das Bild erneut ändert: Ein Text im Bild lässt sich nicht automatisch
+prüfen. Die Tests sichern nur Format und Abmessungen – der Satz selbst bleibt
+eine Sichtprüfung.
+
 #### Bewusst offen geblieben
 
 Die Meta-Description von `/gaming-news` entsteht weiterhin aus den ersten drei
@@ -140,11 +159,6 @@ Text umgestellt wird, entscheidet SEO2 anhand der dann sichtbaren Snippets.
 
 `?search=` bleibt keine adressierbare Suche. Eine `SearchAction` darf erst
 wieder entstehen, wenn dieser Parameter tatsächlich als URL-Suche funktioniert.
-
-Das Social-Preview-Bild `public/social-preview.png` ist eine Grafik und wurde
-nicht neu gezeichnet. Trägt es selbst den alten Text „aus allen Quellen“, gilt
-dort dieselbe Regel wie für die Metadaten – ein eigener kleiner Schritt, kein
-Teil von SEO1.
 
 ### Phase 2 – Indexierungs-Gate
 

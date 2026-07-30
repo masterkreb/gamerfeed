@@ -251,6 +251,48 @@ test('die strukturierten Daten bleiben gueltiges JSON mit Kernangaben', () => {
     assert.ok(data.description, 'die strukturierten Daten haben keine Beschreibung');
 });
 
+test('das Social-Preview-Bild hat die geforderten 1200x630 Pixel', () => {
+    const file = path.join(process.cwd(), 'public', 'social-preview.png');
+    const bytes = fs.readFileSync(file);
+
+    assert.deepEqual(
+        [...bytes.subarray(0, 8)],
+        [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+        'social-preview.png ist keine PNG-Datei',
+    );
+    // IHDR steht immer als erster Chunk: 8 Byte Signatur, 4 Byte Laenge,
+    // 4 Byte Typ, dann Breite und Hoehe als 32-Bit-Werte.
+    assert.equal(bytes.subarray(12, 16).toString('ascii'), 'IHDR');
+    assert.equal(bytes.readUInt32BE(16), 1200, 'Breite weicht ab');
+    assert.equal(bytes.readUInt32BE(20), 630, 'Hoehe weicht ab');
+});
+
+test('Open Graph und Twitter verweisen auf dasselbe vorhandene Vorschaubild', () => {
+    const sources = [
+        document.querySelector('meta[property="og:image"]')?.getAttribute('content'),
+        document.querySelector('meta[name="twitter:image"]')?.getAttribute('content'),
+    ];
+
+    for (const source of sources) {
+        assert.ok(source, 'ein Vorschaubild-Verweis fehlt');
+        const name = source.split('/').pop();
+        assert.ok(
+            fs.existsSync(path.join(process.cwd(), 'public', name)),
+            `${name} liegt nicht in public/`,
+        );
+    }
+
+    assert.equal(sources[0], sources[1], 'die Verweise zeigen auf verschiedene Bilder');
+    assert.equal(
+        document.querySelector('meta[property="og:image:width"]')?.getAttribute('content'),
+        '1200',
+    );
+    assert.equal(
+        document.querySelector('meta[property="og:image:height"]')?.getAttribute('content'),
+        '630',
+    );
+});
+
 test('Canonical, Robots und Sprache bleiben unveraendert', () => {
     assert.equal(document.documentElement.getAttribute('lang'), 'de');
     assert.equal(
