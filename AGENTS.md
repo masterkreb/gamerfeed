@@ -783,6 +783,13 @@ Verlinkung. Zusätzliche Seitentypen beginnen erst nach dem Mess-Gate.
   keine kopierte Artikelliste.
 - Statische Meta-, Open-Graph-, Twitter- und JSON-LD-Texte nennen keine feste
   Quellenzahl mehr; die `SearchAction` ist entfernt.
+- **Drei Ehrlichkeitsregeln gelten auch für sichtbare Produkttexte**, nicht nur
+  für Metadaten: keine feste Quellenzahl, kein „alle Quellen“ (GamerFeed deckt
+  genau die konfigurierten Feeds ab) und keine garantierte
+  Aktualisierungsfrequenz. Der Cron ist zu Minute 7/27/47 **geplant**, GitHub
+  stellt geplante Läufe global in eine Warteschlange – deshalb „ungefähr alle
+  20 Minuten geplant, Verzögerungen möglich“ statt „Echtzeit“.
+  `tests/frontend/unit/honest-product-claims.test.js` prüft das für DE und EN.
 - `components/Footer.tsx` wird seit SEO1 in `App.tsx` tatsächlich gerendert und
   trägt den lokalisierten Link `footer.gamingNews` auf `/gaming-news`.
 - `/gaming-news` hat unter der H1 einen eigenen Einleitungstext

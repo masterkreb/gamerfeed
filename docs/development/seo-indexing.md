@@ -68,6 +68,13 @@ HTML sinnvolle, crawlbare Inhalte und normale interne Links liefern.
 - Keine statische exakte Quellenzahl in Meta-, Open-Graph-, Twitter- oder
   strukturierten Daten. Die Zahl ändert sich; statische Texte sprechen von
   zahlreichen deutschen und internationalen Quellen.
+- Kein Vollständigkeitsversprechen. GamerFeed deckt genau die konfigurierten
+  Feeds ab, nie „alle Quellen“ – das gilt für Metadaten und für sichtbare
+  Produkttexte gleichermaßen.
+- Keine garantierte Aktualisierungsfrequenz. Der Cron-Workflow ist zu
+  Minute 7, 27 und 47 **geplant**, GitHub stellt geplante Läufe aber global in
+  eine Warteschlange. Texte nennen den Takt deshalb als Plan mit möglichen
+  Verzögerungen, nie als „Echtzeit“.
 - Keine `SearchAction`, solange `?search=` nicht tatsächlich als
   adressierbare Suche funktioniert.
 - Normale interne `<a href>`-Links verbinden Startseite und `/gaming-news` in
@@ -120,6 +127,7 @@ etwas auf Pixelgröße; die Tests prüfen genau das.
 |---|---|
 | `tests/frontend/unit/seo-static-entry.test.js` | Quell-`index.html`: eine H1, eigene Beschreibung, interner Link, nichts Verstecktes, keine feste Quellenzahl, keine `SearchAction` |
 | `tests/frontend/unit/footer-gaming-news-link.test.js` | gerenderter Footer-Link, in DE und EN unterschiedlich |
+| `tests/frontend/unit/honest-product-claims.test.js` | sichtbare „Über uns“-Texte in DE und EN: keine feste Quellenzahl, keine Vollständigkeit, kein „Echtzeit“ |
 | `tests/server/unit/gaming-news-page.test.js` | `/gaming-news`: eine H1, eigener Einleitungstext, Canonical, Rückweg zur App |
 | `tests/e2e/seo-entry.spec.ts` | erzeugtes Production-HTML mit **und** ohne JavaScript, genau eine sichtbare H1 nach dem React-Start |
 
@@ -132,6 +140,11 @@ Text umgestellt wird, entscheidet SEO2 anhand der dann sichtbaren Snippets.
 
 `?search=` bleibt keine adressierbare Suche. Eine `SearchAction` darf erst
 wieder entstehen, wenn dieser Parameter tatsächlich als URL-Suche funktioniert.
+
+Das Social-Preview-Bild `public/social-preview.png` ist eine Grafik und wurde
+nicht neu gezeichnet. Trägt es selbst den alten Text „aus allen Quellen“, gilt
+dort dieselbe Regel wie für die Metadaten – ein eigener kleiner Schritt, kein
+Teil von SEO1.
 
 ### Phase 2 – Indexierungs-Gate
 

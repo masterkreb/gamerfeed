@@ -242,7 +242,7 @@ sichtbare H1. Der bisher nirgends gerenderte Footer ist eingehängt und trägt
 den lokalisierten Rückweg. `/gaming-news` hat unter der H1 einen eigenen
 Einleitungstext zu Nutzen, Quellenprinzip und Aktualisierung. Statische
 Metadaten nennen keine feste Quellenzahl mehr, und die nicht einlösbare
-`SearchAction` ist entfernt. 759 zentrale Tests und 30 Browser-Abnahmen laufen
+`SearchAction` ist entfernt. 765 zentrale Tests und 30 Browser-Abnahmen laufen
 erfolgreich.
 
 Ob die Änderungen wirken, entscheidet **nicht** dieser Branch: SEO2 beginnt
@@ -1466,7 +1466,7 @@ nicht als Suche verarbeitet.
 - `npm test`, `npm run typecheck`, `npm run build`, `npm run test:e2e` und
   beide Diff-Checks sind erfolgreich.
 
-**Ergebnis:** Alle Abnahmepunkte sind erfüllt. 759 zentrale Tests und 30
+**Ergebnis:** Alle Abnahmepunkte sind erfüllt. 765 zentrale Tests und 30
 Browser-Abnahmen laufen erfolgreich.
 
 Bewusst **nicht** angefasst, weil außerhalb des Umfangs: Die Meta-Description
