@@ -82,6 +82,22 @@ test('der Auto-Update-Pfad pinnt nicht', () => {
         'Artikel und Generation werden gemeinsam vorgemerkt');
 });
 
+test('der Auto-Update-Pfad fragt ungebunden ab', () => {
+    // `?snapshot=` setzt eine bereits gewaehlte Generation fort. Haengte der
+    // Poll sie an, bekaeme er die gepinnte Generation zurueck - der Server darf
+    // die vorherige weiterhin ausliefern - und meldete nie einen neuen Stand
+    // (Roadmap F5).
+    const body = callbackBody(APP_SOURCE, 'checkForNewArticles');
+
+    assert.match(
+        body,
+        /await fetch\(\s*'\/api\/get-news',/,
+        'der Poll ruft den Endpunkt ohne Generationsangabe ab',
+    );
+    assert.doesNotMatch(body, /snapshotUrl\(/, 'keine gepinnte Adresse im Poll');
+    assert.doesNotMatch(body, /withSnapshotQuery\(/, 'auch nicht direkt gebaut');
+});
+
 test('ein Rollback im Auto-Update-Pfad raeumt die Warteschlange', () => {
     // Eine zurueckgezogene Generation darf nicht vorgemerkt bleiben - sonst
     // spielt ein spaeterer Klick genau sie ein.

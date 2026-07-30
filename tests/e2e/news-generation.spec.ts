@@ -269,3 +269,89 @@ test('eine headerlose Antwort ohne Rollback-Signal bleibt verworfen', async ({ p
     await page.waitForTimeout(500);
     await expect(page.getByText(GAMESTAR_TITEL)).toBeVisible();
 });
+
+/**
+ * Bedient gepinnte Anfragen weiterhin mit der angeforderten Generation.
+ *
+ * Genau das darf der Server laut O3b: die direkt vorherige Generation bleibt
+ * lesbar. Nur so laesst sich der produktiv beobachtete Stillstand aus F5
+ * reproduzieren - eine dauerhaft gepinnte Anfrage bekaeme nie den neuen Stand.
+ */
+async function stelleAktiveGeneration(page: Page, aktiv: Generation, vorherig: Generation) {
+    await installApiMocks(page);
+
+    await page.route('**/api/get-news*', route => {
+        const angefordert = new URL(route.request().url()).searchParams.get('snapshot');
+        const gewaehlt = angefordert === vorherig.snapshotId ? vorherig : aktiv;
+        return erfuelle(route, gewaehlt);
+    });
+
+    await blockExternalRequests(page);
+}
+
+async function setzeLokaleKopie(page: Page, generation: Generation) {
+    await page.addInitScript(([artikel, zeiger]) => {
+        window.localStorage.setItem('cachedNews', JSON.stringify({
+            articles: artikel,
+            timestamp: Date.now(),
+            snapshot: zeiger,
+        }));
+    }, [generation.articles, {
+        schemaVersion: 1,
+        snapshotId: generation.snapshotId,
+        createdAt: generation.createdAt,
+        articleCount: generation.articles.length,
+        runId: 'gha-1',
+    }] as const);
+}
+
+test('eine lokal gepinnte Generation entdeckt die inzwischen aktive Generation', async ({ page }) => {
+    // Der produktiv beobachtete Fall: der Browser haelt Generation A, aktiv ist
+    // laengst B. Solange schon die Entdeckung `?snapshot=A` mitschickt, liefert
+    // der Server zulaessigerweise weiter A - GameStar bliebe dauerhaft
+    // unsichtbar.
+    const adressen: string[] = [];
+    page.on('request', request => {
+        const url = request.url();
+        if (url.includes('/api/get-news')) adressen.push(url);
+    });
+
+    await stelleAktiveGeneration(page, NEU, ALT);
+    await setzeLokaleKopie(page, ALT);
+
+    await page.goto('/');
+
+    await expect(page.getByText(GAMESTAR_TITEL)).toBeVisible();
+
+    // Die lokale Kopie wandert mit auf die neue Generation.
+    await expect.poll(async () => page.evaluate(() => {
+        const roh = window.localStorage.getItem('cachedNews');
+        return roh === null ? null : JSON.parse(roh).snapshot?.snapshotId ?? null;
+    })).toBe(NEU.snapshotId);
+
+    // Der erste Versuch war ungebunden, die Folgestufen tragen B.
+    const [erste, ...folgende] = adressen;
+    expect(erste).not.toContain('snapshot=');
+    expect(folgende.length).toBeGreaterThan(0);
+    expect(folgende.every(url => url.includes(`snapshot=${encodeURIComponent(NEU.snapshotId)}`))).toBe(true);
+});
+
+test('ein manueller Refresh entdeckt die aktive Generation ebenfalls ungebunden', async ({ page }) => {
+    await stelleAktiveGeneration(page, NEU, ALT);
+    await setzeLokaleKopie(page, ALT);
+    await page.goto('/');
+    await expect(page.getByText(GAMESTAR_TITEL)).toBeVisible();
+
+    const adressen: string[] = [];
+    page.on('request', request => {
+        const url = request.url();
+        if (url.includes('/api/get-news')) adressen.push(url);
+    });
+
+    // Die Browsersprache entscheidet ueber die Beschriftung; beide zulassen.
+    await page.getByRole('button', { name: /Refresh news|News aktualisieren/i }).click();
+
+    await expect.poll(() => adressen.length, { timeout: 10_000 }).toBeGreaterThanOrEqual(1);
+    expect(adressen[0]).not.toContain('snapshot=');
+    await expect(page.getByText(GAMESTAR_TITEL)).toBeVisible();
+});
