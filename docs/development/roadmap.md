@@ -1,6 +1,6 @@
 # GamerFeed – Projekt-Roadmap
 
-Stand: 29. Juli 2026
+Stand: 30. Juli 2026
 
 Diese Roadmap ordnet die technische Weiterentwicklung von GamerFeed. Sie ist
 kein fester Veröffentlichungskalender und keine automatische Freigabe, alle
@@ -143,6 +143,14 @@ Optionsdialog räumt seinen verzögerten Fokus beim Schließen auf und gibt den
 Fokus auch bei schnellem Escape zuverlässig zurück. 628 zentrale Tests und 23
 Browser-Abnahmen laufen erfolgreich.
 
+**Stand 30. Juli 2026 (Branch `codex/f3b-article-card-updates`):** F3b ist
+abgeschlossen. `ArticleCard` verwendet weiterhin `React.memo`, aber ohne den
+unvollständigen Sondervergleich, der nur ID, Bild und Titel kannte. Neue
+Artikelobjekte werden deshalb auch bei geänderter Zusammenfassung, Adresse,
+Quelle, Sprache oder Veröffentlichungszeit neu gerendert. Ein Regressionstest
+prüft jedes dieser Felder separat bei unveränderter Artikel-ID. 629 zentrale
+Tests und 23 Browser-Abnahmen laufen erfolgreich.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -160,7 +168,7 @@ Browser-Abnahmen laufen erfolgreich.
 | F1 | P1 | erledigt | Progressive News-Ladekette gegen veraltete Antworten absichern |
 | O3b | P1 | erledigt | News-Caches größenbegrenzt und konsistent veröffentlichen |
 | F3a | P2 | erledigt | Zentrale Tastatur- und DOM-Probleme im Frontend beheben |
-| F3b | P2 | geplant | Veraltetes ArticleCard-Rendering verhindern |
+| F3b | P2 | erledigt | Veraltetes ArticleCard-Rendering verhindern |
 | F4a | P2 | geplant | Persistierten Zustand robust validieren |
 | F4b | P2 | geplant | Verbliebene i18n-Inkonsistenzen schließen |
 | A1a | P2 | geplant | Admin-Mutationen synchron absichern |
@@ -746,6 +754,13 @@ fehlende Navigation und Fokus-Rückgabe.
   ArticleCard-Aktionen und Fokus.
 
 ### F3b – ArticleCard-Aktualisierung
+
+**Status:** erledigt. Der handgeschriebene `React.memo`-Vergleich ist entfernt;
+der sichere Standardvergleich bleibt aktiv. Dadurch löst jedes neue
+Artikelobjekt eine Aktualisierung aus, ohne die Optimierung für vollständig
+unveränderte Props aufzugeben. Der Regressionstest ändert Zusammenfassung,
+Link, Quelle, Sprache und Datum einzeln bei gleicher ID und prüft jeweils die
+gerenderte Ausgabe.
 
 **Umfang:**
 

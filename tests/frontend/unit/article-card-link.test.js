@@ -197,3 +197,81 @@ test('benennt den Optionsdialog und gibt den Fokus nach schnellem Escape dauerha
         await testRoot.cleanup();
     }
 });
+
+test('rendert alle sichtbaren Artikelwerte bei gleicher ID neu', async () => {
+    await vite.ssrLoadModule('/i18n.ts');
+    const { ArticleCard } = await vite.ssrLoadModule('/components/ArticleCard.tsx');
+    const onToggleFavorite = () => {};
+    const onMuteSource = () => {};
+    const original = {
+        ...createArticle('https://beispiel.example/alt'),
+        publicationDate: '2020-01-02T12:00:00.000Z',
+    };
+    const cases = [
+        {
+            name: 'Zusammenfassung',
+            article: { ...original, summary: 'Neue Zusammenfassung' },
+            assertUpdated(container) {
+                assert.match(container.textContent, /Neue Zusammenfassung/);
+            },
+        },
+        {
+            name: 'Link',
+            article: { ...original, link: 'https://beispiel.example/neu' },
+            assertUpdated(container) {
+                const articleLink = Array.from(container.querySelectorAll('a'))
+                    .find(anchor => anchor.textContent.includes('Beispielartikel'));
+                assert.equal(articleLink?.getAttribute('href'), 'https://beispiel.example/neu');
+            },
+        },
+        {
+            name: 'Quelle',
+            article: { ...original, source: 'Neue Quelle' },
+            assertUpdated(container) {
+                assert.match(container.textContent, /Neue Quelle/);
+            },
+        },
+        {
+            name: 'Sprache',
+            article: { ...original, language: 'en' },
+            assertUpdated(container) {
+                assert.equal(container.querySelector('span.uppercase')?.textContent, 'en');
+            },
+        },
+        {
+            name: 'Datum',
+            article: { ...original, publicationDate: '2021-03-04T12:00:00.000Z' },
+            assertUpdated(container) {
+                assert.match(container.textContent, /2021/);
+                assert.doesNotMatch(container.textContent, /2020/);
+            },
+        },
+    ];
+
+    for (const testCase of cases) {
+        const testRoot = await createReactTestRoot();
+        const props = {
+            viewMode: 'grid',
+            isFavorite: false,
+            onToggleFavorite,
+            onMuteSource,
+        };
+
+        try {
+            await testRoot.render(React.createElement(ArticleCard, {
+                ...props,
+                article: original,
+            }));
+            await testRoot.render(React.createElement(ArticleCard, {
+                ...props,
+                article: testCase.article,
+            }));
+            testCase.assertUpdated(testRoot.container);
+        } catch (error) {
+            error.message = `${testCase.name}: ${error.message}`;
+            throw error;
+        } finally {
+            await testRoot.cleanup();
+        }
+    }
+});

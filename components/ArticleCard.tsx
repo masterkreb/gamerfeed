@@ -580,14 +580,4 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
 
 ArticleCardComponent.displayName = 'ArticleCard';
 
-const propsAreEqual = (prevProps: Readonly<ArticleCardProps>, nextProps: Readonly<ArticleCardProps>) => {
-    return (
-        prevProps.isFavorite === nextProps.isFavorite &&
-        prevProps.viewMode === nextProps.viewMode &&
-        prevProps.article.id === nextProps.article.id &&
-        prevProps.article.imageUrl === nextProps.article.imageUrl &&
-        prevProps.article.title === nextProps.article.title
-    );
-};
-
-export const ArticleCard = memo(ArticleCardComponent, propsAreEqual) as typeof ArticleCardComponent;
+export const ArticleCard = memo(ArticleCardComponent) as typeof ArticleCardComponent;

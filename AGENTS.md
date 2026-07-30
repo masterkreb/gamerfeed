@@ -186,6 +186,13 @@ Optionsdialog und Share-Links liegen als Geschwister außerhalb dieses Links.
 Der benannte Optionsdialog ist geschlossen `inert`, räumt verzögerten Fokus
 beim Schließen auf und gibt ihn mit Escape an seinen Auslöser zurück.
 
+`ArticleCard` nutzt `React.memo` ausschließlich mit Reacts Standardvergleich.
+Ein handgeschriebener Vergleich darf nicht nur ausgewählte Artikelfelder
+betrachten, weil sonst etwa eine geänderte Zusammenfassung, Adresse, Quelle,
+Sprache oder Veröffentlichungszeit bei gleicher ID veraltet sichtbar bleibt.
+Artikel-Props werden als unveränderliche Objekte behandelt; aktualisierte
+Inhalte bekommen ein neues `Article`-Objekt.
+
 ### Kontaktformular
 
 Integriert im Reiter „Kontakt" von `SettingsModal`, Gegenstelle ist
@@ -664,6 +671,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Progressive Ladekette (F1): zentraler Request-Controller mit Abort und Epoche, Full läuft auch nach Medium-Fehlern, alte Antworten und Polls dürfen State oder lokale Kopie nicht mehr überschreiben
 - **Juli 2026:** Konsistenter News-Publish (O3b): unveränderliche, bytebegrenzte Generationen mit Manifest, Pointer-last-Aktivierung, Writer-Lease, vorheriger Generation, Rollback und Garbage Collection
 - **Juli 2026:** Tastatur und ArticleCard-DOM (F3a): gespeicherte Suchen per Enter/Leertaste, lokalisierte Accessible Names, Artikelaktionen außerhalb des gestreckten Links und zuverlässige Fokus-Rückgabe im Optionsdialog
+- **Juli 2026:** ArticleCard-Aktualisierung (F3b): unvollständigen Memo-Sondervergleich entfernt und Änderungen aller sichtbaren Artikelfelder bei gleicher ID abgesichert
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 
