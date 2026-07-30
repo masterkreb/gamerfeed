@@ -353,3 +353,85 @@ test('ein Schreibfehler wird gemeldet, aber nicht geworfen', async () => {
     assert.equal(warnungen.length, 1);
     assert.doesNotMatch(warnungen[0], /pg-geheim/, 'auch die Warnung wird bereinigt');
 });
+
+// === Unbekannte Zahlen bleiben unbekannt =====================================
+
+function feedRow(health) {
+    const report = buildRunSummary({
+        run: RUN,
+        feeds: [{ id: 'quelle', name: 'Quelle' }],
+        feedHealth: { quelle: health },
+        transports: new Map(),
+        snapshot: null,
+        redact,
+    });
+    return { row: report.feeds[0], markdown: renderRunSummaryMarkdown(report) };
+}
+
+// Die Kopfzeile der Tabelle beginnt ebenfalls mit „| Quelle |"; gesucht ist
+// die Datenzeile darunter.
+const quellenZeile = markdown => markdown
+    .split('\n')
+    .filter(line => line.startsWith('| Quelle |'))
+    .at(-1);
+
+test('ein nie bearbeiteter Feed meldet keine übersprungenen Items', () => {
+    // Nach einem Abbruch steht eine Quelle auf `unknown`; ihre Items wurden nie
+    // untersucht. Eine 0 wäre eine unbelegte Aussage.
+    const { row, markdown } = feedRow({ status: 'unknown' });
+
+    assert.equal(row.skippedItemCount, null);
+    assert.equal(row.articleCount, null);
+    assert.match(quellenZeile(markdown), /\| – \| – \|/, 'beide Zahlen bleiben leer');
+});
+
+test('ein ausdrückliches null bleibt unbekannt', () => {
+    const { row, markdown } = feedRow({
+        status: 'warning',
+        durationMs: 5,
+        articleCount: null,
+        skippedItemCount: null,
+    });
+
+    assert.equal(row.skippedItemCount, null);
+    assert.match(quellenZeile(markdown), /\| – \| – \|/);
+});
+
+test('eine gemessene Null bleibt eine Null', () => {
+    const { row, markdown } = feedRow({
+        status: 'warning',
+        durationMs: 5,
+        articleCount: 0,
+        skippedItemCount: 0,
+    });
+
+    assert.equal(row.articleCount, 0, 'ein leerer Feed hat wirklich 0 Artikel geliefert');
+    assert.equal(row.skippedItemCount, 0);
+    assert.match(quellenZeile(markdown), /\| 0 \| 0 \|/);
+});
+
+test('gemessene positive Zahlen bleiben erhalten', () => {
+    const { row, markdown } = feedRow({
+        status: 'success',
+        durationMs: 5,
+        articleCount: 12,
+        skippedItemCount: 3,
+    });
+
+    assert.equal(row.articleCount, 12);
+    assert.equal(row.skippedItemCount, 3);
+    assert.match(quellenZeile(markdown), /\| 12 \| 3 \|/);
+});
+
+test('unbrauchbare Zahlen erzeugen keine falsche Null', () => {
+    for (const unbrauchbar of [-1, Number.NaN, Number.POSITIVE_INFINITY, 'viele', {}]) {
+        const { row } = feedRow({
+            status: 'success',
+            articleCount: unbrauchbar,
+            skippedItemCount: unbrauchbar,
+        });
+
+        assert.equal(row.skippedItemCount, null, `${String(unbrauchbar)} ist keine Zahl`);
+        assert.equal(row.articleCount, null, `${String(unbrauchbar)} ist keine Zahl`);
+    }
+});
