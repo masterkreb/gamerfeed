@@ -182,9 +182,9 @@ mindestens diese Werte festgehalten:
 |---|---|---|
 | Live-Test Startseite | erledigt | technisch abrufbar und indexierbar |
 | Live-Test `/gaming-news` | erledigt | technisch abrufbar und indexierbar |
-| Indexierungsantrag Startseite | offen | Google lehnte den Versuch am 30. Juli wegen des überschrittenen Tageskontingents ab; es liegt keine Annahmebestätigung vor |
+| Indexierungsantrag Startseite | offen | Google lehnte die Versuche am 30. und 31. Juli wegen des überschrittenen Tageskontingents ab; es liegt keine Annahmebestätigung vor |
 | Indexierungsantrag `/gaming-news` | offen | erst erneut versuchen, wenn Search Console wieder Anträge annimmt |
-| Sitemap-Befund abgleichen | offen | Der Sitemap-Bericht hatte `/sitemap.xml` erfolgreich mit zwei URLs gelesen, die URL-Prüfung zeigte später jedoch „Vorübergehender Verarbeitungsfehler“; beide Ansichten erneut prüfen, bevor ein Defekt der öffentlichen Sitemap angenommen wird |
+| Sitemap-Befund abgleichen | erledigt | Der Sitemap-Bericht zeigt `/sitemap.xml` weiterhin als erfolgreich, zuletzt am 28. Juli gelesen, mit zwei erkannten Seiten; die URL-Prüfung nennt die Sitemap am 31. Juli ebenfalls wieder normal. Der vorübergehende Hinweis belegt keinen Defekt der öffentlichen Sitemap |
 | Messpunkte nach 7, 14 und 28 Tagen | wartend | Fristen erst ab dem Tag zählen, an dem die Indexierungsanträge tatsächlich angenommen wurden |
 
 Die Eingabe `https://gamerfeed.vercel.app` ohne abschließenden Slash wird von
