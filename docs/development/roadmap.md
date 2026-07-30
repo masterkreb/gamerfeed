@@ -250,14 +250,15 @@ erst nach Merge und Production-Rollout und ist eine manuelle Abnahme in der
 Search Console. Ein technisch indexierbares HTML erzwingt keine Indexierung.
 
 **Stand 31. Juli 2026 (SEO2 gestartet):** Beide Produktions-URLs bestehen den
-Live-Test. Der Indexierungsantrag für die Startseite wurde wegen des
-überschrittenen Search-Console-Tageskontingents nicht angenommen;
+Live-Test. Der Indexierungsantrag für die Startseite wurde am 30. und 31. Juli
+wegen des überschrittenen Search-Console-Tageskontingents nicht angenommen;
 `/gaming-news` bleibt ebenfalls einzureichen. Die Schreibweise der Startseite
 ohne abschließenden Slash wird auf dieselbe kanonische URL mit Slash
-normalisiert. Zusätzlich ist der spätere Hinweis „Vorübergehender
-Verarbeitungsfehler“ in der URL-Prüfung mit dem zuvor erfolgreichen
-Sitemap-Bericht abzugleichen. Die 7-/14-/28-Tage-Fristen beginnen erst nach
-einem tatsächlich angenommenen Antrag. Der dauerhafte Arbeitsstand steht in
+normalisiert. Der Sitemap-Befund ist dagegen geklärt: `/sitemap.xml` steht
+weiterhin auf „Erfolgreich“, wurde zuletzt am 28. Juli gelesen und enthält zwei
+erkannte Seiten; auch die URL-Prüfung nennt sie wieder normal. Die
+7-/14-/28-Tage-Fristen beginnen erst nach einem tatsächlich angenommenen
+Antrag. Der dauerhafte Arbeitsstand steht in
 [`docs/development/seo-indexing.md`](seo-indexing.md).
 
 ## Empfohlene Reihenfolge
@@ -1500,9 +1501,9 @@ lautet jetzt „Gaming-News aus vielen Redaktionen“, die Abmessungen bleiben
 
 **Status:** in Arbeit seit 30. Juli 2026. SEO1 ist produktiv; beide Live-Tests
 sind erfolgreich. Die manuellen Indexierungsanträge sind noch nicht bestätigt,
-weil Google den ersten Versuch wegen des Tageskontingents ablehnte. Vor Beginn
-der Messfristen ist außerdem der widersprüchliche Sitemap-Hinweis aus
-URL-Prüfung und Sitemap-Bericht abzugleichen.
+weil Google die Versuche am 30. und 31. Juli wegen des Tageskontingents
+ablehnte. Der Sitemap-Bericht ist erfolgreich und der vorübergehende
+widersprüchliche Hinweis aus der URL-Prüfung inzwischen verschwunden.
 
 SEO2 ist überwiegend eine manuelle Abnahme, kein neuer Funktionsblock:
 
