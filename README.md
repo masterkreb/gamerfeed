@@ -102,6 +102,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     - `news_cache_64`: Erste 64 Artikel (Medium)
     - `feed_health_status`: Systemstatus je Feed
     - `feed_run_status` & `feed_publish_status`: Cron-Heartbeat und letzter Kern-Publish
+    - `feed_run_history`: Sorted Set mit den bis zu 72 zuletzt abgeschlossenen Läufen
     - `news_snapshot_pointer`: aktive vollständige Cache-Generation
     - `news_snapshot:<id>:{full,preview,medium,meta}`: unveränderliche Payloads und Manifest
     - `daily_trends` & `weekly_trends`: KI-generierte Trends
@@ -138,6 +139,7 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
         *   `feed_health_status`: Protokoll über Erfolg/Misserfolg der Feed-Abrufe
         *   `feed_run_status`: Veränderlicher Status des laufenden bzw. letzten Versuchs
         *   `feed_publish_status`: Zeitpunkt des letzten erfolgreichen Kern-Publish
+        *   `feed_run_history`: begrenzte Historie der abgeschlossenen Läufe (Sorted Set, höchstens 72 Einträge)
         *   `daily_trends` & `weekly_trends`: KI-generierte Trend-Analysen
     4.  Anschliessend schreibt das Skript diese Datensätze in den **Vercel KV Store**.
 *   **WICHTIG:** Der Workflow committet **keine Dateien** mehr in das Git-Repository. Der Prozess ist vollständig vom Code der Webseite getrennt.
@@ -242,6 +244,30 @@ zurückgestellt. Der Grund steht direkt darunter im Panel.
 
 Datenformate, Grenzfälle und Betriebshinweise stehen in der
 [Heartbeat-Dokumentation](docs/deployment/feed-heartbeat.md).
+
+#### Laufhistorie: War das ein Ausrutscher oder ein Muster?
+
+Der Heartbeat zeigt genau einen Lauf. Darunter steht deshalb die **Laufhistorie**
+mit den zuletzt **abgeschlossenen** Läufen, neuester zuerst: Abschlusszeit,
+Ergebnis, Gesamtdauer, Feed-Zähler und – bei `eingeschränkt` oder `abgebrochen` –
+der bereinigte Grund. Eine Zusammenfassung nennt die sichtbaren Zahlen.
+
+Aufbewahrt werden höchstens **72** Läufe (`feed_run_history`). Bei planmäßigen
+20-Minuten-Läufen ist das rechnerisch rund ein Tag; verspätete Actions-Läufe
+verschieben den tatsächlichen Zeitraum. Ältere Einträge fallen deterministisch
+heraus.
+
+Drei Zustände werden unterschieden: **nicht lesbar**, **noch keine Einträge**
+und **vorhandene Einträge**. Eine nicht lesbare Historie wird nie als leere
+ausgegeben.
+
+Zwei Grenzen sind wichtig: Ein Lauf, der **gar nicht erst gestartet** ist,
+hinterlässt hier keinen Eintrag – eine Lücke beweist also nichts. Und die
+Historie **alarmiert niemanden**; sie wird nur sichtbar, wenn jemand hinsieht.
+Ein unabhängiger Alarmkanal ist ein eigenes Arbeitspaket.
+
+Einzelheiten und Betriebshinweise stehen in der
+[Dokumentation der Laufhistorie](docs/deployment/feed-run-history.md).
 
 ---
 

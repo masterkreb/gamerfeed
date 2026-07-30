@@ -423,6 +423,7 @@ läuft).
 | `feed_health_status` | Status pro Feed, mit `lastAttemptAt`/`lastSuccessAt` |
 | `feed_run_status` | Veränderlicher Attempt-Status des Cron-Laufs |
 | `feed_publish_status` | Letzter erfolgreicher Kern-Publish |
+| `feed_run_history` | Sorted Set: bis zu 72 abgeschlossene Läufe, Score `finishedAt` in ms |
 | `daily_trends` | Tägliche KI-Trends |
 | `weekly_trends` | Wöchentliche KI-Trends |
 | `site_announcement` | Aktuelles Banner |
@@ -463,6 +464,43 @@ steht. Nur die neuen Metadaten `feed_run_status` und `feed_publish_status` sind
 best effort.
 
 Einzelheiten, Datenformate und Grenzen: `docs/deployment/feed-heartbeat.md`.
+
+## 🕒 Begrenzte Laufhistorie
+
+Der Heartbeat kennt genau **einen** Lauf. `feed_run_history` (O4b) hält deshalb
+zusätzlich bis zu **72 abgeschlossene** Läufe als Redis **Sorted Set**, Score ist
+`finishedAt` in Millisekunden. Bei planmäßigen 20-Minuten-Läufen ist das
+rechnerisch rund ein Tag; verspätete oder ausgefallene Actions-Läufe verschieben
+den tatsächlichen Zeitraum.
+
+Ein Sorted Set statt eines Arrays, weil ein Read-Modify-Write zweier
+gleichzeitig laufender Workflows einen Lauf still verschlucken würde. `zadd` und
+`zremrangebyrank` laufen in **einer** `multi()`-Transaktion; gelesen wird
+absteigend, neueste zuerst.
+
+Gespeichert werden nur `success`, `degraded` und `fatal` – **nie** `running`.
+Je Eintrag: Schema-Version, `runId`, `startedAt`, `finishedAt`, Ergebnis, genau
+ein bereinigter Grund (`degradedReason` **oder** `fatalError`), die fünf
+Feed-Zähler und die Phasendauern. Keine Transportdetails, keine Feed- oder
+Proxy-Adressen, keine Artikeltexte, keine Einzelmeldungen je Feed.
+
+Geschrieben wird **genau einmal** je Lauf – nach `finish()` beziehungsweise
+`recordFatal()` und erst **nach** dem finalen `feed_run_status`, nie vor dem
+Kern-Publish. Der Write ist **best effort**: ein Fehler wird nur bereinigt
+protokolliert und verändert weder Laufergebnis noch Exit-Code. Ein harter
+Prozessabbruch und ein Vorprüfungsabbruch ohne KV-Konfiguration hinterlassen
+konstruktionsbedingt **keinen** Eintrag – eine Lücke beweist also nichts.
+
+Die geschützte `/api/get-health-data`-Antwort trägt additiv
+`runHistory: FeedRunHistoryEntry[] | null`. **`[]` heißt gelesen und leer,
+`null` heißt nicht lesbar.** Ein Lesefehler der Historie macht aus den übrigen
+Health-Daten keinen 500er. Es entsteht kein neuer öffentlicher Endpunkt.
+
+Ausdrücklich nicht enthalten: **keine Alarmierung** (O4c) und **kein
+Proxy-Fingerprint** (O4d). Die Historie erkennt insbesondere keinen Workflow,
+der gar nicht erst gestartet ist.
+
+Einzelheiten, Datenformate und Grenzen: `docs/deployment/feed-run-history.md`.
 
 ## 📋 Laufbericht in der Step-Summary
 
@@ -963,6 +1001,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Lokaler Startcache im Admin (A1c): der bewusst auf 32 Artikel begrenzte Browsercache bewertet keine Feed-Zeile mehr, sondern steht global als eigene Kennzahl mit echter Artikel- und Quellenzahl
 - **Juli 2026:** Laufbericht (O4a): strukturierte Zusammenfassung je Lauf in der GitHub-Step-Summary mit Ergebnis, Dauern, Fehlerquote, Snapshot-Größen sowie Transport und beobachtetem HTTP-Status je Quelle – ohne neue KV-Schlüssel und ohne Einfluss auf Ergebnis oder Exit-Code
 - **Juli 2026:** SEO0: Search-Console-Baseline mit 0 indexierten URLs trotz erfolgreicher Sitemap und Live-Tests; SEO1 als kleiner hybrider Crawlability-Pilot vor O4b eingeordnet
+- **Juli 2026:** Begrenzte Laufhistorie (O4b): bis zu 72 abgeschlossene Läufe in einem Sorted Set `feed_run_history` mit atomarem Write und Kürzen in einer Transaktion, additiv in der geschützten Health-API und im Health Center sichtbar – ohne Alarmierung (O4c) und ohne Proxy-Fingerprint (O4d)
 - **Juli 2026:** Crawlbare Einstiege (SEO1): sichtbarer HTML-Fallback in `#root` mit genau einer H1 und Link auf `/gaming-news`, gerenderter Footer mit lokalisiertem Rückweg, eigener Einleitungstext auf `/gaming-news`, zeitstabile Metadaten ohne feste Quellenzahl und ohne `SearchAction`
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft

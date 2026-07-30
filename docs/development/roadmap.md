@@ -261,6 +261,29 @@ erkannte Seiten; auch die URL-Prüfung nennt sie wieder normal. Die
 Antrag. Der dauerhafte Arbeitsstand steht in
 [`docs/development/seo-indexing.md`](seo-indexing.md).
 
+**Stand 31. Juli 2026 (Branch `claude/o4b-run-history`):** **O4b** ist
+abgeschlossen. Der Heartbeat kannte genau einen Lauf; damit war nicht
+unterscheidbar, ob ein Ausfall ein Ausrutscher oder ein Muster ist. Ein neuer
+KV-Schlüssel `feed_run_history` hält jetzt bis zu 72 **abgeschlossene** Läufe
+als Redis Sorted Set mit `finishedAt` als Score. `zadd` und `zremrangebyrank`
+laufen in einer `multi()`-Transaktion, sodass ein verspäteter und ein
+planmäßiger Workflow sich nicht mehr gegenseitig überschreiben können und die
+Größe nie unbegrenzt wächst. Gespeichert werden nur `success`, `degraded` und
+`fatal` mit Zeitstempeln, Feed-Zählern, Phasendauern und genau einem auf 300
+Zeichen begrenzten, secret-bereinigten Grund – keine Transportdetails, keine
+Feed- oder Proxy-Adressen, keine Artikeltexte. Der Write läuft genau einmal je
+Lauf, erst nach dem finalen `feed_run_status`, und ist best effort: ein
+Historienfehler verändert weder Laufergebnis noch Exit-Code. Die geschützte
+`/api/get-health-data`-Antwort trägt additiv `runHistory`, wobei `[]` und `null`
+ausdrücklich verschiedene Aussagen sind; ein Lesefehler lässt die übrigen
+Health-Daten mit Status 200 stehen. Im Health Center unterscheidet ein eigenes
+Panel nicht lesbar, leer und vorhanden und trägt jedes Ergebnis durch Text und
+Symbol. 836 zentrale Tests und 30 Browser-Abnahmen laufen erfolgreich.
+
+Nicht enthalten und bewusst offen: **keine Alarmierung** – ein Workflow, der gar
+nicht erst startet, hinterlässt keinen Eintrag, und diese Lücke schließt erst
+O4c. Ebenso **kein Proxy-Fingerprint** (O4d).
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -291,7 +314,7 @@ Antrag. Der dauerhafte Arbeitsstand steht in
 | SEO2 | P2 | in Arbeit | Indexierungsanträge und Mess-Gate nach Production-Rollout |
 | SEO3 | P3 | später | Genau einen eigenständigen Content-Pilot aus Messdaten ableiten |
 | SEO4 | P3 | Entscheidung nötig | Eigene Domain und externe Reichweite festlegen |
-| O4b | P2 | geplant | Begrenzte Laufhistorie |
+| O4b | P2 | erledigt | Begrenzte Laufhistorie |
 | O4c | P2 | Entscheidung nötig | Unabhängige Alarmierung |
 | O4d | P2 | geplant | Isolierter Proxy-Fingerprint |
 | D1 | P2 | Entscheidung nötig | Datenbankschema, Backup und Restore festlegen |
@@ -888,21 +911,52 @@ Integrationsfälle gegen das echte `main()` in
 
 #### O4b – Begrenzte Laufhistorie
 
-**Status:** geplant. Nach dem ausdrücklich priorisierten SEO1-Paket wieder
-einordnen.
+**Status:** erledigt.
 
 - eine begrenzte Historie über mehrere Läufe hinaus führen, damit ein Trend
   überhaupt sichtbar wird – der Heartbeat kennt nur den letzten Lauf;
 - Speicherort, Aufbewahrung und Größengrenze ausdrücklich festlegen;
 - die Historie darf den Kern-Publish weder verzögern noch gefährden.
 
+**Umgesetzt:**
+
+- neuer KV-Schlüssel `feed_run_history` als Redis Sorted Set, Score ist
+  `finishedAt` in Millisekunden, höchstens 72 abgeschlossene Läufe;
+- `zadd` und `zremrangebyrank` in **einer** `multi()`-Transaktion statt eines
+  ungeschützten Read-Modify-Write-Arrays;
+- gespeichert werden nur `success`, `degraded` und `fatal` – nie `running`;
+- der Write läuft genau einmal je Lauf, nach `finish()` beziehungsweise
+  `recordFatal()` und erst nach dem finalen `feed_run_status`;
+- additives `runHistory: FeedRunHistoryEntry[] | null` in der bereits
+  geschützten `/api/get-health-data`-Antwort, ohne neuen öffentlichen Endpunkt;
+- eigenständiges `FeedRunHistoryPanel` im Health Center, DE und EN vollständig
+  lokalisiert.
+
 **Abnahme:**
 
 - eine definierte Zahl vergangener Läufe ist abrufbar, ältere fallen
-  deterministisch heraus;
-- die Historie enthält weder Secrets noch vollständige Proxy-URLs;
+  deterministisch heraus – auch bei außerhalb der Reihenfolge eintreffenden
+  Läufen, weil `finishedAt` und nicht die Schreibreihenfolge sortiert;
+- die Historie enthält weder Secrets noch vollständige Proxy-URLs: Gründe laufen
+  durch die Redaktion des Aufrufers und danach durch die gemeinsame Bereinigung
+  aus `shared/feed-health-model.js`, begrenzt auf 300 Zeichen;
 - ein Fehler beim Schreiben der Historie macht einen erfolgreichen Lauf nicht
-  `fatal`.
+  `fatal` und verändert den Exit-Code nicht;
+- ein Lesefehler der Historie ergibt `runHistory: null`, aber weiterhin Status
+  200 mit den übrigen Health-Daten.
+
+**Dokumentierte Grenzen:** ein harter Prozessabbruch und ein Abbruch in der
+Vorprüfung ohne verfügbare KV-Konfiguration können konstruktionsbedingt keinen
+Eintrag schreiben. Eine Lücke in der Historie beweist deshalb nicht, dass nichts
+passiert ist – und die Historie erkennt insbesondere keinen Workflow, der gar
+nicht erst gestartet ist. Das bleibt O4c.
+
+Erfüllt durch `tests/server/unit/feed-run-history.test.js`,
+`tests/server/unit/feed-run-history-store.test.js`, die O4b-Fälle in
+`tests/feeds/unit/feed-run-recorder.test.js` und
+`tests/server/unit/health-data-handler.test.js` sowie
+`tests/frontend/unit/feed-run-history-panel.test.js`. Betriebsdoku:
+[`docs/deployment/feed-run-history.md`](../deployment/feed-run-history.md).
 
 #### O4c – Unabhängige Alarmierung
 
