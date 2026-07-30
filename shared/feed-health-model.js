@@ -71,6 +71,13 @@ const DURATION_KEYS = Object.freeze([
 
 const MAX_ERROR_MESSAGE_LENGTH = 300;
 
+// `scheme://user:pass@host` - das Schema folgt RFC 3986 (Buchstabe, danach
+// Buchstaben, Ziffern, `+`, `-`, `.`).
+const URI_CREDENTIALS_PATTERN = /([a-z][a-z0-9+.-]*:\/\/)[^\s/@]*@/gi;
+
+// `scheme://host/pfad?token=...` - Querystrings tragen ueblicherweise Tokens.
+const URI_QUERY_PATTERN = /([a-z][a-z0-9+.-]*:\/\/[^\s?#]+)\?[^\s]*/gi;
+
 function emptyDurations() {
     const durations = {};
     for (const key of DURATION_KEYS) {
@@ -160,10 +167,15 @@ export function sanitizeErrorMessage(message, { secrets = [], maxLength = MAX_ER
         text = text.split(secret).join('[redacted]');
     }
 
-    // Zugangsdaten in URLs (https://user:pass@host) und Querystrings, in denen
-    // Tokens ueblicherweise stehen.
-    text = text.replace(/(https?:\/\/)[^\s/@]*@/gi, '$1');
-    text = text.replace(/(https?:\/\/[^\s?#]+)\?[^\s]*/gi, '$1?[redacted]');
+    // Zugangsdaten und Querystrings in Adressen mit Schema.
+    //
+    // Bewusst **nicht** nur http(s): Verbindungsfehler von Postgres, KV oder
+    // Redis tragen ihre Adresse samt `user:pass@` im Text, und die Zusage
+    // „keine Zugangsdaten“ darf nicht davon abhaengen, dass eine Meldung die
+    // konfigurierte Zeichenfolge bytegenau wiederholt. Das Schemamuster folgt
+    // RFC 3986; die exakten Secret-Werte oben laufen weiterhin zuerst.
+    text = text.replace(URI_CREDENTIALS_PATTERN, '$1');
+    text = text.replace(URI_QUERY_PATTERN, '$1?[redacted]');
 
     text = text.replace(/\s+/g, ' ').trim();
     if (text.length > maxLength) {
