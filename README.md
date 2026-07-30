@@ -14,7 +14,7 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
     - Tab-Titel zeigt Anzahl neuer Artikel: `(5) GamerFeed`
     - Badge am Refresh-Button mit Puls-Animation
     - Toast-Benachrichtigung mit Swipe-to-Dismiss (links oder hoch wischen)
-- **Mehrsprachigkeit**: Vollständig übersetzbar mit i18next. Erkennt automatisch die Browsersprache des Nutzers (Deutsch/Englisch) und merkt sich die Auswahl.
+- **Mehrsprachigkeit**: Vollständig übersetzbar mit i18next. Erkennt automatisch die Browsersprache des Nutzers (Deutsch/Englisch) und merkt sich die Auswahl. Ein Wechsel aktualisiert Texte, Datumsformate und barrierefreie Beschriftungen ohne Neuladen.
 - **Anpassbare Ansicht**:
     - **Themes**: Wähle zwischen Light- und Dark-Mode.
     - **Layouts**: Grid-, Listen- oder Kompaktansicht für Artikel.

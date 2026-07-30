@@ -160,6 +160,14 @@ optionale Generation; blockiertes Schreiben nimmt dem laufenden React-State
 nicht seinen neuen Wert. 637 zentrale Tests und 23 Browser-Abnahmen laufen
 erfolgreich.
 
+**Stand 30. Juli 2026 (Branch `codex/f4b-i18n-consistency`):** F4b ist
+abgeschlossen. Artikel-, Trend- und Admin-Datumswerte folgen jetzt der
+gewählten App-Sprache statt der Browsersprache. Verbliebene sichtbare und
+barrierefreie Texte der bearbeiteten Frontend- und Admin-Komponenten liegen in
+den DE-/EN-Ressourcen; interne Fehlerdetails bleiben im Log statt in der
+Oberfläche. Ein Sprachwechsel aktualisiert Datum, Texte und Accessible Names
+ohne Reload. 639 zentrale Tests und 23 Browser-Abnahmen laufen erfolgreich.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -179,8 +187,8 @@ erfolgreich.
 | F3a | P2 | erledigt | Zentrale Tastatur- und DOM-Probleme im Frontend beheben |
 | F3b | P2 | erledigt | Veraltetes ArticleCard-Rendering verhindern |
 | F4a | P2 | erledigt | Persistierten Zustand robust validieren |
-| F4b | P2 | geplant | Verbliebene i18n-Inkonsistenzen schließen |
-| A1a | P2 | geplant | Admin-Mutationen synchron absichern |
+| F4b | P2 | erledigt | Verbliebene i18n-Inkonsistenzen schließen |
+| A1a | P2 | bereit | Admin-Mutationen synchron absichern |
 | A1b | P2 | geplant | Admin-Tabs und Health-Beschriftung korrigieren |
 | O4 | P2 | geplant | Historie, Alarmierung und Proxy-Version beobachtbar machen |
 | D1 | P2 | Entscheidung nötig | Datenbankschema, Backup und Restore festlegen |
@@ -811,6 +819,14 @@ State-Aktualisierung nicht.
 
 ### F4b – i18n-Konsistenz
 
+**Status:** erledigt. `shared/i18n-locale.ts` bildet die aktive i18n-Sprache
+einheitlich auf das Datums-Locale ab. Artikel, Trends, Announcement-Zeitstempel
+und Cron-Heartbeat verwenden diese Auswahl. Bekannte hart codierte UI-Texte in
+den bearbeiteten Komponenten sind durch DE-/EN-Schlüssel ersetzt; technische
+Fehlerdetails werden weiterhin protokolliert, aber nicht ungefiltert angezeigt.
+Ein React-Regressionstest wechselt die Sprache ohne Remount und prüft Datum,
+sichtbaren Fehlertext und Accessible Names in beiden Sprachen.
+
 **Umfang:**
 
 - Artikeldatum an die gewählte i18n-Sprache statt `navigator.language` binden;
@@ -828,6 +844,8 @@ State-Aktualisierung nicht.
 ## Meilenstein 4: Admin
 
 ### A1a – Admin-Mutationen
+
+**Status:** bereit.
 
 **Umfang:**
 
