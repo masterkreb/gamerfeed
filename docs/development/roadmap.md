@@ -190,7 +190,16 @@ Feed gesund zu melden. Die irreführenden Aktualisieren-Symbole je Feed-Zeile
 sind entfallen; der zentrale Knopf lädt ausdrücklich nur den gespeicherten
 Bericht. Der Legenden-Reiter beschreibt dieselbe Semantik ohne Verweise auf die
 alte Dateiarchitektur und ohne den nie gesetzten Zustand „Prüfe“. 672 zentrale
-Tests und 23 Browser-Abnahmen laufen erfolgreich. Als nächstes ist O4 bereit.
+Tests und 23 Browser-Abnahmen laufen erfolgreich.
+
+**Stand 30. Juli 2026 (Branch `claude/f5-snapshot-discovery`):** F5 ist
+abgeschlossen und wurde **vor** O4 eingeschoben. Ein Browser mit gepinnter
+Generation A blieb dauerhaft auf altem Stand, weil schon der erste Versuch
+`?snapshot=A` mitschickte und der Server die direkt vorherige Generation
+zulässigerweise weiter auslieferte. Der erste Versuch jeder autoritativen
+Ladung und der Auto-Update-Poll fragen jetzt ungebunden; erst die angenommene
+Antwort bindet die Folgestufen. 680 zentrale Tests und 25 Browser-Abnahmen
+laufen erfolgreich. Als nächstes ist O4 bereit.
 
 ## Empfohlene Reihenfolge
 
@@ -214,6 +223,7 @@ Tests und 23 Browser-Abnahmen laufen erfolgreich. Als nächstes ist O4 bereit.
 | F4b | P2 | erledigt | Verbliebene i18n-Inkonsistenzen schließen |
 | A1a | P2 | erledigt | Admin-Mutationen synchron absichern |
 | A1b | P2 | erledigt | Admin-Tabs und Health-Beschriftung korrigieren |
+| F5 | P1 | erledigt | Aktive Snapshot-Generation zuverlässig entdecken |
 | O4 | P2 | bereit | Historie, Alarmierung und Proxy-Version beobachtbar machen |
 | D1 | P2 | Entscheidung nötig | Datenbankschema, Backup und Restore festlegen |
 | D2 | P2 | geplant | Lokale Produktionsschreibvorgänge explizit absichern |
@@ -646,6 +656,55 @@ unterschiedliche Generationen enthalten.
 - die serialisierten Full-, 16er- und 64er-Payloads bleiben unter ihren Budgets,
   auch bei einem einzelnen extrem großen Eingabeartikel;
 - Artikelreihenfolge bleibt stabil und newest-first.
+
+### F5 – Aktive Snapshot-Generation zuverlässig entdecken
+
+**Status:** erledigt. Priorität P1, eingeschoben vor O4.
+
+**Warum:** `?snapshot=<id>` setzt eine **bereits gewählte** Generation
+konsistent fort. Es ist kein Suchmittel. Weil O3b die direkt vorherige
+Generation bewusst lesbar hält, beantwortet der Server eine Anfrage mit
+`?snapshot=A` weiterhin mit A – auch wenn längst B aktiv ist. Vor F5 hängten
+sowohl die autoritative Ladekette als auch der Auto-Update-Poll die gepinnte
+Kennung an **jede** Anfrage, einschließlich des ersten Versuchs. Ein Browser
+mit lokal gespeicherter Generation A konnte B deshalb nie entdecken und zeigte
+dauerhaft alte Artikel. Produktiv beobachtet: im Backend lag ein neuerer
+Artikel, das bereits geöffnete Frontend blieb älter.
+
+**Umfang:**
+
+- Entdeckung von Fortsetzung trennen: der **erste** Versuch einer
+  autoritativen Ladung fragt ungebunden – initiale Preview, Full-Fallback
+  ohne vorher angenommene Antwort und manueller Refresh;
+- Auto-Update-Polls fragen den aktiven Stand ungebunden ab;
+- sobald eine Antwort angenommen und ihre Generation gewählt ist, tragen die
+  folgenden Medium- und Full-Stufen genau diese Generation;
+- verworfene Antworten – ältere, headerlose ohne Rollback-Signal oder
+  unbrauchbare – verändern weder sichtbare Artikel noch Pin noch lokale Kopie;
+- der Poll pinnt weiterhin nicht: Artikel und Generation bleiben gemeinsam
+  vorgemerkt und werden erst über die vorhandene Übernahmeaktion sichtbar;
+- Rollback-Signal, Request-Epochen, Abort-Verhalten und Latest-request-wins
+  bleiben unverändert;
+- keine Backend-, KV-, Vercel- oder Cron-Änderungen.
+
+**Abnahme:**
+
+- ein Browser mit gepinnter Generation A entdeckt eine aktive Generation B,
+  auch wenn eine Anfrage mit `?snapshot=A` weiterhin A liefern würde;
+- der erste Request einer Ladekette trägt keine Generation, alle Folgestufen
+  genau die angenommene;
+- nach einem Preview-Fehler bleibt auch der Full-Fallback ungebunden, solange
+  noch keine Antwort angenommen wurde;
+- ältere, headerlose und Rollback-Antworten verhalten sich unverändert;
+- eine Chromium-Abnahme reproduziert den Fall mit einer Attrappe, die gepinnte
+  A-Anfragen tatsächlich mit A beantwortet.
+
+Erfüllt durch die Deferred-Promise-Fälle in
+`tests/frontend/unit/news-load-controller.test.js`, den Verdrahtungswächter in
+`tests/frontend/unit/news-generation-wiring.test.js` und die Chromium-Abnahmen
+in `tests/e2e/news-generation.spec.ts`. Gegenprobe: mit wieder durchgehend
+gepinnten Adressen fallen vier Controller-Tests und beide neuen
+Chromium-Abnahmen, mit gepinntem Poll der Verdrahtungswächter.
 
 ### O4 – Historie, Alarmierung und Versionsdrift
 

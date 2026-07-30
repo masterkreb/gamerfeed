@@ -437,6 +437,12 @@ export function planPendingAdoption({ pinned = null, pending = null } = {}) {
 /**
  * Haengt die gepinnte Generation an eine Endpunktadresse.
  *
+ * **Nur zur Fortsetzung einer bereits gewaehlten Generation, nie zur Suche
+ * nach der aktiven.** Die direkt vorherige Generation bleibt absichtlich
+ * lesbar; eine Anfrage mit `?snapshot=A` bekommt deshalb weiterhin A zurueck,
+ * auch wenn laengst B aktiv ist. Wer schon den ersten Versuch bindet, entdeckt
+ * eine neue Generation nie (Roadmap F5).
+ *
  * Der Parameter macht den Edge-Cache generationsspezifisch: verschiedene
  * Generationen liegen unter verschiedenen Cache-Keys. O3b garantiert
  * inzwischen, dass der Inhalt unter einer Kennung unveraenderlich ist. Die

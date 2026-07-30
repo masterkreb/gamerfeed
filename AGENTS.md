@@ -624,6 +624,17 @@ Generationen**:
   Legacy-Fallback ohne Header.
 - **Drei Leseregeln:** gleiche Generation übernehmen, neuere übernehmen *und*
   umpinnen, ältere verwerfen.
+- **Entdeckung ist nicht Fortsetzung.** `?snapshot=<id>` setzt eine bereits
+  gewählte Generation konsistent fort und taugt **nicht** zur Suche nach der
+  aktiven. Weil die direkt vorherige Generation absichtlich lesbar bleibt,
+  beantwortet der Server `?snapshot=A` weiter mit A – ein Browser, der schon
+  seinen ersten Versuch pinnt, entdeckt eine neue Generation nie. Der erste
+  Versuch jeder autoritativen Ladung fragt deshalb ungebunden (Preview,
+  Full-Fallback ohne angenommene Antwort, manueller Refresh), ebenso der
+  Auto-Update-Poll. Erst die angenommene Antwort bindet Medium und Full an genau
+  ihre Generation; dafür führt der Controller `hasAcceptedResponse` getrennt von
+  `hasUsableResponse`. Die Annahmeentscheidung bleibt unverändert, eine
+  ungebundene Entdeckung öffnet also keinen Rückschritt.
 - **Gepinnt wird nur, was sichtbar ist.** Der Auto-Update-Pfad pollt im
   Hintergrund und pinnt deshalb nicht; Artikel und Generation wandern gemeinsam
   in die Warteschlange und werden beim Klick über `planPendingAdoption` erneut
@@ -823,6 +834,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** i18n-Konsistenz (F4b): Datumswerte an die App-Sprache gebunden, verbliebene UI- und ARIA-Texte nach DE/EN überführt und Sprachwechsel ohne Reload getestet
 - **Juli 2026:** Admin-Mutationen (A1a): synchroner `useRef`-Latch für Feed-POST/PUT/DELETE und die gemeinsam gesperrten Ankündigungs-Mutationen, Bestätigungsdialog vor dem Löschen einer Ankündigung, Fehlerpfade erhalten Eingaben und Datensätze
 - **Juli 2026:** Admin-Tabs und Health-Semantik (A1b): vollwertige ARIA-Tabs mit Pfeiltasten, benannte Aufklapp-Schaltflächen, drei getrennte Quellen-Kennzahlen mit belegbarem Snapshot-Vergleich, unscharfe Gesundmeldung entfernt, irreführende Einzelabruf-Symbole entfernt
+- **Juli 2026:** Snapshot-Entdeckung (F5): der erste Versuch jeder Ladung und der Auto-Update-Poll fragen ungebunden, damit ein Browser mit gepinnter alter Generation die inzwischen aktive überhaupt sieht; erst die angenommene Antwort bindet die Folgestufen
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 

@@ -46,6 +46,15 @@ interface ActiveRun {
     controller: AbortController;
     epoch: number;
     hasUsableResponse: boolean;
+    /**
+     * Hat **diese** Ladung bereits eine Antwort angenommen und damit ihre
+     * Generation gewählt? Erst danach darf gepinnt werden.
+     *
+     * Bewusst getrennt von `hasUsableResponse`: Das beschreibt bereits
+     * sichtbare Artikel aus einem früheren Lauf und entscheidet nur, ob ein
+     * Fehler blockierend ist.
+     */
+    hasAcceptedResponse: boolean;
     isBlocking: boolean;
     manualRefresh: boolean;
 }
@@ -131,6 +140,9 @@ export function createNewsLoadController(options: NewsLoadControllerOptions) {
             controller: new AbortController(),
             epoch,
             hasUsableResponse: hasVisibleArticles,
+            // Jede Ladung beginnt mit einer ungebundenen Entdeckung, auch wenn
+            // schon Artikel sichtbar sind.
+            hasAcceptedResponse: false,
             isBlocking: !hasVisibleArticles,
             manualRefresh,
         };
@@ -181,6 +193,9 @@ export function createNewsLoadController(options: NewsLoadControllerOptions) {
         setPinnedSnapshot(decision.pin);
         commitArticles(rawArticles as Article[], decision.pin, stage);
         run.hasUsableResponse = true;
+        // Ab jetzt steht die Generation dieser Ladung fest; die Folgestufen
+        // werden daran gebunden.
+        run.hasAcceptedResponse = true;
 
         if (run.isBlocking) {
             run.isBlocking = false;
@@ -190,13 +205,29 @@ export function createNewsLoadController(options: NewsLoadControllerOptions) {
         return { accepted: true, stale: false };
     };
 
+    /**
+     * Adresse einer Stufe.
+     *
+     * `?snapshot=<id>` setzt eine **bereits gewählte** Generation konsistent
+     * fort; es ist kein Suchmittel. Der Server darf die direkt vorherige
+     * Generation weiter ausliefern, deshalb bekäme eine gepinnte Anfrage
+     * dauerhaft den alten Stand zurück und der Browser entdeckte eine neue
+     * Generation nie. Der erste Versuch einer Ladung fragt deshalb ungebunden;
+     * erst die angenommene Antwort bindet die Folgestufen.
+     */
+    const stageUrl = (run: ActiveRun, endpoint: string): string => (
+        run.hasAcceptedResponse
+            ? withSnapshotQuery(endpoint, getPinnedSnapshot())
+            : endpoint
+    );
+
     const fetchStage = async (
         run: ActiveRun,
         endpoint: string,
         stage: NewsLoadStage,
     ): Promise<StageResult> => {
         const response = await fetchImpl(
-            withSnapshotQuery(endpoint, getPinnedSnapshot()),
+            stageUrl(run, endpoint),
             { signal: run.controller.signal },
         );
         if (!isCurrent(run)) return { accepted: false, stale: true };

@@ -23,7 +23,6 @@ import {
     planPollResponse,
     readSnapshotHeaders,
     readSnapshotRollback,
-    withSnapshotQuery,
 } from './shared/news-snapshot.js';
 import {
     decodeCachedNews,
@@ -176,11 +175,6 @@ const AppContent: React.FC = () => {
     // sie steuert nur, welche Antwort uebernommen wird, und darf dafuer kein
     // Rendern ausloesen.
     const pinnedSnapshotRef = useRef<NewsSnapshotPointer | null>(null);
-
-    /** Haengt die gepinnte Generation an eine Endpunktadresse. */
-    const snapshotUrl = useCallback((path: string): string => (
-        withSnapshotQuery(path, pinnedSnapshotRef.current)
-    ), []);
 
     const validCachedArticles = useMemo(() => {
         const isFresh = Date.now() - cachedNews.timestamp < LOCAL_NEWS_CACHE_TTL_MS;
@@ -343,8 +337,11 @@ const AppContent: React.FC = () => {
         if (!request) return;
 
         try {
+            // Ungebunden: `?snapshot=` setzt eine gewaehlte Generation fort und
+            // taugt nicht zur Suche. Gepinnt bekaeme der Poll weiterhin die
+            // gepinnte Generation zurueck und meldete nie einen neuen Stand.
             const response = await fetch(
-                snapshotUrl('/api/get-news'),
+                '/api/get-news',
                 { signal: request.signal },
             );
             if (!request.isCurrent() || !response.ok) return;
@@ -408,7 +405,7 @@ const AppContent: React.FC = () => {
         } finally {
             request.release();
         }
-    }, [articles, newsLoadController, snapshotUrl]);
+    }, [articles, newsLoadController]);
 
     // Load pending articles (when user clicks the toast or badge)
     const loadPendingArticles = useCallback(() => {
