@@ -168,6 +168,15 @@ den DE-/EN-Ressourcen; interne Fehlerdetails bleiben im Log statt in der
 Oberfläche. Ein Sprachwechsel aktualisiert Datum, Texte und Accessible Names
 ohne Reload. 639 zentrale Tests und 23 Browser-Abnahmen laufen erfolgreich.
 
+**Stand 30. Juli 2026 (Branch `claude/a1a-admin-mutations`):** A1a ist
+abgeschlossen. Alle fünf mutierenden Admin-Aktionen laufen über einen synchron
+gesetzten `useRef`-Latch, der zwei Ereignisse desselben Render-Zyklus auf genau
+einen POST, PUT oder DELETE reduziert und im `finally` wieder freigegeben wird.
+Speichern und Löschen einer Ankündigung teilen sich diesen Latch. Das Löschen
+einer Ankündigung verlangt jetzt eine fokussierte Bestätigung im `alertdialog`,
+und Fehler erhalten Eingaben, Datensätze und den jeweiligen Dialog. 650 zentrale
+Tests und 23 Browser-Abnahmen laufen erfolgreich. Als nächstes ist A1b bereit.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -188,8 +197,8 @@ ohne Reload. 639 zentrale Tests und 23 Browser-Abnahmen laufen erfolgreich.
 | F3b | P2 | erledigt | Veraltetes ArticleCard-Rendering verhindern |
 | F4a | P2 | erledigt | Persistierten Zustand robust validieren |
 | F4b | P2 | erledigt | Verbliebene i18n-Inkonsistenzen schließen |
-| A1a | P2 | bereit | Admin-Mutationen synchron absichern |
-| A1b | P2 | geplant | Admin-Tabs und Health-Beschriftung korrigieren |
+| A1a | P2 | erledigt | Admin-Mutationen synchron absichern |
+| A1b | P2 | bereit | Admin-Tabs und Health-Beschriftung korrigieren |
 | O4 | P2 | geplant | Historie, Alarmierung und Proxy-Version beobachtbar machen |
 | D1 | P2 | Entscheidung nötig | Datenbankschema, Backup und Restore festlegen |
 | D2 | P2 | geplant | Lokale Produktionsschreibvorgänge explizit absichern |
@@ -845,7 +854,23 @@ sichtbaren Fehlertext und Accessible Names in beiden Sprachen.
 
 ### A1a – Admin-Mutationen
 
-**Status:** bereit.
+**Status:** erledigt. `hooks/useMutationLatch.ts` setzt die Sperre synchron über
+`useRef`, bevor der erste `await` läuft, und gibt sie in jedem Erfolgs- und
+Fehlerpfad über `finally` wieder frei; die State-Kopie `isMutating` steuert nur
+noch Beschriftung, `aria-busy` und `disabled`. Feed-POST/PUT (`FeedFormModal`)
+und Feed-DELETE (`AdminPanel`) haben je einen eigenen Latch, Speichern und
+Löschen einer Ankündigung teilen sich bewusst einen gemeinsamen, damit nicht
+synchron ein POST und ein DELETE nebeneinander starten.
+
+Das Löschen einer Ankündigung erfolgt nicht mehr unmittelbar, sondern über einen
+`alertdialog` mit `useDialogFocus`: initialer Fokus auf „Abbrechen“, Fokusfalle,
+Escape schließt vor Beginn der Mutation und ist währenddessen gesperrt – dieselbe
+Regel wie im Feed-Löschdialog. Fehlt der Auslöser nach erfolgreicher Löschung,
+greift ein Fallback-Fokus; beim Feed ist das „Neuen Feed hinzufügen“, bei der
+Ankündigung das Textfeld, weil der Speichern-Knopf ohne Nachricht deaktiviert und
+damit nicht fokussierbar wäre. Fehler verwerfen weder Eingaben noch Datensätze
+und bleiben als lokalisierte Meldung sichtbar, während der interne Text nur ins
+Log geht.
 
 **Umfang:**
 
@@ -862,7 +887,14 @@ sichtbaren Fehlertext und Accessible Names in beiden Sprachen.
 - Bestätigung erhält initialen Fokus, hält ihn fest, beachtet die definierte
   Escape-Regel und gibt den Fokus zurück.
 
+Erfüllt durch `tests/frontend/unit/admin-mutation-guards.test.js` und die
+erweiterten Tests in `tests/frontend/unit/announcement-tab.test.js`. Beide lösen
+je Flow zwei Aktionen ohne `await` dazwischen aus und belegen gegen den
+Ausgangsstand, dass ohne Latch zwei Requests entstanden wären.
+
 ### A1b – Admin-Tabs und Health-Semantik
+
+**Status:** bereit.
 
 **Umfang:**
 

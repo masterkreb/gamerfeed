@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next';
 import { useFeeds } from '../../hooks/useFeeds';
 import { useDialogFocus } from '../../hooks/useDialogFocus';
+import { useMutationLatch } from '../../hooks/useMutationLatch';
 import type { FeedSource, FeedHeartbeat, HealthDataResponse } from '../../types';
 import {
     ArrowLeftIcon,
@@ -99,7 +100,7 @@ export const AdminPanel: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingFeed, setEditingFeed] = useState<FeedSource | null>(null);
     const [feedToDelete, setFeedToDelete] = useState<FeedSource | null>(null);
-    const [isDeletingFeed, setIsDeletingFeed] = useState(false);
+    const { isMutating: isDeletingFeed, runExclusive: runFeedDeletion } = useMutationLatch();
     const [deleteError, setDeleteError] = useState<string | null>(null);
     const deleteCancelButtonRef = useRef<HTMLButtonElement>(null);
     const addFeedButtonRef = useRef<HTMLButtonElement>(null);
@@ -159,9 +160,14 @@ export const AdminPanel: React.FC = () => {
     });
 
     const confirmDelete = async () => {
-        if (feedToDelete && !isDeletingFeed) {
-            const targetFeed = feedToDelete;
-            setIsDeletingFeed(true);
+        const targetFeed = feedToDelete;
+        if (!targetFeed) {
+            return;
+        }
+
+        // Der Latch wird synchron gesetzt, damit ein zweiter Klick im selben
+        // Render-Zyklus kein zweites DELETE auslöst.
+        await runFeedDeletion(async () => {
             setDeleteError(null);
 
             try {
@@ -173,12 +179,12 @@ export const AdminPanel: React.FC = () => {
                 });
                 setFeedToDelete(null);
             } catch (error) {
+                // Feed und Bestätigungsdialog bleiben erhalten; der interne
+                // Fehlertext geht nur ins Log.
                 console.error('Error deleting feed:', error);
                 setDeleteError(t('admin.deleteError'));
-            } finally {
-                setIsDeletingFeed(false);
             }
-        }
+        });
     };
 
     // Health Check Logic
