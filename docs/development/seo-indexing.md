@@ -1,6 +1,6 @@
 # SEO, Indexierung und messbare Auffindbarkeit
 
-Stand: 30. Juli 2026
+Stand: 31. Juli 2026
 
 Dieses Dokument hält die gemessene Ausgangslage und die Leitplanken für
 SEO-Arbeit an GamerFeed fest. Es ist keine Zusage, viele Seiten zu erzeugen
@@ -162,9 +162,9 @@ wieder entstehen, wenn dieser Parameter tatsächlich als URL-Suche funktioniert.
 
 ### Phase 2 – Indexierungs-Gate
 
-**Offen.** Diese Phase beginnt erst nach Merge und Production-Rollout von SEO1
-und besteht aus manuellen Schritten in der Search Console – kein Code, keine
-API, kein automatischer Antrag.
+**In Arbeit seit 30. Juli 2026.** SEO1 ist gemergt und produktiv. Diese Phase
+besteht aus manuellen Schritten in der Search Console – kein Code, keine API,
+kein automatischer Antrag.
 
 Nach Production-Deployment von SEO1 werden beide URLs manuell live geprüft und
 einmal zur Indexierung eingereicht. Danach werden nach 7, 14 und 28 Tagen
@@ -175,6 +175,31 @@ mindestens diese Werte festgehalten:
 - Suchanfragen ohne reine `site:`-Operatoren;
 - erkannte interne und externe Links;
 - neue Crawl- oder Darstellungsfehler.
+
+#### Aktueller Abnahmestand
+
+| Schritt | Status | Befund beziehungsweise nächste Aktion |
+|---|---|---|
+| Live-Test Startseite | erledigt | technisch abrufbar und indexierbar |
+| Live-Test `/gaming-news` | erledigt | technisch abrufbar und indexierbar |
+| Indexierungsantrag Startseite | offen | Google lehnte den Versuch am 30. Juli wegen des überschrittenen Tageskontingents ab; es liegt keine Annahmebestätigung vor |
+| Indexierungsantrag `/gaming-news` | offen | erst erneut versuchen, wenn Search Console wieder Anträge annimmt |
+| Sitemap-Befund abgleichen | offen | Der Sitemap-Bericht hatte `/sitemap.xml` erfolgreich mit zwei URLs gelesen, die URL-Prüfung zeigte später jedoch „Vorübergehender Verarbeitungsfehler“; beide Ansichten erneut prüfen, bevor ein Defekt der öffentlichen Sitemap angenommen wird |
+| Messpunkte nach 7, 14 und 28 Tagen | wartend | Fristen erst ab dem Tag zählen, an dem die Indexierungsanträge tatsächlich angenommen wurden |
+
+Die Eingabe `https://gamerfeed.vercel.app` ohne abschließenden Slash wird von
+der Search Console auf `https://gamerfeed.vercel.app/` normalisiert. Sie ist
+keine dritte URL und umgeht weder Kontingent noch Indexierungszustand.
+
+Ein lokaler Google-OAuth-Zugang würde diesen Schritt nicht beschleunigen: Die
+URL-Prüfungs-API kann den bekannten Indexzustand auslesen, aber keinen normalen
+Indexierungsantrag stellen. Die Google Indexing API ist für diese gewöhnlichen
+GamerFeed-Seiten nicht vorgesehen. Ein OAuth-Zugang bleibt höchstens eine
+spätere Option für automatisierte, nur lesende Messberichte.
+
+Eine Erinnerung ist nur eine Bedienhilfe und nicht die maßgebliche
+Aufgabenverwaltung. Falls zum Erinnerungszeitpunkt niemand online ist, bleiben
+alle offenen Schritte in dieser Tabelle bestehen.
 
 Das Gate gilt als positives Signal, sobald mindestens eine URL indexiert ist
 und/oder echte thematische Impressionen erhält. Es ist keine Garantie für eine
