@@ -107,6 +107,7 @@
 │   ├── news-snapshot.js         # Generationsgebundenes Leseprotokoll
 │   ├── news-snapshot-store.js   # Unveränderliche Keys, Manifest und Dual-Read
 │   ├── persisted-state.ts       # Decoder und Defaults für Browserzustand
+│   ├── i18n-locale.ts           # App-Sprache auf festes Datums-Locale abbilden
 │   ├── api-errors.js            # Stabile Fehlercodes und Cache-Vorgabe
 │   └── feed-health-model.js     # Cron-Heartbeat, Frische, FEED_STALE_AFTER_MS
 ├── tests/                  # Zentrale Tests nach Fachbereich und Testart
@@ -216,6 +217,19 @@ kaputtes JSON setzt nur den betroffenen Zustand auf seinen Default.
 Artikel und normalisiert eine vorhandene Generation über den bestehenden
 Snapshot-Vertrag. Schlägt nur das persistente Schreiben fehl, bleibt der
 aktuelle React-State benutzbar.
+
+### Internationalisierung und Datumsformate
+
+Sichtbare Texte und Accessible Names der App liegen in den DE-/EN-Ressourcen
+von `i18n.ts`. Neue UI-Texte werden nicht direkt in JSX geschrieben.
+Technische Fehlerdetails gehören in das bereinigte Log; die Oberfläche zeigt
+eine lokalisierte, für Nutzer verständliche Meldung.
+
+Datumswerte folgen ausschließlich der in i18next gewählten Sprache, nicht
+`navigator.language` oder dem Prozess-Locale. `shared/i18n-locale.ts` bildet
+Deutsch auf `de-DE` und alle übrigen unterstützten Sprachen auf `en-US` ab.
+Komponenten beziehen die Sprache über `useTranslation`, damit ein
+Sprachwechsel Texte, Datumswerte und Accessible Names ohne Reload aktualisiert.
 
 ### Kontaktformular
 
@@ -697,6 +711,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Tastatur und ArticleCard-DOM (F3a): gespeicherte Suchen per Enter/Leertaste, lokalisierte Accessible Names, Artikelaktionen außerhalb des gestreckten Links und zuverlässige Fokus-Rückgabe im Optionsdialog
 - **Juli 2026:** ArticleCard-Aktualisierung (F3b): unvollständigen Memo-Sondervergleich entfernt und Änderungen aller sichtbaren Artikelfelder bei gleicher ID abgesichert
 - **Juli 2026:** Persistierter Zustand (F4a): verpflichtende Laufzeit-Decoder, feste Defaults, sichere Cross-Tab-Löschung und validierte lokale News-Kopien
+- **Juli 2026:** i18n-Konsistenz (F4b): Datumswerte an die App-Sprache gebunden, verbliebene UI- und ARIA-Texte nach DE/EN überführt und Sprachwechsel ohne Reload getestet
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 

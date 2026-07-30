@@ -13,11 +13,18 @@ const resources = {
             "header.toggleTheme": "Toggle theme",
             "header.openSettings": "Open settings",
             "header.backToApp": "Back to App",
+            "header.home": "Go to homepage and reset filters",
 
             // View Modes
             "viewMode.grid": "Grid View",
             "viewMode.list": "List View",
             "viewMode.compact": "Compact View",
+            "viewMode.switchTo": "Switch to {{view}}",
+            "viewMode.change": "Change view mode",
+
+            // Languages
+            "language.english": "English",
+            "language.german": "German",
 
             // Filter Bar
             "filter.search.placeholder": "Search articles by keyword...",
@@ -228,17 +235,20 @@ const resources = {
             "trends.updatedHoursAgo_one": "Updated {{count}} hour ago",
             "trends.updatedHoursAgo_other": "Updated {{count}} hours ago",
             "trends.errorLoading": "Could not load trends",
+            "trends.errorLoadingHint": "Please try again later.",
             "trends.noTrends": "No Trends Available",
             "trends.noTrendsHint": "Trends are being generated. Please check back in a few minutes.",
 
             // Accessibility
             "a11y.skipToContent": "Skip to main content",
             "a11y.changeLanguage": "Change language, current: {{lang}}",
+            "a11y.scrollToTop": "Scroll to top",
 
             // Admin Panel
             "admin": {
                 "panelTitle": "Admin Panel",
                 "backToApp": "Back to App",
+                "tabsLabel": "Admin sections",
                 "tabManagement": "Feed Management",
                 "tabHealth": "Health Center",
                 "tabLegend": "Health Legend",
@@ -271,6 +281,8 @@ const resources = {
                     "headerLang": "Lang",
                     "headerHealth": "Health",
                     "headerActions": "Actions",
+                    "priorityPrimary": "Primary",
+                    "prioritySecondary": "Secondary",
                     "ariaCheckHealth": "Check health for {{name}}",
                     "ariaEdit": "Edit {{name}}",
                     "ariaDelete": "Delete {{name}}"
@@ -287,6 +299,7 @@ const resources = {
                     "statusError": "Error",
                     "statusChecking": "Checking...",
                     "statusUnknown": "Unknown",
+                    "detailUnavailable": "No details available.",
                     "detailNotProcessed": "Feed was not processed by the last backend run. Check GitHub Action logs for script errors.",
                     "detailBackendError": "Backend Error: {{message}}",
                     "detailOk": "Feed is live. The last backend fetch was successful.",
@@ -353,6 +366,8 @@ const resources = {
                     "labelUrl": "URL",
                     "labelLang": "Language",
                     "labelPriority": "Priority",
+                    "languageEnglish": "English",
+                    "languageGerman": "German",
                     "labelScraping": "Image requires scraping fallback?",
                     "errorUrlExists": "This feed URL already exists.",
                     "errorSaving": "The feed source could not be saved. Please try again.",
@@ -404,11 +419,18 @@ const resources = {
             "header.toggleTheme": "Design wechseln",
             "header.openSettings": "Einstellungen öffnen",
             "header.backToApp": "Zurück zur App",
+            "header.home": "Zur Startseite und Filter zurücksetzen",
 
             // View Modes
             "viewMode.grid": "Kachelansicht",
             "viewMode.list": "Listenansicht",
             "viewMode.compact": "Kompaktansicht",
+            "viewMode.switchTo": "Zu {{view}} wechseln",
+            "viewMode.change": "Ansicht wechseln",
+
+            // Sprachen
+            "language.english": "Englisch",
+            "language.german": "Deutsch",
 
             // Filter Bar
             "filter.search.placeholder": "Artikel nach Stichwort durchsuchen...",
@@ -619,17 +641,20 @@ const resources = {
             "trends.updatedHoursAgo_one": "Vor {{count}} Stunde aktualisiert",
             "trends.updatedHoursAgo_other": "Vor {{count}} Stunden aktualisiert",
             "trends.errorLoading": "Trends konnten nicht geladen werden",
+            "trends.errorLoadingHint": "Bitte versuche es später erneut.",
             "trends.noTrends": "Keine Trends verfügbar",
             "trends.noTrendsHint": "Trends werden gerade generiert. Bitte versuche es in wenigen Minuten erneut.",
 
             // Accessibility
             "a11y.skipToContent": "Zum Hauptinhalt springen",
             "a11y.changeLanguage": "Sprache ändern, aktuell: {{lang}}",
+            "a11y.scrollToTop": "Nach oben scrollen",
 
             // Admin Panel
             "admin": {
                 "panelTitle": "Admin-Panel",
                 "backToApp": "Zurück zur App",
+                "tabsLabel": "Admin-Bereiche",
                 "tabManagement": "Feed-Verwaltung",
                 "tabHealth": "Status-Center",
                 "tabLegend": "Status-Legende",
@@ -662,6 +687,8 @@ const resources = {
                     "headerLang": "Spr.",
                     "headerHealth": "Status",
                     "headerActions": "Aktionen",
+                    "priorityPrimary": "Primär",
+                    "prioritySecondary": "Sekundär",
                     "ariaCheckHealth": "Status für {{name}} prüfen",
                     "ariaEdit": "{{name}} bearbeiten",
                     "ariaDelete": "{{name}} löschen"
@@ -678,6 +705,7 @@ const resources = {
                     "statusError": "Fehler",
                     "statusChecking": "Prüfe...",
                     "statusUnknown": "Unbekannt",
+                    "detailUnavailable": "Keine Details verfügbar.",
                     "detailNotProcessed": "Feed wurde beim letzten Backend-Lauf nicht verarbeitet. Überprüfe die GitHub Action-Protokolle auf Skriptfehler.",
                     "detailBackendError": "Backend-Fehler: {{message}}",
                     "detailOk": "Feed ist live. Der letzte Backend-Abruf war erfolgreich.",
@@ -744,6 +772,8 @@ const resources = {
                     "labelUrl": "URL",
                     "labelLang": "Sprache",
                     "labelPriority": "Priorität",
+                    "languageEnglish": "Englisch",
+                    "languageGerman": "Deutsch",
                     "labelScraping": "Bild erfordert Scraping-Fallback?",
                     "errorUrlExists": "Diese Feed-URL existiert bereits.",
                     "errorSaving": "Die Feed-Quelle konnte nicht gespeichert werden. Bitte versuche es erneut.",

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import i18n from '../i18n';
 import type { TrendItem, TrendsData } from '../types';
+import { getDateLocale } from '../shared/i18n-locale';
 import { LoadingSpinner, ArrowLeftIcon } from './Icons';
 
 // Fire Icon für Trends
@@ -61,7 +61,7 @@ const formatDateRange = (from: string, to: string, locale: string): string => {
     return `${fromStr} – ${toStr}`;
 };
 
-const formatUpdatedAt = (dateString: string, t: any): string => {
+const formatUpdatedAt = (dateString: string, t: any, locale: string): string => {
     if (!dateString) return '';
     
     const date = new Date(dateString);
@@ -74,7 +74,7 @@ const formatUpdatedAt = (dateString: string, t: any): string => {
     if (diffMins < 60) return t('trends.updatedMinutesAgo', { count: diffMins });
     if (diffHours < 24) return t('trends.updatedHoursAgo', { count: diffHours });
     
-    return date.toLocaleDateString();
+    return date.toLocaleDateString(locale);
 };
 
 interface TrendCardProps {
@@ -139,7 +139,7 @@ const TrendSection: React.FC<TrendSectionProps> = ({
     onTrendClick,
     accentColor 
 }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     
     return (
         <section className="mb-10">
@@ -154,7 +154,11 @@ const TrendSection: React.FC<TrendSectionProps> = ({
                 </div>
                 {updatedAt && (
                     <span className="text-sm text-slate-500 dark:text-zinc-400">
-                        {formatUpdatedAt(updatedAt, t)}
+                        {formatUpdatedAt(
+                            updatedAt,
+                            t,
+                            getDateLocale(i18n.resolvedLanguage ?? i18n.language),
+                        )}
                     </span>
                 )}
             </div>
@@ -199,15 +203,15 @@ const WeeklySummaryBox: React.FC<{ summary: string }> = ({ summary }) => {
 };
 
 export const TrendsView: React.FC<TrendsViewProps> = ({ onBackToNews, onTrendClick }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [trendsData, setTrendsData] = useState<TrendsData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
         const loadTrends = async () => {
             setIsLoading(true);
-            setError(null);
+            setHasError(false);
             
             try {
                 const response = await fetch('/api/get-trends');
@@ -218,7 +222,7 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onBackToNews, onTrendCli
                 setTrendsData(data);
             } catch (err) {
                 console.error('Failed to fetch trends:', err);
-                setError(err instanceof Error ? err.message : 'Unknown error');
+                setHasError(true);
             } finally {
                 setIsLoading(false);
             }
@@ -262,7 +266,7 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onBackToNews, onTrendCli
                 <div className="flex justify-center items-center h-64">
                     <LoadingSpinner />
                 </div>
-            ) : error ? (
+            ) : hasError ? (
                 <div className="text-center py-16">
                     <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/50 mb-4">
                         <svg className="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
@@ -270,7 +274,9 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onBackToNews, onTrendCli
                         </svg>
                     </div>
                     <h3 className="text-xl font-semibold text-red-600 dark:text-red-400">{t('trends.errorLoading')}</h3>
-                    <p className="mt-2 text-slate-600 dark:text-zinc-400">{error}</p>
+                    <p className="mt-2 text-slate-600 dark:text-zinc-400">
+                        {t('trends.errorLoadingHint')}
+                    </p>
                 </div>
             ) : trendsData && (trendsData.daily.length > 0 || trendsData.weekly.length > 0) ? (
                 <>
@@ -303,7 +309,7 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onBackToNews, onTrendCli
                                                 {formatDateRange(
                                                     trendsData.weeklyDateRange.from,
                                                     trendsData.weeklyDateRange.to,
-                                                    i18n.language.startsWith('de') ? 'de-DE' : 'en-US'
+                                                    getDateLocale(i18n.resolvedLanguage ?? i18n.language)
                                                 )}
                                             </p>
                                         )}
@@ -311,7 +317,11 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onBackToNews, onTrendCli
                                 </div>
                                 {trendsData.weeklyUpdatedAt && (
                                     <span className="text-sm text-slate-500 dark:text-zinc-400 sm:text-right">
-                                        {formatUpdatedAt(trendsData.weeklyUpdatedAt, t)}
+                                        {formatUpdatedAt(
+                                            trendsData.weeklyUpdatedAt,
+                                            t,
+                                            getDateLocale(i18n.resolvedLanguage ?? i18n.language),
+                                        )}
                                     </span>
                                 )}
                             </div>

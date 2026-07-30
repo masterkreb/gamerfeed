@@ -176,15 +176,15 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
                             <div>
                                 <label htmlFor="feed-language" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">{t('admin.form.labelLang')}</label>
                                 <select id="feed-language" value={language} onChange={(e) => setLanguage(e.target.value as 'de' | 'en')} className="w-full h-11 px-3 py-2 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
-                                    <option value="en">English</option>
-                                    <option value="de">German</option>
+                                    <option value="en">{t('admin.form.languageEnglish')}</option>
+                                    <option value="de">{t('admin.form.languageGerman')}</option>
                                 </select>
                             </div>
                             <div>
                                 <label htmlFor="feed-priority" className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1">{t('admin.form.labelPriority')}</label>
                                 <select id="feed-priority" value={priority} onChange={(e) => setPriority(e.target.value as 'primary' | 'secondary')} className="w-full h-11 px-3 py-2 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition capitalize">
-                                    <option value="primary">primary</option>
-                                    <option value="secondary">secondary</option>
+                                    <option value="primary">{t('admin.management.priorityPrimary')}</option>
+                                    <option value="secondary">{t('admin.management.prioritySecondary')}</option>
                                 </select>
                             </div>
                         </div>

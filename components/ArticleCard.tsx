@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, memo, forwardRef } fro
 import { useTranslation } from 'react-i18next';
 import type { Article, ViewMode } from '../types';
 import { normalizeContentUrl } from '../shared/url-policy.js';
+import { getDateLocale } from '../shared/i18n-locale';
 import { StarIcon, MoreIcon, CopyIcon, BanIcon, ShareIcon, ArrowLeftIcon, TwitterIcon, FacebookIcon, RedditIcon, WhatsAppIcon, EmailIcon } from './Icons';
 
 
@@ -14,7 +15,7 @@ interface ArticleCardProps {
 }
 
 
-const formatPublicationDate = (date: string, t: any): string => {
+const formatPublicationDate = (date: string, t: any, locale: string): string => {
     const articleDate = new Date(date);
     const now = new Date();
 
@@ -24,7 +25,7 @@ const formatPublicationDate = (date: string, t: any): string => {
 
     const articleDay = new Date(articleDate.getFullYear(), articleDate.getMonth(), articleDate.getDate());
 
-    const timeString = articleDate.toLocaleTimeString(navigator.language, {
+    const timeString = articleDate.toLocaleTimeString(locale, {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false,
@@ -38,7 +39,7 @@ const formatPublicationDate = (date: string, t: any): string => {
         return t('time.yesterday', { time: timeString });
     }
 
-    return articleDate.toLocaleDateString(navigator.language, {
+    return articleDate.toLocaleDateString(locale, {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -331,7 +332,8 @@ const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({ title, source, link, 
 
 
 const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ article, viewMode, isFavorite, onToggleFavorite, onMuteSource }, ref) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const dateLocale = getDateLocale(i18n.resolvedLanguage ?? i18n.language);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [allowCardOverflow, setAllowCardOverflow] = useState(false);
     const menuTimerRef = useRef<number | null>(null);
@@ -427,7 +429,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                     </h3>
                     <p className="text-sm text-slate-600 dark:text-zinc-400 flex-grow line-clamp-3">{article.summary}</p>
                     <div className="mt-auto pt-4 flex justify-between items-center">
-                        <p className="text-sm text-slate-500 dark:text-zinc-400">{formatPublicationDate(article.publicationDate, t)}</p>
+                        <p className="text-sm text-slate-500 dark:text-zinc-400">{formatPublicationDate(article.publicationDate, t, dateLocale)}</p>
                         <div className="relative z-10 flex items-center gap-1">
                             <button
                                 onClick={(e) => { e.preventDefault(); onToggleFavorite(article.id); }}
@@ -512,7 +514,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                     </p>
                     <div className="mt-auto pt-2">
                         <span className="text-sm text-slate-500 dark:text-zinc-400 flex-shrink-0">
-                            {formatPublicationDate(article.publicationDate, t)}
+                            {formatPublicationDate(article.publicationDate, t, dateLocale)}
                         </span>
                     </div>
                 </div>
@@ -542,7 +544,7 @@ const ArticleCardComponent = forwardRef<HTMLElement, ArticleCardProps>(({ articl
                         </a>
                     </h3>
                     <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400 mt-1">
-                        <span className="font-medium text-slate-700 dark:text-zinc-300 flex-shrink-0">{formatPublicationDate(article.publicationDate, t)}</span>
+                        <span className="font-medium text-slate-700 dark:text-zinc-300 flex-shrink-0">{formatPublicationDate(article.publicationDate, t, dateLocale)}</span>
                         <span className="text-slate-500 dark:text-zinc-400">·</span>
                         <span className="truncate">{article.source}</span>
                         <span className="text-slate-500 dark:text-zinc-400">·</span>
