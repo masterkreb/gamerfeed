@@ -199,7 +199,16 @@ Generation A blieb dauerhaft auf altem Stand, weil schon der erste Versuch
 zulässigerweise weiter auslieferte. Der erste Versuch jeder autoritativen
 Ladung und der Auto-Update-Poll fragen jetzt ungebunden; erst die angenommene
 Antwort bindet die Folgestufen. 680 zentrale Tests und 25 Browser-Abnahmen
-laufen erfolgreich. Als nächstes ist O4 bereit.
+laufen erfolgreich.
+
+**Stand 30. Juli 2026 (Branch `claude/a1c-admin-startcache-clarity`):** A1c ist
+abgeschlossen. Der lokale Startcache hält bewusst nur die ersten 32 Artikel;
+dass darin die meisten aktiven Quellen fehlen, ist der Normalfall. Trotzdem
+kommentierte fast jede gesunde Feed-Zeile das als Snapshot-Unterschied. Eine
+Zeile entsteht jetzt ausschließlich aus Backend-Status und aktivem
+News-Snapshot, während der Startcache nur noch global als eigene Kennzahl mit
+seiner tatsächlichen Artikel- und Quellenzahl erscheint. 688 zentrale Tests und
+25 Browser-Abnahmen laufen erfolgreich. Als nächstes ist O4 bereit.
 
 ## Empfohlene Reihenfolge
 
@@ -224,6 +233,7 @@ laufen erfolgreich. Als nächstes ist O4 bereit.
 | A1a | P2 | erledigt | Admin-Mutationen synchron absichern |
 | A1b | P2 | erledigt | Admin-Tabs und Health-Beschriftung korrigieren |
 | F5 | P1 | erledigt | Aktive Snapshot-Generation zuverlässig entdecken |
+| A1c | P2 | erledigt | Lokalen Startcache im Admin verständlich darstellen |
 | O4 | P2 | bereit | Historie, Alarmierung und Proxy-Version beobachtbar machen |
 | D1 | P2 | Entscheidung nötig | Datenbankschema, Backup und Restore festlegen |
 | D2 | P2 | geplant | Lokale Produktionsschreibvorgänge explizit absichern |
@@ -705,6 +715,50 @@ Erfüllt durch die Deferred-Promise-Fälle in
 in `tests/e2e/news-generation.spec.ts`. Gegenprobe: mit wieder durchgehend
 gepinnten Adressen fallen vier Controller-Tests und beide neuen
 Chromium-Abnahmen, mit gepinntem Poll der Verdrahtungswächter.
+
+### A1c – Lokalen Startcache im Admin verständlich darstellen
+
+**Status:** erledigt. Priorität P2, eingeordnet vor O4.
+
+**Warum:** Der Browser speichert als Startcache absichtlich nur die ersten
+`LOCAL_NEWS_CACHE_MAX_ARTICLES` (32) Artikel. Bei 39 aktiven Quellen fehlen
+darin zwangsläufig die meisten. A1b bezog diesen Cache trotzdem in die
+Bewertung jeder Feed-Zeile ein, sodass an fast jedem gesunden Feed stand: „Nur
+in der lokalen Kopie dieses Browsers fehlt die Quelle noch – ein
+Snapshot-Unterschied, kein Feed-Ausfall.“ Technisch nicht falsch, als
+Feed-Diagnose aber irreführend: Das Fehlen im begrenzten Startcache ist
+normalerweise gar kein Snapshot-Unterschied.
+
+**Umfang:**
+
+- Feed-Zeilen ausschließlich aus Backend-Status und aktivem News-Snapshot
+  ableiten; `AdminFeedHealthRow` kennt den Startcache nicht mehr;
+- bei gesunden Feeds keinen Hinweis mehr auf das Fehlen im Startcache;
+- den Startcache global eindeutig als **begrenzten** Startcache beschreiben und
+  seine tatsächliche Artikel- und Quellenzahl nennen, ohne Gleichheit mit dem
+  vollständigen Snapshot zu erwarten;
+- gleiche `snapshotId` heißt gleiche Generation, auch bei weniger Quellen;
+- zwei belegbar verschiedene Kennungen bleiben deutlich als unterschiedliche
+  Generationen sichtbar;
+- der Warnungsbereich nennt weiterhin sofort einen konfigurierten Feed ohne
+  Artikel im aktiven Snapshot;
+- DE und EN vollständig; keine Änderungen an Feed-Abruf, Snapshot-Protokoll,
+  Cachegröße oder APIs.
+
+**Abnahme:**
+
+- ein gesunder Feed im aktiven Snapshot, aber nicht im Startcache, bleibt
+  schlicht OK und bekommt keinen Zusatz;
+- ein Feed ohne Artikel im aktiven Snapshot bleibt eine Warnung, auch wenn er
+  im Startcache liegt;
+- gleiche Snapshot-ID mit unterschiedlichen Quellenzahlen wird als gleiche
+  Generation beschrieben;
+- verschiedene Snapshot-IDs bleiben mit beiden Kennungen sichtbar;
+- gerenderte Tests belegen die Texte in Deutsch und Englisch.
+
+Erfüllt durch die erweiterten Tests in
+`tests/frontend/unit/admin-health-report.test.js`. Gegenproben: mit wieder
+mitgerechnetem Startcache fallen drei Tests, mit der alten Beschriftung zwei.
 
 ### O4 – Historie, Alarmierung und Versionsdrift
 

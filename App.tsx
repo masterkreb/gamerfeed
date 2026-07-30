@@ -33,11 +33,11 @@ import {
 } from './shared/persisted-state';
 import {
     LOCAL_NEWS_CACHE_KEY,
+    LOCAL_NEWS_CACHE_MAX_ARTICLES,
     LOCAL_NEWS_CACHE_TTL_MS,
 } from './shared/local-news-cache';
 
 const ARTICLES_PER_PAGE = 32;
-const INITIAL_ARTICLE_CACHE_COUNT = 32;
 
 // Analytics wird erst nach Zustimmung geladen und bei Widerruf wieder
 // stillgelegt. Der Lebenszyklus liegt in shared/analytics-lifecycle.js.
@@ -194,7 +194,7 @@ const AppContent: React.FC = () => {
         snapshot: NewsSnapshotPointer | null,
     ) => {
         setCachedNews({
-            articles: nextArticles.slice(0, INITIAL_ARTICLE_CACHE_COUNT),
+            articles: nextArticles.slice(0, LOCAL_NEWS_CACHE_MAX_ARTICLES),
             timestamp: Date.now(),
             // Ohne die Generation könnte eine ältere Antwort aus dem
             // Edge-Cache einen neueren lokalen Stand überschreiben - die

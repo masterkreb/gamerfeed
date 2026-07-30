@@ -157,6 +157,7 @@ test('zählt die drei Kennzahlen getrennt und vergleicht nur belegbare Generatio
     assert.equal(report.configuredFeedCount, 5);
     assert.equal(report.activeSnapshotSourceCount, 3);
     assert.equal(report.localCacheSourceCount, 2);
+    assert.equal(report.localCacheArticleCount, 2, 'die tatsaechliche Artikelzahl des Startcaches');
     assert.equal(report.activeSnapshotId, ACTIVE_SNAPSHOT.snapshotId);
     assert.equal(report.localSnapshotId, LOCAL_SNAPSHOT.snapshotId);
     assert.equal(report.snapshotComparison, 'different');
@@ -213,13 +214,9 @@ test('kaputte, abgelaufene und fehlende lokale Kopien erfinden keine Zuordnung',
         });
 
         assert.equal(report.localCacheSourceCount, null);
+        assert.equal(report.localCacheArticleCount, null);
         assert.equal(report.localSnapshotId, null);
         assert.equal(report.snapshotComparison, 'unknown');
-        assert.equal(
-            report.rows.every(row => row.inLocalCache === null),
-            true,
-            'ohne verwendbare Kopie gibt es keine lokale Aussage je Feed',
-        );
         // Die aktive Aussage bleibt davon unberührt.
         assert.equal(rowOf(report, 'feed-vg247').status, 'warning');
         assert.equal(rowOf(report, 'feed-gamestar').status, 'ok');
@@ -240,11 +237,18 @@ test('VG247 fehlt aktiv, GameStar fehlt nur lokal, "PC Games" wird nicht unschar
     assert.equal(vg247.detailKey, 'admin.health.detailNotInActiveSnapshot');
     assert.equal(vg247.inActiveSnapshot, false);
 
+    // GameStar steht im aktiven Snapshot, fehlt aber im begrenzten lokalen
+    // Startcache. Genau das ist bei 32 gespeicherten Artikeln der Normalfall
+    // und darf die Zeile nicht mehr kommentieren.
     const gamestar = rowOf(report, 'feed-gamestar');
-    assert.equal(gamestar.status, 'ok', 'eine ältere lokale Kopie ist kein Feed-Ausfall');
+    assert.equal(gamestar.status, 'ok');
     assert.equal(gamestar.inActiveSnapshot, true);
-    assert.equal(gamestar.inLocalCache, false);
-    assert.equal(gamestar.detailKey, 'admin.health.detailOkNotInLocalCopy');
+    assert.equal(gamestar.detailKey, 'admin.health.detailOk');
+    assert.equal(
+        Object.prototype.hasOwnProperty.call(gamestar, 'inLocalCache'),
+        false,
+        'die Zeile kennt den Startcache gar nicht mehr',
+    );
 
     const pcGames = rowOf(report, 'feed-pcgames');
     assert.equal(pcGames.status, 'warning', '"PC Games" ist nicht "PCGames"');
@@ -407,11 +411,14 @@ test('das Health Center zeigt die drei Kennzahlen mit ihrer Bedeutung', async ()
 
         assert.match(panel.textContent, /Konfigurierte Feeds/);
         assert.match(panel.textContent, /Quellen im aktiven News-Snapshot/);
-        assert.match(panel.textContent, /Quellen in der lokalen Browserkopie/);
+        assert.match(panel.textContent, /Quellen im lokalen Startcache/);
         // Herkunft und Schwankung müssen erklärt sein.
         assert.match(panel.textContent, /Datenbank/);
         assert.match(panel.textContent, /schwankt/);
         assert.match(panel.textContent, /30 Minuten/);
+        // Der Startcache ist absichtlich begrenzt; weniger Quellen sind normal.
+        assert.match(panel.textContent, /nur die ersten 32 Artikel/);
+        assert.match(panel.textContent, /2 Artikel aus 2 Quellen/);
 
         // Beide Generationen werden benannt.
         assert.match(panel.textContent, new RegExp(ACTIVE_SNAPSHOT.snapshotId));
@@ -438,9 +445,13 @@ test('jede konfigurierte Quelle bleibt sichtbar und wird korrekt eingeordnet', a
         assert.match(rowFor('VG247').textContent, /Warnung/);
         assert.match(rowFor('VG247').textContent, /keine Artikel im aktiven News-Snapshot/);
 
+        // GameStar fehlt nur im begrenzten Startcache - das ist kein Befund
+        // und darf die Zeile nicht mehr kommentieren.
         assert.match(rowFor('GameStar').textContent, /OK/);
         assert.doesNotMatch(rowFor('GameStar').textContent, /Fehler/);
-        assert.match(rowFor('GameStar').textContent, /lokalen Kopie dieses Browsers/);
+        assert.doesNotMatch(rowFor('GameStar').textContent, /Startcache/);
+        assert.doesNotMatch(rowFor('GameStar').textContent, /lokalen Kopie/);
+        assert.doesNotMatch(rowFor('GameStar').textContent, /Snapshot-Unterschied/);
 
         assert.match(
             rowFor('PC Games').textContent,
@@ -656,6 +667,200 @@ test('ein fehlgeschlagener Berichtsabruf zeigt keinen internen Fehlertext', asyn
             'die rote Fehlerliste erscheint nicht',
         );
     } finally {
+        await testRoot.cleanup();
+        restoreConsole();
+    }
+});
+
+// --- A1c: der begrenzte lokale Startcache ------------------------------------
+
+test('ein gesunder Feed ausserhalb des Startcaches bekommt keinen Zusatz', () => {
+    // Der Browser speichert bewusst nur die ersten 32 Artikel. Dass die
+    // meisten aktiven Quellen dort fehlen, ist der Normalfall und keine
+    // Feed-Diagnose.
+    const report = buildAdminHealthReport({
+        feeds: [feed('feed-gamestar', 'GameStar')],
+        backendHealth: { 'feed-gamestar': { status: 'success', message: 'ok' } },
+        sourcesInCache: ['GameStar'],
+        activeSnapshot: ACTIVE_SNAPSHOT,
+        localCache: usableLocalCache({ sources: ['Eurogamer'], snapshot: ACTIVE_SNAPSHOT }),
+    });
+    const row = rowOf(report, 'feed-gamestar');
+
+    assert.equal(row.status, 'ok');
+    assert.equal(row.detailKey, 'admin.health.detailOk');
+    assert.deepEqual(row.detailParams, {}, 'kein Feedname fuer einen Startcache-Hinweis');
+});
+
+test('der Startcache aendert die Bewertung einer Feed-Zeile in keinem Fall', () => {
+    // Dieselben Feeds, einmal mit und einmal ohne verwendbaren Startcache: die
+    // Zeilen muessen identisch sein.
+    const gemeinsam = {
+        feeds: FEEDS,
+        backendHealth: BACKEND_HEALTH,
+        sourcesInCache: [...ACTIVE_SOURCES],
+        activeSnapshot: ACTIVE_SNAPSHOT,
+    };
+
+    const mitCache = buildAdminHealthReport({ ...gemeinsam, localCache: usableLocalCache() });
+    const ohneCache = buildAdminHealthReport({
+        ...gemeinsam,
+        localCache: readLocalNewsCache(null, NOW),
+    });
+
+    assert.deepEqual(mitCache.rows, ohneCache.rows);
+});
+
+test('ein Feed ohne Artikel im aktiven Snapshot bleibt eine Warnung', () => {
+    // Gegenprobe zur Entschaerfung: die wirklich wichtige Meldung bleibt.
+    const report = buildAdminHealthReport({
+        feeds: FEEDS,
+        backendHealth: BACKEND_HEALTH,
+        sourcesInCache: [...ACTIVE_SOURCES],
+        activeSnapshot: ACTIVE_SNAPSHOT,
+        localCache: usableLocalCache({ sources: ['VG247'] }),
+    });
+    const vg247 = rowOf(report, 'feed-vg247');
+
+    assert.equal(
+        vg247.status,
+        'warning',
+        'auch ein Feed im Startcache bleibt ohne Artikel im aktiven Snapshot eine Warnung',
+    );
+    assert.equal(vg247.detailKey, 'admin.health.detailNotInActiveSnapshot');
+});
+
+test('dieselbe Generation bleibt dieselbe, auch bei weniger Quellen im Startcache', () => {
+    const report = buildAdminHealthReport({
+        feeds: FEEDS,
+        backendHealth: BACKEND_HEALTH,
+        sourcesInCache: [...ACTIVE_SOURCES],
+        activeSnapshot: ACTIVE_SNAPSHOT,
+        localCache: usableLocalCache({ sources: ['Eurogamer'], snapshot: ACTIVE_SNAPSHOT }),
+    });
+
+    assert.equal(report.snapshotComparison, 'same');
+    assert.equal(report.activeSnapshotSourceCount, 3);
+    assert.equal(report.localCacheSourceCount, 1, 'weniger Quellen sind kein Generationsunterschied');
+    assert.equal(report.localCacheArticleCount, 1);
+});
+
+async function renderStartcache({ localSnapshot, sources = ['Eurogamer'] }) {
+    return renderAdminPanel(vite, {
+        feeds: FEEDS,
+        healthResponse: {
+            healthStatus: BACKEND_HEALTH,
+            sourcesInCache: [...ACTIVE_SOURCES],
+            heartbeat: null,
+            snapshot: ACTIVE_SNAPSHOT,
+        },
+        localStorageEntries: {
+            [LOCAL_NEWS_CACHE_KEY]: localCacheEntry({
+                sources,
+                snapshot: localSnapshot,
+                timestamp: Date.now() - 5 * 60 * 1000,
+            }),
+        },
+    });
+}
+
+test('bei gleicher Generation erklaert der Admin den kleineren Startcache in DE und EN', async () => {
+    const restoreConsole = silenceConsole();
+    const { default: i18n } = await vite.ssrLoadModule('/i18n.ts');
+    const testRoot = await renderStartcache({ localSnapshot: ACTIVE_SNAPSHOT });
+
+    try {
+        await act(async () => {
+            click(testRoot.window, testRoot.container.querySelector('#admin-tab-health'));
+        });
+        const panel = testRoot.container.querySelector('#admin-panel-health');
+
+        assert.equal(panel.querySelector('#admin-metric-snapshot').textContent, '3');
+        assert.equal(panel.querySelector('#admin-metric-local').textContent, '1');
+        assert.match(panel.textContent, /Dieselbe Generation/);
+        assert.match(panel.textContent, /kein Unterschied der Generation/);
+        assert.doesNotMatch(panel.textContent, /anderen Snapshot/);
+        assert.match(panel.textContent, /1 Artikel aus 1 Quelle/);
+
+        await act(async () => {
+            await i18n.changeLanguage('en');
+        });
+
+        assert.match(panel.textContent, /Sources in the local start cache/);
+        assert.match(panel.textContent, /only the first 32 articles/);
+        assert.match(panel.textContent, /same generation as the active snapshot/i);
+        assert.match(panel.textContent, /1 article from 1 source/);
+    } finally {
+        await act(async () => {
+            await i18n.changeLanguage('de');
+        });
+        await testRoot.cleanup();
+        restoreConsole();
+    }
+});
+
+test('bei abweichender Generation bleibt der Unterschied deutlich sichtbar', async () => {
+    const restoreConsole = silenceConsole();
+    const testRoot = await renderStartcache({ localSnapshot: LOCAL_SNAPSHOT });
+
+    try {
+        await act(async () => {
+            click(testRoot.window, testRoot.container.querySelector('#admin-tab-health'));
+        });
+        const panel = testRoot.container.querySelector('#admin-panel-health');
+
+        assert.match(panel.textContent, /anderen Snapshot/);
+        assert.match(panel.textContent, new RegExp(ACTIVE_SNAPSHOT.snapshotId));
+        assert.match(panel.textContent, new RegExp(LOCAL_SNAPSHOT.snapshotId));
+        assert.doesNotMatch(panel.textContent, /Dieselbe Generation/);
+    } finally {
+        await testRoot.cleanup();
+        restoreConsole();
+    }
+});
+
+test('die Warnungsliste nennt VG247 weiterhin sofort', async () => {
+    const restoreConsole = silenceConsole();
+    const testRoot = await renderStartcache({ localSnapshot: ACTIVE_SNAPSHOT });
+
+    try {
+        const warnungen = testRoot.container.querySelector('#admin-warning-feeds-details');
+        assert.ok(warnungen !== null, 'der Warnungsbereich ist sofort sichtbar');
+        assert.match(warnungen.textContent, /VG247/);
+        assert.doesNotMatch(warnungen.textContent, /GameStar/, 'ein gesunder Feed steht nicht darin');
+    } finally {
+        await testRoot.cleanup();
+        restoreConsole();
+    }
+});
+
+test('Artikel- und Quellenzahl werden getrennt pluralisiert', async () => {
+    // Zwei Artikel aus derselben Quelle: eine gemeinsame Pluralform haette
+    // hier "2 Artikel aus 1 Quellen" ergeben.
+    const restoreConsole = silenceConsole();
+    const { default: i18n } = await vite.ssrLoadModule('/i18n.ts');
+    const testRoot = await renderStartcache({
+        localSnapshot: ACTIVE_SNAPSHOT,
+        sources: ['Eurogamer', 'Eurogamer'],
+    });
+
+    try {
+        await act(async () => {
+            click(testRoot.window, testRoot.container.querySelector('#admin-tab-health'));
+        });
+        const panel = testRoot.container.querySelector('#admin-panel-health');
+
+        assert.equal(panel.querySelector('#admin-metric-local').textContent, '1');
+        assert.match(panel.textContent, /2 Artikel aus 1 Quelle(?!n)/);
+
+        await act(async () => {
+            await i18n.changeLanguage('en');
+        });
+        assert.match(panel.textContent, /2 articles from 1 source(?!s)/);
+    } finally {
+        await act(async () => {
+            await i18n.changeLanguage('de');
+        });
         await testRoot.cleanup();
         restoreConsole();
     }

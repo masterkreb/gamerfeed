@@ -13,6 +13,16 @@ export const LOCAL_NEWS_CACHE_KEY = 'cachedNews';
  */
 export const LOCAL_NEWS_CACHE_TTL_MS = 30 * 60 * 1000;
 
+/**
+ * Größe des lokalen Startcaches in Artikeln.
+ *
+ * Der Browser speichert bewusst **nur den Anfang** der Liste, damit der Start
+ * schnell bleibt und `localStorage` nicht überläuft. Deshalb enthält die Kopie
+ * regelmäßig deutlich weniger Quellen als der aktive Snapshot – das ist der
+ * Normalfall und kein Hinweis auf ein Feed-Problem.
+ */
+export const LOCAL_NEWS_CACHE_MAX_ARTICLES = 32;
+
 export type LocalNewsCacheState =
     | { status: 'missing' }
     | { status: 'unreadable' }
@@ -20,6 +30,8 @@ export type LocalNewsCacheState =
     | {
         status: 'usable';
         timestamp: number;
+        /** Tatsächlich gespeicherte Artikel, höchstens `LOCAL_NEWS_CACHE_MAX_ARTICLES`. */
+        articleCount: number;
         sources: string[];
         /** `null` heißt Legacy oder ohne Angabe – nie „gleich wie aktiv“. */
         snapshot: NewsSnapshotPointer | null;
@@ -62,6 +74,7 @@ export function readLocalNewsCache(
     return {
         status: 'usable',
         timestamp: decoded.timestamp,
+        articleCount: decoded.articles.length,
         sources: [...new Set(decoded.articles.map(article => article.source))],
         snapshot: decoded.snapshot ?? null,
     };

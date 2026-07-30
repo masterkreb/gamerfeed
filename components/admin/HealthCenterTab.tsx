@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FeedHeartbeat } from '../../types';
 import type { AdminFeedHealthRow, AdminHealthReport } from '../../services/admin-health-report';
+import { LOCAL_NEWS_CACHE_MAX_ARTICLES } from '../../shared/local-news-cache';
 import { FeedHeartbeatPanel } from './FeedHeartbeatPanel';
 import {
     CheckCircleIcon, XCircleIcon, QuestionMarkCircleIcon, LoadingSpinner, WarningIcon, ChevronDownIcon, ChevronUpIcon
@@ -62,16 +63,17 @@ const SortableHeader: React.FC<{
  *
  * Sie beantworten verschiedene Fragen und dürfen deshalb nicht als eine Zahl
  * gelesen werden: die Datenbank kennt alle konfigurierten Feeds, der aktive
- * Snapshot nur die Quellen des letzten Publish, und die lokale Kopie den Stand
- * genau dieses Browsers.
+ * Snapshot nur die Quellen des letzten Publish, und der lokale Startcache nur
+ * den begrenzten Anfang der Liste in genau diesem Browser. Dass die dritte Zahl
+ * kleiner ist, ist der Normalfall.
  */
 const SourceMetric: React.FC<{
     id: string;
     label: string;
     value: string;
     hint: string;
-    note?: string | null;
-}> = ({ id, label, value, hint, note }) => (
+    notes?: (string | null | undefined)[];
+}> = ({ id, label, value, hint, notes = [] }) => (
     <div className="p-4 rounded-lg bg-slate-50 dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-700">
         <dt className="text-sm font-semibold text-slate-600 dark:text-zinc-300" id={`${id}-label`}>{label}</dt>
         <dd
@@ -83,7 +85,9 @@ const SourceMetric: React.FC<{
             {value}
         </dd>
         <p id={`${id}-hint`} className="mt-2 text-xs text-slate-500 dark:text-zinc-400">{hint}</p>
-        {note && <p className="mt-1 text-xs text-slate-500 dark:text-zinc-400">{note}</p>}
+        {notes.filter(Boolean).map((note, index) => (
+            <p key={index} className="mt-1 text-xs text-slate-500 dark:text-zinc-400">{note}</p>
+        ))}
     </div>
 );
 
@@ -161,12 +165,27 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
             : t('admin.health.metrics.snapshotId', { id: snapshotId })
     );
 
-    const localCacheNote = {
-        missing: t('admin.health.metrics.localMissing'),
-        unreadable: t('admin.health.metrics.localUnreadable'),
-        expired: t('admin.health.metrics.localExpired'),
-        usable: snapshotLabel(report.localSnapshotId),
-    }[report.localCacheStatus];
+    // Die tatsächlich gespeicherte Menge, ohne eine Gleichheit mit dem
+    // vollständigen Snapshot zu behaupten.
+    const localCacheNotes = report.localCacheStatus === 'usable'
+        ? [
+            // Artikel und Quellen werden getrennt pluralisiert: zwei Artikel
+            // koennen aus einer einzigen Quelle stammen.
+            t('admin.health.metrics.localCounts', {
+                articles: t('admin.health.metrics.localArticles', {
+                    count: report.localCacheArticleCount ?? 0,
+                }),
+                sources: t('admin.health.metrics.localSources', {
+                    count: report.localCacheSourceCount ?? 0,
+                }),
+            }),
+            snapshotLabel(report.localSnapshotId),
+        ]
+        : [{
+            missing: t('admin.health.metrics.localMissing'),
+            unreadable: t('admin.health.metrics.localUnreadable'),
+            expired: t('admin.health.metrics.localExpired'),
+        }[report.localCacheStatus]];
 
     const comparisonText = {
         same: t('admin.health.metrics.compareSame'),
@@ -224,7 +243,7 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                             ? unknownValue
                             : String(report.activeSnapshotSourceCount)}
                         hint={t('admin.health.metrics.snapshotHint')}
-                        note={snapshotLabel(report.activeSnapshotId)}
+                        notes={[snapshotLabel(report.activeSnapshotId)]}
                     />
                     <SourceMetric
                         id="admin-metric-local"
@@ -232,8 +251,10 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                         value={report.localCacheSourceCount === null
                             ? unknownValue
                             : String(report.localCacheSourceCount)}
-                        hint={t('admin.health.metrics.localHint')}
-                        note={localCacheNote}
+                        hint={t('admin.health.metrics.localHint', {
+                            maxArticles: LOCAL_NEWS_CACHE_MAX_ARTICLES,
+                        })}
+                        notes={localCacheNotes}
                     />
                 </dl>
                 <p className="mt-4 text-sm text-slate-600 dark:text-zinc-300">{comparisonText}</p>
