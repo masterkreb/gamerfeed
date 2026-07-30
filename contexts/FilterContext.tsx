@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
 import type { TimeFilter } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { decodeStringArray } from '../shared/persisted-state';
 
 // Define the shape of the context state
 interface FilterContextState {
@@ -29,7 +30,11 @@ export const FilterProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [languageFilter, setLanguageFilter] = useState<'all' | 'de' | 'en'>('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [savedSearches, setSavedSearches] = useLocalStorage<string[]>('savedSearches', []);
+  const [savedSearches, setSavedSearches] = useLocalStorage<string[]>(
+    'savedSearches',
+    [],
+    decodeStringArray,
+  );
 
   const onResetFilters = useCallback(() => {
     setSearchQuery('');
