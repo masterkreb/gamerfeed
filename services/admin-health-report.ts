@@ -194,6 +194,10 @@ export function buildAdminHealthReport({
 /**
  * Bericht für den Fall, dass der gespeicherte Status gar nicht gelesen werden
  * konnte. Ohne frische Antwort ist auch keine Snapshot-Aussage belegt.
+ *
+ * Die Zeilen bleiben bewusst `unknown` statt `error`: Nicht die Feeds sind
+ * ausgefallen, sondern der Bericht über sie ist nicht ladbar. Ein roter Status
+ * je Feed wäre genau die Art irreführender Behauptung, die A1b beseitigt.
  */
 export function buildUnavailableHealthReport(
     feeds: FeedSource[],
@@ -211,7 +215,7 @@ export function buildUnavailableHealthReport(
         ...report,
         rows: report.rows.map(row => ({
             ...row,
-            status: 'error',
+            status: 'unknown',
             detailKey: 'admin.health.detailFetchError',
             detailParams: {},
         })),

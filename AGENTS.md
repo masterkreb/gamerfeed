@@ -280,7 +280,11 @@ Entsprechung bleibt eine Warnung statt still gesund zu werden, und
 Snapshot-Quellennamen ohne passenden Feed werden separat als „nicht zugeordnet“
 aufgelistet, statt zu verschwinden. Jeder konfigurierte Feed bleibt in jedem
 Fall eine eigene Zeile: fehlend, ähnlich geschrieben, artikellos oder unbekannt.
-Backend-Abrufstatus und Snapshot-Präsenz sind zwei getrennte Aussagen.
+Backend-Abrufstatus und Snapshot-Präsenz sind zwei getrennte Aussagen. Kann der
+gespeicherte Bericht gar nicht geladen werden, sind alle Zeilen **unbekannt**,
+nicht rot: Nicht die Feeds sind ausgefallen, sondern der Bericht über sie fehlt.
+Der textlastige Legenden-Reiter trägt `tabIndex={0}`, damit er ohne
+Bedienelemente per Tastatur erreichbar und scrollbar bleibt.
 
 ### Persistierter Browserzustand
 

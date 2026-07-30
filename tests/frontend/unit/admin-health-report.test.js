@@ -296,7 +296,8 @@ test('ein nicht gelesener Bericht macht jede Zeile unbekannt statt still gesund'
     assert.equal(report.rows.length, 5);
 
     const unavailable = buildUnavailableHealthReport(FEEDS, readLocalNewsCache(null, NOW));
-    assert.equal(unavailable.rows.every(row => row.status === 'error'), true);
+    // Ein nicht ladbarer Bericht ist kein Feed-Ausfall: unbekannt statt rot.
+    assert.equal(unavailable.rows.every(row => row.status === 'unknown'), true);
     assert.equal(unavailable.rows.every(row => row.detailKey === 'admin.health.detailFetchError'), true);
     assert.equal(unavailable.activeSnapshotSourceCount, null);
 });
@@ -459,8 +460,16 @@ test('ein fehlgeschlagener Berichtsabruf zeigt keinen internen Fehlertext', asyn
         assert.equal(panel.querySelectorAll('tbody tr').length, 5, 'alle Zeilen bleiben sichtbar');
         assert.doesNotMatch(panel.textContent, /Interner KV-Fehler/);
         assert.doesNotMatch(panel.textContent, /kv:\/\//);
+        assert.match(panel.textContent, /Der gespeicherte Statusbericht konnte nicht geladen werden/);
         assert.equal(panel.querySelector('#admin-metric-configured').textContent, '5');
+        assert.equal(panel.querySelector('#admin-metric-snapshot').textContent, 'unbekannt');
         assert.match(panel.textContent, /Konfigurierte Feeds/);
+        // Ein nicht ladbarer Bericht meldet keine ausgefallenen Feeds.
+        assert.equal(
+            testRoot.container.querySelector('#admin-failed-feeds-details'),
+            null,
+            'die rote Fehlerliste erscheint nicht',
+        );
     } finally {
         await testRoot.cleanup();
         restoreConsole();

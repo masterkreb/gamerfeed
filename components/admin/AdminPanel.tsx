@@ -482,6 +482,9 @@ export const AdminPanel: React.FC = () => {
                     role="tabpanel"
                     aria-labelledby={getTabId('legend')}
                     hidden={activeTab !== 'legend'}
+                    // Reiner Text ohne Bedienelemente: ohne tabIndex wäre der
+                    // Bereich per Tastatur weder erreichbar noch scrollbar.
+                    tabIndex={0}
                 >
                     <HealthLegendTab />
                 </div>
