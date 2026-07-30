@@ -111,8 +111,31 @@ function resolveRow(
         };
     }
 
-    // Ab hier gilt: der Backend-Abruf war erfolgreich. Ob die Quelle Artikel im
-    // aktiven Snapshot hat, ist davon getrennt zu beantworten.
+    // Eine Backend-Warnung bleibt **immer** eine Warnung. Der Cron vergibt sie
+    // unter anderem für eine wegen Zeitbudget zurückgestellte Quelle, die ihre
+    // alten Artikel behält, und für einen erfolgreich abgerufenen, aber leeren
+    // Feed. In beiden Fällen können noch alte Artikel im aktiven Snapshot
+    // liegen - deren Präsenz belegt keinen erfolgreichen Abruf und darf die
+    // Warnung deshalb nie in `ok` umschlagen lassen. Die Snapshot-Aussage wird
+    // trotzdem getrennt genannt.
+    if (entry.status === 'warning') {
+        const detailKey = inActiveSnapshot === null
+            ? 'admin.health.detailBackendWarningSnapshotUnknown'
+            : inActiveSnapshot
+                ? 'admin.health.detailBackendWarningInSnapshot'
+                : 'admin.health.detailBackendWarningNotInSnapshot';
+
+        return {
+            ...base,
+            status: 'warning',
+            detailKey,
+            detailParams: { message: entry.message ?? '', feedName: feed.name },
+        };
+    }
+
+    // Ab hier gilt: der Backend-Abruf war erfolgreich **und** ohne Warnung. Ob
+    // die Quelle Artikel im aktiven Snapshot hat, ist davon getrennt zu
+    // beantworten.
     if (inActiveSnapshot === null) {
         return {
             ...base,

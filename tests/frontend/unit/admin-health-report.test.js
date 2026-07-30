@@ -302,6 +302,73 @@ test('ein nicht gelesener Bericht macht jede Zeile unbekannt statt still gesund'
     assert.equal(unavailable.activeSnapshotSourceCount, null);
 });
 
+// --- Backend-Warnungen -------------------------------------------------------
+
+// Genau die Meldungen, die scripts/fetch-feeds.js in diesen beiden Faellen
+// schreibt. Beide sind bereits cron-seitig bereinigt.
+const DEFERRED_MESSAGE = 'Zurückgestellt: Zeitbudget des Laufs erschöpft.';
+const EMPTY_FEED_MESSAGE = 'Feed fetched successfully, but no articles were found.';
+
+function warningReport({ message, sourcesInCache }) {
+    const warned = feed('feed-warnung', 'Zurückgestellt');
+
+    return buildAdminHealthReport({
+        feeds: [warned],
+        backendHealth: { 'feed-warnung': { status: 'warning', message } },
+        sourcesInCache,
+        activeSnapshot: sourcesInCache === null ? null : ACTIVE_SNAPSHOT,
+        localCache: usableLocalCache(),
+    });
+}
+
+test('ein wegen Zeitbudget zurückgestellter Feed bleibt Warnung, obwohl alte Artikel im Snapshot liegen', () => {
+    // Die Quelle behält bei einer Zurückstellung ihre alten Artikel. Ihre
+    // Präsenz im Snapshot belegt deshalb keinen erfolgreichen Abruf.
+    const report = warningReport({
+        message: DEFERRED_MESSAGE,
+        sourcesInCache: ['Zurückgestellt'],
+    });
+    const row = rowOf(report, 'feed-warnung');
+
+    assert.equal(row.status, 'warning', 'eine Backend-Warnung wird nie zu OK');
+    assert.equal(row.detailKey, 'admin.health.detailBackendWarningInSnapshot');
+    assert.equal(row.detailParams.message, DEFERRED_MESSAGE);
+    assert.equal(row.inActiveSnapshot, true, 'die Snapshot-Präsenz bleibt getrennt sichtbar');
+});
+
+test('eine Warnung wegen leeren Feeds bleibt Warnung, obwohl alte Artikel im Snapshot liegen', () => {
+    const report = warningReport({
+        message: EMPTY_FEED_MESSAGE,
+        sourcesInCache: ['Zurückgestellt'],
+    });
+    const row = rowOf(report, 'feed-warnung');
+
+    assert.equal(row.status, 'warning');
+    assert.equal(row.detailKey, 'admin.health.detailBackendWarningInSnapshot');
+    assert.equal(row.detailParams.message, EMPTY_FEED_MESSAGE);
+});
+
+test('eine Backend-Warnung ohne Snapshot-Aussage bleibt Warnung statt unbekannt', () => {
+    const report = warningReport({ message: DEFERRED_MESSAGE, sourcesInCache: null });
+    const row = rowOf(report, 'feed-warnung');
+
+    assert.equal(row.status, 'warning');
+    assert.equal(row.detailKey, 'admin.health.detailBackendWarningSnapshotUnknown');
+    assert.equal(row.inActiveSnapshot, null);
+});
+
+test('eine Backend-Warnung ohne Artikel im aktiven Snapshot nennt beide Befunde', () => {
+    const report = warningReport({
+        message: DEFERRED_MESSAGE,
+        sourcesInCache: ['Eine andere Quelle'],
+    });
+    const row = rowOf(report, 'feed-warnung');
+
+    assert.equal(row.status, 'warning');
+    assert.equal(row.detailKey, 'admin.health.detailBackendWarningNotInSnapshot');
+    assert.equal(row.inActiveSnapshot, false);
+});
+
 // --- Darstellung im Admin ----------------------------------------------------
 
 async function renderHealthTab() {
@@ -418,6 +485,58 @@ test('die Aktualisierung nennt sich erneutes Laden des gespeicherten Berichts', 
         });
         const after = testRoot.requests.filter(request => request.url.startsWith('/api/get-health-data')).length;
         assert.equal(after, before + 1, 'es wird nur der gespeicherte Bericht erneut geladen');
+    } finally {
+        await testRoot.cleanup();
+        restoreConsole();
+    }
+});
+
+test('ein zurückgestellter Feed erscheint im Admin als Warnung, nicht als erfolgreicher Abruf', async () => {
+    const restoreConsole = silenceConsole();
+    const deferred = feed('feed-warnung', 'Zurückgestellt');
+    const testRoot = await renderAdminPanel(vite, {
+        feeds: [deferred],
+        healthResponse: {
+            healthStatus: {
+                'feed-warnung': { status: 'warning', message: DEFERRED_MESSAGE },
+            },
+            // Die alten Artikel der zurückgestellten Quelle liegen weiterhin
+            // im aktiven Snapshot.
+            sourcesInCache: ['Zurückgestellt'],
+            heartbeat: null,
+            snapshot: ACTIVE_SNAPSHOT,
+        },
+        localStorageEntries: {},
+    });
+
+    try {
+        await act(async () => {
+            click(testRoot.window, testRoot.container.querySelector('#admin-tab-health'));
+        });
+
+        const panel = testRoot.container.querySelector('#admin-panel-health');
+        const row = panel.querySelector('tbody tr');
+
+        assert.match(row.textContent, /Warnung/);
+        assert.doesNotMatch(row.textContent, /OK/, 'eine Backend-Warnung wird nie als OK angezeigt');
+        assert.doesNotMatch(
+            row.textContent,
+            /Backend-Abruf erfolgreich/,
+            'ein zurückgestellter Lauf ist kein erfolgreicher Abruf',
+        );
+        assert.match(row.textContent, /Zurückgestellt: Zeitbudget des Laufs erschöpft\./);
+        assert.match(row.textContent, /belegen keinen erfolgreichen Abruf/);
+
+        // Die Warnungsliste oben nennt den Feed ebenfalls.
+        assert.ok(
+            testRoot.container.querySelector('#admin-warning-feeds-details') !== null,
+            'der Feed steht in der Warnungsliste',
+        );
+        assert.equal(
+            testRoot.container.querySelector('#admin-failed-feeds-details'),
+            null,
+            'eine Warnung landet nicht in der Fehlerliste',
+        );
     } finally {
         await testRoot.cleanup();
         restoreConsole();

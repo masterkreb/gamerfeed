@@ -280,9 +280,19 @@ Entsprechung bleibt eine Warnung statt still gesund zu werden, und
 Snapshot-Quellennamen ohne passenden Feed werden separat als „nicht zugeordnet“
 aufgelistet, statt zu verschwinden. Jeder konfigurierte Feed bleibt in jedem
 Fall eine eigene Zeile: fehlend, ähnlich geschrieben, artikellos oder unbekannt.
-Backend-Abrufstatus und Snapshot-Präsenz sind zwei getrennte Aussagen. Kann der
-gespeicherte Bericht gar nicht geladen werden, sind alle Zeilen **unbekannt**,
-nicht rot: Nicht die Feeds sind ausgefallen, sondern der Bericht über sie fehlt.
+Backend-Abrufstatus und Snapshot-Präsenz sind zwei getrennte Aussagen. Eine
+Backend-**Warnung** bleibt deshalb immer eine Warnung, egal was der Snapshot
+sagt: Der Cron vergibt sie unter anderem für eine wegen Zeitbudget
+zurückgestellte Quelle, die ihre alten Artikel behält, und für einen erfolgreich
+abgerufenen, aber leeren Feed. In beiden Fällen können noch **ältere** Artikel im
+aktiven Snapshot liegen – ihre Präsenz belegt keinen erfolgreichen Abruf und darf
+die Warnung nie in „OK“ umschlagen lassen. Die Snapshot-Aussage steht trotzdem
+daneben, und die bereits cron-seitig bereinigte Backend-Meldung erscheint in
+einem lokalisierten Satz.
+
+Kann der gespeicherte Bericht gar nicht geladen werden, sind alle Zeilen
+**unbekannt**, nicht rot: Nicht die Feeds sind ausgefallen, sondern der Bericht
+über sie fehlt.
 Der textlastige Legenden-Reiter trägt `tabIndex={0}`, damit er ohne
 Bedienelemente per Tastatur erreichbar und scrollbar bleibt.
 

@@ -175,9 +175,13 @@ Es basiert auf dem Abgleich von zwei Datensätzen, die vom "Datensammler" im Ver
 Die Statusanzeige wird wie folgt ermittelt:
 
 *   **Status: OK (Grün)**: Der Feed hat im `feed_health_status` den Status `success` **UND** die Quelle steht mit **exakt diesem Namen** im aktiven Snapshot.
-*   **Status: Warnung (Gelb)**: Der Feed hat den Status `success`, **ABER** die Quelle steht nicht im aktiven Snapshot. (Mögliche Gründe: Feed ist leer, oder der Name stimmt nicht exakt überein.)
+*   **Status: Warnung (Gelb)**: Entweder meldet der letzte Lauf für den Feed `warning` – etwa eine wegen des Zeitbudgets zurückgestellte Quelle oder einen Feed ohne gelieferte Artikel –, **ODER** der Feed hat `success`, seine Quelle steht aber nicht im aktiven Snapshot. (Mögliche Gründe für Letzteres: Feed ist leer, oder der Name stimmt nicht exakt überein.)
 *   **Status: Fehler (Rot)**: Der Feed hat im `feed_health_status` den Status `error`. (Mögliche Gründe: URL nicht erreichbar, XML-Fehler, etc.)
 *   **Status: Unbekannt (Grau)**: Der gespeicherte Bericht wurde noch nicht geladen, oder der aktive Snapshot ist derzeit nicht belegbar.
+
+Eine Backend-Warnung bleibt immer eine Warnung. Eine zurückgestellte Quelle
+behält ihre **älteren** Artikel im aktiven Snapshot; deren Vorhandensein belegt
+keinen erfolgreichen Abruf und macht aus der Warnung deshalb nie ein „OK“.
 
 Zugeordnet wird ausschließlich über **exakt gleiche Quellennamen**. Ein nur
 ähnlich geschriebener Name wird bewusst nicht mehr als gesund gemeldet;

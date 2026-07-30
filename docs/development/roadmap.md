@@ -188,7 +188,7 @@ sind. Die unscharfe Namensnormalisierung ist entfernt: unzuordenbare
 Snapshot-Namen werden getrennt ausgewiesen, statt einen ähnlich geschriebenen
 Feed gesund zu melden. Die irreführenden Aktualisieren-Symbole je Feed-Zeile
 sind entfallen; der zentrale Knopf lädt ausdrücklich nur den gespeicherten
-Bericht. 666 zentrale Tests und 23 Browser-Abnahmen laufen erfolgreich. Als
+Bericht. 671 zentrale Tests und 23 Browser-Abnahmen laufen erfolgreich. Als
 nächstes ist O4 bereit.
 
 ## Empfohlene Reihenfolge
@@ -928,6 +928,14 @@ das Admin den Fall VG247 (erfolgreich abgerufen, aber nicht im aktiven
 Snapshot: Warnung) sauber von GameStar (im aktiven Snapshot, nur in einer
 älteren lokalen Kopie nicht: OK mit Hinweis, kein Feed-Ausfall).
 
+Backend-Abrufstatus und Snapshot-Präsenz bleiben getrennt. Eine Backend-Warnung
+bleibt deshalb immer eine Warnung: Der Cron vergibt sie für eine wegen
+Zeitbudget zurückgestellte Quelle und für einen erfolgreich abgerufenen, aber
+leeren Feed. Beide behalten ihre **älteren** Artikel im aktiven Snapshot, und
+deren Präsenz belegt keinen erfolgreichen Abruf. Die bereits cron-seitig
+bereinigte Meldung erscheint in einem lokalisierten Satz zusammen mit der
+getrennten Snapshot-Aussage.
+
 Die unscharfe Namensnormalisierung ist entfernt. Zugeordnet wird nur über exakt
 gleiche Quellennamen; Snapshot-Namen ohne passenden Feed werden separat
 aufgelistet, statt einen ähnlich geschriebenen Feed auf „OK“ zu setzen. Jeder
@@ -974,9 +982,9 @@ ein GitHub-Action-Lauf startet.
 Erfüllt durch `tests/frontend/unit/admin-panel-a11y.test.js` und
 `tests/frontend/unit/admin-health-report.test.js`. Beide prüfen die echte
 Admin-Komponente; die reine Ableitung wird zusätzlich mit kontrollierter Uhr
-direkt getestet. Gegenprobe: mit wiederhergestellter Namensnormalisierung
+direkt getestet. Gegenproben: mit wiederhergestellter Namensnormalisierung
 beziehungsweise mit „fehlende Kennung gilt als gleich“ fallen jeweils zwei
-Tests.
+Tests, ohne die ausdrückliche Behandlung von `warning` fünf.
 
 Ein echter manueller Einzelquellen-Abruf ist ein separates, derzeit nicht
 geplantes Produktfeature.
