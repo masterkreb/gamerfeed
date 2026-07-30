@@ -118,7 +118,8 @@
 ├── docs/
 │   ├── deployment/        # Betrieb, Release, Rollback und Domain-Anleitungen
 │   └── development/
-│       └── roadmap.md      # Priorisierte Arbeitspakete und Abnahmekriterien
+│       ├── roadmap.md      # Priorisierte Arbeitspakete und Abnahmekriterien
+│       └── seo-indexing.md # Search-Console-Baseline und SEO-Mess-Gate
 ├── tools/
 │   └── feed-proxy.php      # Manuell deployter externer Feed-Fallback
 │
@@ -754,6 +755,36 @@ Preview-, Medium-, Full- und manuellen Refresh-Requests.
 Deferred-Promise- und Chromium-Fälle sowie die bewussten Grenzen stehen in
 `docs/development/progressive-news-loading.md`.
 
+## 🔎 Auffindbarkeit und SEO
+
+Die React-SPA bleibt die interaktive Anwendung; wichtige SEO-Einstiege sollen
+bereits im ersten HTML sinnvolle Inhalte und normale interne Links liefern.
+`/gaming-news` ist die bestehende servergerenderte Einstiegsseite. Ein
+kompletter Rewrite, eine Framework-Migration oder eine Artikeldatenbank sind
+keine Voraussetzung für den SEO-Pilot.
+
+Die Search-Console-Baseline vom 30. Juli 2026 zeigt 0 indexierte bei 2 nicht
+indexierten URLs, obwohl Sitemap und aktuelle Live-Tests technisch erfolgreich
+sind. Deshalb ist SEO1 vor O4b priorisiert. Das Paket arbeitet nur an
+crawlbaren Einstiegen, ehrlichen zeitstabilen Metadaten und wechselseitiger
+Verlinkung. Zusätzliche Seitentypen beginnen erst nach dem Mess-Gate.
+
+Wichtige Leitplanken:
+
+- kein versteckter, außerhalb des Viewports platzierter oder mit `aria-hidden`
+  markierter Crawler-Inhalt;
+- keine exakte Quellenzahl in statischen Meta- oder strukturierten Daten;
+- keine `SearchAction`, solange `?search=` nicht als URL-Suche funktioniert;
+- keine massenhaft erzeugten dünnen Seiten und keine kopierten
+  Artikelzusammenfassungen als eigener Inhalt;
+- keine Search-Console-Zugangsdaten, Kontoadressen oder Exporte im Repository;
+- Indexierungsanträge und Production-Änderungen bleiben manuelle, ausdrücklich
+  freizugebende Schritte.
+
+Baseline, gestufter Versuch und Abbruchkriterien:
+`docs/development/seo-indexing.md`. Die Pakete SEO0 bis SEO4 stehen in
+`docs/development/roadmap.md`.
+
 ## 🔌 Feed-Proxy
 
 Einzelne Quellen – aktuell GamePro – beantworten Anfragen aus dem
@@ -899,6 +930,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Snapshot-Entdeckung (F5): der erste Versuch jeder Ladung und der Auto-Update-Poll fragen ungebunden, damit ein Browser mit gepinnter alter Generation die inzwischen aktive überhaupt sieht; erst die angenommene Antwort bindet die Folgestufen
 - **Juli 2026:** Lokaler Startcache im Admin (A1c): der bewusst auf 32 Artikel begrenzte Browsercache bewertet keine Feed-Zeile mehr, sondern steht global als eigene Kennzahl mit echter Artikel- und Quellenzahl
 - **Juli 2026:** Laufbericht (O4a): strukturierte Zusammenfassung je Lauf in der GitHub-Step-Summary mit Ergebnis, Dauern, Fehlerquote, Snapshot-Größen sowie Transport und beobachtetem HTTP-Status je Quelle – ohne neue KV-Schlüssel und ohne Einfluss auf Ergebnis oder Exit-Code
+- **Juli 2026:** SEO0: Search-Console-Baseline mit 0 indexierten URLs trotz erfolgreicher Sitemap und Live-Tests; SEO1 als kleiner hybrider Crawlability-Pilot vor O4b eingeordnet
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 

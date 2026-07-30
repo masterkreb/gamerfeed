@@ -22,7 +22,8 @@ Priorität:
 
 - **P0**: laufender Produktionsausfall oder unmittelbar ausnutzbare Lücke
 - **P1**: bekanntes Sicherheits-, Datenschutz- oder Zuverlässigkeitsrisiko
-- **P2**: wichtige Stabilisierung und Wartbarkeit
+- **P2**: wichtige Stabilisierung, Wartbarkeit oder ein durch Messdaten
+  belegtes Produktionsproblem
 - **P3**: Optimierung erst nach Messdaten oder erkennbarem Bedarf
 
 Es wird immer nur **ein Arbeitspaket** bearbeitet. Ein Arbeitspaket darf mehrere
@@ -219,7 +220,19 @@ je Quelle mit Transport und wirklich beobachtetem HTTP-Status. Die
 Zusammenfassung ist reine Beobachtbarkeit und kann weder Ergebnis noch
 Exit-Code verändern. Auch ein Abbruch in der Vorprüfung bekommt seinen – dann
 minimalen – Bericht. 741 zentrale Tests und 25 Browser-Abnahmen laufen
-erfolgreich. Als nächstes ist O4b bereit.
+erfolgreich. O4b bleibt als nächster Betriebsbaustein geplant; wegen der
+gemessenen fehlenden Google-Indexierung wird zunächst SEO0/SEO1 eingeordnet.
+
+**Stand 30. Juli 2026 (Search-Console-Baseline SEO0):** SEO0 ist
+abgeschlossen. Die Sitemap wird erfolgreich gelesen und beide öffentlichen
+URLs bestehen den Live-Test, trotzdem stehen **0 indexierte Seiten** zwei
+nicht indexierten gegenüber. Die Startseite wurde zuletzt am 25. Juni
+erfolgreich gecrawlt und danach nicht indexiert; `/gaming-news` wurde gefunden,
+aber nicht gecrawlt. Die letzten 28 Tage brachten 0 Impressionen und 0 Klicks,
+und der Links-Bericht kennt weder interne noch externe Links. Es gibt keine
+manuelle Maßnahme und kein Sicherheitsproblem. Damit ist SEO1 das nächste
+Arbeitspaket vor O4b. Baseline, Leitplanken und Mess-Gate:
+[`docs/development/seo-indexing.md`](seo-indexing.md).
 
 ## Empfohlene Reihenfolge
 
@@ -246,7 +259,12 @@ erfolgreich. Als nächstes ist O4b bereit.
 | F5 | P1 | erledigt | Aktive Snapshot-Generation zuverlässig entdecken |
 | A1c | P2 | erledigt | Lokalen Startcache im Admin verständlich darstellen |
 | O4a | P2 | erledigt | Strukturierter Laufbericht und GitHub-Step-Summary |
-| O4b | P2 | bereit | Begrenzte Laufhistorie |
+| SEO0 | P2 | erledigt | Search-Console-Baseline und SEO-Leitplanken festhalten |
+| SEO1 | P2 | bereit | Crawlbare Einstiege und ehrliche Metadaten herstellen |
+| SEO2 | P2 | geplant | Indexierungs- und Mess-Gate nach Production-Rollout |
+| SEO3 | P3 | später | Genau einen eigenständigen Content-Pilot aus Messdaten ableiten |
+| SEO4 | P3 | Entscheidung nötig | Eigene Domain und externe Reichweite festlegen |
+| O4b | P2 | geplant | Begrenzte Laufhistorie |
 | O4c | P2 | Entscheidung nötig | Unabhängige Alarmierung |
 | O4d | P2 | geplant | Isolierter Proxy-Fingerprint |
 | D1 | P2 | Entscheidung nötig | Datenbankschema, Backup und Restore festlegen |
@@ -843,7 +861,8 @@ Integrationsfälle gegen das echte `main()` in
 
 #### O4b – Begrenzte Laufhistorie
 
-**Status:** bereit.
+**Status:** geplant. Nach dem ausdrücklich priorisierten SEO1-Paket wieder
+einordnen.
 
 - eine begrenzte Historie über mehrere Läufe hinaus führen, damit ein Trend
   überhaupt sichtbar wird – der Heartbeat kennt nur den letzten Lauf;
@@ -1341,6 +1360,144 @@ geplantes Produktfeature.
   Production-Merges;
 - SHA-Kommentare lassen die verwendete Release-Version erkennen;
 - Update-Dokumentation verlangt weiterhin Tests, Typecheck und Build.
+
+---
+
+## Meilenstein 6: Auffindbarkeit und messbares SEO
+
+Dieser Meilenstein reagiert auf einen gemessenen Produktionszustand, nicht auf
+eine allgemeine SEO-Vermutung. Die React-App wird nicht umgeschrieben. Zuerst
+entsteht ein kleiner hybrider Versuch mit crawlbarem HTML; erst Search-Console-
+Daten entscheiden über zusätzliche Seiten oder eine größere Architektur.
+
+Einzelheiten und die zeitgebundene Baseline:
+[`docs/development/seo-indexing.md`](seo-indexing.md).
+
+### SEO0 – Search-Console-Baseline und Leitplanken
+
+**Status:** erledigt.
+
+Am 30. Juli 2026 wurden Leistung, Seitenindexierung, Sitemap, URL-Prüfung,
+Links, manuelle Maßnahmen und Sicherheitsprobleme geprüft:
+
+- 0 indexierte und 2 nicht indexierte URLs;
+- Startseite am 25. Juni erfolgreich gecrawlt, aber nicht indexiert;
+- `/gaming-news` gefunden, aber nicht gecrawlt beziehungsweise indexiert;
+- Sitemap erfolgreich gelesen und beide URLs in aktuellen Live-Tests
+  technisch indexierbar;
+- 0 Klicks und 0 Impressionen in den letzten 28 Tagen;
+- keine erkannten internen oder externen Links;
+- keine manuelle Maßnahme und kein Sicherheitsproblem.
+
+Diese Daten enthalten keine Kontoadresse, Tokens oder vollständigen
+Search-Console-Exporte. Sie begründen SEO1, garantieren aber keine spätere
+Indexierung.
+
+### SEO1 – Crawlbare Einstiege und ehrliche Metadaten
+
+**Status:** bereit. Priorität P2, ausdrücklich vor O4b eingeordnet.
+
+**Warum:** Die Startseite liefert im ursprünglichen HTML nur einen leeren
+React-Container. `/gaming-news` ist zwar servergerendert und in der Sitemap,
+wird aus der laufenden App aber nirgends mit einem normalen Link erschlossen.
+Statische Metadaten nennen eine längst veraltete exakte Quellenzahl, und die
+strukturierten Daten versprechen `?search=`, obwohl die App diesen URL-Parameter
+nicht als Suche verarbeitet.
+
+**Umfang:**
+
+- alle statischen Startseiten-Texte in Meta-, Open-Graph-, Twitter- und
+  strukturierten Daten zeitstabil formulieren, ohne exakte Quellenzahl;
+- die `SearchAction` vollständig entfernen; keine neue URL-Suche in diesem
+  Paket implementieren;
+- innerhalb von `#root` einen kleinen, ohne JavaScript sichtbaren
+  HTML-Fallback mit genau einer Überschrift, einer eigenen Beschreibung und
+  einem normalen Link zu `/gaming-news` liefern;
+- der Fallback ist weder versteckt noch außerhalb des Viewports platziert und
+  enthält keine dynamische beziehungsweise kopierte Artikelliste;
+- die laufende React-App verlinkt `/gaming-news` sichtbar und lokalisiert,
+  vorzugsweise im Footer; nach dem React-Start bleibt genau eine sichtbare H1;
+- `/gaming-news` erhält einen kurzen eigenständigen Einleitungstext, der
+  Nutzen, Quellenprinzip und Aktualisierung erklärt, ohne fremde
+  Artikelzusammenfassungen als eigene Inhalte auszugeben;
+- die bereits vorhandene Rückverlinkung von `/gaming-news` zur App bleibt eine
+  normale, crawlbare Verbindung;
+- die SEO-Dokumentation und relevante Architekturhinweise werden mit dem
+  tatsächlichen Verhalten synchronisiert.
+
+**Nicht enthalten:**
+
+- kein React-, Vite- oder Framework-Rewrite;
+- keine neue Datenbank und kein Wechsel vom KV-Snapshot;
+- keine neuen Quellen-, Themen-, Plattform- oder Datumsseiten;
+- kein Sitemap-Generator, keine Search-Console-API und kein automatischer
+  Indexierungsantrag;
+- kein Deployment und keine Änderung an Google-, Vercel- oder
+  GitHub-Einstellungen.
+
+**Abnahme:**
+
+- ein Test des ursprünglichen `index.html` und des Production-Builds findet
+  eine sichtbare H1, eigenen Beschreibungstext und einen internen
+  `/gaming-news`-Link bereits ohne JavaScript;
+- kein statischer SEO-Text enthält „über 15“ oder eine andere fest verdrahtete
+  Quellenanzahl; die strukturierten Daten enthalten keine `SearchAction`;
+- ein gerenderter Frontend-Test und eine Chromium-Abnahme belegen den
+  lokalisierten Link, ohne die bestehende App-Navigation zu beschädigen;
+- Handler-Tests belegen H1, eigenen Einleitungstext, Canonical und die
+  wechselseitigen Links von `/gaming-news`;
+- JavaScript-Ansicht und HTML-Fallback geben keine widersprüchlichen Aussagen
+  aus und erzeugen nach App-Start keine doppelte H1;
+- `npm test`, `npm run typecheck`, `npm run build`, `npm run test:e2e` und
+  beide Diff-Checks sind erfolgreich.
+
+### SEO2 – Indexierungs- und Mess-Gate
+
+**Status:** geplant. Erst nach Merge und Production-Rollout von SEO1.
+
+SEO2 ist überwiegend eine manuelle Abnahme, kein neuer Funktionsblock:
+
+- beide URLs in der Search Console live testen;
+- bei erfolgreichem Test jeweils einmal die Indexierung beantragen;
+- nach 7, 14 und 28 Tagen Indexierungszustand, Klicks, Impressionen,
+  thematische Suchanfragen und erkannte Links festhalten;
+- Unterschiede zur SEO0-Baseline dokumentieren, ohne persönliche Konto- oder
+  Token-Daten zu speichern.
+
+**Gate:** Mindestens eine indexierte URL oder echte thematische Impressionen
+sind ein positives Signal. Bleiben nach 28 Tagen beide URLs trotz erfolgreichem
+Live-Test ausgeschlossen, beginnt SEO3 nicht. Dann werden zuerst Inhalt,
+Domain, Canonical-Signale und der aktuelle Ausschlussgrund erneut geprüft.
+
+### SEO3 – Ein eigenständiger Content-Pilot
+
+**Status:** später. Priorität P3, nur nach positivem SEO2-Gate.
+
+- aus echten Suchanfragen oder einem klaren Nutzerproblem genau einen
+  dauerhaft pflegbaren Seitentyp auswählen;
+- eigenen Nutzen und eigene Einordnung liefern, statt nur fremde Titel neu zu
+  gruppieren;
+- vor einer Vervielfältigung den einzelnen Pilot erneut messen.
+
+**Abnahme:** Inhalt, URL-Lebenszyklus, Aktualisierung, Canonical, interne
+Verlinkung und Rückbau sind vor Implementierung festgelegt. Ohne belastbaren
+Pilot entstehen keine automatisch vervielfältigten SEO-Seiten.
+
+### SEO4 – Eigene Domain und externe Reichweite
+
+**Status:** Entscheidung des Projektinhabers nötig. Priorität P3.
+
+- vor einer größeren URL-Struktur entscheiden, ob die Vercel-Subdomain
+  dauerhaft bleibt oder eine eigene Domain verwendet wird;
+- bei einem Wechsel Redirects, Canonicals, Sitemap, Search-Console-Property
+  und Rollback gemeinsam planen;
+- externe Reichweite, passende Verweise und Community-/Social-Verteilung als
+  Produktarbeit behandeln – HTML allein erzeugt keine Nachfrage;
+- Messung so bewerten, dass zustimmungsabhängiges Google Analytics nicht als
+  vollständige Besucherzählung missverstanden wird.
+
+Diese Entscheidung blockiert den kleinen SEO1/SEO2-Versuch nicht, aber eine
+breite Content- und URL-Strategie.
 
 ---
 
