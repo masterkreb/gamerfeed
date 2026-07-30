@@ -287,8 +287,10 @@ export async function fetchFeedXml({
         logger?.log?.(`   ✅ Direct fetch successful for ${feedName}`);
         return {
             directError: null,
+            httpStatus: directResult.status ?? null,
             lastError: null,
             proxyError: null,
+            transport: 'direct',
             usedProxy: false,
             xmlString: directResult.text,
         };
@@ -313,8 +315,12 @@ export async function fetchFeedXml({
         return {
             budgetExhausted: directResult.budgetExhausted === true,
             directError,
+            // Ein zurueckgestellter Abruf hat keinen Status; `fetchTextWithRetry`
+            // liefert dort ausdruecklich `null` statt einer geratenen Zahl.
+            httpStatus: directResult.status ?? null,
             lastError: directError,
             proxyError: null,
+            transport: 'none',
             usedProxy: false,
             xmlString: null,
         };
@@ -329,8 +335,10 @@ export async function fetchFeedXml({
         const proxyError = `feed proxy URL is invalid: ${getErrorMessage(error)}`;
         return {
             directError,
+            httpStatus: directResult.status ?? null,
             lastError: `${directError} / ${proxyError}`,
             proxyError,
+            transport: 'none',
             usedProxy: false,
             xmlString: null,
         };
@@ -359,8 +367,10 @@ export async function fetchFeedXml({
         logger?.log?.(`   ✅ Feed proxy fetch successful for ${feedName}`);
         return {
             directError,
+            httpStatus: proxyResult.status ?? null,
             lastError: null,
             proxyError: null,
+            transport: 'proxy',
             usedProxy: true,
             xmlString: proxyResult.text,
         };
@@ -378,8 +388,12 @@ export async function fetchFeedXml({
     return {
         budgetExhausted: proxyResult.budgetExhausted === true,
         directError,
+        // Der Proxy war der zuletzt versuchte Weg; sein Status ist der letzte
+        // wirklich beobachtete. Ohne Antwort bleibt es bei `null`.
+        httpStatus: proxyResult.status ?? null,
         lastError: `${directError} / ${proxyError}`,
         proxyError,
+        transport: 'none',
         usedProxy: false,
         xmlString: null,
     };

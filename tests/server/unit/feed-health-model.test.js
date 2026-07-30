@@ -545,3 +545,69 @@ test('der Frischebericht reicht einen widerspruechlichen Grund nicht durch', () 
     assert.equal(bericht.run.result, 'success');
     assert.equal(bericht.run.degradedReason, null);
 });
+
+// === Zugangsdaten aller ueblichen URI-Schemata ===============================
+//
+// Die O4a-Summary verspricht, keine Zugangsdaten auszugeben. Diese Zusage darf
+// nicht davon abhaengen, dass eine Fehlermeldung die konfigurierte
+// Verbindungszeichenfolge bytegenau wiederholt.
+
+test('sanitizeErrorMessage entfernt Zugangsdaten aus einer PostgreSQL-Adresse', () => {
+    const message = sanitizeErrorMessage(
+        'connect ECONNREFUSED postgres://user:password@db.example/main',
+    );
+
+    assert.equal(message, 'connect ECONNREFUSED postgres://db.example/main');
+});
+
+test('sanitizeErrorMessage bereinigt auch eine abweichende PostgreSQL-Adresse', () => {
+    // Kein exakter Treffer in `secrets`: der Host stammt aus einer anderen
+    // Verbindung, das Passwort ist trotzdem eines.
+    const message = sanitizeErrorMessage(
+        'pool error postgresql://admin:anderes-passwort@replica.example:5432/db',
+        { secrets: ['postgres://user:password@db.example/main'] },
+    );
+
+    assert.doesNotMatch(message, /anderes-passwort/);
+    assert.doesNotMatch(message, /admin:/);
+    assert.equal(message, 'pool error postgresql://replica.example:5432/db');
+});
+
+test('sanitizeErrorMessage entfernt ein Token aus einer Redis-Adresse', () => {
+    const message = sanitizeErrorMessage(
+        'redis connection lost redis://:rediss-token-geheim@cache.example:6379',
+    );
+
+    assert.doesNotMatch(message, /rediss-token-geheim/);
+    assert.equal(message, 'redis connection lost redis://cache.example:6379');
+});
+
+test('sanitizeErrorMessage entfernt Querystrings auch bei Verbindungsadressen', () => {
+    const message = sanitizeErrorMessage(
+        'ssl error postgres://user:password@db.example/main?sslmode=require&token=abc',
+    );
+
+    assert.doesNotMatch(message, /password/);
+    assert.doesNotMatch(message, /sslmode|token=abc/);
+    assert.equal(message, 'ssl error postgres://db.example/main?[redacted]');
+});
+
+test('sanitizeErrorMessage laesst das bisherige HTTP(S)-Verhalten unveraendert', () => {
+    assert.equal(
+        sanitizeErrorMessage('fetch failed: https://token:abc@kv.example.com/pipeline?token=supersecret'),
+        'fetch failed: https://kv.example.com/pipeline?[redacted]',
+    );
+    assert.equal(
+        sanitizeErrorMessage('GET http://feeds.example/rss.xml failed'),
+        'GET http://feeds.example/rss.xml failed',
+    );
+});
+
+test('sanitizeErrorMessage ersetzt bekannte Secret-Werte weiterhin zuerst', () => {
+    const message = sanitizeErrorMessage(
+        'connect ECONNREFUSED für postgres://nutzer:geheim@db.example.com/main',
+        { secrets: ['postgres://nutzer:geheim@db.example.com/main'] },
+    );
+
+    assert.equal(message, 'connect ECONNREFUSED für [redacted]');
+});

@@ -94,6 +94,7 @@
 │   ├── feed-run-budget.js  # Zeit- und Scrape-Budget eines Laufs
 │   ├── feed-run-config.js  # Core- und optionale Konfiguration des Laufs
 │   ├── feed-run-recorder.js # Reihenfolge und Schreibregeln des Heartbeats
+│   ├── feed-run-summary.js # Laufbericht und GitHub-Step-Summary
 │   ├── news-snapshot-publisher.js # Bytebudget, Lease, atomare Aktivierung und GC
 │   ├── groq-client.js      # Begrenzter Zugang zur Groq-API
 │   └── limited-response.js # Begrenztes Lesen fremder HTTP-Antworten
@@ -461,6 +462,53 @@ steht. Nur die neuen Metadaten `feed_run_status` und `feed_publish_status` sind
 best effort.
 
 Einzelheiten, Datenformate und Grenzen: `docs/deployment/feed-heartbeat.md`.
+
+## 📋 Laufbericht in der Step-Summary
+
+`scripts/feed-run-summary.js` fasst jeden Lauf für die Job-Übersicht von GitHub
+Actions zusammen (O4a). Geschrieben wird **nur** bei gesetztem und nicht leerem
+`GITHUB_STEP_SUMMARY`, über den injizierbaren `writeSummary`-Parameter von
+`main()`.
+
+Der Bericht entsteht rein aus Daten, die der Lauf ohnehin hat – `feed_run_status`,
+`feed_health_status` und das Ergebnis des Snapshot-Publishers. **Es entstehen
+keine neuen KV-Schlüssel:** Transport und HTTP-Status je Feed leben
+ausschließlich im Arbeitsspeicher des laufenden Prozesses.
+
+Vier Begriffe sind genau definiert:
+
+- **`proxy`** heißt, dass die *erfolgreiche* Antwort wirklich vom Proxy kam –
+  nicht, dass ein Proxyversuch möglich gewesen wäre. Eine zurückgestellte
+  Quelle bekommt `none`.
+- **Ein HTTP-Status erscheint nur, wenn er beobachtet wurde.** Nichts wird
+  geraten; ein Verbindungsfehler und eine Zurückstellung zeigen `–`.
+- **Artikel** sind nur die in *diesem* Lauf gelieferten. Alte, lediglich
+  beibehaltene Artikel stehen dort nie.
+- **Fehlerquote = `error / (success + warning + error)`.** `unknown` bleibt
+  außen vor und wird getrennt genannt; Warnungen stehen im Nenner, aber nie im
+  Zähler und bekommen eine eigene Warnquote.
+
+Unbekannte Zahlen bleiben unbekannt: **`–` heißt, dass keine verlässliche
+Messung vorliegt; `0` heißt, dass wirklich gemessen wurde.** Übersprungene Items
+zählt nur ein tatsächlich durchgeführtes Parsen – Abruffehler, Zurückstellung
+und Parse-Abbruch zeigen `–`. Dasselbe gilt für Dauer und Artikelzahl.
+
+Die Bereinigung entfernt eingebettete Zugangsdaten aus **jeder** Adresse mit
+`scheme://`, nicht nur aus HTTP(S): `postgres://user:pass@host?sslmode=…` wird
+ebenso entschärft. Sie ist damit nicht darauf angewiesen, dass eine Meldung die
+konfigurierte Verbindungszeichenfolge bytegenau wiederholt.
+
+Die Zusammenfassung ist **ausschließlich zusätzliche Beobachtbarkeit**. Zwei
+Schichten fangen Fehler ab – `writeRunSummary` selbst und der Aufrufer in
+`main()` –, damit weder ein Schreibfehler noch ein Fehler beim Aufbau des
+Berichts das Ergebnis, den Exit-Code oder einen vorhandenen Fatalfehler
+verändert. Auch ein Abbruch in der **Vorprüfung** bekommt einen – dann
+minimalen – Bericht, ohne die Reihenfolge vor dem ersten externen Zugriff
+anzutasten. Sie enthält keine Secrets, Querystrings, Feed- oder Proxy-Adressen
+und keine Artikeltexte; Feed-Namen werden für Markdown entschärft und die
+Tabelle ist auf 50 Zeilen begrenzt.
+
+Einzelheiten und Grenzen: `docs/deployment/feed-run-summary.md`.
 
 ---
 
@@ -850,6 +898,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Admin-Tabs und Health-Semantik (A1b): vollwertige ARIA-Tabs mit Pfeiltasten, benannte Aufklapp-Schaltflächen, drei getrennte Quellen-Kennzahlen mit belegbarem Snapshot-Vergleich, unscharfe Gesundmeldung entfernt, irreführende Einzelabruf-Symbole entfernt
 - **Juli 2026:** Snapshot-Entdeckung (F5): der erste Versuch jeder Ladung und der Auto-Update-Poll fragen ungebunden, damit ein Browser mit gepinnter alter Generation die inzwischen aktive überhaupt sieht; erst die angenommene Antwort bindet die Folgestufen
 - **Juli 2026:** Lokaler Startcache im Admin (A1c): der bewusst auf 32 Artikel begrenzte Browsercache bewertet keine Feed-Zeile mehr, sondern steht global als eigene Kennzahl mit echter Artikel- und Quellenzahl
+- **Juli 2026:** Laufbericht (O4a): strukturierte Zusammenfassung je Lauf in der GitHub-Step-Summary mit Ergebnis, Dauern, Fehlerquote, Snapshot-Größen sowie Transport und beobachtetem HTTP-Status je Quelle – ohne neue KV-Schlüssel und ohne Einfluss auf Ergebnis oder Exit-Code
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 

@@ -1,13 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { main } from '../../../scripts/fetch-feeds.js';
 import { createFeedRunRecorder } from '../../../scripts/feed-run-recorder.js';
+import { createRunBudget } from '../../../scripts/feed-run-budget.js';
 import {
     ALLE_SECRETS,
     FEED_ROW,
     GAMEPRO_ROW,
     VOLLSTAENDIGE_ENV,
+    createControlledClock,
     createSpies,
+    createTimeoutSignalFactory,
     feedFetch,
     rssFeed,
     runMain as startMain,
@@ -446,4 +450,487 @@ test('ein einzelnes fehlerhaftes Item verwirft den Feed nicht', async () => {
     assert.equal(health.gamestar.status, 'success');
     assert.equal(health.gamestar.skippedItemCount, 1);
     assert.match(health.gamestar.message, /invalid_date: 1/);
+});
+
+// === GitHub-Step-Summary (O4a) ===============================================
+//
+// Der Bericht ist reine Beobachtbarkeit. Geprüft wird gegen das echte `main()`
+// mit injizierten Außenkanten - insbesondere, dass er nichts am Ergebnis ändert.
+
+/** Sammelt die Schreibversuche der Zusammenfassung. */
+function summaryWriter({ fail = false } = {}) {
+    const versuche = [];
+    return {
+        versuche,
+        get markdown() {
+            return versuche.map(eintrag => eintrag.markdown).join('\n');
+        },
+        writeSummary: async (path, markdown) => {
+            versuche.push({ path, markdown });
+            if (fail) {
+                // So sieht ein echter Fehler aus: die vollständige
+                // Verbindungszeichenfolge, nicht ein bloßes Token.
+                throw new Error('ENOSPC while writing postgres://nutzer:pg-geheim@db.example/main');
+            }
+        },
+    };
+}
+
+const SUMMARY_ENV = Object.freeze({
+    ...VOLLSTAENDIGE_ENV,
+    GITHUB_STEP_SUMMARY: '/tmp/step-summary.md',
+});
+
+test('ein erfolgreicher Lauf schreibt eine Zusammenfassung mit Ergebnis und Snapshot', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.equal(writer.versuche.length, 1, 'genau ein Schreibvorgang');
+    assert.equal(writer.versuche[0].path, '/tmp/step-summary.md');
+
+    const markdown = writer.markdown;
+    assert.match(markdown, /GamerFeed-Lauf/);
+    assert.match(markdown, /success/);
+    assert.match(markdown, /Aktive Generation/);
+    assert.match(markdown, /\| GameStar \|/, 'die Quelle steht in der Tabelle');
+    assert.match(markdown, /\bdirect\b/, 'der Direktabruf wird als Transport genannt');
+    assert.match(markdown, /Fehlerquote/);
+    assert.deepEqual(spies.exitCodes, [], 'ein erfolgreicher Lauf endet ohne Exit-Code');
+});
+
+test('die Zusammenfassung nennt weder Feed-Adressen noch Secrets', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    const markdown = writer.markdown;
+    for (const secret of ALLE_SECRETS) {
+        assert.doesNotMatch(markdown, new RegExp(secret), `${secret} steht in der Zusammenfassung`);
+    }
+    assert.doesNotMatch(markdown, /https?:\/\//, 'keine Adressen in der Zusammenfassung');
+    assert.doesNotMatch(markdown, /Erster Artikel/, 'keine Artikeltitel');
+});
+
+test('ein erfolgreicher Proxy-Abruf erscheint als Transport proxy', async () => {
+    const spies = createSpies({ feeds: [GAMEPRO_ROW] });
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: spies.makeFetchImpl(async url => (
+            url.includes('proxy.example')
+                ? new Response(rssFeed(), { status: 200 })
+                : new Response('blocked', { status: 403 })
+        )),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.match(writer.markdown, /\| GamePro \| success \|[^|]*\|[^|]*\|[^|]*\| proxy \| 200 \|/);
+});
+
+test('ein endgültiger Abruffehler erscheint mit Transport none und seinem Status', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: spies.makeFetchImpl(async () => new Response('kaputt', { status: 500 })),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.match(writer.markdown, /\| GameStar \| error \|[^|]*\|[^|]*\|[^|]*\| none \| 500 \|/);
+});
+
+test('ohne GITHUB_STEP_SUMMARY entsteht kein Schreibversuch', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(writer.versuche, [], 'kein Schreibversuch ohne gesetzten Pfad');
+    assert.deepEqual(spies.exitCodes, []);
+});
+
+test('ein Schreibfehler der Zusammenfassung ändert Ergebnis und Exit-Code nicht', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter({ fail: true });
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(spies.exitCodes, [], 'der Lauf bleibt erfolgreich');
+    assert.equal(spies.kvStore.feed_run_status.result, 'success');
+
+    const warnung = spies.logLines.find(line => line.includes('Zusammenfassung'));
+    assert.ok(warnung, 'der Fehlschlag wird protokolliert');
+    assert.doesNotMatch(warnung, /pg-geheim/, 'auch die Warnung bleibt bereinigt');
+});
+
+test('auch ein fataler Abbruch bekommt eine Zusammenfassung, ohne den Exit-Code zu ändern', async () => {
+    const spies = createSpies({
+        // So sieht ein echter Fehler aus: die vollstaendige
+        // Verbindungszeichenfolge, nicht ein blosses Token.
+        sqlError: new Error('connect ECONNREFUSED postgres://nutzer:pg-geheim@db.example/main'),
+    });
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(spies.exitCodes, [1], 'der Abbruch bleibt ein Abbruch');
+    assert.equal(writer.versuche.length, 1);
+    assert.match(writer.markdown, /fatal/);
+    assert.doesNotMatch(writer.markdown, /pg-geheim/);
+    assert.doesNotMatch(writer.markdown, /Aktive Generation/, 'ohne Publish gibt es keine Generation');
+    assert.match(writer.markdown, /Kein Kern-Publish/);
+});
+
+test('ein Schreibfehler im Fatalpfad überdeckt den ursprünglichen Fehler nicht', async () => {
+    const spies = createSpies({
+        // So sieht ein echter Fehler aus: die vollstaendige
+        // Verbindungszeichenfolge, nicht ein blosses Token.
+        sqlError: new Error('connect ECONNREFUSED postgres://nutzer:pg-geheim@db.example/main'),
+    });
+    const writer = summaryWriter({ fail: true });
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(spies.exitCodes, [1]);
+    assert.equal(spies.kvStore.feed_run_status.result, 'fatal');
+});
+
+// === Zusammenfassung auch bei gescheiterter Vorprüfung ========================
+//
+// „Jeder Lauf bekommt eine Zusammenfassung" muss auch für den Fatalfall gelten,
+// der noch vor Recorder und Feed-Liste greift. Sie bleibt dabei minimal: es gibt
+// schlicht nichts zu berichten außer dem Konfigurationsfehler.
+
+test('ein fehlendes Core-Secret erzeugt trotzdem genau eine fatale Zusammenfassung', async () => {
+    for (const key of ['POSTGRES_URL', 'KV_REST_API_URL', 'KV_REST_API_TOKEN']) {
+        const spies = createSpies();
+        const writer = summaryWriter();
+        const env = { ...SUMMARY_ENV };
+        delete env[key];
+
+        await runMain(spies, {
+            env,
+            groqFetch: spies.makeGroqFetch(),
+            writeSummary: writer.writeSummary,
+        });
+
+        assert.deepEqual(spies.exitCodes, [1], `${key}: der Lauf endet fatal`);
+        assert.equal(writer.versuche.length, 1, `${key}: genau ein Schreibversuch`);
+
+        // Die Vorprüfung bleibt vor jedem externen Zugriff.
+        assert.equal(spies.sqlQueries.length, 0, `${key}: kein SQL`);
+        assert.equal(spies.kvGets.length, 0, `${key}: kein KV-Lesen`);
+        assert.equal(spies.kvSets.length, 0, `${key}: kein KV-Schreiben`);
+        assert.equal(spies.recorderCalls.length, 0, `${key}: kein Recorder`);
+        assert.equal(spies.fetchCalls.length, 0, `${key}: kein HTTP`);
+        assert.equal(spies.groqCalls.length, 0, `${key}: kein Groq`);
+
+        const markdown = writer.markdown;
+        assert.match(markdown, /fatal/, `${key}: das Ergebnis steht drin`);
+        assert.match(markdown, new RegExp(key), `${key}: der Variablenname steht drin`);
+        for (const secret of ALLE_SECRETS) {
+            assert.doesNotMatch(markdown, new RegExp(secret), `${key}: ${secret} steht in der Ausgabe`);
+        }
+    }
+});
+
+test('die Zusammenfassung der Vorprüfung erfindet weder Feeds noch Snapshot', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+    const env = { ...SUMMARY_ENV };
+    delete env.POSTGRES_URL;
+
+    await runMain(spies, { env, groqFetch: spies.makeGroqFetch(), writeSummary: writer.writeSummary });
+
+    const markdown = writer.markdown;
+    assert.doesNotMatch(markdown, /### Quellen/, 'keine Quellentabelle ohne Feed-Liste');
+    assert.doesNotMatch(markdown, /### Feeds/, 'keine erfundenen Feed-Zähler');
+    assert.doesNotMatch(markdown, /Aktive Generation/, 'kein Snapshot');
+    assert.doesNotMatch(markdown, /Fehlerquote/, 'keine Quote ohne bewertete Feeds');
+    assert.match(markdown, /Vorprüfung/, 'der Grund ist benannt');
+});
+
+test('ein nur aus Leerzeichen bestehender Core-Wert verhält sich genauso', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: { ...SUMMARY_ENV, POSTGRES_URL: '   ' },
+        groqFetch: spies.makeGroqFetch(),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(spies.exitCodes, [1]);
+    assert.equal(spies.recorderCalls.length, 0);
+    assert.equal(writer.versuche.length, 1);
+    assert.match(writer.markdown, /POSTGRES_URL/);
+});
+
+test('ein Writer-Fehler in der Vorprüfung ändert Exit-Code und Reihenfolge nicht', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter({ fail: true });
+    // Bewusst nicht POSTGRES_URL: dessen Wert ist dann gar nicht konfiguriert
+    // und kann deshalb auch nicht bereinigt werden. Der Test prüft die
+    // Bereinigung, also muss die Variable gesetzt bleiben.
+    const env = { ...SUMMARY_ENV };
+    delete env.KV_REST_API_URL;
+
+    await runMain(spies, { env, groqFetch: spies.makeGroqFetch(), writeSummary: writer.writeSummary });
+
+    assert.deepEqual(spies.exitCodes, [1], 'der Lauf endet weiterhin fatal');
+    assert.equal(spies.recorderCalls.length, 0, 'die Vorprüfung bleibt vor dem Recorder');
+    assert.equal(spies.sqlQueries.length, 0);
+    assert.equal(spies.kvSets.length, 0);
+
+    const warnung = spies.logLines.find(line => line.includes('Zusammenfassung'));
+    assert.ok(warnung, 'der Fehlschlag wird protokolliert');
+    assert.doesNotMatch(warnung, /pg-geheim/);
+});
+
+test('ohne GITHUB_STEP_SUMMARY schreibt auch die Vorprüfung nichts', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+    const env = { ...VOLLSTAENDIGE_ENV };
+    delete env.POSTGRES_URL;
+
+    await runMain(spies, { env, groqFetch: spies.makeGroqFetch(), writeSummary: writer.writeSummary });
+
+    assert.deepEqual(spies.exitCodes, [1]);
+    assert.deepEqual(writer.versuche, []);
+});
+
+test('ein Abbruch nach geladener Feed-Liste erfindet für unbearbeitete Quellen keine Null', async () => {
+    // Der Lauf bricht nach der ersten Quelle ab. GamePro wurde dadurch nie
+    // angefasst und steht noch auf `unknown`; seine Items hat niemand
+    // untersucht. „0 übersprungen" wäre eine unbelegte Aussage.
+    const spies = createSpies({ feeds: [FEED_ROW, GAMEPRO_ROW] });
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        // Die Höflichkeitspause nach der ersten Quelle beendet den Lauf.
+        sleep: async () => {
+            throw new Error('Abbruch nach der ersten Quelle');
+        },
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(spies.exitCodes, [1]);
+
+    const zeile = writer.markdown.split('\n').find(line => line.startsWith('| GamePro |'));
+    assert.ok(zeile, 'die nie bearbeitete Quelle steht in der Tabelle');
+    assert.match(zeile, /\| unknown \|/, 'sie ist als unbewertet erkennbar');
+    assert.doesNotMatch(zeile, /\| 0 \|/, 'keine erfundene Null für nie untersuchte Items');
+    assert.match(zeile, /\| – \| – \| – \|/, 'Dauer, Artikel und Übersprungene bleiben leer');
+});
+
+// === Übersprungene Items nur nach echtem Parsing ==============================
+//
+// „0 übersprungen" ist eine Messung. Ohne Parsing gab es keine, und der
+// gespeicherte Status muss das als `null` sagen - genauso wie die Summary mit
+// einem Gedankenstrich.
+
+/** Der zuletzt gespeicherte Feed-Status einer Quelle. */
+function gespeicherterStatus(spies, feedId) {
+    const eintrag = spies.kvSets
+        .filter(entry => entry.key === 'feed_health_status')
+        .at(-1);
+    return eintrag?.value?.[feedId] ?? null;
+}
+
+/** Die Zelle „Übersprungen" einer Quelle in der Zusammenfassung. */
+function uebersprungenZelle(markdown, name) {
+    const zeile = markdown.split('\n').find(line => line.startsWith(`| ${name} |`));
+    return zeile === undefined ? null : zeile.split('|')[5].trim();
+}
+
+test('ein endgültiger Abruffehler meldet keine gemessene Null', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: spies.makeFetchImpl(async () => new Response('kaputt', { status: 500 })),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.equal(gespeicherterStatus(spies, 'gamestar').status, 'error');
+    assert.equal(gespeicherterStatus(spies, 'gamestar').skippedItemCount, null);
+    assert.equal(uebersprungenZelle(writer.markdown, 'GameStar'), '–');
+});
+
+test('eine vor dem Abruf zurückgestellte Quelle meldet keine gemessene Null', async () => {
+    const uhr = createControlledClock();
+    const signale = createTimeoutSignalFactory();
+    const spies = createSpies({ feeds: [FEED_ROW, GAMEPRO_ROW] });
+    const writer = summaryWriter();
+
+    const budget = createRunBudget({
+        now: uhr.now,
+        setTimer: uhr.setTimer,
+        clearTimer: uhr.clearTimer,
+        createTimeoutSignal: signale.createTimeoutSignal,
+        deadlineMs: 60_000,
+    });
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        budget,
+        // Die erste Quelle verbraucht das gesamte Budget; die zweite kommt gar
+        // nicht mehr dran.
+        fetchImpl: spies.makeFetchImpl(async () => {
+            uhr.vor(90_000);
+            return new Response(rssFeed(), { status: 200 });
+        }),
+        writeSummary: writer.writeSummary,
+    });
+
+    const zurueckgestellt = gespeicherterStatus(spies, 'gamepro');
+    assert.equal(zurueckgestellt.status, 'warning');
+    assert.equal(zurueckgestellt.skippedItemCount, null, 'nie geparst, nie gemessen');
+    assert.equal(uebersprungenZelle(writer.markdown, 'GamePro'), '–');
+});
+
+test('der Parse-Abbruch übernimmt den unbekannten Basiseintrag', async () => {
+    // Diese Verzweigung ist von außen nicht erreichbar: linkedom erzeugt für
+    // fehlerhaftes Feed-XML keinen `parsererror`, sondern überspringt einzelne
+    // Elemente. Geprüft wird deshalb, dass sie denselben Basiseintrag
+    // übernimmt wie Abruffehler und Zurückstellung - und keine eigene Zahl
+    // setzt.
+    const quelltext = await readFile(
+        new URL('../../../scripts/fetch-feeds.js', import.meta.url),
+        'utf8',
+    );
+
+    const basis = quelltext.slice(
+        quelltext.indexOf('const baseEntry = {'),
+        quelltext.indexOf('if (xmlString) {'),
+    );
+    assert.match(basis, /skippedItemCount: null,/, 'der Basiseintrag misst nichts');
+
+    const parseZweig = quelltext.slice(
+        quelltext.indexOf('} catch (parseError) {'),
+        quelltext.indexOf('} else if (budgetExhausted) {'),
+    );
+    assert.match(parseZweig, /\.\.\.baseEntry,/, 'der Parse-Abbruch erbt den Basiseintrag');
+    assert.doesNotMatch(
+        parseZweig,
+        /skippedItemCount:/,
+        'und setzt keine eigene Zahl über nie gezählte Elemente',
+    );
+});
+
+test('ein erfolgreich geparster Feed ohne verworfene Items meldet eine echte Null', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    const status = gespeicherterStatus(spies, 'gamestar');
+    assert.equal(status.status, 'success');
+    assert.equal(status.skippedItemCount, 0, 'hier wurde wirklich gemessen');
+    assert.equal(uebersprungenZelle(writer.markdown, 'GameStar'), '0');
+});
+
+test('ein erfolgreich geparster Feed mit verworfenen Items meldet deren Zahl', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    // Ein Element ohne Titel und Link wird verworfen, das andere bleibt.
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>Quelle</title>
+<item>
+  <title>Gutes Element</title>
+  <link>https://www.gamestar.de/a1</link>
+  <guid isPermaLink="false">a1</guid>
+  <pubDate>Sat, 25 Jul 2026 18:37:34 +0000</pubDate>
+  <description><![CDATA[<p>Text</p>]]></description>
+</item>
+<item>
+  <title>Kaputtes Element</title>
+  <link>https://www.gamestar.de/a2</link>
+  <guid isPermaLink="false">a2</guid>
+  <pubDate>kein gueltiges Datum</pubDate>
+  <description><![CDATA[<p>Text</p>]]></description>
+</item>
+</channel></rss>`;
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: spies.makeFetchImpl(async () => new Response(xml, { status: 200 })),
+        writeSummary: writer.writeSummary,
+    });
+
+    const status = gespeicherterStatus(spies, 'gamestar');
+    assert.equal(status.status, 'success');
+    assert.equal(status.skippedItemCount, 1);
+    assert.equal(uebersprungenZelle(writer.markdown, 'GameStar'), '1');
+});
+
+test('die gerenderte Zusammenfassung enthält keine Zugangsdaten', async () => {
+    const spies = createSpies({
+        // Eine Verbindungszeichenfolge, die *nicht* dem konfigurierten Secret
+        // entspricht: die Bereinigung darf sich nicht auf einen exakten
+        // Treffer verlassen.
+        sqlError: new Error('connect ECONNREFUSED postgres://admin:fremdes-passwort@replica.example/db?sslmode=require'),
+    });
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(spies.exitCodes, [1]);
+    assert.doesNotMatch(writer.markdown, /fremdes-passwort/);
+    assert.doesNotMatch(writer.markdown, /admin:/);
+    assert.doesNotMatch(writer.markdown, /sslmode/);
 });

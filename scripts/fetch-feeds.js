@@ -40,6 +40,12 @@ import {
     isProxyEligibleSource,
 } from './feed-fetch-utils.js';
 import { publishNewsSnapshot } from './news-snapshot-publisher.js';
+import {
+    buildPreflightFailureSummary,
+    buildRunSummary,
+    renderRunSummaryMarkdown,
+    writeRunSummary,
+} from './feed-run-summary.js';
 
 // === HELPER FUNCTIONS (DECODING, STRIPPING, ETC.) ===
 function decodeHtmlEntities(text) {
@@ -912,10 +918,13 @@ async function generateAndSaveTrends(articles, { groqApiKey, groqFetch, logger =
 
 // Die Actions-Run-ID ist nicht geheim und laesst einen Lauf im Admin direkt dem
 // Workflow-Protokoll zuordnen. Lokale Laeufe bekommen eine eigene Kennung.
-function createRunId() {
-    const actionsRunId = process.env.GITHUB_RUN_ID;
+// Die Umgebung ist ein Parameter, damit auch die Vorpruefung eine Lauf-ID
+// bilden kann, ohne an `process.env` gebunden zu sein. Ohne Argument gilt
+// unveraendert das bisherige Produktionsverhalten.
+function createRunId(env = process.env) {
+    const actionsRunId = env?.GITHUB_RUN_ID;
     if (actionsRunId) {
-        const attempt = process.env.GITHUB_RUN_ATTEMPT;
+        const attempt = env?.GITHUB_RUN_ATTEMPT;
         return `gha-${actionsRunId}${attempt ? `-${attempt}` : ''}`;
     }
     return `local-${randomUUID()}`;
@@ -975,6 +984,13 @@ export async function main({
     // Unveraenderlicher, groessenbegrenzter O3b-Publish. Injizierbar fuer
     // Orchestrierungs- und Fault-Injection-Tests.
     publishSnapshot = publishNewsSnapshot,
+    // Schreibt die GitHub-Step-Summary (O4a). Injizierbar, damit Tests keine
+    // echte Actions-Datei brauchen. Ohne gesetztes GITHUB_STEP_SUMMARY wird er
+    // gar nicht erst aufgerufen.
+    writeSummary = async (path, markdown) => {
+        const { appendFile } = await import('node:fs/promises');
+        await appendFile(path, markdown, 'utf8');
+    },
 } = {}) {
     // === Vorpruefung: laeuft vor jeder Verbindung ===
     //
@@ -985,6 +1001,30 @@ export async function main({
     const configuration = readFeedRunConfiguration(env);
     if (!configuration.ok) {
         logger.error(`\n❌ ${configuration.fatalMessage}`);
+
+        // Auch dieser Fatalfall bekommt seine Zusammenfassung - aber eine
+        // minimale. Es gibt weder Recorder noch Feed-Liste noch irgendeinen
+        // externen Zugriff; berichtet wird ausschliesslich der bereits sichere
+        // Konfigurationsfehler, der nur Variablennamen nennt. Best effort: ein
+        // Schreibfehler darf den Exit-Code nicht veraendern.
+        try {
+            await writeRunSummary({
+                env,
+                markdown: renderRunSummaryMarkdown(buildPreflightFailureSummary({
+                    runId: createRunId(env),
+                    message: configuration.fatalMessage,
+                    redact: redactMessage,
+                })),
+                writeSummary,
+                redact: redactMessage,
+                logger,
+            });
+        } catch (summaryError) {
+            logger.warn?.(`   ⚠️  Zusammenfassung übersprungen: ${redactMessage(
+                summaryError instanceof Error ? summaryError.message : String(summaryError),
+            )}`);
+        }
+
         return exit(1);
     }
 
@@ -993,6 +1033,49 @@ export async function main({
     }
 
     const feedHealthStatus = {};
+    // Transport und HTTP-Status je Feed - ausschliesslich fuer die
+    // Zusammenfassung dieses Laufs (O4a). Bewusst **nicht** persistiert: der
+    // Heartbeat behaelt sein Schema, es entsteht kein neuer KV-Schluessel.
+    const feedTransports = new Map();
+    // Wird nach einem erfolgreichen Kern-Publish gesetzt und von der
+    // Zusammenfassung gelesen; ohne Publish bleibt sie null.
+    let publishedSnapshot = null;
+    // Die Feed-Liste steht erst spaeter fest; die Zusammenfassung braucht sie
+    // fuer Namen und Reihenfolge.
+    let loadedFeeds = [];
+
+    /**
+     * Schreibt die GitHub-Step-Summary - ausdruecklich **best effort**.
+     *
+     * Sie ist reine Beobachtbarkeit und darf niemals ein Ergebnis veraendern:
+     * kein Wurf, keine Aenderung am Exit-Code, kein Ueberdecken eines bereits
+     * vorhandenen Fatalfehlers. Deshalb faengt sie zusaetzlich zum internen
+     * try/catch von `writeRunSummary` auch Fehler des Berichtsaufbaus ab.
+     */
+    const publishRunSummary = async runStatus => {
+        try {
+            const summary = buildRunSummary({
+                run: runStatus,
+                feeds: loadedFeeds,
+                feedHealth: feedHealthStatus,
+                transports: feedTransports,
+                snapshot: publishedSnapshot,
+                redact: redactMessage,
+            });
+
+            await writeRunSummary({
+                env,
+                markdown: renderRunSummaryMarkdown(summary),
+                writeSummary,
+                redact: redactMessage,
+                logger,
+            });
+        } catch (summaryError) {
+            logger.warn?.(`   ⚠️  Zusammenfassung übersprungen: ${redactMessage(
+                summaryError instanceof Error ? summaryError.message : String(summaryError),
+            )}`);
+        }
+    };
     const ARTICLE_RETENTION_DAYS = 60; // Artikel werden 60 Tage gespeichert
     const MAX_ARTICLES = 10000; // Maximale Anzahl Artikel (verhindert KV Limit-Überschreitung)
     const IMAGE_BACKFILL_LIMIT = 30;
@@ -1025,7 +1108,7 @@ export async function main({
     const durations = {};
     const recorder = createRecorder({
         store,
-        runId: createRunId(),
+        runId: createRunId(env),
         startedAt: new Date(),
         // Ohne diese Zeile faellt der Recorder auf `console` zurueck und seine
         // Warnungen ("Feed-Status wird nicht geschrieben ...") laufen an der
@@ -1093,6 +1176,7 @@ export async function main({
         // Ab hier gilt die Feed-Liste als bekannt: eine leere Liste darf den
         // gespeicherten Status jetzt leeren, ein Abbruch davor nicht.
         recorder.markFeedListLoaded();
+        loadedFeeds = feeds;
         feeds.forEach(feed => {
             feedHealthStatus[feed.id] = {
                 status: 'unknown',
@@ -1125,8 +1209,12 @@ export async function main({
                     lastSuccessAt: recorder.lastSuccessAtFor(feed.id),
                     durationMs: null,
                     articleCount: null,
-                    skippedItemCount: 0,
+                    // Nie geparst, also auch nie gemessen. Eine 0 waere hier
+                    // eine Aussage ueber Items, die niemand angesehen hat.
+                    skippedItemCount: null,
                 };
+                // Gar nicht abgerufen: kein Transport, kein erfundener Status.
+                feedTransports.set(feed.id, { transport: 'none', httpStatus: null });
                 logger.warn(`   ⏱️  Zurückgestellt: ${feed.name} (Zeitbudget erschöpft)`);
                 continue;
             }
@@ -1138,7 +1226,13 @@ export async function main({
             }
 
             const feedStartMs = Date.now();
-            const { xmlString, lastError, budgetExhausted } = await fetchFeedXml({
+            const {
+                xmlString,
+                lastError,
+                budgetExhausted,
+                transport,
+                httpStatus,
+            } = await fetchFeedXml({
                 // Nur ausdrücklich vorgesehene Quellen dürfen über den Proxy.
                 allowProxy: isProxyEligibleSource(feed),
                 createSignal: requestSignal,
@@ -1155,6 +1249,13 @@ export async function main({
                 sleep,
             });
 
+            // Nur der tatsaechlich tragende Weg und ein wirklich beobachteter
+            // Status. `proxy` heisst: die erfolgreiche Antwort kam vom Proxy.
+            feedTransports.set(feed.id, {
+                transport: transport ?? 'none',
+                httpStatus: httpStatus ?? null,
+            });
+
             // Minimale Feed-Dauer: sie beantwortet spaeter, welche Quelle das
             // Zeitbudget aufbraucht (O2b), ohne heute schon zu regeln.
             const attemptAt = new Date().toISOString();
@@ -1164,7 +1265,10 @@ export async function main({
                 lastSuccessAt: recorder.lastSuccessAtFor(feed.id),
                 durationMs: feedDurationMs,
                 articleCount: null,
-                skippedItemCount: 0,
+                // Beide Zahlen bleiben unbekannt, bis `parseFeedItems`
+                // wirklich einen Bericht geliefert hat. Abruffehler,
+                // Zurueckstellung und Parse-Abbruch messen nichts.
+                skippedItemCount: null,
             };
 
             if (xmlString) {
@@ -1481,6 +1585,7 @@ export async function main({
             leaseWaitMs: Math.min(30_000, Math.max(0, runBudget.remainingMs() - 1_000)),
         });
         sortedArticles = snapshotPublish.payloads.full.articles;
+        publishedSnapshot = snapshotPublish;
 
         durations.publishMs = Date.now() - publishStartMs;
         durations.totalMs = Date.now() - runStartMs;
@@ -1548,12 +1653,14 @@ export async function main({
             logger.warn(`   ⏱️  Lauf eingeschränkt abgeschlossen – ${degradedReason}`);
         }
 
-        await recorder.finish({
+        const finishedRun = await recorder.finish({
             feedHealth: feedHealthStatus,
             durations: { ...durations, totalMs: Date.now() - runStartMs },
             result,
             degradedReason,
         });
+
+        await publishRunSummary(finishedRun);
 
     } catch (error) {
         // Niemals das rohe Fehlerobjekt: ein SQL- oder KV-Fehler traegt
@@ -1566,17 +1673,29 @@ export async function main({
         // und schreibt den Feed-Status nur, wenn die Feed-Liste geladen war.
         // Scheitert auch das Festhalten des Abbruchs, bleibt es beim
         // urspruenglichen Fehler: der Exit-Code ist wichtiger als das Protokoll.
+        let fatalRun = null;
         try {
-            await recorder.recordFatal({
+            const recorded = await recorder.recordFatal({
                 error,
                 feedHealth: feedHealthStatus,
                 durations: { ...durations, totalMs: Date.now() - runStartMs },
             });
+            fatalRun = recorded?.run ?? null;
         } catch (recorderError) {
             logger.error(`   ⚠️  Abbruch konnte nicht festgehalten werden: ${redactMessage(
                 recorderError instanceof Error ? recorderError.message : String(recorderError),
             )}`);
         }
+
+        // Auch ein abgebrochener Lauf bekommt seine Zusammenfassung; sie darf
+        // den Exit-Code aber unter keinen Umstaenden veraendern.
+        await publishRunSummary(fatalRun ?? {
+            runId: recorder.runId,
+            result: 'fatal',
+            fatalError: error instanceof Error ? error.message : String(error),
+            durations: { ...durations, totalMs: Date.now() - runStartMs },
+        });
+
         return exit(1);
     } finally {
         // Der Deadline-Timer würde den Prozess sonst bis zu seinem Ablauf
