@@ -151,6 +151,15 @@ Quelle, Sprache oder Veröffentlichungszeit neu gerendert. Ein Regressionstest
 prüft jedes dieser Felder separat bei unveränderter Artikel-ID. 629 zentrale
 Tests und 23 Browser-Abnahmen laufen erfolgreich.
 
+**Stand 30. Juli 2026 (Branch `codex/f4a-persisted-state-validation`):** F4a
+ist abgeschlossen. Alle durch den gemeinsamen Hook gespeicherten Zustände
+besitzen jetzt einen Laufzeit-Decoder. Kaputtes JSON, falsche Formen,
+unbekannte Enum-Werte und entfernte Keys fallen je Zustand auf einen festen
+Default zurück. `cachedNews` prüft zusätzlich jeden Artikel sowie eine
+optionale Generation; blockiertes Schreiben nimmt dem laufenden React-State
+nicht seinen neuen Wert. 637 zentrale Tests und 23 Browser-Abnahmen laufen
+erfolgreich.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -169,7 +178,7 @@ Tests und 23 Browser-Abnahmen laufen erfolgreich.
 | O3b | P1 | erledigt | News-Caches größenbegrenzt und konsistent veröffentlichen |
 | F3a | P2 | erledigt | Zentrale Tastatur- und DOM-Probleme im Frontend beheben |
 | F3b | P2 | erledigt | Veraltetes ArticleCard-Rendering verhindern |
-| F4a | P2 | geplant | Persistierten Zustand robust validieren |
+| F4a | P2 | erledigt | Persistierten Zustand robust validieren |
 | F4b | P2 | geplant | Verbliebene i18n-Inkonsistenzen schließen |
 | A1a | P2 | geplant | Admin-Mutationen synchron absichern |
 | A1b | P2 | geplant | Admin-Tabs und Health-Beschriftung korrigieren |
@@ -776,6 +785,16 @@ gerenderte Ausgabe.
 - unveränderte Props verursachen keine nachweisbare funktionale Regression.
 
 ### F4a – Persistierten Zustand validieren
+
+**Status:** erledigt. `shared/persisted-state.ts` enthält reine Decoder für
+Theme, ViewMode, String-Arrays, nullable Strings und `cachedNews`.
+`useLocalStorage` verlangt einen passenden Decoder, nutzt ihn beim ersten
+Lesen, beim Schreiben und bei `storage`-Events und setzt einen entfernten oder
+unbrauchbaren Wert auf den Default des jeweiligen Aufrufers zurück. Die
+dokumentierten Defaults sind `light`, `grid`, leere Arrays,
+`{ articles: [], timestamp: 0 }` und `null` für die geschlossene Ankündigung.
+Ein abgelehnter Browser-Schreibzugriff verhindert die aktuelle
+State-Aktualisierung nicht.
 
 **Umfang:**
 

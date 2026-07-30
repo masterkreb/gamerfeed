@@ -22,6 +22,7 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
     - **Favoriten**: Speichere interessante Artikel, um sie später zu lesen.
     - **Quellen stummschalten**: Blende Nachrichten von Quellen aus, die dich nicht interessieren.
     - **Gespeicherte Suchen**: Speichere häufige Suchanfragen für schnellen Zugriff.
+    - Beschädigte oder veraltete Browserwerte fallen kontrolliert auf sichere Standardeinstellungen zurück.
 - **Leistungsstarke Filter & Suche**:
     - Filtere Artikel nach Zeitraum (Heute, Gestern, Letzte 7 Tage).
     - Filtere nach spezifischer Quelle oder Sprache (DE/EN).
@@ -93,7 +94,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
 
 ### Systemkomponenten
 
-1.  **Frontend (React & Vite)**: Eine statische Single-Page-Application, die beim Start die Artikel dynamisch von API-Endpunkten abruft. Nutzt Progressive Loading für sofortige Content-Anzeige. Alle Benutzereinstellungen werden im `localStorage` gespeichert.
+1.  **Frontend (React & Vite)**: Eine statische Single-Page-Application, die beim Start die Artikel dynamisch von API-Endpunkten abruft. Nutzt Progressive Loading für sofortige Content-Anzeige. Benutzereinstellungen werden im `localStorage` gespeichert und beim Lesen, Schreiben sowie bei Cross-Tab-Änderungen gegen Laufzeit-Decoder geprüft.
 2.  **Datenbank (Neon PostgreSQL)**: Eine serverless Postgres-Datenbank, die ausschliesslich die Liste der zu verarbeitenden RSS-Feed-Quellen speichert. Alternativ kann auch Vercel Postgres verwendet werden.
 3.  **Datencache (Vercel KV)**: Ein extrem schneller In-Memory-Datenspeicher, der mehrere optimierte Caches bereithält. **Artikel werden 60 Tage (2 Monate) gespeichert** (max. 10.000), ältere werden automatisch entfernt.
     - `news_cache`: Alle Artikel (vollständig)

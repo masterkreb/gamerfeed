@@ -106,6 +106,7 @@
 │   ├── announcement-contract.js # Typen, Längengrenze und Parser
 │   ├── news-snapshot.js         # Generationsgebundenes Leseprotokoll
 │   ├── news-snapshot-store.js   # Unveränderliche Keys, Manifest und Dual-Read
+│   ├── persisted-state.ts       # Decoder und Defaults für Browserzustand
 │   ├── api-errors.js            # Stabile Fehlercodes und Cache-Vorgabe
 │   └── feed-health-model.js     # Cron-Heartbeat, Frische, FEED_STALE_AFTER_MS
 ├── tests/                  # Zentrale Tests nach Fachbereich und Testart
@@ -192,6 +193,29 @@ betrachten, weil sonst etwa eine geänderte Zusammenfassung, Adresse, Quelle,
 Sprache oder Veröffentlichungszeit bei gleicher ID veraltet sichtbar bleibt.
 Artikel-Props werden als unveränderliche Objekte behandelt; aktualisierte
 Inhalte bekommen ein neues `Article`-Objekt.
+
+### Persistierter Browserzustand
+
+`hooks/useLocalStorage.ts` akzeptiert nur noch Aufrufe mit einem
+Laufzeit-Decoder aus `shared/persisted-state.ts`. Der generische TypeScript-Typ
+allein schützt nicht vor manuell veränderten, alten oder beschädigten
+`localStorage`-Werten.
+
+| Key | Decoder | Default |
+|---|---|---|
+| `theme` | `decodeTheme` | `light` |
+| `viewMode` | `decodeViewMode` | `grid` |
+| `favorites`, `mutedSources`, `savedSearches` | `decodeStringArray` | `[]` |
+| `cachedNews` | `decodeCachedNews` | `{ articles: [], timestamp: 0 }` |
+| `dismissedAnnouncementId` | `decodeNullableString` | `null` |
+
+Dieselben Regeln gelten beim ersten Lesen, beim Schreiben und bei
+Cross-Tab-`storage`-Events. Ein entfernter Key, ein `localStorage.clear()` oder
+kaputtes JSON setzt nur den betroffenen Zustand auf seinen Default.
+`cachedNews` akzeptiert Legacy-Einträge ohne Generation, prüft aber jeden
+Artikel und normalisiert eine vorhandene Generation über den bestehenden
+Snapshot-Vertrag. Schlägt nur das persistente Schreiben fehl, bleibt der
+aktuelle React-State benutzbar.
 
 ### Kontaktformular
 
@@ -672,6 +696,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Konsistenter News-Publish (O3b): unveränderliche, bytebegrenzte Generationen mit Manifest, Pointer-last-Aktivierung, Writer-Lease, vorheriger Generation, Rollback und Garbage Collection
 - **Juli 2026:** Tastatur und ArticleCard-DOM (F3a): gespeicherte Suchen per Enter/Leertaste, lokalisierte Accessible Names, Artikelaktionen außerhalb des gestreckten Links und zuverlässige Fokus-Rückgabe im Optionsdialog
 - **Juli 2026:** ArticleCard-Aktualisierung (F3b): unvollständigen Memo-Sondervergleich entfernt und Änderungen aller sichtbaren Artikelfelder bei gleicher ID abgesichert
+- **Juli 2026:** Persistierter Zustand (F4a): verpflichtende Laufzeit-Decoder, feste Defaults, sichere Cross-Tab-Löschung und validierte lokale News-Kopien
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 
