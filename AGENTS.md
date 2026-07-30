@@ -4,7 +4,7 @@
 
 ## 📋 Projektübersicht
 
-**GamerFeed** ist ein Gaming-News-Aggregator, der Artikel aus 15+ deutschen und englischen Quellen sammelt und übersichtlich darstellt.
+**GamerFeed** ist ein Gaming-News-Aggregator, der Artikel aus zahlreichen deutschen und internationalen Redaktionen sammelt und übersichtlich darstellt. Die genaue Zahl steht in der Feed-Verwaltung und ändert sich; sichtbare Texte nennen sie deshalb nicht.
 
 - **Typ:** Single-Page-Application (SPA)
 - **Status:** Produktiv auf Vercel
@@ -24,7 +24,7 @@
 | Backend | Vercel Serverless Functions |
 | Datenbank | Neon PostgreSQL (Feed-Quellen) |
 | Cache | Vercel KV (Artikel, Trends, Announcements) |
-| Cron | GitHub Actions (alle 20 Min) |
+| Cron | GitHub Actions (geplant zu Minute 7/27/47, Start kann sich verzögern) |
 | Feed-Fallback | Externes PHP/cURL-Hosting (optional) |
 | KI-API | Groq (llama-3.1-8b-instant) für Trends |
 

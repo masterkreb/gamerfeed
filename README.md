@@ -27,7 +27,7 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
     - Filtere Artikel nach Zeitraum (Heute, Gestern, Letzte 7 Tage).
     - Filtere nach spezifischer Quelle oder Sprache (DE/EN).
     - Volltextsuche in Titeln und Zusammenfassungen.
-- **Automatische Aktualisierung**: Ein GitHub-Action-Workflow aktualisiert den News-Cache alle 20 Minuten, sodass die angezeigten Nachrichten immer aktuell sind.
+- **Automatische Aktualisierung**: Ein GitHub-Action-Workflow aktualisiert den News-Cache; der Lauf ist ungefähr alle 20 Minuten geplant. GitHub stellt geplante Workflows global in eine Warteschlange, Verzögerungen sind also möglich – der Takt ist ein Plan, keine Zusage.
 - **🤖 KI-gestützte Trend-Analyse**: Automatische Erkennung aktueller Gaming-Trends mit Groq AI (tägliche und wöchentliche Trends). Intelligente Deduplizierung von Artikeln gleicher Verlagsgruppen für akkuratere Trend-Berechnung.
 - **✉️ Kontaktformular**: In den Einstellungen integriert, versendet über Gmail SMTP und ist mit reCAPTCHA v3 gegen automatisierte Zusendungen abgesichert. Server- und clientseitige Prüfung von Pflichtfeldern, Feldlängen und E-Mail-Format.
 - **♿ Barrierefreiheit**:
@@ -127,7 +127,7 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
 
 #### 1. Der Datensammler (GitHub Actions Cron Job)
 
-*   **Aufgabe:** Alle 20 Minuten sämtliche Feed-Quellen abrufen und die neuesten Nachrichten im zentralen Cache ablegen.
+*   **Aufgabe:** Die konfigurierten Feed-Quellen abrufen und die neuesten Nachrichten im zentralen Cache ablegen. Geplant ist der Lauf zu den Minuten 7, 27 und 47; tatsächlich startet er auch später, wenn GitHub die Warteschlange abarbeitet.
 *   **Ablauf:**
     1.  Der GitHub-Workflow (`.github/workflows/update-feeds.yml`) startet das `fetch-feeds.js`-Skript.
     2.  Das Skript holt die Feed-Liste aus der Postgres-Datenbank.
@@ -441,7 +441,7 @@ dem Setzen des Secrets die
 [Feed-Proxy-Betriebsanleitung](docs/deployment/feed-proxy.md) vollständig
 abarbeiten.
 
-Der Workflow (`.github/workflows/update-feeds.yml`) wird nun alle 20 Minuten automatisch ausgeführt und hält deine Live-Daten aktuell.
+Der Workflow (`.github/workflows/update-feeds.yml`) ist nun zu den Minuten 7, 27 und 47 eingeplant und hält deine Live-Daten aktuell. Ein geplanter Lauf kann später starten als eingetragen; deshalb toleriert die Frischeprüfung bis zu 50 Minuten.
 
 ---
 
