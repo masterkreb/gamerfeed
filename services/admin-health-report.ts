@@ -20,8 +20,6 @@ export interface AdminFeedHealthRow {
     detailParams: Record<string, string>;
     /** `null`, solange die aktive Generation nicht gelesen werden konnte. */
     inActiveSnapshot: boolean | null;
-    /** `null`, solange keine verwendbare lokale Browserkopie vorliegt. */
-    inLocalCache: boolean | null;
 }
 
 export interface AdminHealthReport {
@@ -29,8 +27,10 @@ export interface AdminHealthReport {
     configuredFeedCount: number;
     /** Quellen mit Artikeln im aktiven News-Snapshot, `null` wenn ungelesen. */
     activeSnapshotSourceCount: number | null;
-    /** Quellen in der noch verwendbaren lokalen Browserkopie, sonst `null`. */
+    /** Quellen im noch verwendbaren lokalen Startcache, sonst `null`. */
     localCacheSourceCount: number | null;
+    /** Artikel im noch verwendbaren lokalen Startcache, sonst `null`. */
+    localCacheArticleCount: number | null;
     activeSnapshotId: string | null;
     localSnapshotId: string | null;
     snapshotComparison: SnapshotComparison;
@@ -63,15 +63,23 @@ function compareSnapshots(
     return active.snapshotId === local.snapshotId ? 'same' : 'different';
 }
 
+/**
+ * Bewertet eine Feed-Zeile.
+ *
+ * Bewusst **nur** aus Backend-Status und aktivem News-Snapshot. Der lokale
+ * Startcache hält absichtlich nur die ersten
+ * `LOCAL_NEWS_CACHE_MAX_ARTICLES` Artikel; dass die meisten aktiven Quellen
+ * dort fehlen, ist der Normalfall und keine Feed-Diagnose. Ihn hier
+ * einzubeziehen erzeugte an fast jeder gesunden Zeile einen irreführenden
+ * Hinweis auf einen Snapshot-Unterschied.
+ */
 function resolveRow(
     feed: FeedSource,
     backendHealth: BackendHealthStatus | null,
     activeSources: Set<string> | null,
-    localSources: Set<string> | null,
 ): AdminFeedHealthRow {
     const inActiveSnapshot = activeSources === null ? null : activeSources.has(feed.name);
-    const inLocalCache = localSources === null ? null : localSources.has(feed.name);
-    const base = { feedId: feed.id, name: feed.name, inActiveSnapshot, inLocalCache };
+    const base = { feedId: feed.id, name: feed.name, inActiveSnapshot };
 
     if (backendHealth === null) {
         return {
@@ -154,18 +162,6 @@ function resolveRow(
         };
     }
 
-    // Im aktiven Snapshot vorhanden, aber die lokale Kopie dieses Browsers
-    // kennt die Quelle noch nicht. Das ist ein Snapshot-Unterschied, kein
-    // Feed-Ausfall - der Status bleibt deshalb `ok`.
-    if (inLocalCache === false) {
-        return {
-            ...base,
-            status: 'ok',
-            detailKey: 'admin.health.detailOkNotInLocalCopy',
-            detailParams: { feedName: feed.name },
-        };
-    }
-
     return {
         ...base,
         status: 'ok',
@@ -191,13 +187,15 @@ export function buildAdminHealthReport({
     localCache,
 }: AdminHealthReportInput): AdminHealthReport {
     const activeSources = sourcesInCache === null ? null : new Set(sourcesInCache);
-    const localSources = localCache.status === 'usable' ? new Set(localCache.sources) : null;
     const feedNames = new Set(feeds.map(feed => feed.name));
 
     return {
         configuredFeedCount: feeds.length,
         activeSnapshotSourceCount: activeSources === null ? null : activeSources.size,
-        localCacheSourceCount: localSources === null ? null : localSources.size,
+        localCacheSourceCount: localCache.status === 'usable'
+            ? new Set(localCache.sources).size
+            : null,
+        localCacheArticleCount: localCache.status === 'usable' ? localCache.articleCount : null,
         activeSnapshotId: activeSnapshot?.snapshotId ?? null,
         localSnapshotId: localCache.status === 'usable'
             ? localCache.snapshot?.snapshotId ?? null
@@ -207,7 +205,7 @@ export function buildAdminHealthReport({
             localCache.status === 'usable' ? localCache.snapshot : null,
         ),
         localCacheStatus: localCache.status,
-        rows: feeds.map(feed => resolveRow(feed, backendHealth, activeSources, localSources)),
+        rows: feeds.map(feed => resolveRow(feed, backendHealth, activeSources)),
         unmatchedSnapshotSources: activeSources === null
             ? []
             : [...activeSources].filter(source => !feedNames.has(source)).sort(),
