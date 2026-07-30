@@ -217,7 +217,8 @@ Feed-Zähler, Fehler- und Warnquote mit dokumentiertem Nenner, aktive
 Snapshot-Kennung samt Artikelzahlen und Bytegrößen sowie eine begrenzte Tabelle
 je Quelle mit Transport und wirklich beobachtetem HTTP-Status. Die
 Zusammenfassung ist reine Beobachtbarkeit und kann weder Ergebnis noch
-Exit-Code verändern. 718 zentrale Tests und 25 Browser-Abnahmen laufen
+Exit-Code verändern. Auch ein Abbruch in der Vorprüfung bekommt seinen – dann
+minimalen – Bericht. 729 zentrale Tests und 25 Browser-Abnahmen laufen
 erfolgreich. Als nächstes ist O4b bereit.
 
 ## Empfohlene Reihenfolge
@@ -815,6 +816,13 @@ einen injizierbaren Writer. Die Zusammenfassung ist **ausschließlich zusätzlic
 Beobachtbarkeit**: Weder ein Fehler des Writers noch einer des Berichtsaufbaus
 verändert Ergebnis oder Exit-Code, und ein bereits vorhandener Fatalfehler wird
 nie überdeckt. Auch `degraded` und `fatal` bekommen eine Zusammenfassung.
+
+Das gilt ebenso für einen Abbruch in der **Vorprüfung**, also vor Recorder und
+Feed-Liste. Er bekommt einen bewusst minimalen Bericht: Ergebnis, Lauf-ID und
+den bereits sicheren Konfigurationsfehler, der nichts als Variablennamen nennt.
+Phasen-, Feed- und Snapshot-Abschnitte entfallen dort ganz – Nullen über nie
+betrachtete Quellen wären erfundene Aussagen. Die Reihenfolge bleibt
+unverändert: kein Recorder, kein SQL, kein KV, kein HTTP, kein Groq.
 
 Einzelheiten und Grenzen:
 [`docs/deployment/feed-run-summary.md`](../deployment/feed-run-summary.md).

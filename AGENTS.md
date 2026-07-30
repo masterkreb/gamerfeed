@@ -488,11 +488,17 @@ Vier Begriffe sind genau definiert:
   außen vor und wird getrennt genannt; Warnungen stehen im Nenner, aber nie im
   Zähler und bekommen eine eigene Warnquote.
 
+Unbekannte Zahlen bleiben unbekannt: Dauer, Artikel und übersprungene Items
+einer nie bearbeiteten Quelle erscheinen als `–`, nicht als `0`. Eine
+ausdrücklich gemessene `0` bleibt dagegen `0`.
+
 Die Zusammenfassung ist **ausschließlich zusätzliche Beobachtbarkeit**. Zwei
 Schichten fangen Fehler ab – `writeRunSummary` selbst und der Aufrufer in
 `main()` –, damit weder ein Schreibfehler noch ein Fehler beim Aufbau des
 Berichts das Ergebnis, den Exit-Code oder einen vorhandenen Fatalfehler
-verändert. Sie enthält keine Secrets, Querystrings, Feed- oder Proxy-Adressen
+verändert. Auch ein Abbruch in der **Vorprüfung** bekommt einen – dann
+minimalen – Bericht, ohne die Reihenfolge vor dem ersten externen Zugriff
+anzutasten. Sie enthält keine Secrets, Querystrings, Feed- oder Proxy-Adressen
 und keine Artikeltexte; Feed-Namen werden für Markdown entschärft und die
 Tabelle ist auf 50 Zeilen begrenzt.
 

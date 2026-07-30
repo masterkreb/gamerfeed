@@ -11,6 +11,14 @@ Die Zusammenfassung wird **nur** geschrieben, wenn `GITHUB_STEP_SUMMARY`
 gesetzt und nicht leer ist – also praktisch nur im Actions-Kontext. Lokal
 passiert nichts, und es wird nicht einmal ein Schreibversuch unternommen.
 
+Das gilt für **jeden** Ausgang des Laufs, auch für einen Abbruch in der
+Vorprüfung. Fehlt ein Core-Secret, entsteht ein bewusst minimaler Bericht:
+Ergebnis, Lauf-ID und der Konfigurationsfehler, der nichts als Variablennamen
+nennt. Phasen-, Feed- und Snapshot-Abschnitte fehlen dort vollständig – zu
+diesem Zeitpunkt gab es weder Recorder noch Feed-Liste noch einen externen
+Zugriff, und Nullen wären erfundene Aussagen. Die Reihenfolge der Vorprüfung
+bleibt unangetastet.
+
 Sie erscheint unter dem Workflow-Lauf im Reiter *Summary*.
 
 ## Was drinsteht
@@ -42,6 +50,12 @@ Proxys, weil er der zuletzt versuchte Weg war.
 **Artikel** zählt ausschließlich die in **diesem** Lauf gelieferten Artikel.
 Alte Artikel, die eine zurückgestellte oder leere Quelle im Snapshot behält,
 erscheinen hier nicht – sonst sähe ein Lauf ohne jede Lieferung erfolgreich aus.
+
+**Unbekannt ist nicht null.** Dauer, Artikelzahl und übersprungene Items einer
+Quelle, die in diesem Lauf gar nicht bearbeitet wurde, erscheinen als `–`. Ein
+`0 übersprungen` wäre dort eine Aussage über Items, die niemand untersucht hat.
+Eine ausdrücklich gemessene `0` – etwa ein erfolgreich abgerufener, aber leerer
+Feed – bleibt dagegen `0`. Unbrauchbare Werte ergeben `–`, nie eine Zahl.
 
 **Fehlerquote** hat einen festen Nenner:
 
