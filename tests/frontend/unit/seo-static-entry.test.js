@@ -210,7 +210,7 @@ test('kein statischer SEO-Text verspricht "alle Quellen"', () => {
         // GamerFeed deckt genau die konfigurierten Feeds ab - nie "alle".
         // Dasselbe gilt fuer "jede Quelle" und "all sources".
         const match = text.match(
-            /\b(?:alle[nmr]?|jede[nmrs]?|s(?:ä|ae)mtliche[nmrs]?|all|every)\s+(?:\p{L}+\s+){0,2}(?:quellen|redaktionen|sources)\b/iu,
+            /\b(?:alle[nmr]?|jede[nmrs]?|s(?:ä|ae)mtliche[nmrs]?|all|every)\s+(?:[\p{L}-]+\s+){0,3}(?:[\p{L}]+-)?(?:quellen|redaktionen|sources)\b/iu,
         );
         if (match) {
             offenders.push(match[0]);

@@ -190,7 +190,7 @@ test('/gaming-news verspricht keine Vollstaendigkeit der Quellen', async () => {
     const text = (document.body.textContent ?? '').replace(/\s+/g, ' ');
 
     const match = text.match(
-        /\b(?:alle[nmr]?|jede[nmrs]?|s(?:ä|ae)mtliche[nmrs]?)\s+(?:\p{L}+\s+){0,2}(?:quellen|redaktionen)\b/iu,
+        /\b(?:alle[nmr]?|jede[nmrs]?|s(?:ä|ae)mtliche[nmrs]?)\s+(?:[\p{L}-]+\s+){0,3}(?:[\p{L}]+-)?(?:quellen|redaktionen)\b/iu,
     );
     assert.equal(
         match,

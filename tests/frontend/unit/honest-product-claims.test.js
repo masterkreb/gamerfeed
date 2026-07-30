@@ -66,7 +66,7 @@ test('die Ueber-uns-Texte behaupten keine Vollstaendigkeit', () => {
         for (const key of ABOUT_KEYS) {
             const text = claim(language, key);
             const match = text.match(
-                /\b(?:alle[nmr]?|jede[nmrs]?|s(?:ä|ae)mtliche[nmrs]?|all|every)\s+(?:\p{L}+\s+){0,2}(?:quellen|redaktionen|sources)\b/iu,
+                /\b(?:alle[nmr]?|jede[nmrs]?|s(?:ä|ae)mtliche[nmrs]?|all|every)\s+(?:[\p{L}-]+\s+){0,3}(?:[\p{L}]+-)?(?:quellen|redaktionen|sources)\b/iu,
             );
             assert.equal(
                 match,
