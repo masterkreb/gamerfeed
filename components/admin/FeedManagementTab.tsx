@@ -5,7 +5,7 @@ import type { FeedHealth } from './AdminPanel';
 import type { HealthState } from './healthTypes';
 import {
     PencilIcon, PlusIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon,
-    CheckCircleIcon, XCircleIcon, QuestionMarkCircleIcon, LoadingSpinner, WarningIcon
+    CheckCircleIcon, XCircleIcon, QuestionMarkCircleIcon, WarningIcon
 } from '../Icons';
 
 type SortableKey = keyof Omit<FeedSource, 'needsScraping' | 'id'> | 'health';
@@ -25,8 +25,6 @@ const HealthStatusIcon: React.FC<{ state: HealthState }> = ({ state }) => {
             return <div title={detail}><WarningIcon className="w-5 h-5 text-amber-500" /></div>;
         case 'error':
             return <div title={detail}><XCircleIcon className="w-5 h-5 text-red-500" /></div>;
-        case 'checking':
-            return <div title={t('admin.health.statusChecking')}><LoadingSpinner className="w-4 h-4 text-indigo-500" /></div>;
         default:
             return <div title={detail}><QuestionMarkCircleIcon className="w-5 h-5 text-slate-400" /></div>;
     }
@@ -88,7 +86,7 @@ export const FeedManagementTab: React.FC<FeedManagementTabProps> = ({
         if (sortConfig !== null) {
             sortableItems.sort((a, b) => {
                 if (sortConfig.key === 'health') {
-                    const healthOrder: Record<HealthState['status'], number> = { error: 0, warning: 1, checking: 2, unknown: 3, ok: 4 };
+                    const healthOrder: Record<HealthState['status'], number> = { error: 0, warning: 1, unknown: 2, ok: 3 };
                     const healthA = healthOrder[feedHealth[a.id]?.status || 'unknown'];
                     const healthB = healthOrder[feedHealth[b.id]?.status || 'unknown'];
                     if (healthA < healthB) return sortConfig.direction === 'ascending' ? -1 : 1;

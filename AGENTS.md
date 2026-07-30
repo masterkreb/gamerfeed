@@ -294,7 +294,12 @@ Kann der gespeicherte Bericht gar nicht geladen werden, sind alle Zeilen
 **unbekannt**, nicht rot: Nicht die Feeds sind ausgefallen, sondern der Bericht
 über sie fehlt.
 Der textlastige Legenden-Reiter trägt `tabIndex={0}`, damit er ohne
-Bedienelemente per Tastatur erreichbar und scrollbar bleibt.
+Bedienelemente per Tastatur erreichbar und scrollbar bleibt. Seine Texte
+beschreiben genau diese Semantik: kein Verweis mehr auf `news-cache.json` oder
+`feed-health-status.json`, OK nur bei `success` **und** exaktem Quellennamen im
+aktiven Snapshot, Warnung für beide Ursachen. Den Eintrag „Prüfe“ gibt es nicht
+mehr – es wird kein einzelner Feed live geprüft, und der Zeilenstatus `checking`
+ist ersatzlos aus `HealthState` entfernt.
 
 ### Persistierter Browserzustand
 

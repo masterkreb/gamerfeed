@@ -517,8 +517,14 @@ test('ein zurückgestellter Feed erscheint im Admin als Warnung, nicht als erfol
         const panel = testRoot.container.querySelector('#admin-panel-health');
         const row = panel.querySelector('tbody tr');
 
-        assert.match(row.textContent, /Warnung/);
-        assert.doesNotMatch(row.textContent, /OK/, 'eine Backend-Warnung wird nie als OK angezeigt');
+        // Die Statuszelle exakt vergleichen: eine Regex ueber den ganzen
+        // Zeilentext koennte 'OK' auch im Detailsatz uebersehen oder finden.
+        const statusCell = row.querySelectorAll('td')[1];
+        assert.equal(
+            statusCell.textContent.trim(),
+            'Warnung',
+            'eine Backend-Warnung wird nie als OK angezeigt',
+        );
         assert.doesNotMatch(
             row.textContent,
             /Backend-Abruf erfolgreich/,
@@ -538,6 +544,66 @@ test('ein zurückgestellter Feed erscheint im Admin als Warnung, nicht als erfol
             'eine Warnung landet nicht in der Fehlerliste',
         );
     } finally {
+        await testRoot.cleanup();
+        restoreConsole();
+    }
+});
+
+test('der Legenden-Reiter beschreibt die aktuelle Semantik ohne Dateinamen und ohne Live-Pruefung', async () => {
+    const restoreConsole = silenceConsole();
+    const { default: i18n } = await vite.ssrLoadModule('/i18n.ts');
+    const testRoot = await renderAdminPanel(vite, {
+        feeds: FEEDS,
+        healthResponse: {
+            healthStatus: BACKEND_HEALTH,
+            sourcesInCache: [...ACTIVE_SOURCES],
+            heartbeat: null,
+            snapshot: ACTIVE_SNAPSHOT,
+        },
+        localStorageEntries: {},
+    });
+
+    try {
+        await act(async () => {
+            click(testRoot.window, testRoot.container.querySelector('#admin-tab-legend'));
+        });
+
+        const panel = testRoot.container.querySelector('#admin-panel-legend');
+        const statusTitles = () => Array.from(
+            panel.querySelector('#admin-legend-statuses').querySelectorAll('h4'),
+        ).map(heading => heading.textContent);
+
+        // Kein "Prüfe": dieser Zeilenstatus wird nirgends gesetzt.
+        assert.deepEqual(statusTitles(), ['OK', 'Warnung', 'Fehler', 'Unbekannt']);
+
+        // Keine Architektur von gestern und keine behauptete Live-Prüfung.
+        assert.doesNotMatch(panel.textContent, /\.json/);
+        assert.doesNotMatch(panel.textContent, /Live-Cache/);
+        assert.match(panel.textContent, /kein einzelner Feed live aus deinem Browser geprüft/);
+
+        // OK: Backend-Status success UND exakter Name im aktiven Snapshot.
+        assert.match(panel.textContent, /meldet für diesen Feed `success`/);
+        assert.match(panel.textContent, /exakt dieser Schreibweise im aktiven News-Snapshot/);
+
+        // Warnung: beide Ursachen, inklusive der zurückgestellten Quelle.
+        assert.match(panel.textContent, /meldet der letzte Backend-Lauf `warning`/);
+        assert.match(panel.textContent, /zurückgestellte Quelle/);
+        assert.match(panel.textContent, /belegt keinen erfolgreichen Abruf/);
+
+        await act(async () => {
+            await i18n.changeLanguage('en');
+        });
+
+        assert.deepEqual(statusTitles(), ['OK', 'Warning', 'Error', 'Unknown']);
+        assert.doesNotMatch(panel.textContent, /\.json/);
+        assert.match(panel.textContent, /No single feed is checked live from your browser/);
+        assert.match(panel.textContent, /reports `success` for this feed/);
+        assert.match(panel.textContent, /reports `warning`/);
+        assert.match(panel.textContent, /does not prove a successful fetch/);
+    } finally {
+        await act(async () => {
+            await i18n.changeLanguage('de');
+        });
         await testRoot.cleanup();
         restoreConsole();
     }
