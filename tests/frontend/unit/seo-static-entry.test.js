@@ -203,6 +203,27 @@ test('kein statischer SEO-Text nennt eine feste Quellenzahl', () => {
     assert.deepEqual(offenders, [], `feste Quellenzahl gefunden: ${offenders.join(' | ')}`);
 });
 
+test('kein statischer SEO-Text verspricht "alle Quellen"', () => {
+    const offenders = [];
+
+    for (const text of staticSeoTexts(document)) {
+        // GamerFeed deckt genau die konfigurierten Feeds ab - nie "alle".
+        // Dasselbe gilt fuer "jede Quelle" und "all sources".
+        const match = text.match(
+            /\b(?:alle[nmr]?|jede[nmrs]?|s(?:ä|ae)mtliche[nmrs]?|all|every)\s+(?:\p{L}+\s+){0,2}(?:quellen|redaktionen|sources)\b/iu,
+        );
+        if (match) {
+            offenders.push(match[0]);
+        }
+    }
+
+    assert.deepEqual(
+        offenders,
+        [],
+        `Vollstaendigkeitsversprechen gefunden: ${offenders.join(' | ')}`,
+    );
+});
+
 test('die strukturierten Daten enthalten keine SearchAction', () => {
     assert.ok(
         !/SearchAction/i.test(INDEX_HTML),

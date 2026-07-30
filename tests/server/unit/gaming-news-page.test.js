@@ -160,6 +160,45 @@ test('/gaming-news nennt nur gemessene Zahlen aus dem aktiven Bestand', async ()
     assert.match(hero, /3 Artikel aus 3 Quellen/);
 });
 
+test('/gaming-news beschreibt die Aktualisierung als Plan, nicht als Zusage', async () => {
+    const { document } = await renderPage(SAMPLE);
+    const text = (document.body.textContent ?? '').replace(/\s+/g, ' ');
+
+    // Der Workflow ist auf 7,27,47 geplant, GitHub stellt geplante Laeufe aber
+    // global in eine Warteschlange. Ein blankes "alle 20 Min." waere eine
+    // Zusage, die das Projekt nicht halten kann.
+    assert.match(
+        text,
+        /\d+\s*Min/i,
+        'der Takt wird gar nicht mehr genannt',
+    );
+
+    for (const sentence of text.split(/(?<=[.;—–])\s+/)) {
+        if (!/\d+\s*Min/i.test(sentence)) {
+            continue;
+        }
+        assert.match(
+            sentence,
+            /geplant|ungef(?:ä|ae)hr|etwa|ca\.|circa|Verz(?:ö|oe)gerung/i,
+            `Taktangabe ohne Einschraenkung: ${sentence.trim()}`,
+        );
+    }
+});
+
+test('/gaming-news verspricht keine Vollstaendigkeit der Quellen', async () => {
+    const { document } = await renderPage(SAMPLE);
+    const text = (document.body.textContent ?? '').replace(/\s+/g, ' ');
+
+    const match = text.match(
+        /\b(?:alle[nmr]?|jede[nmrs]?|s(?:ä|ae)mtliche[nmrs]?)\s+(?:\p{L}+\s+){0,2}(?:quellen|redaktionen)\b/iu,
+    );
+    assert.equal(
+        match,
+        null,
+        `Vollstaendigkeitsversprechen gefunden: ${match?.[0]}`,
+    );
+});
+
 test('/gaming-news bleibt bei leerem Bestand eine ehrliche 503', async () => {
     const handler = createGamingNewsHandler(legacyCache([]), {
         legacyRollback: true,
