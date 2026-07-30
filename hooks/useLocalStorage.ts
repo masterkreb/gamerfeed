@@ -1,44 +1,82 @@
-// FIX: The `React` namespace was not in scope, causing an error when using types like `React.Dispatch`. Importing `React` resolves this.
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  decodePersistedValue,
+  parsePersistedValue,
+  type PersistedStateDecoder,
+} from '../shared/persisted-state';
 
-export function useLocalStorage<T,>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+export function useLocalStorage<T,>(
+  key: string,
+  initialValue: T,
+  decoder: PersistedStateDecoder<T>,
+): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const initialValueRef = useRef(initialValue);
+  const decoderRef = useRef(decoder);
+  initialValueRef.current = initialValue;
+  decoderRef.current = decoder;
+
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === 'undefined') {
       return initialValue;
     }
+
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(error);
+      return parsePersistedValue(item, decoder, initialValue);
+    } catch {
       return initialValue;
     }
   });
 
   const setValue = useCallback((value: T | ((val: T) => T)) => {
-    try {
-      // Use the functional update form of useState's setter to avoid depending on storedValue
-      setStoredValue(currentStoredValue => {
-        const valueToStore = value instanceof Function ? value(currentStoredValue) : value;
-        if (typeof window !== 'undefined') {
+    setStoredValue(currentStoredValue => {
+      const candidate = value instanceof Function ? value(currentStoredValue) : value;
+      const valueToStore = decodePersistedValue(
+        candidate,
+        decoderRef.current,
+        initialValueRef.current,
+      );
+
+      if (typeof window !== 'undefined') {
+        try {
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        } catch {
+          // Der React-Zustand bleibt auch verfügbar, wenn der Browser das
+          // persistente Schreiben blockiert oder sein Kontingent erschöpft ist.
         }
-        return valueToStore;
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  }, [key]); // Now only depends on key, which is stable.
+      }
+
+      return valueToStore;
+    });
+  }, [key]);
 
   useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === key && e.newValue) {
-            setStoredValue(JSON.parse(e.newValue));
-        }
+    if (typeof window === 'undefined') return undefined;
+
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key !== key && event.key !== null) return;
+
+      try {
+        if (event.storageArea && event.storageArea !== window.localStorage) return;
+      } catch {
+        return;
+      }
+
+      if (event.key === null) {
+        setStoredValue(initialValueRef.current);
+        return;
+      }
+
+      setStoredValue(parsePersistedValue(
+        event.newValue,
+        decoderRef.current,
+        initialValueRef.current,
+      ));
     };
+
     window.addEventListener('storage', handleStorageChange);
     return () => {
-        window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, [key]);
 

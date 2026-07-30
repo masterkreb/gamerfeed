@@ -25,6 +25,13 @@ import {
     readSnapshotRollback,
     withSnapshotQuery,
 } from './shared/news-snapshot.js';
+import {
+    decodeCachedNews,
+    decodeNullableString,
+    decodeStringArray,
+    decodeTheme,
+    decodeViewMode,
+} from './shared/persisted-state';
 
 const ARTICLES_PER_PAGE = 32;
 const INITIAL_ARTICLE_CACHE_COUNT = 32;
@@ -113,15 +120,19 @@ const SearchResultsHeader: React.FC<{
 
 const AppContent: React.FC = () => {
     const { t } = useTranslation();
-    const [theme, setTheme] = useLocalStorage<Theme>('theme', 'light');
-    const [viewMode, setViewMode] = useLocalStorage<ViewMode>('viewMode', 'grid');
-    const [favorites, setFavorites] = useLocalStorage<string[]>('favorites', []);
-    const [mutedSources, setMutedSources] = useLocalStorage<string[]>('mutedSources', []);
+    const [theme, setTheme] = useLocalStorage<Theme>('theme', 'light', decodeTheme);
+    const [viewMode, setViewMode] = useLocalStorage<ViewMode>('viewMode', 'grid', decodeViewMode);
+    const [favorites, setFavorites] = useLocalStorage<string[]>('favorites', [], decodeStringArray);
+    const [mutedSources, setMutedSources] = useLocalStorage<string[]>('mutedSources', [], decodeStringArray);
     const [currentView, setCurrentView] = useState<AppView>('news');
 
     const [articles, setArticles] = useState<Article[]>([]);
     const articlesRef = useRef<Article[]>([]);
-    const [cachedNews, setCachedNews] = useLocalStorage<CachedNews>('cachedNews', { articles: [], timestamp: 0 });
+    const [cachedNews, setCachedNews] = useLocalStorage<CachedNews>(
+        'cachedNews',
+        { articles: [], timestamp: 0 },
+        decodeCachedNews,
+    );
     const [isBlockingLoading, setIsBlockingLoading] = useState<boolean>(true);
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -151,7 +162,11 @@ const AppContent: React.FC = () => {
 
     // Announcement state
     const [announcement, setAnnouncement] = useState<Announcement | null>(null);
-    const [dismissedAnnouncementId, setDismissedAnnouncementId] = useLocalStorage<string | null>('dismissedAnnouncementId', null);
+    const [dismissedAnnouncementId, setDismissedAnnouncementId] = useLocalStorage<string | null>(
+        'dismissedAnnouncementId',
+        null,
+        decodeNullableString,
+    );
     const cachedArticlesRef = useRef<Article[]>([]);
 
     // Gepinnte Cache-Generation (Roadmap O3a). Bewusst eine Ref und kein State:
