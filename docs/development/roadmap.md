@@ -208,7 +208,17 @@ kommentierte fast jede gesunde Feed-Zeile das als Snapshot-Unterschied. Eine
 Zeile entsteht jetzt ausschließlich aus Backend-Status und aktivem
 News-Snapshot, während der Startcache nur noch global als eigene Kennzahl mit
 seiner tatsächlichen Artikel- und Quellenzahl erscheint. 688 zentrale Tests und
-25 Browser-Abnahmen laufen erfolgreich. Als nächstes ist O4 bereit.
+25 Browser-Abnahmen laufen erfolgreich.
+
+**Stand 30. Juli 2026 (Branch `claude/o4a-run-summary`):** O4 ist in O4a bis
+O4d geteilt, und **O4a** ist abgeschlossen. Jeder Lauf schreibt bei gesetztem
+`GITHUB_STEP_SUMMARY` einen strukturierten Bericht: Ergebnis, Grund, Dauern,
+Feed-Zähler, Fehler- und Warnquote mit dokumentiertem Nenner, aktive
+Snapshot-Kennung samt Artikelzahlen und Bytegrößen sowie eine begrenzte Tabelle
+je Quelle mit Transport und wirklich beobachtetem HTTP-Status. Die
+Zusammenfassung ist reine Beobachtbarkeit und kann weder Ergebnis noch
+Exit-Code verändern. 718 zentrale Tests und 25 Browser-Abnahmen laufen
+erfolgreich. Als nächstes ist O4b bereit.
 
 ## Empfohlene Reihenfolge
 
@@ -234,7 +244,10 @@ seiner tatsächlichen Artikel- und Quellenzahl erscheint. 688 zentrale Tests und
 | A1b | P2 | erledigt | Admin-Tabs und Health-Beschriftung korrigieren |
 | F5 | P1 | erledigt | Aktive Snapshot-Generation zuverlässig entdecken |
 | A1c | P2 | erledigt | Lokalen Startcache im Admin verständlich darstellen |
-| O4 | P2 | bereit | Historie, Alarmierung und Proxy-Version beobachtbar machen |
+| O4a | P2 | erledigt | Strukturierter Laufbericht und GitHub-Step-Summary |
+| O4b | P2 | bereit | Begrenzte Laufhistorie |
+| O4c | P2 | Entscheidung nötig | Unabhängige Alarmierung |
+| O4d | P2 | geplant | Isolierter Proxy-Fingerprint |
 | D1 | P2 | Entscheidung nötig | Datenbankschema, Backup und Restore festlegen |
 | D2 | P2 | geplant | Lokale Produktionsschreibvorgänge explizit absichern |
 | S3 | P2 | Entscheidung nötig | Rate Limits und SMTP-Laufzeit festlegen |
@@ -760,29 +773,112 @@ Erfüllt durch die erweiterten Tests in
 `tests/frontend/unit/admin-health-report.test.js`. Gegenproben: mit wieder
 mitgerechnetem Startcache fallen drei Tests, mit der alten Beschriftung zwei.
 
-### O4 – Historie, Alarmierung und Versionsdrift
+### O4 – Beobachtbarkeit des Cron-Laufs
 
-**Status:** bereit.
+Das ursprüngliche O4 bündelte vier unabhängige Fragen: einen Bericht je Lauf,
+eine Historie über mehrere Läufe, einen Alarmkanal und einen Versionsabgleich
+des manuell deployten Proxys. Sie brauchen verschiedene Speicher,
+verschiedene Entscheidungen und verschiedene Abnahmen. O4 ist deshalb in vier
+Teilpakete geteilt, die einzeln abgeschlossen werden.
 
-- strukturierte Run- und Feed-Metriken sowie eine kurze
-  `GITHUB_STEP_SUMMARY`;
-- Dauer, Transportweg, HTTP-Status und Item-/Skip-Zahlen ohne Secrets
-  nachvollziehbar machen;
-- begrenzte Historie und einen unabhängigen Alarmkanal für veralteten Cache oder
-  ungewöhnlich hohe Fehlerquote festlegen; ein ausgefallener Workflow darf
-  nicht sein eigener einziger Monitor sein;
-- nicht geheimen Versionsfingerprint verwenden, damit manuell deployter Proxy
-  und Repository verglichen werden können.
+#### O4a – Strukturierter Laufbericht und GitHub-Step-Summary
+
+**Status:** erledigt.
+
+`scripts/feed-run-summary.js` baut den Bericht rein und ohne Seiteneffekte aus
+Daten, die der Lauf ohnehin hat: `feed_run_status`, `feed_health_status` und
+dem Ergebnis des Snapshot-Publishers. **Es entstehen keine neuen KV-Schlüssel.**
+Transportweg und HTTP-Status je Feed werden ausschließlich im Arbeitsspeicher
+des laufenden Prozesses gesammelt.
+
+Der Bericht nennt Lauf-ID, Ergebnis, bereinigten Degraded- oder Fatalgrund,
+Gesamt- und Phasendauern, die Feed-Zähler, Fehler- und Warnquote, die aktive
+Snapshot-Kennung mit Artikelzahl und Bytegröße von Full, Medium und Preview
+sowie eine begrenzte Tabelle je Feed.
+
+**Eindeutige Semantik:**
+
+- `proxy` heißt, dass die **erfolgreiche** Antwort wirklich vom Proxy kam –
+  nicht, dass ein Proxyversuch möglich gewesen wäre;
+- eine wegen Zeitbudget zurückgestellte Quelle bekommt `none` und **keinen**
+  erfundenen HTTP-Status;
+- ein HTTP-Status erscheint nur, wenn er wirklich beobachtet wurde;
+- die Artikelzahl zählt nur die in **diesem** Lauf gelieferten Artikel; alte,
+  lediglich beibehaltene Artikel stehen dort nie;
+- **Nenner der Fehlerquote ist `success + warning + error`.** Unbewertete Feeds
+  (`unknown`) bleiben außen vor und werden getrennt genannt. Warnungen stehen im
+  Nenner, aber nie im Zähler; damit sie nicht unbemerkt mit echten Fehlern
+  verschmelzen, gibt es die Warnquote als eigene Zahl.
+
+Geschrieben wird nur bei gesetztem und nicht leerem `GITHUB_STEP_SUMMARY`, über
+einen injizierbaren Writer. Die Zusammenfassung ist **ausschließlich zusätzliche
+Beobachtbarkeit**: Weder ein Fehler des Writers noch einer des Berichtsaufbaus
+verändert Ergebnis oder Exit-Code, und ein bereits vorhandener Fatalfehler wird
+nie überdeckt. Auch `degraded` und `fatal` bekommen eine Zusammenfassung.
+
+Einzelheiten und Grenzen:
+[`docs/deployment/feed-run-summary.md`](../deployment/feed-run-summary.md).
 
 **Abnahme:**
 
 - ein Run beantwortet ohne Rohlog-Suche Dauer, Transport, Item-Zahl,
   Fehlerquote, Snapshot und Payload-Größe;
-- Summary und Historie enthalten weder Secrets noch vollständige Proxy-URLs;
+- die Zusammenfassung enthält weder Secrets noch Querystrings, keine Feed- oder
+  Proxy-Adressen und keine Artikeltexte;
+- ohne `GITHUB_STEP_SUMMARY` entsteht kein Schreibversuch;
+- ein Schreibfehler verändert weder Ergebnis noch Exit-Code.
+
+Erfüllt durch `tests/feeds/unit/feed-run-summary.test.js`, die
+Transportfälle in `tests/feeds/unit/feed-fetch-utils.test.js` und die
+Integrationsfälle gegen das echte `main()` in
+`tests/feeds/integration/feed-run-orchestration.test.js`.
+
+#### O4b – Begrenzte Laufhistorie
+
+**Status:** bereit.
+
+- eine begrenzte Historie über mehrere Läufe hinaus führen, damit ein Trend
+  überhaupt sichtbar wird – der Heartbeat kennt nur den letzten Lauf;
+- Speicherort, Aufbewahrung und Größengrenze ausdrücklich festlegen;
+- die Historie darf den Kern-Publish weder verzögern noch gefährden.
+
+**Abnahme:**
+
+- eine definierte Zahl vergangener Läufe ist abrufbar, ältere fallen
+  deterministisch heraus;
+- die Historie enthält weder Secrets noch vollständige Proxy-URLs;
+- ein Fehler beim Schreiben der Historie macht einen erfolgreichen Lauf nicht
+  `fatal`.
+
+#### O4c – Unabhängige Alarmierung
+
+**Status:** Entscheidung des Projektinhabers nötig – Kanal und Plattform sind
+offen.
+
+- einen Alarmkanal für veralteten Cache oder ungewöhnlich hohe Fehlerquote
+  festlegen; **ein ausgefallener Workflow darf nicht sein eigener einziger
+  Monitor sein**;
+- Schwellen, Deduplizierung und Recovery-Meldung definieren.
+
+**Abnahme:**
+
 - Alarm, Deduplizierung und Recovery werden mit ausgefallenem sowie wieder
   gesundem Cron getestet;
+- der Alarmweg funktioniert auch dann, wenn der Workflow gar nicht mehr läuft;
+- keine Secrets in den Meldungen.
+
+#### O4d – Isolierter Proxy-Fingerprint
+
+**Status:** geplant.
+
+- einen nicht geheimen Versionsfingerprint verwenden, damit der manuell
+  deployte PHP-Proxy und das Repository verglichen werden können.
+
+**Abnahme:**
+
 - ein isolierter Smoke-Test vergleicht den erwarteten Proxy-Fingerprint, ohne
   Produktionscache oder Feed-Anbieter zu verändern;
+- der Fingerprint verrät die Proxy-Adresse nicht;
 - Authentifizierung und Rate Limit des Proxys bleiben ausschließlich X1.
 
 ---
