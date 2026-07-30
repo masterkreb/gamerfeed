@@ -64,18 +64,20 @@ function feed(id, name, language = 'de') {
 const FEEDS = Object.freeze([
     feed('feed-gamestar', 'GameStar'),
     feed('feed-vg247', 'VG247', 'en'),
-    feed('feed-golem', 'Golem'),
+    // "PC Games" gegen "PCGames": der frühere unscharfe Vergleich entfernte
+    // Leerzeichen und Punkte und hätte diese Quelle gesund gemeldet.
     feed('feed-pcgames', 'PC Games'),
+    feed('feed-buffed', 'Buffed'),
     feed('feed-eurogamer', 'Eurogamer', 'en'),
 ]);
 
-const ACTIVE_SOURCES = Object.freeze(['GameStar', 'Golem.de', 'Eurogamer']);
+const ACTIVE_SOURCES = Object.freeze(['GameStar', 'PCGames', 'Eurogamer']);
 
 const BACKEND_HEALTH = Object.freeze({
     'feed-gamestar': { status: 'success', message: 'ok' },
     'feed-vg247': { status: 'success', message: 'ok' },
-    'feed-golem': { status: 'success', message: 'ok' },
-    'feed-pcgames': { status: 'error', message: 'HTTP 500 von upstream-db' },
+    'feed-pcgames': { status: 'success', message: 'ok' },
+    'feed-buffed': { status: 'error', message: 'HTTP 500 von upstream-db' },
     'feed-eurogamer': { status: 'success', message: 'ok' },
 });
 
@@ -93,7 +95,7 @@ function article(source, index) {
 }
 
 function localCacheEntry({
-    sources = ['Eurogamer', 'Golem.de'],
+    sources = ['Eurogamer', 'PCGames'],
     timestamp = Date.parse(LOCAL_CREATED_AT),
     snapshot = LOCAL_SNAPSHOT,
     omitSnapshot = false,
@@ -135,7 +137,7 @@ test('liest die lokale Browserkopie mit demselben Decoder und derselben Frist wi
 
     const usable = usableLocalCache();
     assert.equal(usable.status, 'usable');
-    assert.deepEqual(usable.sources, ['Eurogamer', 'Golem.de']);
+    assert.deepEqual(usable.sources, ['Eurogamer', 'PCGames']);
     assert.equal(usable.snapshot.snapshotId, LOCAL_SNAPSHOT.snapshotId);
 
     const legacy = readLocalNewsCache(localCacheEntry({ omitSnapshot: true }), NOW);
@@ -224,7 +226,7 @@ test('kaputte, abgelaufene und fehlende lokale Kopien erfinden keine Zuordnung',
     }
 });
 
-test('VG247 fehlt aktiv, GameStar fehlt nur lokal, Golem wird nicht unscharf gesund gemeldet', () => {
+test('VG247 fehlt aktiv, GameStar fehlt nur lokal, "PC Games" wird nicht unscharf gesund gemeldet', () => {
     const report = buildAdminHealthReport({
         feeds: FEEDS,
         backendHealth: BACKEND_HEALTH,
@@ -244,21 +246,21 @@ test('VG247 fehlt aktiv, GameStar fehlt nur lokal, Golem wird nicht unscharf ges
     assert.equal(gamestar.inLocalCache, false);
     assert.equal(gamestar.detailKey, 'admin.health.detailOkNotInLocalCopy');
 
-    const golem = rowOf(report, 'feed-golem');
-    assert.equal(golem.status, 'warning', '"Golem" ist nicht "Golem.de"');
-    assert.equal(golem.inActiveSnapshot, false);
+    const pcGames = rowOf(report, 'feed-pcgames');
+    assert.equal(pcGames.status, 'warning', '"PC Games" ist nicht "PCGames"');
+    assert.equal(pcGames.inActiveSnapshot, false);
 
     const eurogamer = rowOf(report, 'feed-eurogamer');
     assert.equal(eurogamer.status, 'ok');
     assert.equal(eurogamer.detailKey, 'admin.health.detailOk');
 
-    const pcgames = rowOf(report, 'feed-pcgames');
-    assert.equal(pcgames.status, 'error');
-    assert.equal(pcgames.detailKey, 'admin.health.detailBackendError');
+    const buffed = rowOf(report, 'feed-buffed');
+    assert.equal(buffed.status, 'error');
+    assert.equal(buffed.detailKey, 'admin.health.detailBackendError');
 
     assert.deepEqual(
         report.unmatchedSnapshotSources,
-        ['Golem.de'],
+        ['PCGames'],
         'der unzuordenbare Snapshot-Name verschwindet nicht stillschweigend',
     );
 });
@@ -278,7 +280,7 @@ test('ohne gelesenen Snapshot bleibt die Präsenz unbekannt statt geraten', () =
     assert.equal(rowOf(report, 'feed-gamestar').detailKey, 'admin.health.detailSnapshotUnknown');
     assert.equal(rowOf(report, 'feed-gamestar').inActiveSnapshot, null);
     // Ein echter Backend-Fehler bleibt trotzdem ein Fehler.
-    assert.equal(rowOf(report, 'feed-pcgames').status, 'error');
+    assert.equal(rowOf(report, 'feed-buffed').status, 'error');
 });
 
 test('ein nicht gelesener Bericht macht jede Zeile unbekannt statt still gesund', () => {
@@ -372,16 +374,20 @@ test('jede konfigurierte Quelle bleibt sichtbar und wird korrekt eingeordnet', a
         assert.doesNotMatch(rowFor('GameStar').textContent, /Fehler/);
         assert.match(rowFor('GameStar').textContent, /lokalen Kopie dieses Browsers/);
 
-        assert.match(rowFor('Golem').textContent, /Warnung/, 'ähnliche Namen werden nicht gesund gemeldet');
+        assert.match(
+            rowFor('PC Games').textContent,
+            /Warnung/,
+            'ein nur ähnlich geschriebener Name wird nicht gesund gemeldet',
+        );
         assert.match(rowFor('Eurogamer').textContent, /OK/);
-        assert.match(rowFor('PC Games').textContent, /Fehler/);
+        assert.match(rowFor('Buffed').textContent, /Fehler/);
 
         // Nicht zugeordnete Snapshot-Quellennamen werden vollständig genannt.
         const unmatched = panel.querySelector('#admin-unmatched-snapshot-sources');
         assert.ok(unmatched !== null, 'die Liste nicht zugeordneter Namen existiert');
         assert.deepEqual(
             Array.from(unmatched.querySelectorAll('li')).map(item => item.textContent),
-            ['Golem.de'],
+            ['PCGames'],
         );
     } finally {
         await testRoot.cleanup();
