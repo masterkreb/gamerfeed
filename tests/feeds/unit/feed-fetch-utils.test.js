@@ -577,3 +577,95 @@ test('ein erschöpftes Gesamtbudget schließt den Proxy-Umweg aus', async () => 
     assert.equal(result.usedProxy, false);
     assert.equal(result.budgetExhausted, true);
 });
+
+// === Strukturierte Transport- und Statusangabe (O4a) ==========================
+//
+// Additiv zum bisherigen Vertrag: `usedProxy` bleibt unveraendert bestehen.
+// `transport` und `httpStatus` beantworten getrennt, welchen Weg die
+// **erfolgreiche** Antwort genommen hat und welcher HTTP-Status wirklich
+// bekannt ist.
+
+test('ein direkter Erfolg meldet Transport direct mit seinem Status', async () => {
+    const fetcher = createFetchSequence(response(RSS_XML));
+    const result = await fetchTestFeed({ fetchImpl: fetcher.fetchImpl });
+
+    assert.equal(result.transport, 'direct');
+    assert.equal(result.httpStatus, 200);
+    assert.equal(result.usedProxy, false, 'der bisherige Vertrag bleibt bestehen');
+});
+
+test('ein Erfolg über den Proxy meldet Transport proxy', async () => {
+    // 403 ist keine wiederholbare Absage: ein Direktversuch, dann der Proxy.
+    const fetcher = createFetchSequence(
+        response('<html>blocked</html>', 403),
+        response(RSS_XML, 200),
+    );
+    const result = await fetchTestFeed({
+        feedProxyUrl: 'https://proxy.example.com/feed-proxy.php',
+        fetchImpl: fetcher.fetchImpl,
+    });
+
+    assert.equal(result.xmlString, RSS_XML);
+    assert.equal(result.transport, 'proxy', 'die Antwort kam wirklich vom Proxy');
+    assert.equal(result.httpStatus, 200);
+    assert.equal(result.usedProxy, true);
+});
+
+test('ein endgültiger Abruffehler meldet keinen Transport, aber den letzten Status', async () => {
+    const fetcher = createFetchSequence(
+        response('nope', 500),
+        response('nope', 500),
+    );
+    const result = await fetchTestFeed({
+        allowProxy: false,
+        fetchImpl: fetcher.fetchImpl,
+    });
+
+    assert.equal(result.xmlString, null);
+    assert.equal(result.transport, 'none', 'ohne Erfolg gab es keinen tragenden Transport');
+    assert.equal(result.httpStatus, 500);
+});
+
+test('ein Verbindungsfehler erfindet keinen HTTP-Status', async () => {
+    const fetcher = createFetchSequence(
+        new Error('ECONNREFUSED'),
+        new Error('ECONNREFUSED'),
+    );
+    const result = await fetchTestFeed({
+        allowProxy: false,
+        fetchImpl: fetcher.fetchImpl,
+    });
+
+    assert.equal(result.transport, 'none');
+    assert.equal(result.httpStatus, null, 'ohne Antwort gibt es keinen Status');
+});
+
+test('eine wegen Zeitbudget zurückgestellte Quelle hat weder Transport noch Status', async () => {
+    const fetcher = createFetchSequence();
+    const result = await fetchTestFeed({
+        allowProxy: false,
+        fetchImpl: fetcher.fetchImpl,
+        hasTimeFor: () => false,
+    });
+
+    assert.equal(result.budgetExhausted, true);
+    assert.equal(result.transport, 'none');
+    assert.equal(result.httpStatus, null);
+    assert.equal(fetcher.calls.length, 0, 'es wurde gar nicht erst abgerufen');
+});
+
+test('nach einem gescheiterten Proxyversuch zählt dessen Status', async () => {
+    const fetcher = createFetchSequence(
+        response('nope', 500),
+        response('nope', 500),
+        response('nope', 502),
+        response('nope', 502),
+    );
+    const result = await fetchTestFeed({
+        feedProxyUrl: 'https://proxy.example.com/feed-proxy.php',
+        fetchImpl: fetcher.fetchImpl,
+    });
+
+    assert.equal(result.transport, 'none');
+    assert.equal(result.httpStatus, 502, 'der zuletzt versuchte Weg war der Proxy');
+});

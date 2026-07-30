@@ -447,3 +447,182 @@ test('ein einzelnes fehlerhaftes Item verwirft den Feed nicht', async () => {
     assert.equal(health.gamestar.skippedItemCount, 1);
     assert.match(health.gamestar.message, /invalid_date: 1/);
 });
+
+// === GitHub-Step-Summary (O4a) ===============================================
+//
+// Der Bericht ist reine Beobachtbarkeit. Geprüft wird gegen das echte `main()`
+// mit injizierten Außenkanten - insbesondere, dass er nichts am Ergebnis ändert.
+
+/** Sammelt die Schreibversuche der Zusammenfassung. */
+function summaryWriter({ fail = false } = {}) {
+    const versuche = [];
+    return {
+        versuche,
+        get markdown() {
+            return versuche.map(eintrag => eintrag.markdown).join('\n');
+        },
+        writeSummary: async (path, markdown) => {
+            versuche.push({ path, markdown });
+            if (fail) {
+                // So sieht ein echter Fehler aus: die vollständige
+                // Verbindungszeichenfolge, nicht ein bloßes Token.
+                throw new Error('ENOSPC while writing postgres://nutzer:pg-geheim@db.example/main');
+            }
+        },
+    };
+}
+
+const SUMMARY_ENV = Object.freeze({
+    ...VOLLSTAENDIGE_ENV,
+    GITHUB_STEP_SUMMARY: '/tmp/step-summary.md',
+});
+
+test('ein erfolgreicher Lauf schreibt eine Zusammenfassung mit Ergebnis und Snapshot', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.equal(writer.versuche.length, 1, 'genau ein Schreibvorgang');
+    assert.equal(writer.versuche[0].path, '/tmp/step-summary.md');
+
+    const markdown = writer.markdown;
+    assert.match(markdown, /GamerFeed-Lauf/);
+    assert.match(markdown, /success/);
+    assert.match(markdown, /Aktive Generation/);
+    assert.match(markdown, /\| GameStar \|/, 'die Quelle steht in der Tabelle');
+    assert.match(markdown, /\bdirect\b/, 'der Direktabruf wird als Transport genannt');
+    assert.match(markdown, /Fehlerquote/);
+    assert.deepEqual(spies.exitCodes, [], 'ein erfolgreicher Lauf endet ohne Exit-Code');
+});
+
+test('die Zusammenfassung nennt weder Feed-Adressen noch Secrets', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    const markdown = writer.markdown;
+    for (const secret of ALLE_SECRETS) {
+        assert.doesNotMatch(markdown, new RegExp(secret), `${secret} steht in der Zusammenfassung`);
+    }
+    assert.doesNotMatch(markdown, /https?:\/\//, 'keine Adressen in der Zusammenfassung');
+    assert.doesNotMatch(markdown, /Erster Artikel/, 'keine Artikeltitel');
+});
+
+test('ein erfolgreicher Proxy-Abruf erscheint als Transport proxy', async () => {
+    const spies = createSpies({ feeds: [GAMEPRO_ROW] });
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: spies.makeFetchImpl(async url => (
+            url.includes('proxy.example')
+                ? new Response(rssFeed(), { status: 200 })
+                : new Response('blocked', { status: 403 })
+        )),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.match(writer.markdown, /\| GamePro \| success \|[^|]*\|[^|]*\|[^|]*\| proxy \| 200 \|/);
+});
+
+test('ein endgültiger Abruffehler erscheint mit Transport none und seinem Status', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: spies.makeFetchImpl(async () => new Response('kaputt', { status: 500 })),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.match(writer.markdown, /\| GameStar \| error \|[^|]*\|[^|]*\|[^|]*\| none \| 500 \|/);
+});
+
+test('ohne GITHUB_STEP_SUMMARY entsteht kein Schreibversuch', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(writer.versuche, [], 'kein Schreibversuch ohne gesetzten Pfad');
+    assert.deepEqual(spies.exitCodes, []);
+});
+
+test('ein Schreibfehler der Zusammenfassung ändert Ergebnis und Exit-Code nicht', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter({ fail: true });
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(spies.exitCodes, [], 'der Lauf bleibt erfolgreich');
+    assert.equal(spies.kvStore.feed_run_status.result, 'success');
+
+    const warnung = spies.logLines.find(line => line.includes('Zusammenfassung'));
+    assert.ok(warnung, 'der Fehlschlag wird protokolliert');
+    assert.doesNotMatch(warnung, /pg-geheim/, 'auch die Warnung bleibt bereinigt');
+});
+
+test('auch ein fataler Abbruch bekommt eine Zusammenfassung, ohne den Exit-Code zu ändern', async () => {
+    const spies = createSpies({
+        // So sieht ein echter Fehler aus: die vollstaendige
+        // Verbindungszeichenfolge, nicht ein blosses Token.
+        sqlError: new Error('connect ECONNREFUSED postgres://nutzer:pg-geheim@db.example/main'),
+    });
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(spies.exitCodes, [1], 'der Abbruch bleibt ein Abbruch');
+    assert.equal(writer.versuche.length, 1);
+    assert.match(writer.markdown, /fatal/);
+    assert.doesNotMatch(writer.markdown, /pg-geheim/);
+    assert.doesNotMatch(writer.markdown, /Aktive Generation/, 'ohne Publish gibt es keine Generation');
+    assert.match(writer.markdown, /Kein Kern-Publish/);
+});
+
+test('ein Schreibfehler im Fatalpfad überdeckt den ursprünglichen Fehler nicht', async () => {
+    const spies = createSpies({
+        // So sieht ein echter Fehler aus: die vollstaendige
+        // Verbindungszeichenfolge, nicht ein blosses Token.
+        sqlError: new Error('connect ECONNREFUSED postgres://nutzer:pg-geheim@db.example/main'),
+    });
+    const writer = summaryWriter({ fail: true });
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(spies.exitCodes, [1]);
+    assert.equal(spies.kvStore.feed_run_status.result, 'fatal');
+});
