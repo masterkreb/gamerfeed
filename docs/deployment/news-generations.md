@@ -145,6 +145,40 @@ reist weiterhin in diesen Headern:
 - `x-gamerfeed-snapshot-schema`
 - `x-gamerfeed-snapshot-created-at`
 
+## Entdeckung gegen Fortsetzung (F5)
+
+**`?snapshot=<id>` setzt eine bereits gewählte Generation fort. Es ist kein
+Suchmittel.** Beides zu vermischen war der Fehler, der produktiv einen bereits
+geöffneten Browser dauerhaft auf altem Stand hielt: Der Client hängte seine
+gepinnte Kennung an *jede* Anfrage, auch an den allerersten Versuch. Da die
+direkt vorherige Generation absichtlich lesbar bleibt (siehe oben), antwortete
+der Server auf `?snapshot=A` weiterhin korrekt mit A – die inzwischen aktive
+Generation B kam nie in Sicht.
+
+Deshalb gilt clientseitig:
+
+| Anfrage | Gebunden? |
+|---|---|
+| Erster Versuch einer autoritativen Ladung (Preview) | **nein** |
+| Full-Fallback, solange keine Antwort angenommen wurde | **nein** |
+| Manueller Refresh (erster Versuch) | **nein** |
+| Auto-Update-Poll | **nein** |
+| Medium und Full nach einer angenommenen Antwort | ja, genau deren Generation |
+
+`services/news-load-controller.ts` führt dafür je Ladung das Feld
+`hasAcceptedResponse`. Es ist bewusst getrennt von `hasUsableResponse`: Letzteres
+beschreibt bereits sichtbare Artikel aus einem früheren Lauf und entscheidet nur,
+ob ein Fehler blockierend ist. Eine Ladung beginnt deshalb auch dann ungebunden,
+wenn schon Artikel auf dem Bildschirm stehen.
+
+Die Leseregeln selbst ändern sich dadurch **nicht**. Eine ungebunden entdeckte
+Antwort läuft durch dieselbe Annahmeentscheidung: gleiche Generation übernehmen,
+neuere übernehmen und umpinnen, ältere verwerfen. Eine ungebundene Entdeckung
+öffnet also keinen Rückschritt. Der Poll pinnt weiterhin nicht; Artikel und
+Generation bleiben gemeinsam vorgemerkt und werden erst beim Klick übernommen.
+
+Serverseitig ändert F5 nichts.
+
 ## Consumer
 
 | Consumer | Gebundene Quelle ab O3b |
