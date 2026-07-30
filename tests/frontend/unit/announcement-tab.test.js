@@ -419,8 +419,8 @@ test('der Löschdialog fokussiert Abbrechen, hält den Fokus und gibt ihn zurüc
         // Nach erfolgreicher Löschung fehlt der Auslöser; der Fallback greift.
         await resolveMutation(api.firstOf('DELETE'), new Response(null, { status: 204 }));
         assert.ok(
-            testRoot.window.document.activeElement === getSaveButton(testRoot.container),
-            'ohne Auslöser greift der Fallback-Fokus',
+            testRoot.window.document.activeElement === testRoot.container.querySelector('textarea'),
+            'ohne Auslöser greift der Fallback-Fokus auf das Textfeld',
         );
     } finally {
         await testRoot.cleanup();

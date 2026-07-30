@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FeedSource } from '../../types';
 import { useDialogFocus } from '../../hooks/useDialogFocus';
+import { useMutationLatch } from '../../hooks/useMutationLatch';
 import { CloseIcon } from '../Icons';
 
 interface FeedFormModalProps {
@@ -22,7 +23,7 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
     const [needsScraping, setNeedsScraping] = useState(false);
     const [urlError, setUrlError] = useState<string | null>(null);
     const [submitError, setSubmitError] = useState<string | null>(null);
-    const [isSaving, setIsSaving] = useState(false);
+    const { isMutating: isSaving, runExclusive } = useMutationLatch();
     const nameInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -64,7 +65,6 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (isSaving) return;
         setSubmitError(null);
 
         // --- Duplicate URL Validation ---
@@ -85,20 +85,23 @@ export const FeedFormModal: React.FC<FeedFormModalProps> = ({ isOpen, onClose, f
 
         const feedData = { name, url, language, priority, needsScraping };
 
-        setIsSaving(true);
-        try {
-            if (feed) {
-                await updateFeed({ ...feedData, id: feed.id });
-            } else {
-                await addFeed(feedData);
+        // Der Latch wird synchron gesetzt, damit ein zweites Submit-Ereignis
+        // im selben Render-Zyklus keinen zweiten POST oder PUT auslöst.
+        await runExclusive(async () => {
+            try {
+                if (feed) {
+                    await updateFeed({ ...feedData, id: feed.id });
+                } else {
+                    await addFeed(feedData);
+                }
+                onClose();
+            } catch (error) {
+                // Der Dialog bleibt mit allen Eingaben offen; der interne
+                // Fehlertext geht nur ins Log.
+                console.error('Error saving feed:', error);
+                setSubmitError(t('admin.form.errorSaving'));
             }
-            onClose();
-        } catch (error) {
-            console.error('Error saving feed:', error);
-            setSubmitError(t('admin.form.errorSaving'));
-        } finally {
-            setIsSaving(false);
-        }
+        });
     };
 
     const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
