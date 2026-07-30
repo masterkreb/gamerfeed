@@ -51,6 +51,21 @@ function toNonNegativeInteger(value) {
     return Number.isFinite(number) && number >= 0 ? Math.floor(number) : 0;
 }
 
+/**
+ * Zaehlwert, der unbekannt bleiben darf.
+ *
+ * `null`, `undefined` und unbrauchbare Werte ergeben `null` statt `0`. Eine
+ * nie bearbeitete Quelle hat ihre Items nicht untersucht - `0 uebersprungen`
+ * waere eine unbelegte Aussage. Eine ausdruecklich gemessene `0` bleibt `0`.
+ */
+function toNullableCount(value) {
+    if (value === null || value === undefined || value === '') return null;
+
+    const number = Number(value);
+    if (!Number.isFinite(number) || number < 0) return null;
+    return Math.floor(number);
+}
+
 function toDurationMs(value) {
     // `null` heisst "Phase lief nicht" und darf nicht zu 0 werden -
     // `Number(null)` waere 0 und behauptete eine Dauer von null Millisekunden.
@@ -207,11 +222,10 @@ export function buildRunSummary({
             status: typeof health.status === 'string' ? health.status : 'unknown',
             durationMs: toDurationMs(health.durationMs),
             // Ausschliesslich die in **diesem** Lauf gelieferten Artikel. Alte,
-            // lediglich beibehaltene Artikel stehen hier nie.
-            articleCount: Number.isFinite(Number(health.articleCount)) && health.articleCount !== null
-                ? toNonNegativeInteger(health.articleCount)
-                : null,
-            skippedItemCount: toNonNegativeInteger(health.skippedItemCount),
+            // lediglich beibehaltene Artikel stehen hier nie. Beide Zahlen
+            // duerfen unbekannt bleiben, statt eine Null zu behaupten.
+            articleCount: toNullableCount(health.articleCount),
+            skippedItemCount: toNullableCount(health.skippedItemCount),
             transport: normalizeTransport(transport?.transport),
             httpStatus: toHttpStatus(transport?.httpStatus),
         };
@@ -239,6 +253,44 @@ export function buildRunSummary({
         feeds: visibleFeeds,
         truncatedFeedCount: Math.max(0, feeds.length - visibleFeeds.length),
     };
+}
+
+/**
+ * Minimaler Bericht fuer einen Abbruch in der Vorpruefung.
+ *
+ * Zu diesem Zeitpunkt gibt es weder Recorder noch Feed-Liste noch irgendeinen
+ * externen Zugriff - und deshalb **nichts** zu berichten ausser dem bereits
+ * sicheren Konfigurationsfehler. `counters` bleibt bewusst `null`: eine
+ * Zaehlertabelle voller Nullen waere eine erfundene Aussage ueber Feeds, die
+ * nie betrachtet wurden.
+ *
+ * @param {{ runId?: string|null, message: unknown, redact?: (message: string) => string }} params
+ */
+export function buildPreflightFailureSummary({
+    runId = null,
+    message,
+    redact = value => String(value),
+} = {}) {
+    return {
+        runId: typeof runId === 'string' && runId !== '' ? runId : null,
+        result: 'fatal',
+        reason: message ? toSingleLine(redact(String(message)), SUMMARY_MAX_REASON_LENGTH) : null,
+        startedAt: null,
+        finishedAt: null,
+        durations: pickDurations(null),
+        counters: null,
+        rates: null,
+        snapshot: null,
+        feeds: [],
+        truncatedFeedCount: 0,
+        preflightFailure: true,
+    };
+}
+
+/** Fügt alle Zeilen zu einem Markdown-Block mit abschließendem Umbruch. */
+function joinLines(lines) {
+    const newline = String.fromCharCode(10);
+    return `${lines.join(newline)}${newline}`;
 }
 
 function formatDuration(ms) {
@@ -286,6 +338,17 @@ export function renderRunSummaryMarkdown(summary) {
         lines.push(`- **Grund:** ${summary.reason}`);
     }
     lines.push('');
+
+    // Ein Abbruch in der Vorpruefung hat weder Phasen noch Feeds noch einen
+    // Snapshot. Die Abschnitte entfallen deshalb ganz, statt Nullen zu zeigen.
+    if (summary.preflightFailure === true) {
+        lines.push(
+            'Der Lauf endete in der Vorprüfung, noch vor jedem externen Zugriff. '
+            + 'Es gibt deshalb keine Phasen-, Feed- oder Snapshot-Daten.',
+        );
+        lines.push('');
+        return joinLines(lines);
+    }
 
     lines.push('### Dauern');
     lines.push('');
@@ -335,7 +398,7 @@ export function renderRunSummaryMarkdown(summary) {
     for (const feed of summary.feeds) {
         lines.push(
             `| ${feed.name} | ${feed.status} | ${formatDuration(feed.durationMs)}`
-            + ` | ${formatCount(feed.articleCount)} | ${feed.skippedItemCount}`
+            + ` | ${formatCount(feed.articleCount)} | ${formatCount(feed.skippedItemCount)}`
             + ` | ${feed.transport} | ${feed.httpStatus ?? '–'} |`,
         );
     }
@@ -345,7 +408,7 @@ export function renderRunSummaryMarkdown(summary) {
     }
     lines.push('');
 
-    return `${lines.join('\n')}\n`;
+    return joinLines(lines);
 }
 
 /**

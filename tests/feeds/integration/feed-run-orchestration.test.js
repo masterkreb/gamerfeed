@@ -626,3 +626,134 @@ test('ein Schreibfehler im Fatalpfad überdeckt den ursprünglichen Fehler nicht
     assert.deepEqual(spies.exitCodes, [1]);
     assert.equal(spies.kvStore.feed_run_status.result, 'fatal');
 });
+
+// === Zusammenfassung auch bei gescheiterter Vorprüfung ========================
+//
+// „Jeder Lauf bekommt eine Zusammenfassung" muss auch für den Fatalfall gelten,
+// der noch vor Recorder und Feed-Liste greift. Sie bleibt dabei minimal: es gibt
+// schlicht nichts zu berichten außer dem Konfigurationsfehler.
+
+test('ein fehlendes Core-Secret erzeugt trotzdem genau eine fatale Zusammenfassung', async () => {
+    for (const key of ['POSTGRES_URL', 'KV_REST_API_URL', 'KV_REST_API_TOKEN']) {
+        const spies = createSpies();
+        const writer = summaryWriter();
+        const env = { ...SUMMARY_ENV };
+        delete env[key];
+
+        await runMain(spies, {
+            env,
+            groqFetch: spies.makeGroqFetch(),
+            writeSummary: writer.writeSummary,
+        });
+
+        assert.deepEqual(spies.exitCodes, [1], `${key}: der Lauf endet fatal`);
+        assert.equal(writer.versuche.length, 1, `${key}: genau ein Schreibversuch`);
+
+        // Die Vorprüfung bleibt vor jedem externen Zugriff.
+        assert.equal(spies.sqlQueries.length, 0, `${key}: kein SQL`);
+        assert.equal(spies.kvGets.length, 0, `${key}: kein KV-Lesen`);
+        assert.equal(spies.kvSets.length, 0, `${key}: kein KV-Schreiben`);
+        assert.equal(spies.recorderCalls.length, 0, `${key}: kein Recorder`);
+        assert.equal(spies.fetchCalls.length, 0, `${key}: kein HTTP`);
+        assert.equal(spies.groqCalls.length, 0, `${key}: kein Groq`);
+
+        const markdown = writer.markdown;
+        assert.match(markdown, /fatal/, `${key}: das Ergebnis steht drin`);
+        assert.match(markdown, new RegExp(key), `${key}: der Variablenname steht drin`);
+        for (const secret of ALLE_SECRETS) {
+            assert.doesNotMatch(markdown, new RegExp(secret), `${key}: ${secret} steht in der Ausgabe`);
+        }
+    }
+});
+
+test('die Zusammenfassung der Vorprüfung erfindet weder Feeds noch Snapshot', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+    const env = { ...SUMMARY_ENV };
+    delete env.POSTGRES_URL;
+
+    await runMain(spies, { env, groqFetch: spies.makeGroqFetch(), writeSummary: writer.writeSummary });
+
+    const markdown = writer.markdown;
+    assert.doesNotMatch(markdown, /### Quellen/, 'keine Quellentabelle ohne Feed-Liste');
+    assert.doesNotMatch(markdown, /### Feeds/, 'keine erfundenen Feed-Zähler');
+    assert.doesNotMatch(markdown, /Aktive Generation/, 'kein Snapshot');
+    assert.doesNotMatch(markdown, /Fehlerquote/, 'keine Quote ohne bewertete Feeds');
+    assert.match(markdown, /Vorprüfung/, 'der Grund ist benannt');
+});
+
+test('ein nur aus Leerzeichen bestehender Core-Wert verhält sich genauso', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: { ...SUMMARY_ENV, POSTGRES_URL: '   ' },
+        groqFetch: spies.makeGroqFetch(),
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(spies.exitCodes, [1]);
+    assert.equal(spies.recorderCalls.length, 0);
+    assert.equal(writer.versuche.length, 1);
+    assert.match(writer.markdown, /POSTGRES_URL/);
+});
+
+test('ein Writer-Fehler in der Vorprüfung ändert Exit-Code und Reihenfolge nicht', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter({ fail: true });
+    // Bewusst nicht POSTGRES_URL: dessen Wert ist dann gar nicht konfiguriert
+    // und kann deshalb auch nicht bereinigt werden. Der Test prüft die
+    // Bereinigung, also muss die Variable gesetzt bleiben.
+    const env = { ...SUMMARY_ENV };
+    delete env.KV_REST_API_URL;
+
+    await runMain(spies, { env, groqFetch: spies.makeGroqFetch(), writeSummary: writer.writeSummary });
+
+    assert.deepEqual(spies.exitCodes, [1], 'der Lauf endet weiterhin fatal');
+    assert.equal(spies.recorderCalls.length, 0, 'die Vorprüfung bleibt vor dem Recorder');
+    assert.equal(spies.sqlQueries.length, 0);
+    assert.equal(spies.kvSets.length, 0);
+
+    const warnung = spies.logLines.find(line => line.includes('Zusammenfassung'));
+    assert.ok(warnung, 'der Fehlschlag wird protokolliert');
+    assert.doesNotMatch(warnung, /pg-geheim/);
+});
+
+test('ohne GITHUB_STEP_SUMMARY schreibt auch die Vorprüfung nichts', async () => {
+    const spies = createSpies();
+    const writer = summaryWriter();
+    const env = { ...VOLLSTAENDIGE_ENV };
+    delete env.POSTGRES_URL;
+
+    await runMain(spies, { env, groqFetch: spies.makeGroqFetch(), writeSummary: writer.writeSummary });
+
+    assert.deepEqual(spies.exitCodes, [1]);
+    assert.deepEqual(writer.versuche, []);
+});
+
+test('ein Abbruch nach geladener Feed-Liste erfindet für unbearbeitete Quellen keine Null', async () => {
+    // Der Lauf bricht nach der ersten Quelle ab. GamePro wurde dadurch nie
+    // angefasst und steht noch auf `unknown`; seine Items hat niemand
+    // untersucht. „0 übersprungen" wäre eine unbelegte Aussage.
+    const spies = createSpies({ feeds: [FEED_ROW, GAMEPRO_ROW] });
+    const writer = summaryWriter();
+
+    await runMain(spies, {
+        env: SUMMARY_ENV,
+        createRecorder: createFeedRunRecorder,
+        fetchImpl: feedFetch(spies),
+        // Die Höflichkeitspause nach der ersten Quelle beendet den Lauf.
+        sleep: async () => {
+            throw new Error('Abbruch nach der ersten Quelle');
+        },
+        writeSummary: writer.writeSummary,
+    });
+
+    assert.deepEqual(spies.exitCodes, [1]);
+
+    const zeile = writer.markdown.split('\n').find(line => line.startsWith('| GamePro |'));
+    assert.ok(zeile, 'die nie bearbeitete Quelle steht in der Tabelle');
+    assert.match(zeile, /\| unknown \|/, 'sie ist als unbewertet erkennbar');
+    assert.doesNotMatch(zeile, /\| 0 \|/, 'keine erfundene Null für nie untersuchte Items');
+    assert.match(zeile, /\| – \| – \| – \|/, 'Dauer, Artikel und Übersprungene bleiben leer');
+});

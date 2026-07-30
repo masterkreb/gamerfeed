@@ -41,6 +41,7 @@ import {
 } from './feed-fetch-utils.js';
 import { publishNewsSnapshot } from './news-snapshot-publisher.js';
 import {
+    buildPreflightFailureSummary,
     buildRunSummary,
     renderRunSummaryMarkdown,
     writeRunSummary,
@@ -917,10 +918,13 @@ async function generateAndSaveTrends(articles, { groqApiKey, groqFetch, logger =
 
 // Die Actions-Run-ID ist nicht geheim und laesst einen Lauf im Admin direkt dem
 // Workflow-Protokoll zuordnen. Lokale Laeufe bekommen eine eigene Kennung.
-function createRunId() {
-    const actionsRunId = process.env.GITHUB_RUN_ID;
+// Die Umgebung ist ein Parameter, damit auch die Vorpruefung eine Lauf-ID
+// bilden kann, ohne an `process.env` gebunden zu sein. Ohne Argument gilt
+// unveraendert das bisherige Produktionsverhalten.
+function createRunId(env = process.env) {
+    const actionsRunId = env?.GITHUB_RUN_ID;
     if (actionsRunId) {
-        const attempt = process.env.GITHUB_RUN_ATTEMPT;
+        const attempt = env?.GITHUB_RUN_ATTEMPT;
         return `gha-${actionsRunId}${attempt ? `-${attempt}` : ''}`;
     }
     return `local-${randomUUID()}`;
@@ -997,6 +1001,30 @@ export async function main({
     const configuration = readFeedRunConfiguration(env);
     if (!configuration.ok) {
         logger.error(`\n❌ ${configuration.fatalMessage}`);
+
+        // Auch dieser Fatalfall bekommt seine Zusammenfassung - aber eine
+        // minimale. Es gibt weder Recorder noch Feed-Liste noch irgendeinen
+        // externen Zugriff; berichtet wird ausschliesslich der bereits sichere
+        // Konfigurationsfehler, der nur Variablennamen nennt. Best effort: ein
+        // Schreibfehler darf den Exit-Code nicht veraendern.
+        try {
+            await writeRunSummary({
+                env,
+                markdown: renderRunSummaryMarkdown(buildPreflightFailureSummary({
+                    runId: createRunId(env),
+                    message: configuration.fatalMessage,
+                    redact: redactMessage,
+                })),
+                writeSummary,
+                redact: redactMessage,
+                logger,
+            });
+        } catch (summaryError) {
+            logger.warn?.(`   ⚠️  Zusammenfassung übersprungen: ${redactMessage(
+                summaryError instanceof Error ? summaryError.message : String(summaryError),
+            )}`);
+        }
+
         return exit(1);
     }
 
@@ -1080,7 +1108,7 @@ export async function main({
     const durations = {};
     const recorder = createRecorder({
         store,
-        runId: createRunId(),
+        runId: createRunId(env),
         startedAt: new Date(),
         // Ohne diese Zeile faellt der Recorder auf `console` zurueck und seine
         // Warnungen ("Feed-Status wird nicht geschrieben ...") laufen an der
