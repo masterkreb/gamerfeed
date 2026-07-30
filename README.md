@@ -38,7 +38,7 @@ GamerFeed ist ein schlanker und moderner News-Aggregator, der die neuesten Nachr
     - Artikelaktionen liegen semantisch außerhalb des Artikel-Links und öffnen weder beim Favorisieren noch beim Optionsdialog versehentlich den Artikel.
     - Erfolgs- und Fehlermeldungen des Kontaktformulars werden Screenreadern angekündigt.
 - **Admin-Panel**: Ein passwortgeschütztes Admin-Panel zur einfachen Verwaltung der Feed-Quellen, Überwachung ihres Status und Veröffentlichung von Ankündigungen.
-- **📢 Ankündigungs-Banner**: Admins können wichtige Nachrichten (Info, Warnung, Wartung, Feier) als Banner für alle Benutzer anzeigen. Benutzer können Banner schließen (wird im localStorage gespeichert).
+- **📢 Ankündigungs-Banner**: Admins können wichtige Nachrichten (Info, Warnung, Wartung, Feier) als Banner für alle Benutzer anzeigen. Benutzer können Banner schließen (wird im localStorage gespeichert). Das Löschen einer Ankündigung verlangt – wie das Löschen einer Feed-Quelle – eine ausdrückliche Bestätigung.
 
 ---
 

@@ -78,6 +78,7 @@
 │
 ├── hooks/
 │   ├── useDialogFocus.ts   # Fokusfalle, Escape, Fokus-Rückgabe für Dialoge
+│   ├── useMutationLatch.ts # Synchrone Sperre gegen doppelte Mutationen
 │   ├── useFeeds.ts         # Feed-Daten fetchen
 │   └── useLocalStorage.ts  # localStorage Hook
 │
@@ -170,7 +171,8 @@ Wichtige Eigenschaften:
 ### Barrierefreiheit von Dialogen
 
 `hooks/useDialogFocus.ts` ist die gemeinsame Grundlage für Admin-Formulardialog,
-Admin-Löschdialog, mobilen Filterdialog und `SettingsModal`. Er liefert
+die beiden Admin-Löschdialoge (Feed und Ankündigung), den mobilen Filterdialog
+und `SettingsModal`. Er liefert
 Fokusfalle, initialen Fokus, Escape-Behandlung, Fokus-Rückgabe an das auslösende
 Element und optional `canClose` zum Blockieren während laufender Aktionen.
 
@@ -194,6 +196,39 @@ betrachten, weil sonst etwa eine geänderte Zusammenfassung, Adresse, Quelle,
 Sprache oder Veröffentlichungszeit bei gleicher ID veraltet sichtbar bleibt.
 Artikel-Props werden als unveränderliche Objekte behandelt; aktualisierte
 Inhalte bekommen ein neues `Article`-Objekt.
+
+### Mutierende Admin-Aktionen
+
+`hooks/useMutationLatch.ts` schützt jede mutierende Admin-Aktion gegen zwei
+Ereignisse im **selben** Render-Zyklus. Ein Guard aus React-State (`isSaving`,
+`isDeletingFeed`) genügt dafür nicht: Zwei synchrone Klicks oder Submits sehen
+beide noch den alten Wert, weil React erst danach neu rendert. Der Latch liegt
+deshalb in einem `useRef`, wird **vor dem ersten `await`** gesetzt und in jedem
+Erfolgs- und Fehlerpfad über `finally` wieder freigegeben. Die State-Kopie
+`isMutating` dient ausschließlich Beschriftung, `aria-busy` und `disabled`.
+
+| Flow | Latch |
+|---|---|
+| Feed anlegen (POST) und bearbeiten (PUT) | `FeedFormModal` |
+| Feed löschen (DELETE) | `AdminPanel` |
+| Ankündigung speichern (POST) und löschen (DELETE) | `AnnouncementTab`, **gemeinsam** |
+
+Speichern und Löschen einer Ankündigung teilen sich bewusst einen Latch, damit
+nicht synchron ein POST und ein DELETE nebeneinander starten.
+
+Ein Fehler verwirft nie Eingaben oder Datensätze: Der Feed-Formulardialog bleibt
+mit allen Feldern offen, Feed und Ankündigung bleiben samt ihrem
+Bestätigungsdialog erhalten, und Nachricht, Typ und Aktiv-Status der Ankündigung
+stehen unverändert weiter. Interne Fehlertexte gehen nur ins Log; sichtbar sind
+lokalisierte Meldungen.
+
+Beide Löschungen laufen über einen `alertdialog` mit `useDialogFocus`: initialer
+Fokus auf „Abbrechen“, Fokusfalle, Escape schließt **vor** Beginn der Mutation
+und ist währenddessen gesperrt (`canClose`), Fokus-Rückgabe an den Auslöser.
+Fehlt der Auslöser nach erfolgreicher Löschung, greift ein Fallback – die
+Schaltfläche „Neuen Feed hinzufügen“ beziehungsweise das Ankündigungs-Textfeld.
+Der Speichern-Knopf taugt dafür nicht: ohne Nachricht ist er deaktiviert und
+damit nicht fokussierbar.
 
 ### Persistierter Browserzustand
 
@@ -261,9 +296,10 @@ läuft).
 
 ### Admin-Panel (/admin.html)
 - ✅ Basic Auth geschützt
-- ✅ Feed-Verwaltung (CRUD)
+- ✅ Feed-Verwaltung (CRUD) mit Löschbestätigung
+- ✅ Mutationen gegen synchrone Doppelauslösung gesperrt
 - ✅ Health Center (Feed-Status, letzter Lauf, Kern-Publish, Inhaltsfrische)
-- ✅ Ankündigungs-System (Info, Warnung, Wartung, Feier)
+- ✅ Ankündigungs-System (Info, Warnung, Wartung, Feier) mit Löschbestätigung
 
 ---
 
@@ -712,6 +748,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** ArticleCard-Aktualisierung (F3b): unvollständigen Memo-Sondervergleich entfernt und Änderungen aller sichtbaren Artikelfelder bei gleicher ID abgesichert
 - **Juli 2026:** Persistierter Zustand (F4a): verpflichtende Laufzeit-Decoder, feste Defaults, sichere Cross-Tab-Löschung und validierte lokale News-Kopien
 - **Juli 2026:** i18n-Konsistenz (F4b): Datumswerte an die App-Sprache gebunden, verbliebene UI- und ARIA-Texte nach DE/EN überführt und Sprachwechsel ohne Reload getestet
+- **Juli 2026:** Admin-Mutationen (A1a): synchroner `useRef`-Latch für Feed-POST/PUT/DELETE und die gemeinsam gesperrten Ankündigungs-Mutationen, Bestätigungsdialog vor dem Löschen einer Ankündigung, Fehlerpfade erhalten Eingaben und Datensätze
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 
