@@ -249,6 +249,17 @@ Ob die Änderungen wirken, entscheidet **nicht** dieser Branch: SEO2 beginnt
 erst nach Merge und Production-Rollout und ist eine manuelle Abnahme in der
 Search Console. Ein technisch indexierbares HTML erzwingt keine Indexierung.
 
+**Stand 31. Juli 2026 (SEO2 gestartet):** Beide Produktions-URLs bestehen den
+Live-Test. Der Indexierungsantrag für die Startseite wurde wegen des
+überschrittenen Search-Console-Tageskontingents nicht angenommen;
+`/gaming-news` bleibt ebenfalls einzureichen. Die Schreibweise der Startseite
+ohne abschließenden Slash wird auf dieselbe kanonische URL mit Slash
+normalisiert. Zusätzlich ist der spätere Hinweis „Vorübergehender
+Verarbeitungsfehler“ in der URL-Prüfung mit dem zuvor erfolgreichen
+Sitemap-Bericht abzugleichen. Die 7-/14-/28-Tage-Fristen beginnen erst nach
+einem tatsächlich angenommenen Antrag. Der dauerhafte Arbeitsstand steht in
+[`docs/development/seo-indexing.md`](seo-indexing.md).
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -276,7 +287,7 @@ Search Console. Ein technisch indexierbares HTML erzwingt keine Indexierung.
 | O4a | P2 | erledigt | Strukturierter Laufbericht und GitHub-Step-Summary |
 | SEO0 | P2 | erledigt | Search-Console-Baseline und SEO-Leitplanken festhalten |
 | SEO1 | P2 | erledigt | Crawlbare Einstiege und ehrliche Metadaten herstellen |
-| SEO2 | P2 | bereit | Indexierungs- und Mess-Gate nach Production-Rollout |
+| SEO2 | P2 | in Arbeit | Indexierungsanträge und Mess-Gate nach Production-Rollout |
 | SEO3 | P3 | später | Genau einen eigenständigen Content-Pilot aus Messdaten ableiten |
 | SEO4 | P3 | Entscheidung nötig | Eigene Domain und externe Reichweite festlegen |
 | O4b | P2 | geplant | Begrenzte Laufhistorie |
@@ -1487,7 +1498,11 @@ lautet jetzt „Gaming-News aus vielen Redaktionen“, die Abmessungen bleiben
 
 ### SEO2 – Indexierungs- und Mess-Gate
 
-**Status:** bereit. Erst nach Merge und Production-Rollout von SEO1.
+**Status:** in Arbeit seit 30. Juli 2026. SEO1 ist produktiv; beide Live-Tests
+sind erfolgreich. Die manuellen Indexierungsanträge sind noch nicht bestätigt,
+weil Google den ersten Versuch wegen des Tageskontingents ablehnte. Vor Beginn
+der Messfristen ist außerdem der widersprüchliche Sitemap-Hinweis aus
+URL-Prüfung und Sitemap-Bericht abzugleichen.
 
 SEO2 ist überwiegend eine manuelle Abnahme, kein neuer Funktionsblock:
 
