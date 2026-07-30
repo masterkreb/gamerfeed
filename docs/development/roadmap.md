@@ -218,7 +218,7 @@ Snapshot-Kennung samt Artikelzahlen und Bytegrößen sowie eine begrenzte Tabell
 je Quelle mit Transport und wirklich beobachtetem HTTP-Status. Die
 Zusammenfassung ist reine Beobachtbarkeit und kann weder Ergebnis noch
 Exit-Code verändern. Auch ein Abbruch in der Vorprüfung bekommt seinen – dann
-minimalen – Bericht. 729 zentrale Tests und 25 Browser-Abnahmen laufen
+minimalen – Bericht. 741 zentrale Tests und 25 Browser-Abnahmen laufen
 erfolgreich. Als nächstes ist O4b bereit.
 
 ## Empfohlene Reihenfolge

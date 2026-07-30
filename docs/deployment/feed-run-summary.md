@@ -51,11 +51,13 @@ Proxys, weil er der zuletzt versuchte Weg war.
 Alte Artikel, die eine zurückgestellte oder leere Quelle im Snapshot behält,
 erscheinen hier nicht – sonst sähe ein Lauf ohne jede Lieferung erfolgreich aus.
 
-**Unbekannt ist nicht null.** Dauer, Artikelzahl und übersprungene Items einer
-Quelle, die in diesem Lauf gar nicht bearbeitet wurde, erscheinen als `–`. Ein
-`0 übersprungen` wäre dort eine Aussage über Items, die niemand untersucht hat.
-Eine ausdrücklich gemessene `0` – etwa ein erfolgreich abgerufener, aber leerer
-Feed – bleibt dagegen `0`. Unbrauchbare Werte ergeben `–`, nie eine Zahl.
+**`–` heißt: keine verlässliche Messung. `0` heißt: tatsächlich gemessen.**
+Übersprungene Items werden nur gezählt, wenn das Parsen wirklich stattgefunden
+hat. Ein Abruffehler, eine wegen des Zeitbudgets zurückgestellte Quelle und ein
+Parse-Abbruch haben nie ein Element angesehen – sie zeigen deshalb `–`, nicht
+`0`. Dasselbe gilt für Dauer und Artikelzahl. Eine `0` erscheint nur dort, wo
+sie gemessen wurde, etwa bei einem erfolgreich geparsten Feed ohne verworfene
+Elemente. Unbrauchbare Werte ergeben `–`, nie eine Zahl.
 
 **Fehlerquote** hat einen festen Nenner:
 
@@ -76,6 +78,11 @@ Warnquote    = warning / (success + warning + error)
 
 - keine Secret-Werte (`POSTGRES_URL`, `KV_REST_API_*`, `GROQ_API_KEY`,
   `FEED_PROXY_URL`) – es gilt dieselbe Bereinigung wie im Heartbeat;
+- **keine eingebetteten Zugangsdaten**, und zwar unabhängig vom Schema:
+  `sanitizeErrorMessage` entfernt `user:pass@` und den Querystring aus jeder
+  Adresse mit `scheme://`, also auch aus `postgres://`, `postgresql://` und
+  `redis://`. Die Zusage hängt damit **nicht** davon ab, dass eine Meldung die
+  konfigurierte Verbindungszeichenfolge bytegenau wiederholt;
 - keine vollständige Proxy-Adresse und keine Querystrings;
 - keine Feed-URLs;
 - keine Artikel-URLs, -Titel oder -Inhalte;

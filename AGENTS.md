@@ -488,9 +488,15 @@ Vier Begriffe sind genau definiert:
   außen vor und wird getrennt genannt; Warnungen stehen im Nenner, aber nie im
   Zähler und bekommen eine eigene Warnquote.
 
-Unbekannte Zahlen bleiben unbekannt: Dauer, Artikel und übersprungene Items
-einer nie bearbeiteten Quelle erscheinen als `–`, nicht als `0`. Eine
-ausdrücklich gemessene `0` bleibt dagegen `0`.
+Unbekannte Zahlen bleiben unbekannt: **`–` heißt, dass keine verlässliche
+Messung vorliegt; `0` heißt, dass wirklich gemessen wurde.** Übersprungene Items
+zählt nur ein tatsächlich durchgeführtes Parsen – Abruffehler, Zurückstellung
+und Parse-Abbruch zeigen `–`. Dasselbe gilt für Dauer und Artikelzahl.
+
+Die Bereinigung entfernt eingebettete Zugangsdaten aus **jeder** Adresse mit
+`scheme://`, nicht nur aus HTTP(S): `postgres://user:pass@host?sslmode=…` wird
+ebenso entschärft. Sie ist damit nicht darauf angewiesen, dass eine Meldung die
+konfigurierte Verbindungszeichenfolge bytegenau wiederholt.
 
 Die Zusammenfassung ist **ausschließlich zusätzliche Beobachtbarkeit**. Zwei
 Schichten fangen Fehler ab – `writeRunSummary` selbst und der Aufrufer in
