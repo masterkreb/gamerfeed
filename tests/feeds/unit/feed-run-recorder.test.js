@@ -1023,3 +1023,246 @@ test('ein abgelehnter Ergebniszustand hinterlässt keinen Historieneintrag', asy
 
     assert.deepEqual(harness.historyWrites, []);
 });
+
+// === Der Historien-Write ist begrenzt, nicht nur folgenlos ===
+//
+// „Best effort“ heisst auch: ein Speicher, der gar nicht antwortet, haelt den
+// Laufabschluss nicht auf. Kein Test wartet real - die Zeitgeber feuern auf
+// Zuruf, der haengende Speicher ist ein nie aufgeloestes Promise.
+
+function createTestTimers() {
+    const angelegt = [];
+    const abgeraeumt = [];
+
+    return {
+        angelegt,
+        abgeraeumt,
+        offene: () => angelegt.filter(eintrag => !abgeraeumt.includes(eintrag)),
+        setTimer(callback, ms) {
+            const eintrag = { callback, ms };
+            angelegt.push(eintrag);
+            return eintrag;
+        },
+        clearTimer(handle) {
+            if (handle) abgeraeumt.push(handle);
+        },
+        ablaufen() {
+            for (const eintrag of angelegt) eintrag.callback();
+        },
+    };
+}
+
+/**
+ * Laesst die Microtask-Warteschlange durchlaufen, ohne real zu warten.
+ *
+ * Der Recorder schreibt vor dem Historien-Write noch `feed_run_status`; der
+ * Zeitgeber der Frist entsteht deshalb erst einige Await-Schritte spaeter.
+ */
+async function abwickeln(runden = 8) {
+    for (let index = 0; index < runden; index += 1) {
+        await new Promise(resolve => setImmediate(resolve));
+    }
+}
+
+async function laufMitHaengenderHistorie(harness, clock, logger, timers) {
+    let ablehnen;
+    const haengend = new Promise((_resolve, reject) => {
+        ablehnen = reject;
+    });
+
+    const recorder = createRecorder(harness, clock, logger, {
+        appendHistory: () => haengend,
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    await recorder.begin();
+    await recorder.loadPreviousState();
+    recorder.markFeedListLoaded();
+    clock.advance(150_000);
+
+    return { recorder, ablehnen };
+}
+
+test('ein hängender Historien-Write hält finish() nicht auf', async () => {
+    const harness = createStore({
+        initial: {
+            feed_health_status: storedHealth('2026-07-28T10:40:00.000Z'),
+            feed_publish_status: storedPublish('2026-07-28T10:40:00.000Z'),
+        },
+    });
+    const clock = createClock();
+    const { logger, warnings } = silentLogger();
+    const timers = createTestTimers();
+
+    const { recorder } = await laufMitHaengenderHistorie(harness, clock, logger, timers);
+
+    const lauf = recorder.finish({
+        feedHealth: successfulFeedHealth('2026-07-28T11:01:30.000Z'),
+        durations: { totalMs: 150_000 },
+    });
+
+    await abwickeln();
+
+    // Der Laufstatus steht bereits; ohne Frist bliebe finish() hier für immer.
+    assert.equal(harness.lastWrite('feed_run_status').result, 'success');
+    assert.equal(timers.angelegt.length, 1);
+    assert.equal(timers.angelegt[0].ms, 3000);
+
+    timers.ablaufen();
+
+    const finished = await lauf;
+
+    assert.equal(finished.result, 'success', 'das Ergebnis bleibt unverändert');
+    assert.equal(harness.historyWrites.length, 0);
+    assert.deepEqual(timers.offene(), [], 'der Zeitgeber wird abgeräumt');
+    assert.ok(warnings.some(message => message.includes('Laufhistorie konnte nicht ergänzt werden')));
+    assert.ok(warnings.some(message => message.includes('Zeitgrenze')));
+});
+
+test('ein hängender Historien-Write hält recordFatal() nicht auf', async () => {
+    const harness = createStore({
+        initial: { feed_health_status: storedHealth('2026-07-28T10:40:00.000Z') },
+    });
+    const clock = createClock();
+    const { logger, warnings } = silentLogger();
+    const timers = createTestTimers();
+
+    const { recorder } = await laufMitHaengenderHistorie(harness, clock, logger, timers);
+
+    const lauf = recorder.recordFatal({
+        error: new Error('SQL nicht erreichbar'),
+        feedHealth: failedFeedHealth('2026-07-28T11:00:45.000Z', '2026-07-28T10:40:00.000Z'),
+        durations: { totalMs: 150_000 },
+    });
+
+    await abwickeln();
+
+    assert.equal(harness.lastWrite('feed_run_status').result, 'fatal');
+    timers.ablaufen();
+
+    const { run } = await lauf;
+
+    assert.equal(run.result, 'fatal', 'der Abbruch bleibt ein Abbruch');
+    assert.deepEqual(timers.offene(), []);
+    assert.ok(warnings.some(message => message.includes('Laufhistorie konnte nicht ergänzt werden')));
+});
+
+test('eine verspätete Ablehnung des überholten Writes bleibt behandelt', async () => {
+    const harness = createStore({
+        initial: {
+            feed_health_status: storedHealth('2026-07-28T10:40:00.000Z'),
+            feed_publish_status: storedPublish('2026-07-28T10:40:00.000Z'),
+        },
+    });
+    const clock = createClock();
+    const { logger } = silentLogger();
+    const timers = createTestTimers();
+
+    const unbehandelte = [];
+    const beobachter = grund => unbehandelte.push(grund);
+    process.on('unhandledRejection', beobachter);
+
+    try {
+        const { recorder, ablehnen } = await laufMitHaengenderHistorie(harness, clock, logger, timers);
+
+        const lauf = recorder.finish({
+            feedHealth: successfulFeedHealth('2026-07-28T11:01:30.000Z'),
+            durations: { totalMs: 150_000 },
+        });
+
+        await abwickeln();
+        timers.ablaufen();
+        await lauf;
+
+        // Der Speicher meldet sich erst jetzt - lange nachdem der Lauf fertig
+        // ist. Das darf den Cron-Prozess nicht beenden.
+        ablehnen(new Error('kv-token-geheim verspätet abgelehnt'));
+        await new Promise(resolve => setImmediate(resolve));
+        await new Promise(resolve => setImmediate(resolve));
+
+        assert.deepEqual(unbehandelte, []);
+    } finally {
+        process.off('unhandledRejection', beobachter);
+    }
+});
+
+test('die Frist des Historien-Writes ist einstellbar', async () => {
+    const harness = createStore({
+        initial: {
+            feed_health_status: storedHealth('2026-07-28T10:40:00.000Z'),
+            feed_publish_status: storedPublish('2026-07-28T10:40:00.000Z'),
+        },
+    });
+    const clock = createClock();
+    const timers = createTestTimers();
+    let ablehnen;
+    const haengend = new Promise((_resolve, reject) => {
+        ablehnen = reject;
+    });
+    void ablehnen;
+
+    const recorder = createRecorder(harness, clock, silentLogger().logger, {
+        appendHistory: () => haengend,
+        historyTimeoutMs: 500,
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    await recorder.begin();
+    await recorder.loadPreviousState();
+    recorder.markFeedListLoaded();
+
+    const lauf = recorder.finish({
+        feedHealth: successfulFeedHealth('2026-07-28T11:01:30.000Z'),
+        durations: { totalMs: 150_000 },
+    });
+
+    await abwickeln();
+
+    assert.equal(timers.angelegt[0].ms, 500);
+    timers.ablaufen();
+    assert.equal((await lauf).result, 'success');
+});
+
+test('die Warnung zum Fristablauf trägt kein Secret', async () => {
+    const harness = createStore({
+        initial: {
+            feed_health_status: storedHealth('2026-07-28T10:40:00.000Z'),
+            feed_publish_status: storedPublish('2026-07-28T10:40:00.000Z'),
+        },
+    });
+    const clock = createClock();
+    const { logger, warnings } = silentLogger();
+    const timers = createTestTimers();
+    const haengend = new Promise(() => {});
+
+    const recorder = createFeedRunRecorder({
+        store: harness.store,
+        runId: 'gha-4711-1',
+        startedAt: STARTED_AT,
+        now: clock.now,
+        logger,
+        redact: message => message.split('kv-token-geheim').join('[redacted]'),
+        appendHistory: () => haengend,
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    await recorder.begin();
+    await recorder.loadPreviousState();
+    recorder.markFeedListLoaded();
+
+    const lauf = recorder.finish({
+        feedHealth: successfulFeedHealth('2026-07-28T11:01:30.000Z'),
+        durations: { totalMs: 150_000 },
+    });
+    await abwickeln();
+    timers.ablaufen();
+    await lauf;
+
+    const historienWarnungen = warnings.filter(message => message.includes('Laufhistorie'));
+    assert.equal(historienWarnungen.length, 1);
+    assert.ok(!historienWarnungen[0].includes('kv-token-geheim'));
+    assert.ok(!historienWarnungen[0].includes('feed_run_history'));
+});

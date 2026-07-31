@@ -10,11 +10,13 @@ import {
     FEED_RUN_HISTORY_LIMIT,
     FEED_RUN_HISTORY_RESULTS,
     FEED_RUN_HISTORY_SCHEMA_VERSION,
+    FEED_RUN_HISTORY_TIMEOUT_MS,
     buildRunHistoryEntry,
     normalizeRunHistory,
     normalizeRunHistoryEntry,
     runHistoryScore,
     summarizeRunHistory,
+    withRunHistoryDeadline,
 } from '../../../shared/feed-run-history.js';
 
 const STARTED_AT = '2026-07-28T11:58:00.000Z';
@@ -339,4 +341,153 @@ test('der Builder verlangt keine History-Schema-Version am Laufstatus', () => {
     const eintrag = buildRunHistoryEntry(ohneVersion);
     assert.notEqual(eintrag, null);
     assert.equal(eintrag.schemaVersion, FEED_RUN_HISTORY_SCHEMA_VERSION);
+});
+
+// === Frist für einen Historienzugriff ===
+//
+// Steuerbare Zeitgeber: kein Test wartet real. Ein nie aufgeloestes Promise
+// stellt den haengenden Speicher dar.
+
+/** Zeitgeber, die nur auf Zuruf feuern. */
+function createTestTimers() {
+    const angelegt = [];
+    const abgeraeumt = [];
+
+    return {
+        angelegt,
+        abgeraeumt,
+        offene: () => angelegt.filter(eintrag => !abgeraeumt.includes(eintrag)),
+        setTimer(callback, ms) {
+            const eintrag = { callback, ms };
+            angelegt.push(eintrag);
+            return eintrag;
+        },
+        clearTimer(handle) {
+            if (handle) abgeraeumt.push(handle);
+        },
+        ablaufen() {
+            for (const eintrag of angelegt) eintrag.callback();
+        },
+    };
+}
+
+/** Ein Speicher, der niemals antwortet. */
+function nieAufgeloest() {
+    let ablehnen;
+    const promise = new Promise((_resolve, reject) => {
+        ablehnen = reject;
+    });
+    return { promise, ablehnen };
+}
+
+test('ein Zugriff innerhalb der Frist liefert sein Ergebnis', async () => {
+    const timers = createTestTimers();
+
+    const ergebnis = await withRunHistoryDeadline(async () => 'fertig', {
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    assert.equal(ergebnis, 'fertig');
+    assert.deepEqual(timers.offene(), [], 'der Zeitgeber wird auch im Erfolgsfall abgeräumt');
+});
+
+test('ein hängender Zugriff wird nach der Frist abgebrochen', async () => {
+    const timers = createTestTimers();
+    const haengend = nieAufgeloest();
+
+    const lauf = withRunHistoryDeadline(() => haengend.promise, {
+        timeoutMs: 3000,
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    assert.equal(timers.angelegt.length, 1);
+    assert.equal(timers.angelegt[0].ms, 3000, 'die Frist steht am Zeitgeber');
+
+    timers.ablaufen();
+
+    await assert.rejects(() => lauf, /Zeitgrenze von 3000 ms überschritten/);
+    assert.deepEqual(timers.offene(), [], 'der Zeitgeber wird auch im Fristfall abgeräumt');
+});
+
+test('ein Fehler des Zugriffs wird weitergereicht und räumt den Zeitgeber ab', async () => {
+    const timers = createTestTimers();
+
+    await assert.rejects(
+        () => withRunHistoryDeadline(async () => {
+            throw new Error('Speicher abgelehnt');
+        }, { setTimer: timers.setTimer, clearTimer: timers.clearTimer }),
+        /Speicher abgelehnt/,
+    );
+
+    assert.deepEqual(timers.offene(), []);
+});
+
+test('ein synchroner Wurf wird zur Ablehnung statt zum Absturz', async () => {
+    const timers = createTestTimers();
+
+    await assert.rejects(
+        () => withRunHistoryDeadline(() => {
+            throw new Error('sofort kaputt');
+        }, { setTimer: timers.setTimer, clearTimer: timers.clearTimer }),
+        /sofort kaputt/,
+    );
+
+    assert.deepEqual(timers.offene(), []);
+});
+
+test('eine verspätete Ablehnung nach dem Fristablauf bleibt behandelt', async () => {
+    const timers = createTestTimers();
+    const haengend = nieAufgeloest();
+
+    const unbehandelte = [];
+    const beobachter = grund => unbehandelte.push(grund);
+    process.on('unhandledRejection', beobachter);
+
+    try {
+        const lauf = withRunHistoryDeadline(() => haengend.promise, {
+            setTimer: timers.setTimer,
+            clearTimer: timers.clearTimer,
+        });
+
+        timers.ablaufen();
+        await assert.rejects(() => lauf, /Zeitgrenze/);
+
+        // Der überholte Zugriff meldet sich erst jetzt - und darf den Prozess
+        // nicht mit einer unbehandelten Ablehnung beenden.
+        haengend.ablehnen(new Error('verspätet abgelehnt'));
+
+        // Zwei Runden der Microtask- und Macrotask-Warteschlange: erst danach
+        // hätte Node eine unbehandelte Ablehnung gemeldet.
+        await new Promise(resolve => setImmediate(resolve));
+        await new Promise(resolve => setImmediate(resolve));
+
+        assert.deepEqual(unbehandelte, []);
+    } finally {
+        process.off('unhandledRejection', beobachter);
+    }
+});
+
+test('eine unbrauchbare Frist schaltet die Begrenzung nicht ab', async () => {
+    for (const timeoutMs of [0, -1, Number.NaN, null, 'drei']) {
+        const timers = createTestTimers();
+        const haengend = nieAufgeloest();
+
+        const lauf = withRunHistoryDeadline(() => haengend.promise, {
+            timeoutMs,
+            setTimer: timers.setTimer,
+            clearTimer: timers.clearTimer,
+        });
+
+        assert.equal(timers.angelegt.length, 1, `${String(timeoutMs)} ergibt trotzdem einen Zeitgeber`);
+        assert.equal(timers.angelegt[0].ms, FEED_RUN_HISTORY_TIMEOUT_MS, 'die Vorgabe gilt');
+
+        timers.ablaufen();
+        await assert.rejects(() => lauf, /Zeitgrenze/);
+    }
+});
+
+test('die Vorgabefrist ist festgelegt und kurz', () => {
+    assert.equal(FEED_RUN_HISTORY_TIMEOUT_MS, 3000);
 });

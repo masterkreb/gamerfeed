@@ -536,6 +536,154 @@ test('die Historie liefert keine Secrets aus, auch wenn sie welche enthielte', a
     assert.ok(!text.includes('proxy-geheim'));
 });
 
+// === Der Historien-Read ist begrenzt ===
+//
+// Ein Speicher, der gar nicht antwortet, darf die Antwort nicht offen halten:
+// alle uebrigen Health-Daten liegen laengst vor. Kein Test wartet real.
+
+function createTestTimers() {
+    const angelegt = [];
+    const abgeraeumt = [];
+
+    return {
+        angelegt,
+        offene: () => angelegt.filter(eintrag => !abgeraeumt.includes(eintrag)),
+        setTimer(callback, ms) {
+            const eintrag = { callback, ms };
+            angelegt.push(eintrag);
+            return eintrag;
+        },
+        clearTimer(handle) {
+            if (handle) abgeraeumt.push(handle);
+        },
+        ablaufen() {
+            for (const eintrag of angelegt) eintrag.callback();
+        },
+    };
+}
+
+async function abwickeln(runden = 8) {
+    for (let index = 0; index < runden; index += 1) {
+        await new Promise(resolve => setImmediate(resolve));
+    }
+}
+
+test('ein hängender Historien-Read hält die Health-Antwort nicht auf', async () => {
+    const timers = createTestTimers();
+    let ablehnen;
+    const haengend = new Promise((_resolve, reject) => {
+        ablehnen = reject;
+    });
+    void ablehnen;
+
+    const { handler, loggerCalls } = createHandler(healthyStore(), {
+        readHistory: () => haengend,
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    const antwort = handler(new Request('https://example.com/x'));
+    await abwickeln();
+
+    assert.equal(timers.angelegt.length, 1);
+    assert.equal(timers.angelegt[0].ms, 3000, 'die dokumentierte Frist');
+    timers.ablaufen();
+
+    const response = await antwort;
+    const body = await response.json();
+
+    assert.equal(response.status, 200, 'die übrigen Health-Daten kommen an');
+    assert.equal(body.runHistory, null, 'ein Zeitablauf ist kein leeres Feld');
+    assert.equal(body.healthStatus.gamestar.status, 'success');
+    assert.deepEqual(body.sourcesInCache, ['GameStar']);
+    assert.equal(body.heartbeat.run.runId, 'gha-123-1');
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
+    assert.deepEqual(timers.offene(), [], 'der Zeitgeber wird abgeräumt');
+    assert.ok(loggerCalls.some(call => /Run history unavailable/.test(String(call[0]))));
+});
+
+test('der Zeitgeber des Historien-Reads wird auch im Erfolgsfall abgeräumt', async () => {
+    const timers = createTestTimers();
+    const { handler } = createHandler(healthyStore(), {
+        readHistory: async () => [historyEntry({ runId: 'gha-schnell' })],
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    const body = await (await handler(new Request('https://example.com/x'))).json();
+
+    assert.deepEqual(body.runHistory.map(eintrag => eintrag.runId), ['gha-schnell']);
+    assert.deepEqual(timers.offene(), []);
+});
+
+test('eine verspätete Ablehnung des überholten Reads bleibt behandelt', async () => {
+    const timers = createTestTimers();
+    let ablehnen;
+    const haengend = new Promise((_resolve, reject) => {
+        ablehnen = reject;
+    });
+
+    const unbehandelte = [];
+    const beobachter = grund => unbehandelte.push(grund);
+    process.on('unhandledRejection', beobachter);
+
+    try {
+        const { handler } = createHandler(healthyStore(), {
+            readHistory: () => haengend,
+            setTimer: timers.setTimer,
+            clearTimer: timers.clearTimer,
+        });
+
+        const antwort = handler(new Request('https://example.com/x'));
+        await abwickeln();
+        timers.ablaufen();
+
+        assert.equal((await antwort).status, 200);
+
+        ablehnen(new Error('KV offline: https://kv.example/pipeline?token=geheim'));
+        await abwickeln();
+
+        assert.deepEqual(unbehandelte, []);
+    } finally {
+        process.off('unhandledRejection', beobachter);
+    }
+});
+
+test('die Frist des Historien-Reads verrät nichts über den Speicher', async () => {
+    const timers = createTestTimers();
+    const { handler, loggerCalls } = createHandler(healthyStore(), {
+        readHistory: () => new Promise(() => {}),
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    const antwort = handler(new Request('https://example.com/x'));
+    await abwickeln();
+    timers.ablaufen();
+
+    const body = await (await antwort).json();
+
+    assert.doesNotMatch(JSON.stringify(body), /feed_run_history|Zeitgrenze|kv/i);
+    assert.ok(loggerCalls.some(call => /Run history unavailable/.test(String(call[0]))));
+});
+
+test('die Frist des Historien-Reads ist einstellbar', async () => {
+    const timers = createTestTimers();
+    const { handler } = createHandler(healthyStore(), {
+        readHistory: () => new Promise(() => {}),
+        historyTimeoutMs: 250,
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    const antwort = handler(new Request('https://example.com/x'));
+    await abwickeln();
+
+    assert.equal(timers.angelegt[0].ms, 250);
+    timers.ablaufen();
+    assert.equal((await antwort).status, 200);
+});
+
 test('Einträge mit fremder Schema-Version werden verworfen, die übrigen bleiben', async () => {
     const { handler } = createHandler(healthyStore(), {
         readHistory: async () => [

@@ -20,6 +20,10 @@
 // 3. Gelesene Einträge werden genauso streng normalisiert wie geschriebene. Ein
 //    beschädigter Datensatz ergibt `null` und wird vom Leser übersprungen,
 //    statt die gesamte Historie unbrauchbar zu machen.
+// 4. Kein Zugriff auf die Historie wartet unbegrenzt. „Best effort“ heisst
+//    nicht nur „ein Fehler ist folgenlos“, sondern auch „ein haengender
+//    Speicher haelt niemanden auf“ – sonst blockiert eine nicht antwortende
+//    Verbindung den Laufabschluss oder die gesamte Health-Antwort.
 
 import {
     normalizeCounters,
@@ -52,6 +56,80 @@ export const FEED_RUN_HISTORY_LIMIT = 72;
  * für „läuft gerade“.
  */
 export const FEED_RUN_HISTORY_RESULTS = Object.freeze(['success', 'degraded', 'fatal']);
+
+/**
+ * Frist für einen einzelnen Historienzugriff.
+ *
+ * Ein Speicher, der gar nicht antwortet, ist etwas anderes als einer, der einen
+ * Fehler meldet: ohne Frist bliebe `finish()` unbegrenzt haengen, obwohl
+ * `feed_run_status` bereits geschrieben ist, und die Health-Antwort kaeme nie
+ * an, obwohl alle uebrigen Daten vorliegen.
+ *
+ * Drei Sekunden sind reichlich fuer eine einzelne KV-Transaktion und kurz genug,
+ * um weder den Laufabschluss noch eine Admin-Anfrage spuerbar zu verzoegern.
+ * Die Historie ist Beobachtbarkeit; sie darf niemanden aufhalten.
+ */
+export const FEED_RUN_HISTORY_TIMEOUT_MS = 3000;
+
+/**
+ * Begrenzt einen Historienzugriff auf eine kurze, feste Frist.
+ *
+ * Der Zeitgeber ist injizierbar, damit Tests einen haengenden Speicher
+ * nachstellen koennen, ohne real zu warten.
+ *
+ * Zwei Feinheiten, die leicht untergehen:
+ *
+ * - Der Zeitgeber wird auf **jedem** Abschlussweg wieder abgeraeumt, auch im
+ *   Erfolgsfall. Sonst haelt ein offener Timer den Node-Prozess des Cron-Laufs
+ *   nach dem letzten Schreibvorgang unnoetig am Leben.
+ * - Eine **verspaetete Ablehnung** des ueberholten Zugriffs bekommt hier einen
+ *   eigenen Handler. Ohne ihn beendete eine Ablehnung, die erst nach dem
+ *   Zeitablauf eintrifft, den Prozess als unbehandelte Ablehnung – ausgerechnet
+ *   ausgeloest von der Historie, die niemals ein Ergebnis veraendern darf.
+ *
+ * @param {() => Promise<unknown>} start startet den Zugriff
+ * @param {{
+ *   timeoutMs?: number,
+ *   setTimer?: (callback: () => void, ms: number) => unknown,
+ *   clearTimer?: (handle: unknown) => void,
+ * }} [options]
+ */
+export async function withRunHistoryDeadline(start, {
+    timeoutMs = FEED_RUN_HISTORY_TIMEOUT_MS,
+    setTimer = (callback, ms) => setTimeout(callback, ms),
+    clearTimer = handle => clearTimeout(handle),
+} = {}) {
+    // Auch ein synchroner Wurf des Aufrufers wird so zu einer Ablehnung und
+    // laeuft durch dieselbe Behandlung.
+    const operation = (async () => start())();
+
+    // Siehe oben: der ueberholte Zugriff darf niemanden mehr stoeren.
+    operation.catch(() => {});
+
+    // Eine unbrauchbare Frist schaltet die Begrenzung nicht ab, sondern faellt
+    // auf die Vorgabe zurueck. „Keine Frist“ waere genau der Zustand, den diese
+    // Funktion verhindern soll.
+    const effectiveMs = Number.isFinite(timeoutMs) && timeoutMs > 0
+        ? timeoutMs
+        : FEED_RUN_HISTORY_TIMEOUT_MS;
+
+    let handle = null;
+    try {
+        return await Promise.race([
+            operation,
+            new Promise((_resolve, reject) => {
+                handle = setTimer(
+                    // Bewusst ohne Speicherdetails im Text: die Meldung landet
+                    // im Protokoll des Laufs.
+                    () => reject(new Error(`Zeitgrenze von ${effectiveMs} ms überschritten`)),
+                    effectiveMs,
+                );
+            }),
+        ]);
+    } finally {
+        clearTimer(handle);
+    }
+}
 
 /**
  * Baut einen Historieneintrag aus einem abgeschlossenen Laufstatus.

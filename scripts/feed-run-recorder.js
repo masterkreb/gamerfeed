@@ -43,7 +43,11 @@ import {
     progressRunStatus,
     summarizeFeedHealth,
 } from '../shared/feed-health-model.js';
-import { buildRunHistoryEntry } from '../shared/feed-run-history.js';
+import {
+    FEED_RUN_HISTORY_TIMEOUT_MS,
+    buildRunHistoryEntry,
+    withRunHistoryDeadline,
+} from '../shared/feed-run-history.js';
 import { appendRunHistoryEntry } from '../shared/feed-run-history-store.js';
 
 /**
@@ -63,6 +67,9 @@ const FINISHABLE_RUN_RESULTS = Object.freeze(['success', 'degraded']);
  *   logger?: { log?: Function, warn?: Function },
  *   redact?: (message: string) => string,
  *   appendHistory?: (store: object, entry: object) => Promise<{ ok: boolean, error: string|null }>,
+ *   historyTimeoutMs?: number,
+ *   setTimer?: (callback: () => void, ms: number) => unknown,
+ *   clearTimer?: (handle: unknown) => void,
  * }} options
  */
 export function createFeedRunRecorder({
@@ -75,6 +82,11 @@ export function createFeedRunRecorder({
     // Injizierbar, damit Tests einen Schreibfehler der Historie erzwingen
     // koennen, ohne einen echten Sorted Set zu brauchen.
     appendHistory = appendRunHistoryEntry,
+    // Frist des Historien-Writes samt injizierbarer Zeitsteuerung. Tests
+    // stellen einen haengenden Speicher nach, ohne real zu warten.
+    historyTimeoutMs = FEED_RUN_HISTORY_TIMEOUT_MS,
+    setTimer = (callback, ms) => setTimeout(callback, ms),
+    clearTimer = handle => clearTimeout(handle),
 }) {
     const runStatus = createRunStatus({ runId, startedAt });
 
@@ -153,6 +165,13 @@ export function createFeedRunRecorder({
      * bereinigt protokolliert und geht nicht weiter nach oben. Er darf weder
      * werfen noch das Laufergebnis oder den Exit-Code veraendern.
      *
+     * „Best effort“ heisst dabei ausdruecklich auch: **begrenzt**. Ein Speicher,
+     * der gar nicht antwortet, ist etwas anderes als einer, der einen Fehler
+     * meldet – ohne Frist bliebe `finish()` unbegrenzt haengen, obwohl
+     * `feed_run_status` bereits geschrieben ist und der Lauf fachlich fertig
+     * war. Ein Zeitablauf wird deshalb wie jeder andere Historienfehler
+     * behandelt.
+     *
      * Bewusst nicht abgedeckt: ein harter Abbruch des Prozesses und ein
      * Abbruch in der Vorpruefung ohne KV-Konfiguration. Beide erreichen diese
      * Stelle konstruktionsbedingt nie und hinterlassen deshalb keinen
@@ -166,7 +185,12 @@ export function createFeedRunRecorder({
                 return null;
             }
 
-            const result = await appendHistory(store, entry);
+            // Begrenzt: ein Speicher, der gar nicht antwortet, darf den bereits
+            // geschriebenen Laufabschluss nicht unbegrenzt offen halten.
+            const result = await withRunHistoryDeadline(
+                () => appendHistory(store, entry),
+                { timeoutMs: historyTimeoutMs, setTimer, clearTimer },
+            );
             if (!result?.ok) {
                 warn(`Laufhistorie konnte nicht ergänzt werden: ${redact(result?.error ?? 'unbekannter Fehler')}`);
                 return null;

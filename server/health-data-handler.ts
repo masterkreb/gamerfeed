@@ -14,7 +14,11 @@ import {
     FEED_STALE_AFTER_MS,
     buildFreshnessReport,
 } from '../shared/feed-health-model.js';
-import { normalizeRunHistory } from '../shared/feed-run-history.js';
+import {
+    FEED_RUN_HISTORY_TIMEOUT_MS,
+    normalizeRunHistory,
+    withRunHistoryDeadline,
+} from '../shared/feed-run-history.js';
 import { readRunHistory } from '../shared/feed-run-history-store.js';
 import { normalizeSnapshotPointer } from '../shared/news-snapshot.js';
 import { normalizeNewsSnapshotMetadata } from '../shared/news-snapshot-store.js';
@@ -61,6 +65,22 @@ interface HealthHandlerOptions {
      * die übrigen Health-Daten unberührt.
      */
     readHistory?: () => Promise<unknown[]>;
+    /**
+     * Frist für den Historien-Read (O4b).
+     *
+     * Ein Speicher, der gar nicht antwortet, darf die Health-Antwort nicht
+     * unbegrenzt offen halten – alle übrigen Daten liegen längst vor.
+     */
+    historyTimeoutMs?: number;
+    /** Injizierbare Zeitsteuerung: Tests warten nicht real. */
+    setTimer?: (callback: () => void, ms: number) => unknown;
+    clearTimer?: (handle: unknown) => void;
+}
+
+interface RunHistoryDeadlineOptions {
+    timeoutMs: number;
+    setTimer: (callback: () => void, ms: number) => unknown;
+    clearTimer: (handle: unknown) => void;
 }
 
 // Neutral formuliert: die Meldung geht an den Client und soll weder den
@@ -78,13 +98,20 @@ const MISSING_DATA_MESSAGE = 'Health-Daten sind derzeit nicht verfügbar.';
  */
 async function readRunHistorySafely(
     readHistory: () => Promise<unknown[]>,
+    deadline: RunHistoryDeadlineOptions,
     logger: Pick<Console, 'error'>,
 ): Promise<FeedRunHistoryEntry[] | null> {
     try {
+        // Begrenzt: ein hängender Speicher darf die übrige Antwort nicht
+        // aufhalten. Ein Zeitablauf zählt wie jeder andere Lesefehler und
+        // ergibt `null` – niemals ein leeres Feld, das eine leere Historie
+        // behaupten würde.
+        const entries = await withRunHistoryDeadline(readHistory, deadline);
+
         // Auch eine bereits normalisierte Liste läuft noch einmal durch die
         // gemeinsame Regel: was ausgeliefert wird, entscheidet genau eine
         // Stelle, unabhängig davon, woher die Einträge kommen.
-        return normalizeRunHistory(await readHistory()) as FeedRunHistoryEntry[];
+        return normalizeRunHistory(entries) as FeedRunHistoryEntry[];
     } catch (historyError) {
         // Der KV-Originaltext bleibt im Log.
         logger.error('Run history unavailable in /api/get-health-data:', historyError);
@@ -107,6 +134,9 @@ export function createHealthDataHandler(
         readSnapshot,
         readSnapshotMetadata,
         readHistory = () => readRunHistory(cache),
+        historyTimeoutMs = FEED_RUN_HISTORY_TIMEOUT_MS,
+        setTimer = (callback, ms) => setTimeout(callback, ms),
+        clearTimer = handle => clearTimeout(handle as ReturnType<typeof setTimeout>),
     }: HealthHandlerOptions = {},
     logger: Pick<Console, 'error'> = console,
 ) {
@@ -120,7 +150,11 @@ export function createHealthDataHandler(
                 // ergibt `null` und darf die übrigen Health-Daten nicht in
                 // einen 500er verwandeln. `[]` heißt dagegen ausdrücklich
                 // „gelesen, aber noch leer“.
-                readRunHistorySafely(readHistory, logger),
+                readRunHistorySafely(
+                    readHistory,
+                    { timeoutMs: historyTimeoutMs, setTimer, clearTimer },
+                    logger,
+                ),
             ]);
 
             if (!healthStatus) {
