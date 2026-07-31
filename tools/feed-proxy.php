@@ -24,6 +24,45 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
     exit;
 }
 
+// === Isolierter Versionsfingerprint (Roadmap-Paket O4d) ===
+//
+// Beantwortet ausschliesslich die Frage, ob die hochgeladene Datei zur
+// Hauptkopie im Repository gehoert. Der Zweig steht bewusst **vor** jeder
+// anderen Pruefung:
+//
+// - Er ruft niemals den Upstream-Feed ab und fasst die Allowlist nicht an.
+// - Er braucht kein cURL. Deshalb liegt er vor der cURL-Pruefung: ein Hosting
+//   ohne cURL-Erweiterung soll seine Version trotzdem melden koennen, statt nur
+//   "Proxy is not configured correctly" zu sagen.
+//
+// Der Fingerprint ist **nicht geheim**: er ist der Hash einer Datei, die
+// oeffentlich im Repository liegt. Er verraet weder die Adresse dieses
+// Endpunkts noch irgendein Secret.
+if (($_GET['mode'] ?? '') === 'fingerprint') {
+    $source = @file_get_contents(__FILE__);
+    if ($source === false) {
+        http_response_code(500);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo "Fingerprint unavailable\n";
+        exit;
+    }
+
+    // CRLF und einzelne CR werden auf LF vereinheitlicht. Ein Upload per FTP im
+    // Textmodus oder ein Windows-Editor aendert die Zeilenenden, ohne eine
+    // einzige Anweisung zu veraendern - das darf keinen Fehlalarm ausloesen.
+    $canonical = str_replace(["\r\n", "\r"], "\n", $source);
+
+    http_response_code(200);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'schemaVersion' => 1,
+        'service'       => 'gamerfeed-feed-proxy',
+        'algorithm'     => 'sha256',
+        'fingerprint'   => hash('sha256', $canonical),
+    ], JSON_UNESCAPED_SLASHES), "\n";
+    exit;
+}
+
 if (!function_exists('curl_init')) {
     http_response_code(500);
     header('Content-Type: text/plain; charset=utf-8');
