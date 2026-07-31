@@ -918,6 +918,9 @@ Zeilenendenwechsel ist also kein Alarm).
 - Der Workflow sieht nur `FEED_PROXY_URL`, keine Datenbank- und keine KV-Secrets
 - „Nicht erreichbar“ und „andere Version“ sind getrennte Ausgänge; aus einem
   Hosting-Ausfall folgt keine Aussage über die deployte Datei
+- Das O4d-Rollout-Gate ist geschlossen: Produktionslauf `30661491099` bestätigte
+  am 31. Juli 2026 die Übereinstimmung des Cyon-Deployments mit der
+  Repository-Fassung am Merge-Commit `972d2ef`
 - Ablauf und Ergebnistabelle: `docs/deployment/feed-proxy.md`
 
 ---
@@ -1044,7 +1047,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Lokaler Startcache im Admin (A1c): der bewusst auf 32 Artikel begrenzte Browsercache bewertet keine Feed-Zeile mehr, sondern steht global als eigene Kennzahl mit echter Artikel- und Quellenzahl
 - **Juli 2026:** Laufbericht (O4a): strukturierte Zusammenfassung je Lauf in der GitHub-Step-Summary mit Ergebnis, Dauern, Fehlerquote, Snapshot-Größen sowie Transport und beobachtetem HTTP-Status je Quelle – ohne neue KV-Schlüssel und ohne Einfluss auf Ergebnis oder Exit-Code
 - **Juli 2026:** SEO0: Search-Console-Baseline mit 0 indexierten URLs trotz erfolgreicher Sitemap und Live-Tests; SEO1 als kleiner hybrider Crawlability-Pilot vor O4b eingeordnet
-- **Juli 2026:** Isolierter Proxy-Fingerprint (O4d): `?mode=fingerprint` meldet den SHA-256-Hash des kanonisierten Proxy-Quelltexts, verglichen über einen eigenen manuellen Workflow – ohne Upstream-Abruf, ohne Cache- oder Datenbankzugriff und ohne den Feed-Lauf zu berühren
+- **Juli 2026:** Isolierter Proxy-Fingerprint (O4d): `?mode=fingerprint` meldet den SHA-256-Hash des kanonisierten Proxy-Quelltexts, verglichen über einen eigenen manuellen Workflow – ohne Upstream-Abruf, ohne Cache- oder Datenbankzugriff und ohne den Feed-Lauf zu berühren; der erfolgreiche Produktionslauf `30661491099` schloss das Rollout-Gate
 - **Juli 2026:** Begrenzte Laufhistorie (O4b): bis zu 72 abgeschlossene Läufe in einem Sorted Set `feed_run_history` mit atomarem Write und Kürzen in einer Transaktion, strikt geprüfter Schema-Version beim Lesen und einer Frist von 3 Sekunden je Zugriff, additiv in der geschützten Health-API und im Health Center sichtbar – ohne Alarmierung (O4c) und ohne Proxy-Fingerprint (O4d)
 - **Juli 2026:** Crawlbare Einstiege (SEO1): sichtbarer HTML-Fallback in `#root` mit genau einer H1 und Link auf `/gaming-news`, gerenderter Footer mit lokalisiertem Rückweg, eigener Einleitungstext auf `/gaming-news`, zeitstabile Metadaten ohne feste Quellenzahl und ohne `SearchAction`
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`

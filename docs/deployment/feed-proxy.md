@@ -141,6 +141,19 @@ console.log(computeProxyFingerprint(await readFile('tools/feed-proxy.php', 'utf8
 
 Derselbe Wert muss im Feld `fingerprint` der Endpunktantwort stehen.
 
+### Produktionsabnahme von O4d
+
+Das erstmalige Rollout-Gate wurde am **31. Juli 2026** geschlossen. Nach dem
+manuellen Upload auf Cyon bestätigte der GitHub-Actions-Lauf
+[30661491099](https://github.com/masterkreb/gamerfeed/actions/runs/30661491099),
+dass der deployte Fingerprint mit `tools/feed-proxy.php` am Merge-Commit
+`972d2ef` übereinstimmt. Der Workflow endete erfolgreich; weder Feed-Anbieter
+noch Produktionscache oder Datenbank wurden dabei angesprochen.
+
+Diese Abnahme belegt den damaligen Stand, ersetzt aber keine spätere Prüfung:
+Nach jeder Änderung an `tools/feed-proxy.php` bleiben Upload und erneuter
+Fingerprint-Vergleich erforderlich.
+
 ### Ergebnisse und ihre Bedeutung
 
 | Ausgang | Bedeutung | Nächster Schritt |
