@@ -292,6 +292,21 @@ Nicht enthalten und bewusst offen: **keine Alarmierung** – ein Workflow, der g
 nicht erst startet, hinterlässt keinen Eintrag, und diese Lücke schließt erst
 O4c. Ebenso **kein Proxy-Fingerprint** (O4d).
 
+**Stand 31. Juli 2026 (Branch `claude/o4d-proxy-fingerprint`):** **O4d** ist im
+Code fertig, das **Rollout-Gate bleibt offen**. `tools/feed-proxy.php` wird von
+Hand auf fremdes Hosting geladen und nirgends abgeglichen; „dort liegt die
+aktuelle Fassung“ war deshalb bisher eine Behauptung. Der Endpunkt beantwortet
+jetzt `?mode=fingerprint` mit dem SHA-256-Hash seines kanonisierten Quelltexts –
+ohne jeden Upstream-Abruf, ohne die Allowlist zu berühren und sogar auf einem
+Hosting ohne cURL. Verglichen wird über einen eigenen, ausschließlich manuell
+startbaren Workflow, der weder Datenbank- noch KV-Secrets sieht und den
+Feed-Lauf nicht anfassen kann. 895 zentrale Tests und 30 Browser-Abnahmen laufen
+erfolgreich.
+
+Erledigt ist O4d damit **noch nicht**: der deployte Proxy kennt den Modus erst
+nach dem nächsten manuellen Upload. Das Paket wird erst nach dem ersten echten
+Produktionsvergleich auf erledigt gesetzt.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -324,7 +339,7 @@ O4c. Ebenso **kein Proxy-Fingerprint** (O4d).
 | SEO4 | P3 | Entscheidung nötig | Eigene Domain und externe Reichweite festlegen |
 | O4b | P2 | erledigt | Begrenzte Laufhistorie |
 | O4c | P2 | Entscheidung nötig | Unabhängige Alarmierung |
-| O4d | P2 | geplant | Isolierter Proxy-Fingerprint |
+| O4d | P2 | Rollout-Gate offen | Isolierter Proxy-Fingerprint |
 | D1 | P2 | Entscheidung nötig | Datenbankschema, Backup und Restore festlegen |
 | D2 | P2 | geplant | Lokale Produktionsschreibvorgänge explizit absichern |
 | S3 | P2 | Entscheidung nötig | Rate Limits und SMTP-Laufzeit festlegen |
@@ -991,17 +1006,52 @@ offen.
 
 #### O4d – Isolierter Proxy-Fingerprint
 
-**Status:** geplant.
+**Status:** Code fertig, **Rollout-Gate offen**. Erledigt ist O4d erst nach dem
+echten Produktionsvergleich: die geänderte `tools/feed-proxy.php` muss auf das
+Cyon-Hosting hochgeladen und der Workflow **Proxy-Fingerprint prüfen** einmal
+gegen die Produktion gestartet werden. Solange das aussteht, beantwortet der
+deployte Endpunkt `?mode=fingerprint` noch gar nicht.
 
 - einen nicht geheimen Versionsfingerprint verwenden, damit der manuell
   deployte PHP-Proxy und das Repository verglichen werden können.
 
+**Umgesetzt:**
+
+- `tools/feed-proxy.php` beantwortet `?mode=fingerprint` mit dem SHA-256-Hash
+  seines kanonisierten Quelltexts; CRLF und einzelne CR werden vor dem Hash zu
+  LF, damit ein reiner Zeilenendenwechsel keinen Fehlalarm auslöst;
+- der Zweig steht **vor** der cURL-Prüfung, ruft niemals den Upstream ab und
+  fasst die Allowlist nicht an; ein mitgegebener `url`-Parameter wird ignoriert;
+- Antwort klein, versioniert und strikt geprüft
+  (`schemaVersion`, `service`, `algorithm`, `fingerprint`); `Cache-Control:
+  no-store` und `nosniff` bleiben unverändert;
+- `scripts/proxy-fingerprint.js` und `scripts/check-proxy-fingerprint.js`
+  berechnen den erwarteten Wert, rufen den Modus mit 10 s Frist und 4 KiB
+  Limit ab und benennen jeden Ausgang eindeutig;
+- eigener manueller Workflow `.github/workflows/proxy-fingerprint.yml`
+  (`workflow_dispatch`), ausdrücklich **nicht** Teil von `update-feeds.yml` und
+  ohne Datenbank- oder KV-Secrets;
+- für `FEED_PROXY_URL` gilt derselbe Adressvertrag wie im Feed-Lauf, über
+  dieselbe Funktion `readOptionalProxyUrl`: HTTPS ist Pflicht, und eine
+  abgelehnte Adresse löst keinerlei Netzwerkzugriff aus.
+
 **Abnahme:**
 
 - ein isolierter Smoke-Test vergleicht den erwarteten Proxy-Fingerprint, ohne
-  Produktionscache oder Feed-Anbieter zu verändern;
-- der Fingerprint verrät die Proxy-Adresse nicht;
+  Produktionscache oder Feed-Anbieter zu verändern – belegt durch einen
+  PHP-Lauf mit abgeschaltetem `curl_init`, der trotzdem antwortet;
+- der Fingerprint verrät die Proxy-Adresse nicht: jede Meldung läuft durch zwei
+  unabhängige Bereinigungsschichten, und beide sind durch Gegenproben als
+  wirksam nachgewiesen;
+- „nicht erreichbar“ und „andere Version“ bleiben getrennte Ausgänge;
 - Authentifizierung und Rate Limit des Proxys bleiben ausschließlich X1.
+
+**Offen bis zum Rollout:** der erste echte Vergleich gegen das Cyon-Hosting.
+Erst er belegt, dass Deployment und Prüfweg in Produktion zusammenpassen.
+
+Erfüllt durch `tests/feeds/unit/proxy-fingerprint.test.js` und
+`tests/feeds/unit/feed-proxy-php.test.js` (führt das echte PHP-Skript aus).
+Betriebsdoku: [`docs/deployment/feed-proxy.md`](../deployment/feed-proxy.md).
 
 ---
 

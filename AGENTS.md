@@ -121,7 +121,7 @@
 │       ├── roadmap.md      # Priorisierte Arbeitspakete und Abnahmekriterien
 │       └── seo-indexing.md # Search-Console-Baseline und SEO-Mess-Gate
 ├── tools/
-│   └── feed-proxy.php      # Manuell deployter externer Feed-Fallback
+│   └── feed-proxy.php      # Manuell deployter externer Feed-Fallback samt Fingerprint-Modus
 │
 ├── src/
 │   └── index.css           # Tailwind-v4-Konfiguration + Custom Styles
@@ -892,6 +892,34 @@ Der Hosting-Edge weist Anfragen sporadisch mit 415 ab, bevor PHP läuft. Da das
 Skript diesen Status nie selbst erzeugt, behandelt `scripts/feed-fetch-utils.js`
 415 **nur auf dem Proxy-Weg** als vorübergehend und wiederholt die Anfrage.
 
+### Versionsfingerprint (O4d)
+
+Weil die Datei von Hand hochgeladen wird, war „auf dem Hosting liegt die
+aktuelle Fassung“ bisher eine Behauptung. `?mode=fingerprint` macht daraus eine
+Feststellung: der Endpunkt meldet den SHA-256-Hash seines **kanonisierten**
+Quelltexts (CRLF und CR werden vor dem Hash zu LF, ein reiner
+Zeilenendenwechsel ist also kein Alarm).
+
+- Der Zweig steht **vor** der cURL-Prüfung, ruft **niemals** den Upstream ab und
+  fasst die Allowlist nicht an; ein mitgegebener `url`-Parameter wird ignoriert
+- Antwort: `{schemaVersion, service, algorithm, fingerprint}`, klein und strikt
+  geprüft – ein fremder Dienst oder eine spätere Schema-Fassung wird abgelehnt
+- Der Fingerprint ist **nicht geheim** (Hash einer öffentlichen Datei). Geheim
+  bleibt allein `FEED_PROXY_URL`; sie erscheint in keiner Meldung und keinem Log
+- Verglichen wird über `scripts/check-proxy-fingerprint.js` im **eigenen,
+  manuellen** Workflow `.github/workflows/proxy-fingerprint.yml`. Ausdrücklich
+  **nicht** im Feed-Lauf: der Vergleich darf einen News-Publish nie blockieren
+- Für `FEED_PROXY_URL` gilt **derselbe Adressvertrag wie im Feed-Lauf**, über
+  dieselbe Funktion `readOptionalProxyUrl`: HTTPS ist Pflicht, eingebettete
+  Zugangsdaten und fremde Protokolle sind abgelehnt. Eine abgelehnte Adresse
+  löst **keinen** Netzwerkzugriff aus – geprüft wird vor URL-Bau, DNS und fetch.
+  Bewusst **keine zweite** HTTPS-Prüfung: zwei Fassungen desselben Vertrags
+  laufen mit der Zeit auseinander
+- Der Workflow sieht nur `FEED_PROXY_URL`, keine Datenbank- und keine KV-Secrets
+- „Nicht erreichbar“ und „andere Version“ sind getrennte Ausgänge; aus einem
+  Hosting-Ausfall folgt keine Aussage über die deployte Datei
+- Ablauf und Ergebnistabelle: `docs/deployment/feed-proxy.md`
+
 ---
 
 ## 🔧 Häufige Befehle
@@ -1016,6 +1044,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Lokaler Startcache im Admin (A1c): der bewusst auf 32 Artikel begrenzte Browsercache bewertet keine Feed-Zeile mehr, sondern steht global als eigene Kennzahl mit echter Artikel- und Quellenzahl
 - **Juli 2026:** Laufbericht (O4a): strukturierte Zusammenfassung je Lauf in der GitHub-Step-Summary mit Ergebnis, Dauern, Fehlerquote, Snapshot-Größen sowie Transport und beobachtetem HTTP-Status je Quelle – ohne neue KV-Schlüssel und ohne Einfluss auf Ergebnis oder Exit-Code
 - **Juli 2026:** SEO0: Search-Console-Baseline mit 0 indexierten URLs trotz erfolgreicher Sitemap und Live-Tests; SEO1 als kleiner hybrider Crawlability-Pilot vor O4b eingeordnet
+- **Juli 2026:** Isolierter Proxy-Fingerprint (O4d): `?mode=fingerprint` meldet den SHA-256-Hash des kanonisierten Proxy-Quelltexts, verglichen über einen eigenen manuellen Workflow – ohne Upstream-Abruf, ohne Cache- oder Datenbankzugriff und ohne den Feed-Lauf zu berühren
 - **Juli 2026:** Begrenzte Laufhistorie (O4b): bis zu 72 abgeschlossene Läufe in einem Sorted Set `feed_run_history` mit atomarem Write und Kürzen in einer Transaktion, strikt geprüfter Schema-Version beim Lesen und einer Frist von 3 Sekunden je Zugriff, additiv in der geschützten Health-API und im Health Center sichtbar – ohne Alarmierung (O4c) und ohne Proxy-Fingerprint (O4d)
 - **Juli 2026:** Crawlbare Einstiege (SEO1): sichtbarer HTML-Fallback in `#root` mit genau einer H1 und Link auf `/gaming-news`, gerenderter Footer mit lokalisiertem Rückweg, eigener Einleitungstext auf `/gaming-news`, zeitstabile Metadaten ohne feste Quellenzahl und ohne `SearchAction`
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`

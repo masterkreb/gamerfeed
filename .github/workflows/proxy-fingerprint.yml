@@ -1,0 +1,50 @@
+name: Proxy-Fingerprint prüfen
+
+# Isolierter Produktionsvergleich des manuell deployten PHP-Proxys (O4d).
+#
+# Ausdrücklich nur `workflow_dispatch` und ausdrücklich **nicht** Teil von
+# `update-feeds.yml`: der Vergleich darf einen News-Publish niemals blockieren.
+# Ein abweichender Fingerprint soll eine ruhige Betriebsentscheidung auslösen,
+# keinen roten Cron-Lauf.
+#
+# Der Job stellt genau eine GET-Anfrage an den Fingerprint-Modus des Proxys. Er
+# ruft keinen Feed-Anbieter ab und bekommt deshalb weder Datenbank- noch
+# KV-Secrets: `FEED_PROXY_URL` ist das einzige Secret, das er sieht.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: proxy-fingerprint
+  cancel-in-progress: false
+
+jobs:
+  fingerprint:
+    name: Deployten Proxy mit der Hauptkopie vergleichen
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: PHP-Proxy syntaktisch prüfen
+        run: php -l tools/feed-proxy.php
+
+      - name: Fingerprint vergleichen
+        env:
+          # Einziges Secret dieses Workflows. Es wird nie ausgegeben; der
+          # Checker bereinigt jede Meldung.
+          FEED_PROXY_URL: ${{ secrets.FEED_PROXY_URL }}
+        run: node scripts/check-proxy-fingerprint.js
