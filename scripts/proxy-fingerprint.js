@@ -21,6 +21,7 @@
 //    nicht zum Schema“.
 
 import { createHash } from 'node:crypto';
+import { readOptionalProxyUrl } from './feed-run-config.js';
 import { readLimitedResponseText, ResponseTooLargeError } from './limited-response.js';
 import { fetchWithOutboundPolicy } from './outbound-policy.js';
 import { sanitizeErrorMessage } from '../shared/feed-health-model.js';
@@ -239,14 +240,26 @@ export async function checkProxyFingerprint({
     maxBytes = PROXY_FINGERPRINT_MAX_BYTES,
     createSignal = ms => AbortSignal.timeout(ms),
 } = {}) {
-    const configuredUrl = typeof feedProxyUrl === 'string' ? feedProxyUrl.trim() : '';
-    const redact = message => redactProxyMessage(message, configuredUrl || null);
+    const rawUrl = typeof feedProxyUrl === 'string' ? feedProxyUrl.trim() : '';
+    const redact = message => redactProxyMessage(message, rawUrl || null);
 
-    if (configuredUrl === '') {
-        return describe(
-            'missing_configuration',
-            'FEED_PROXY_URL ist nicht gesetzt; ohne Adresse ist kein Vergleich möglich.',
-        );
+    // Genau derselbe Adressvertrag wie im Feed-Lauf, und ausdruecklich **die
+    // gleiche Funktion**: `readOptionalProxyUrl` verlangt HTTPS und lehnt
+    // eingebettete Zugangsdaten, fremde Protokolle und ungueltige Syntax ab.
+    //
+    // Eine zweite, eigene Pruefung waere hier die eigentliche Gefahr: sie
+    // koennte mit der Zeit abweichen, und dann liefe der Fingerprint-Vergleich
+    // gegen eine Adresse, die der Feed-Lauf gar nicht benutzen wuerde - im
+    // schlimmsten Fall unverschluesselt ueber http.
+    //
+    // Die Pruefung steht vor dem Bau der Anfrageadresse, vor der
+    // DNS-Aufloesung, vor dem AbortSignal und vor jedem fetch: eine abgelehnte
+    // Adresse loest keinerlei Netzwerkzugriff aus.
+    const configured = readOptionalProxyUrl({ FEED_PROXY_URL: feedProxyUrl });
+    if (configured.value === null) {
+        // `skipReason` nennt ausschliesslich den Variablennamen und den Grund -
+        // niemals die Adresse, den Host, den Pfad oder einen Querystring.
+        return describe('missing_configuration', `${configured.skipReason}.`);
     }
 
     if (!SHA256_HEX_PATTERN.test(String(expectedFingerprint ?? ''))) {
@@ -256,15 +269,9 @@ export async function checkProxyFingerprint({
         );
     }
 
-    let requestUrl;
-    try {
-        requestUrl = buildFingerprintRequestUrl(configuredUrl);
-    } catch (error) {
-        return describe(
-            'missing_configuration',
-            `FEED_PROXY_URL ist keine gültige Adresse: ${redact(error)}`,
-        );
-    }
+    // Kann nach der Pruefung oben nicht mehr werfen: `readOptionalProxyUrl` hat
+    // die Adresse bereits erfolgreich durch `new URL()` gefuehrt.
+    const requestUrl = buildFingerprintRequestUrl(configured.value);
 
     let response;
     try {

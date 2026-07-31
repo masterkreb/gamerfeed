@@ -23,6 +23,7 @@ import {
     redactProxyMessage,
 } from '../../../scripts/proxy-fingerprint.js';
 import { main as checkerMain } from '../../../scripts/check-proxy-fingerprint.js';
+import { readOptionalProxyUrl } from '../../../scripts/feed-run-config.js';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const PROXY_SOURCE_PATH = resolve(REPO_ROOT, 'tools/feed-proxy.php');
@@ -465,4 +466,179 @@ test('der Checker gibt bei fehlender Konfiguration keinen leeren Platzhalter aus
 
     assert.deepEqual(codes, [1]);
     assert.match(zeilen.join('\n'), /missing_configuration/);
+});
+
+// === Adressvertrag: derselbe wie im Feed-Lauf ===
+//
+// Der Checker darf keine Adresse akzeptieren, die `scripts/feed-run-config.js`
+// ablehnen würde. Ein stiller Downgrade auf http wäre hier besonders
+// unangenehm: der Fingerprint-Vergleich liefe dann unverschlüsselt gegen einen
+// Endpunkt, den der eigentliche Feed-Lauf gar nicht benutzen würde.
+
+/**
+ * Prüft eine Adresse und zählt dabei jeden Netzwerkzugriff mit.
+ *
+ * Auch die DNS-Auflösung wird gezählt: die Validierung muss vor dem Bau der
+ * Anfrageadresse greifen, nicht erst kurz vor dem eigentlichen Abruf.
+ */
+async function pruefeAdresse(feedProxyUrl) {
+    let fetchCalls = 0;
+    let lookupCalls = 0;
+
+    const result = await checkProxyFingerprint({
+        feedProxyUrl,
+        expectedFingerprint: computeProxyFingerprint(QUELLTEXT),
+        lookup: async () => {
+            lookupCalls += 1;
+            return [{ address: '93.184.216.34', family: 4 }];
+        },
+        fetchImpl: async () => {
+            fetchCalls += 1;
+            return gueltigeAntwort(computeProxyFingerprint(QUELLTEXT));
+        },
+    });
+
+    return { result, fetchCalls, lookupCalls };
+}
+
+test('http löst keinerlei Netzwerkzugriff aus', async () => {
+    const { result, fetchCalls, lookupCalls } = await pruefeAdresse(
+        'http://proxy.example/feed-proxy.php?key=proxy-geheim',
+    );
+
+    assert.equal(result.outcome, 'missing_configuration', 'kein stiller Downgrade auf http');
+    assert.equal(fetchCalls, 0, 'kein Abruf');
+    assert.equal(lookupCalls, 0, 'keine DNS-Auflösung');
+    assert.match(result.message, /muss https verwenden/);
+});
+
+test('fremde Protokolle, Zugangsdaten und ungültige Syntax lösen keinen Zugriff aus', async () => {
+    const abzulehnen = [
+        'ftp://proxy.example/feed-proxy.php',
+        'file:///etc/passwd',
+        'javascript:alert(1)',
+        'https://nutzer:proxy-geheim@proxy.example/feed-proxy.php',
+        'http://nutzer:proxy-geheim@proxy.example/feed-proxy.php',
+        'nicht-mal-eine-url',
+        'https://',
+        '   ',
+        '',
+        null,
+        undefined,
+    ];
+
+    for (const feedProxyUrl of abzulehnen) {
+        const { result, fetchCalls, lookupCalls } = await pruefeAdresse(feedProxyUrl);
+
+        assert.equal(result.outcome, 'missing_configuration', String(feedProxyUrl));
+        assert.equal(fetchCalls, 0, `Abruf trotz ${String(feedProxyUrl)}`);
+        assert.equal(lookupCalls, 0, `DNS trotz ${String(feedProxyUrl)}`);
+    }
+});
+
+test('gültiges HTTPS wird weiterhin genau einmal geprüft', async () => {
+    for (const feedProxyUrl of [
+        'https://proxy.example/feed-proxy.php',
+        'https://proxy.example/gamerfeed/feed-proxy.php?key=proxy-geheim',
+        '  https://proxy.example/feed-proxy.php?a=1&b=2  ',
+    ]) {
+        const { result, fetchCalls } = await pruefeAdresse(feedProxyUrl);
+
+        assert.equal(result.outcome, 'ok', feedProxyUrl);
+        assert.equal(fetchCalls, 1, `genau ein Abruf für ${feedProxyUrl}`);
+    }
+});
+
+test('vorhandene Queryparameter einer gültigen Adresse bleiben erhalten', async () => {
+    const stub = createFetchStub(async () => gueltigeAntwort(computeProxyFingerprint(QUELLTEXT)));
+
+    await checkProxyFingerprint({
+        feedProxyUrl: 'https://proxy.example/feed-proxy.php?key=proxy-geheim&v=2',
+        expectedFingerprint: computeProxyFingerprint(QUELLTEXT),
+        fetchImpl: stub.fetchImpl,
+        lookup: lookupStub,
+    });
+
+    const angefragt = new URL(stub.calls[0].url);
+    assert.equal(angefragt.searchParams.get('key'), 'proxy-geheim');
+    assert.equal(angefragt.searchParams.get('v'), '2');
+    assert.equal(angefragt.searchParams.get('mode'), 'fingerprint');
+});
+
+test('Feed-Lauf und Fingerprint-Checker urteilen über dieselben Adressen gleich', async () => {
+    // Kreuztest gegen ein künftiges Auseinanderlaufen: beide Seiten müssen
+    // dieselbe Menge an Adressen annehmen und ablehnen. Der Checker benutzt
+    // dafür buchstäblich `readOptionalProxyUrl`; dieser Test hält fest, dass
+    // das so bleibt.
+    const adressen = [
+        'https://proxy.example/feed-proxy.php',
+        'https://proxy.example/feed-proxy.php?key=proxy-geheim',
+        'http://proxy.example/feed-proxy.php',
+        'ftp://proxy.example/feed-proxy.php',
+        'https://nutzer:proxy-geheim@proxy.example/feed-proxy.php',
+        'nicht-mal-eine-url',
+        '',
+        '   ',
+    ];
+
+    for (const adresse of adressen) {
+        const vomFeedLauf = readOptionalProxyUrl({ FEED_PROXY_URL: adresse });
+        const { result } = await pruefeAdresse(adresse);
+
+        const feedLaufAkzeptiert = vomFeedLauf.value !== null;
+        const checkerAkzeptiert = result.outcome !== 'missing_configuration';
+
+        assert.equal(
+            checkerAkzeptiert,
+            feedLaufAkzeptiert,
+            `Uneinigkeit über ${adresse || '(leer)'}: Feed-Lauf ${feedLaufAkzeptiert}, Checker ${checkerAkzeptiert}`,
+        );
+
+        if (!feedLaufAkzeptiert) {
+            // Auch die Begründung stammt aus derselben Quelle.
+            assert.equal(result.message, `${vomFeedLauf.skipReason}.`, adresse || '(leer)');
+        }
+    }
+});
+
+test('eine abgelehnte Adresse nennt weder Host noch Pfad noch Querystring', async () => {
+    for (const feedProxyUrl of [
+        'http://proxy.example/gamerfeed/feed-proxy.php?key=proxy-geheim',
+        'ftp://proxy.example/gamerfeed/feed-proxy.php?key=proxy-geheim',
+        'https://nutzer:proxy-geheim@proxy.example/gamerfeed/feed-proxy.php',
+    ]) {
+        const { result } = await pruefeAdresse(feedProxyUrl);
+        const gesamt = JSON.stringify(result);
+
+        assert.doesNotMatch(gesamt, /proxy-geheim/, feedProxyUrl);
+        assert.doesNotMatch(gesamt, /proxy\.example/, feedProxyUrl);
+        assert.doesNotMatch(gesamt, /gamerfeed\/feed-proxy\.php/, feedProxyUrl);
+        assert.doesNotMatch(gesamt, /nutzer/, feedProxyUrl);
+        assert.match(gesamt, /FEED_PROXY_URL/, 'die Variable darf benannt werden');
+    }
+});
+
+test('auch die Checker-Ausgabe verrät bei abgelehnter Adresse nichts', async () => {
+    const { logger, zeilen } = createLogger();
+    const codes = [];
+
+    await checkerMain({
+        env: { FEED_PROXY_URL: 'http://proxy.example/gamerfeed/feed-proxy.php?key=proxy-geheim' },
+        readSource: async () => QUELLTEXT,
+        logger,
+        exit: code => codes.push(code),
+        fetchImpl: async () => {
+            throw new Error('es darf gar nicht erst abgerufen werden');
+        },
+        lookup: async () => {
+            throw new Error('es darf keine DNS-Auflösung geben');
+        },
+    });
+
+    const ausgabe = zeilen.join('\n');
+    assert.deepEqual(codes, [1]);
+    assert.match(ausgabe, /missing_configuration/);
+    assert.match(ausgabe, /muss https verwenden/);
+    assert.doesNotMatch(ausgabe, /proxy-geheim/);
+    assert.doesNotMatch(ausgabe, /proxy\.example/);
 });
