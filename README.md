@@ -266,6 +266,11 @@ hinterlässt hier keinen Eintrag – eine Lücke beweist also nichts. Und die
 Historie **alarmiert niemanden**; sie wird nur sichtbar, wenn jemand hinsieht.
 Ein unabhängiger Alarmkanal ist ein eigenes Arbeitspaket.
 
+Die Historie hält nie jemanden auf: jeder Zugriff auf sie hat eine Frist von 3
+Sekunden. Antwortet der Speicher nicht, endet der Cron-Lauf trotzdem normal und
+das Admin zeigt die Historie als nicht lesbar, während alle übrigen Health-Daten
+weiterhin ankommen.
+
 Einzelheiten und Betriebshinweise stehen in der
 [Dokumentation der Laufhistorie](docs/deployment/feed-run-history.md).
 

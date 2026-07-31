@@ -278,7 +278,15 @@ Historienfehler verändert weder Laufergebnis noch Exit-Code. Die geschützte
 ausdrücklich verschiedene Aussagen sind; ein Lesefehler lässt die übrigen
 Health-Daten mit Status 200 stehen. Im Health Center unterscheidet ein eigenes
 Panel nicht lesbar, leer und vorhanden und trägt jedes Ergebnis durch Text und
-Symbol. 836 zentrale Tests und 30 Browser-Abnahmen laufen erfolgreich.
+Symbol.
+
+Jeder Historienzugriff – Write wie Read – läuft zusätzlich gegen eine Frist von
+3 Sekunden mit injizierbarer Zeitsteuerung: ein Speicher, der gar nicht
+antwortet, ist etwas anderes als einer, der einen Fehler meldet, und dürfte
+weder `finish()` noch die Health-Antwort offen halten. Beim Lesen wird die
+gespeicherte Schema-Version strikt geprüft, damit ein Eintrag aus einem fremden
+Schema nicht stillschweigend als aktueller gelesen wird. 858 zentrale Tests und
+30 Browser-Abnahmen laufen erfolgreich.
 
 Nicht enthalten und bewusst offen: **keine Alarmierung** – ein Workflow, der gar
 nicht erst startet, hinterlässt keinen Eintrag, und diese Lücke schließt erst
@@ -943,7 +951,13 @@ Integrationsfälle gegen das echte `main()` in
 - ein Fehler beim Schreiben der Historie macht einen erfolgreichen Lauf nicht
   `fatal` und verändert den Exit-Code nicht;
 - ein Lesefehler der Historie ergibt `runHistory: null`, aber weiterhin Status
-  200 mit den übrigen Health-Daten.
+  200 mit den übrigen Health-Daten;
+- ein **hängender** Speicher hält weder den Laufabschluss noch die Health-Antwort
+  auf: jeder Zugriff läuft gegen `FEED_RUN_HISTORY_TIMEOUT_MS` (3 Sekunden), der
+  Zeitgeber wird auf jedem Abschlussweg abgeräumt, und eine verspätete Ablehnung
+  erzeugt keine unbehandelte Ablehnung;
+- beim Lesen wird `schemaVersion` strikt geprüft; eine fehlende, ältere oder
+  zukünftige Version wird als einzelner ungültiger Eintrag übersprungen.
 
 **Dokumentierte Grenzen:** ein harter Prozessabbruch und ein Abbruch in der
 Vorprüfung ohne verfügbare KV-Konfiguration können konstruktionsbedingt keinen

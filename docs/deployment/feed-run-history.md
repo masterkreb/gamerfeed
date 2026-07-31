@@ -96,6 +96,26 @@ Zustand mit unbegrenzter Größe.
 }
 ```
 
+### Schema-Version
+
+`schemaVersion` wird **beim Lesen strikt geprüft**: nur genau
+`FEED_RUN_HISTORY_SCHEMA_VERSION` wird angenommen. Eine fehlende, ältere oder
+zukünftige Version ist ein einzelner ungültiger Eintrag und wird übersprungen –
+sie wird nicht als aktuelle umgedeutet.
+
+Das ist der eigentliche Zweck der Angabe. Ohne diese Prüfung würde ein Eintrag
+aus einem anderen Schema stillschweigend als aktueller gelesen: fehlende Felder
+erschienen als `0`, `null` oder „unbekannt“, ohne dass irgendwo sichtbar wäre,
+dass hier ein fremdes Format geraten wurde.
+
+Beim **Schreiben** wird die Version dagegen nicht geprüft, sondern vergeben:
+`buildRunHistoryEntry()` übersetzt einen aktuellen Laufstatus – der die Version
+des Heartbeat-Schemas trägt – in das aktuelle History-Schema.
+
+Ein späteres Schema wird deshalb als bewusster Schnitt eingeführt: die alten
+Einträge verschwinden aus der Anzeige, statt falsch gelesen zu werden, und die
+Historie füllt sich innerhalb eines Tages wieder.
+
 Genau **ein** Grundfeld je Ergebnis: ein `degraded` trägt `degradedReason`, ein
 `fatal` trägt `fatalError`, ein `success` trägt keines von beiden. Ein
 gespeicherter Widerspruch – „abgeschlossen“ neben „zurückgestellt: …“ – wäre im
@@ -149,7 +169,7 @@ hinterlassen:
 In beiden Fällen bleibt der letzte Eintrag der des vorherigen Laufs. Eine Lücke
 in der Historie ist deshalb **kein Beweis**, dass nichts passiert ist.
 
-### Best effort
+### Best effort heißt auch: begrenzt
 
 Ein Fehler beim Schreiben der Historie wird ausschließlich bereinigt
 protokolliert:
@@ -161,6 +181,33 @@ protokolliert:
 Er wirft nicht, verändert `success`, `degraded` oder `fatal` nicht und
 verändert den Exit-Code nicht. Ein Lauf, dessen News-Publish erfolgreich war,
 bleibt erfolgreich – auch wenn der Sorted Set gerade nicht erreichbar ist.
+
+Ein Speicher, der gar **nicht antwortet**, ist dabei etwas anderes als einer,
+der einen Fehler meldet. Jeder Historienzugriff läuft deshalb gegen eine feste
+Frist:
+
+```text
+FEED_RUN_HISTORY_TIMEOUT_MS = 3000   // 3 Sekunden
+```
+
+Drei Sekunden sind reichlich für eine einzelne KV-Transaktion und kurz genug,
+um weder den Laufabschluss noch eine Admin-Anfrage spürbar zu verzögern. Ohne
+diese Frist bliebe `finish()` unbegrenzt hängen, obwohl `feed_run_status`
+bereits geschrieben und der Lauf fachlich fertig ist. Ein Zeitablauf wird
+behandelt wie jeder andere Historienfehler.
+
+Zwei Feinheiten sind Teil des geprüften Verhaltens:
+
+- Der Zeitgeber wird auf **jedem** Abschlussweg abgeräumt, auch im Erfolgsfall –
+  sonst hielte ein offener Timer den Node-Prozess des Cron-Laufs unnötig am
+  Leben.
+- Eine **verspätete Ablehnung** des überholten Zugriffs bekommt einen eigenen
+  Handler. Ohne ihn beendete eine Ablehnung, die erst nach dem Zeitablauf
+  eintrifft, den Prozess als unbehandelte Ablehnung – ausgerechnet ausgelöst
+  von der Historie, die niemals ein Ergebnis verändern darf.
+
+Die Zeitsteuerung ist an beiden Aufrufstellen injizierbar (`historyTimeoutMs`,
+`setTimer`, `clearTimer`); kein Test wartet real.
 
 ## Health-API
 
@@ -181,6 +228,11 @@ Ein Lesefehler der Historie verwandelt die übrigen Health-Daten **nicht** in
 einen 500er: der Feed-Status, die Quellenliste, der Heartbeat und der
 Snapshot-Zeiger werden weiterhin mit Status 200 ausgeliefert. Authentifizierung
 und `private, no-store` bleiben unverändert.
+
+Der Read läuft gegen dieselbe Frist von 3 Sekunden. Ein hängender Speicher hält
+die Antwort also nicht offen, obwohl alle übrigen Daten längst vorliegen; ein
+Zeitablauf ergibt `runHistory: null` und niemals `[]`. Weder die Antwort noch
+das Protokoll nennen dabei den Speicher oder den Schlüsselnamen.
 
 Beschädigte Einzelelemente werden isoliert verworfen; ein unlesbarer Eintrag
 nimmt die restliche Historie nicht mit.
@@ -224,12 +276,13 @@ im Admin-Panel (Browser).
 
 | Datei | Prüft |
 |---|---|
-| `tests/server/unit/feed-run-history.test.js` | Builder und Normalizer, Ergebniszustände, Bereinigung, Grenzen |
+| `tests/server/unit/feed-run-history.test.js` | Builder und Normalizer, Ergebniszustände, strikte Schema-Version, Bereinigung, Frist |
 | `tests/server/unit/feed-run-history-store.test.js` | Transaktion, Kürzen, Reihenfolge, Lese- und Schreibfehler |
-| `tests/feeds/unit/feed-run-recorder.test.js` | Wann geschrieben wird, und dass ein Historienfehler folgenlos bleibt |
-| `tests/server/unit/health-data-handler.test.js` | `runHistory` in der Antwort, `[]` gegen `null`, Status 200 im Fehlerfall |
+| `tests/feeds/unit/feed-run-recorder.test.js` | Wann geschrieben wird, und dass Historienfehler und Fristablauf folgenlos bleiben |
+| `tests/server/unit/health-data-handler.test.js` | `runHistory` in der Antwort, `[]` gegen `null`, Status 200 bei Fehler und Fristablauf |
 | `tests/frontend/unit/feed-run-history-panel.test.js` | Datenfall, Leerfall, Nicht-verfügbar-Fall, DE/EN, Symbol statt nur Farbe |
 
 Kein Test berührt einen echten KV-Speicher, eine echte Datenbank, das Netz oder
 eine echte Wartezeit: die Uhren sind fest, die Speicher sind vollständige
-Attrappen.
+Attrappen. Ein hängender Speicher wird über ein nie aufgelöstes Promise und
+Zeitgeber nachgestellt, die nur auf Zuruf feuern.
