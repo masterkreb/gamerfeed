@@ -367,6 +367,28 @@ const resources = {
                         "feeds": "{{success}} of {{total}} feeds delivered articles",
                         "contentTitle": "Content freshness",
                         "contentNewestArticle": "Newest article: {{timestamp}}"
+                    },
+                    "runHistory": {
+                        "title": "Run history",
+                        "description": "The last completed runs, newest first. At most {{limit}} entries are kept; older ones drop out.",
+                        "unavailable": "The run history cannot be read right now. That is not a statement about the runs themselves.",
+                        "empty": "No completed run has been recorded yet. The next finished cron run fills this in.",
+                        "summary": "{{total}} recorded runs: {{success}} finished, {{degraded}} degraded, {{fatal}} aborted.",
+                        "scopeHint": "Only runs that actually finished are recorded. A workflow that never started leaves no entry here.",
+                        "tableCaption": "Completed cron runs, newest first",
+                        "headerFinishedAt": "Finished at",
+                        "headerResult": "Result",
+                        "headerDuration": "Total duration",
+                        "headerFeeds": "Feeds",
+                        "headerReason": "Reason",
+                        "resultSuccess": "finished",
+                        "resultDegraded": "degraded",
+                        "resultFatal": "aborted",
+                        "durationSeconds": "{{seconds}} s",
+                        "durationUnknown": "unknown",
+                        "feedCounts": "{{success}} of {{total}} with articles ({{warning}} warning, {{error}} error, {{unknown}} unknown)",
+                        "reasonNone": "-",
+                        "unknownTimestamp": "unknown"
                     }
                 },
                 "legend": {
@@ -808,6 +830,28 @@ const resources = {
                         "feeds": "{{success}} von {{total}} Feeds mit Artikeln",
                         "contentTitle": "Inhaltsfrische",
                         "contentNewestArticle": "Neuester Artikel: {{timestamp}}"
+                    },
+                    "runHistory": {
+                        "title": "Laufhistorie",
+                        "description": "Die zuletzt abgeschlossenen Läufe, neueste zuerst. Es werden höchstens {{limit}} Einträge aufbewahrt; ältere fallen heraus.",
+                        "unavailable": "Die Laufhistorie ist derzeit nicht lesbar. Das ist keine Aussage über die Läufe selbst.",
+                        "empty": "Es wurde noch kein abgeschlossener Lauf festgehalten. Der nächste beendete Cron-Lauf ergänzt ihn.",
+                        "summary": "{{total}} festgehaltene Läufe: {{success}} abgeschlossen, {{degraded}} eingeschränkt, {{fatal}} abgebrochen.",
+                        "scopeHint": "Festgehalten werden nur tatsächlich beendete Läufe. Ein Workflow, der gar nicht erst gestartet ist, hinterlässt hier keinen Eintrag.",
+                        "tableCaption": "Abgeschlossene Cron-Läufe, neuester zuerst",
+                        "headerFinishedAt": "Abschlusszeit",
+                        "headerResult": "Ergebnis",
+                        "headerDuration": "Gesamtdauer",
+                        "headerFeeds": "Feeds",
+                        "headerReason": "Grund",
+                        "resultSuccess": "abgeschlossen",
+                        "resultDegraded": "eingeschränkt",
+                        "resultFatal": "abgebrochen",
+                        "durationSeconds": "{{seconds}} s",
+                        "durationUnknown": "unbekannt",
+                        "feedCounts": "{{success}} von {{total}} mit Artikeln ({{warning}} Warnung, {{error}} Fehler, {{unknown}} unbekannt)",
+                        "reasonNone": "-",
+                        "unknownTimestamp": "unbekannt"
                     }
                 },
                 "legend": {

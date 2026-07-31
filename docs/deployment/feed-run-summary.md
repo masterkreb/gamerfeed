@@ -105,7 +105,9 @@ nicht zerlegen.
   ausschließlich im Arbeitsspeicher des laufenden Prozesses und werden nirgends
   gespeichert; das Schema von `feed_run_status`, `feed_publish_status` und
   `feed_health_status` bleibt unverändert.
-- Es gibt **keine Historie** über den letzten Lauf hinaus – das ist O4b.
+- Die Zusammenfassung selbst führt **keine Historie** über den letzten Lauf
+  hinaus. Die begrenzte Historie abgeschlossener Läufe steht seit O4b in
+  `feed_run_history`: [Begrenzte Laufhistorie](feed-run-history.md).
 - Es gibt **keinen Alarmkanal**; ein ausgefallener Workflow schreibt auch keine
   Zusammenfassung. Das ist O4c.
 - Es gibt **keinen Proxy-Fingerprint** – das ist O4d.

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useFeeds } from '../../hooks/useFeeds';
 import { useDialogFocus } from '../../hooks/useDialogFocus';
 import { useMutationLatch } from '../../hooks/useMutationLatch';
-import type { FeedSource, FeedHeartbeat, HealthDataResponse } from '../../types';
+import type { FeedSource, FeedHeartbeat, FeedRunHistoryEntry, HealthDataResponse } from '../../types';
 import {
     ArrowLeftIcon,
     NewspaperIcon,
@@ -128,6 +128,9 @@ export const AdminPanel: React.FC = () => {
     const deleteCancelButtonRef = useRef<HTMLButtonElement>(null);
     const addFeedButtonRef = useRef<HTMLButtonElement>(null);
     const [heartbeat, setHeartbeat] = useState<FeedHeartbeat | null>(null);
+    // O4b: `null` heisst nicht lesbar, `[]` heisst gelesen und noch leer. Beide
+    // Faelle sind unterscheidbar und werden im Health Center getrennt benannt.
+    const [runHistory, setRunHistory] = useState<FeedRunHistoryEntry[] | null>(null);
     const [activeTab, setActiveTab] = useState<AdminTab>('management');
     const [isReloadingReport, setIsReloadingReport] = useState(false);
     const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -269,9 +272,13 @@ export const AdminPanel: React.FC = () => {
                 sourcesInCache,
                 heartbeat: backendHeartbeat,
                 snapshot,
+                runHistory: backendRunHistory,
             } = await response.json() as HealthDataResponse;
 
             setHeartbeat(backendHeartbeat ?? null);
+            // Eine fehlende oder unbrauchbare Historie bleibt `null`; ein
+            // geratenes `[]` wuerde eine leere Historie behaupten.
+            setRunHistory(Array.isArray(backendRunHistory) ? backendRunHistory : null);
             setStoredReport({
                 backendHealth: healthStatus ?? {},
                 sourcesInCache: Array.isArray(sourcesInCache) ? sourcesInCache : null,
@@ -283,8 +290,10 @@ export const AdminPanel: React.FC = () => {
             // lokalisierte Meldung.
             console.error('Error reloading the stored health report:', error);
 
-            // Ohne frische Antwort ist auch der Heartbeat nicht mehr belegt.
+            // Ohne frische Antwort sind auch Heartbeat und Historie nicht mehr
+            // belegt.
             setHeartbeat(null);
+            setRunHistory(null);
             setStoredReport(null);
             setIsReportUnavailable(true);
         } finally {
@@ -459,6 +468,7 @@ export const AdminPanel: React.FC = () => {
                         <HealthCenterTab
                             report={healthReport}
                             heartbeat={heartbeat}
+                            runHistory={runHistory}
                             onReloadReport={reloadStoredReport}
                             isReloadingReport={isReloadingReport}
                         />

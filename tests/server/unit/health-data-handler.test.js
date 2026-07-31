@@ -3,6 +3,10 @@ import assert from 'node:assert/strict';
 import { createHealthDataHandler } from '../../../server/health-data-handler.ts';
 import { FEED_STALE_AFTER_MS } from '../../../shared/feed-health-model.js';
 import {
+    FEED_RUN_HISTORY_KEY,
+    FEED_RUN_HISTORY_LIMIT,
+} from '../../../shared/feed-run-history.js';
+import {
     NEWS_SNAPSHOT_VARIANTS,
     newsSnapshotPayloadKey,
 } from '../../../shared/news-snapshot-store.js';
@@ -233,7 +237,11 @@ test('ein KV-Fehler wird protokolliert, aber nicht ausgeliefert', async () => {
     assert.equal(body.error, 'Es ist ein interner Serverfehler aufgetreten.');
     assert.doesNotMatch(JSON.stringify(body), /KV offline|geheim/);
     assert.equal(response.headers.get('cache-control'), 'private, no-store');
-    assert.equal(calls.length, 1, 'der Originaltext landet ausschliesslich im Log');
+
+    // Die Laufhistorie protokolliert ihren eigenen Ausfall (O4b); gezählt wird
+    // deshalb nur die Meldung dieses Fehlerpfads.
+    const apiFehler = calls.filter(call => /API Error/.test(String(call[0])));
+    assert.equal(apiFehler.length, 1, 'der Originaltext landet ausschliesslich im Log');
 });
 
 test('es werden nur die vier erwarteten KV-Schluessel gelesen', async () => {
@@ -359,8 +367,8 @@ test('ein Fehler beim Lesen der Quelle beendet die Health-API nicht', async () =
     assert.equal(response.status, 200);
     assert.equal(body.snapshot, null);
     assert.deepEqual(body.sourcesInCache, ['GameStar']);
-    assert.equal(loggerCalls.length, 1, 'der Ausfall wird protokolliert');
-    assert.match(String(loggerCalls[0][0]), /Snapshot unavailable/);
+    const snapshotFehler = loggerCalls.filter(call => /Snapshot unavailable/.test(String(call[0])));
+    assert.equal(snapshotFehler.length, 1, 'der Ausfall wird protokolliert');
 });
 
 test('eine unbrauchbare Angabe der Quelle gilt als Legacy', async () => {
@@ -388,4 +396,308 @@ test('ohne Zeiger meldet die Health-API null statt zu scheitern', async () => {
     assert.equal(response.status, 200);
     assert.equal(body.snapshot, null);
     assert.deepEqual(body.sourcesInCache, ['GameStar']);
+});
+
+// === Begrenzte Laufhistorie (Roadmap O4b) ===
+//
+// Additiv: die Historie kommt zu den bestehenden Health-Daten hinzu und darf
+// sie unter keinen Umständen gefährden. `[]` heisst „gelesen und leer“, `null`
+// heisst „nicht lesbar“ - dieser Unterschied ist die eigentliche Aussage.
+
+function historyEntry({ runId = 'gha-1', finishedAgeMs = 60_000, result = 'success', ...rest } = {}) {
+    return {
+        schemaVersion: 1,
+        runId,
+        startedAt: isoAgo(finishedAgeMs + 120_000),
+        finishedAt: isoAgo(finishedAgeMs),
+        result,
+        degradedReason: null,
+        fatalError: null,
+        feeds: { total: 2, success: 2, warning: 0, error: 0, unknown: 0 },
+        durations: { totalMs: 120_000 },
+        ...rest,
+    };
+}
+
+test('eine gültige Historie wird ausgeliefert, neueste zuerst', async () => {
+    const { handler } = createHandler(healthyStore(), {
+        readHistory: async () => [
+            historyEntry({ runId: 'gha-mitte', finishedAgeMs: 20 * 60_000 }),
+            historyEntry({ runId: 'gha-neu', finishedAgeMs: 60_000 }),
+            historyEntry({
+                runId: 'gha-alt',
+                finishedAgeMs: 40 * 60_000,
+                result: 'degraded',
+                degradedReason: 'Trendphase zurückgestellt',
+            }),
+        ],
+    });
+
+    const response = await handler(new Request('https://example.com/x'));
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
+    assert.deepEqual(body.runHistory.map(eintrag => eintrag.runId), ['gha-neu', 'gha-mitte', 'gha-alt']);
+    assert.equal(body.runHistory[2].result, 'degraded');
+    assert.equal(body.runHistory[2].degradedReason, 'Trendphase zurückgestellt');
+
+    // Die bestehenden Verträge bleiben unberührt.
+    assert.equal(body.heartbeat.run.runId, 'gha-123-1');
+    assert.deepEqual(body.sourcesInCache, ['GameStar']);
+});
+
+test('beschädigte Elemente der Historie werden isoliert verworfen', async () => {
+    const { handler } = createHandler(healthyStore(), {
+        readHistory: async () => [
+            historyEntry({ runId: 'gut' }),
+            null,
+            'kein Objekt',
+            { ...historyEntry(), result: 'running', finishedAt: null },
+            { ...historyEntry(), finishedAt: 'irgendwann' },
+            { kaputt: true },
+        ],
+    });
+
+    const body = await (await handler(new Request('https://example.com/x'))).json();
+
+    assert.deepEqual(body.runHistory.map(eintrag => eintrag.runId), ['gut']);
+});
+
+test('eine gelesene, aber leere Historie ist ein leeres Feld und kein null', async () => {
+    const { handler } = createHandler(healthyStore(), { readHistory: async () => [] });
+    const body = await (await handler(new Request('https://example.com/x'))).json();
+
+    assert.deepEqual(body.runHistory, []);
+});
+
+test('ein Lesefehler der Historie ergibt null, aber weiterhin Status 200', async () => {
+    const { handler, loggerCalls } = createHandler(healthyStore(), {
+        readHistory: async () => {
+            throw new Error('Sorted Set nicht lesbar');
+        },
+    });
+
+    const response = await handler(new Request('https://example.com/x'));
+    const body = await response.json();
+
+    assert.equal(response.status, 200, 'die übrigen Health-Daten bleiben ausgeliefert');
+    assert.equal(body.runHistory, null, 'kein geratenes leeres Feld');
+    assert.equal(body.healthStatus.gamestar.status, 'success');
+    assert.deepEqual(body.sourcesInCache, ['GameStar']);
+    assert.equal(body.heartbeat.run.runId, 'gha-123-1');
+    assert.ok(loggerCalls.some(call => /Run history unavailable/.test(String(call[0]))));
+});
+
+test('ein Client ohne Sorted-Set-Zugriff ergibt runHistory null statt eines Fehlers', async () => {
+    // Der Testclient kennt nur `get` - genau wie ein Legacy-KV-Client.
+    const { handler } = createHandler(healthyStore());
+
+    const response = await handler(new Request('https://example.com/x'));
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.runHistory, null);
+});
+
+test('die Historie wird aus dem Sorted Set des Clients gelesen', async () => {
+    const cache = createCache(healthyStore());
+    const zrangeCalls = [];
+    cache.client.zrange = async (key, min, max, options) => {
+        zrangeCalls.push({ key, min, max, options });
+        return [historyEntry({ runId: 'gha-aus-kv' })];
+    };
+
+    const { logger } = createLogger();
+    const handler = createHealthDataHandler(cache.client, { now: () => new Date(NOW) }, logger);
+    const body = await (await handler(new Request('https://example.com/x'))).json();
+
+    assert.deepEqual(body.runHistory.map(eintrag => eintrag.runId), ['gha-aus-kv']);
+    assert.equal(zrangeCalls.length, 1);
+    assert.equal(zrangeCalls[0].key, FEED_RUN_HISTORY_KEY);
+    assert.equal(zrangeCalls[0].min, 0);
+    assert.equal(zrangeCalls[0].max, FEED_RUN_HISTORY_LIMIT - 1);
+    assert.deepEqual(zrangeCalls[0].options, { rev: true });
+});
+
+test('die Historie liefert keine Secrets aus, auch wenn sie welche enthielte', async () => {
+    const { handler } = createHandler(healthyStore(), {
+        readHistory: async () => [historyEntry({
+            result: 'fatal',
+            fatalError: 'connect ECONNREFUSED postgres://nutzer:pg-geheim@db.example/main '
+                + 'sowie https://proxy.example/feed-proxy.php?key=proxy-geheim',
+        })],
+    });
+
+    const body = await (await handler(new Request('https://example.com/x'))).json();
+    const text = JSON.stringify(body);
+
+    assert.ok(!text.includes('pg-geheim'));
+    assert.ok(!text.includes('proxy-geheim'));
+});
+
+// === Der Historien-Read ist begrenzt ===
+//
+// Ein Speicher, der gar nicht antwortet, darf die Antwort nicht offen halten:
+// alle uebrigen Health-Daten liegen laengst vor. Kein Test wartet real.
+
+function createTestTimers() {
+    const angelegt = [];
+    const abgeraeumt = [];
+
+    return {
+        angelegt,
+        offene: () => angelegt.filter(eintrag => !abgeraeumt.includes(eintrag)),
+        setTimer(callback, ms) {
+            const eintrag = { callback, ms };
+            angelegt.push(eintrag);
+            return eintrag;
+        },
+        clearTimer(handle) {
+            if (handle) abgeraeumt.push(handle);
+        },
+        ablaufen() {
+            for (const eintrag of angelegt) eintrag.callback();
+        },
+    };
+}
+
+async function abwickeln(runden = 8) {
+    for (let index = 0; index < runden; index += 1) {
+        await new Promise(resolve => setImmediate(resolve));
+    }
+}
+
+test('ein hängender Historien-Read hält die Health-Antwort nicht auf', async () => {
+    const timers = createTestTimers();
+    let ablehnen;
+    const haengend = new Promise((_resolve, reject) => {
+        ablehnen = reject;
+    });
+    void ablehnen;
+
+    const { handler, loggerCalls } = createHandler(healthyStore(), {
+        readHistory: () => haengend,
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    const antwort = handler(new Request('https://example.com/x'));
+    await abwickeln();
+
+    assert.equal(timers.angelegt.length, 1);
+    assert.equal(timers.angelegt[0].ms, 3000, 'die dokumentierte Frist');
+    timers.ablaufen();
+
+    const response = await antwort;
+    const body = await response.json();
+
+    assert.equal(response.status, 200, 'die übrigen Health-Daten kommen an');
+    assert.equal(body.runHistory, null, 'ein Zeitablauf ist kein leeres Feld');
+    assert.equal(body.healthStatus.gamestar.status, 'success');
+    assert.deepEqual(body.sourcesInCache, ['GameStar']);
+    assert.equal(body.heartbeat.run.runId, 'gha-123-1');
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
+    assert.deepEqual(timers.offene(), [], 'der Zeitgeber wird abgeräumt');
+    assert.ok(loggerCalls.some(call => /Run history unavailable/.test(String(call[0]))));
+});
+
+test('der Zeitgeber des Historien-Reads wird auch im Erfolgsfall abgeräumt', async () => {
+    const timers = createTestTimers();
+    const { handler } = createHandler(healthyStore(), {
+        readHistory: async () => [historyEntry({ runId: 'gha-schnell' })],
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    const body = await (await handler(new Request('https://example.com/x'))).json();
+
+    assert.deepEqual(body.runHistory.map(eintrag => eintrag.runId), ['gha-schnell']);
+    assert.deepEqual(timers.offene(), []);
+});
+
+test('eine verspätete Ablehnung des überholten Reads bleibt behandelt', async () => {
+    const timers = createTestTimers();
+    let ablehnen;
+    const haengend = new Promise((_resolve, reject) => {
+        ablehnen = reject;
+    });
+
+    const unbehandelte = [];
+    const beobachter = grund => unbehandelte.push(grund);
+    process.on('unhandledRejection', beobachter);
+
+    try {
+        const { handler } = createHandler(healthyStore(), {
+            readHistory: () => haengend,
+            setTimer: timers.setTimer,
+            clearTimer: timers.clearTimer,
+        });
+
+        const antwort = handler(new Request('https://example.com/x'));
+        await abwickeln();
+        timers.ablaufen();
+
+        assert.equal((await antwort).status, 200);
+
+        ablehnen(new Error('KV offline: https://kv.example/pipeline?token=geheim'));
+        await abwickeln();
+
+        assert.deepEqual(unbehandelte, []);
+    } finally {
+        process.off('unhandledRejection', beobachter);
+    }
+});
+
+test('die Frist des Historien-Reads verrät nichts über den Speicher', async () => {
+    const timers = createTestTimers();
+    const { handler, loggerCalls } = createHandler(healthyStore(), {
+        readHistory: () => new Promise(() => {}),
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    const antwort = handler(new Request('https://example.com/x'));
+    await abwickeln();
+    timers.ablaufen();
+
+    const body = await (await antwort).json();
+
+    assert.doesNotMatch(JSON.stringify(body), /feed_run_history|Zeitgrenze|kv/i);
+    assert.ok(loggerCalls.some(call => /Run history unavailable/.test(String(call[0]))));
+});
+
+test('die Frist des Historien-Reads ist einstellbar', async () => {
+    const timers = createTestTimers();
+    const { handler } = createHandler(healthyStore(), {
+        readHistory: () => new Promise(() => {}),
+        historyTimeoutMs: 250,
+        setTimer: timers.setTimer,
+        clearTimer: timers.clearTimer,
+    });
+
+    const antwort = handler(new Request('https://example.com/x'));
+    await abwickeln();
+
+    assert.equal(timers.angelegt[0].ms, 250);
+    timers.ablaufen();
+    assert.equal((await antwort).status, 200);
+});
+
+test('Einträge mit fremder Schema-Version werden verworfen, die übrigen bleiben', async () => {
+    const { handler } = createHandler(healthyStore(), {
+        readHistory: async () => [
+            { ...historyEntry({ runId: 'zu-neu' }), schemaVersion: 999 },
+            historyEntry({ runId: 'gültig', finishedAgeMs: 20 * 60_000 }),
+            { ...historyEntry({ runId: 'ohne-version' }), schemaVersion: undefined },
+            { ...historyEntry({ runId: 'zu-alt' }), schemaVersion: 0 },
+        ],
+    });
+
+    const response = await handler(new Request('https://example.com/x'));
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(body.runHistory.map(eintrag => eintrag.runId), ['gültig']);
+    assert.equal(body.healthStatus.gamestar.status, 'success');
 });

@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { FeedHeartbeat } from '../../types';
+import type { FeedHeartbeat, FeedRunHistoryEntry } from '../../types';
 import type { AdminFeedHealthRow, AdminHealthReport } from '../../services/admin-health-report';
 import { LOCAL_NEWS_CACHE_MAX_ARTICLES } from '../../shared/local-news-cache';
 import { FeedHeartbeatPanel } from './FeedHeartbeatPanel';
+import { FeedRunHistoryPanel } from './FeedRunHistoryPanel';
 import {
     CheckCircleIcon, XCircleIcon, QuestionMarkCircleIcon, LoadingSpinner, WarningIcon, ChevronDownIcon, ChevronUpIcon
 } from '../Icons';
@@ -97,6 +98,8 @@ const SourceMetric: React.FC<{
 interface HealthCenterTabProps {
     report: AdminHealthReport;
     heartbeat: FeedHeartbeat | null;
+    /** `null` heißt nicht lesbar, `[]` heißt gelesen und noch leer (O4b). */
+    runHistory: FeedRunHistoryEntry[] | null;
     onReloadReport: () => void;
     isReloadingReport: boolean;
 }
@@ -104,6 +107,7 @@ interface HealthCenterTabProps {
 export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                                                                     report,
                                                                     heartbeat,
+                                                                    runHistory,
                                                                     onReloadReport,
                                                                     isReloadingReport
                                                                 }) => {
@@ -199,6 +203,7 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
     return (
         <section className="bg-white dark:bg-zinc-800 rounded-lg shadow overflow-hidden">
             <FeedHeartbeatPanel heartbeat={heartbeat} />
+            <FeedRunHistoryPanel entries={runHistory} />
             <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-slate-200 dark:border-zinc-700">
                 <div className="text-center sm:text-left">
                     <h2 className="text-lg font-semibold">{t('admin.health.title')}</h2>

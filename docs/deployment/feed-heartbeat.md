@@ -287,8 +287,10 @@ sollten lokale Schreibläufe nicht parallel zum Cron gestartet werden.
 
 **Was hier bewusst noch nicht drin ist:**
 
-- Keine Historie über den letzten Lauf hinaus und kein Alarmkanal – das ist O4.
-  Der Heartbeat muss heute noch aktiv im Admin abgerufen werden.
+- Der Heartbeat selbst kennt nur den letzten Lauf. Eine begrenzte Historie
+  abgeschlossener Läufe kam mit O4b hinzu:
+  [Begrenzte Laufhistorie](feed-run-history.md). Ein Alarmkanal fehlt weiterhin
+  – das ist O4c; Heartbeat und Historie müssen aktiv im Admin abgerufen werden.
 - Die drei News-Caches werden weiterhin nacheinander geschrieben. Schlägt ein
   Schreibvorgang dazwischen fehl, wird der Kern-Publish **nicht** fortgeschrieben;
   der Heartbeat meldet dann eher zu viel Alter als zu wenig. Die atomare

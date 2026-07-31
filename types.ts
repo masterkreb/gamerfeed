@@ -142,6 +142,26 @@ export interface FeedHeartbeat {
     };
 }
 
+/**
+ * Ein abgeschlossener Lauf in der begrenzten Historie (Roadmap O4b).
+ *
+ * Nur `success`, `degraded` und `fatal` werden gespeichert; `running` ist kein
+ * Abschluss und bleibt allein im veränderlichen `feed_run_status`.
+ */
+export interface FeedRunHistoryEntry {
+    schemaVersion: number;
+    runId: string | null;
+    startedAt: string;
+    finishedAt: string;
+    result: Exclude<FeedRunResult, 'running'>;
+    /** Nur bei `degraded` gesetzt, bereinigt und auf 300 Zeichen begrenzt. */
+    degradedReason: string | null;
+    /** Nur bei `fatal` gesetzt, bereinigt und auf 300 Zeichen begrenzt. */
+    fatalError: string | null;
+    feeds: FeedRunCounters;
+    durations: FeedRunDurations;
+}
+
 /** Aktive Cache-Generation des Leseprotokolls (Roadmap O3a). */
 export interface NewsSnapshotPointer {
     schemaVersion: number;
@@ -157,4 +177,12 @@ export interface HealthDataResponse {
     heartbeat: FeedHeartbeat;
     /** Generation, auf der `sourcesInCache` beruht; `null` bei Legacy-Stand. */
     snapshot: NewsSnapshotPointer | null;
+    /**
+     * Begrenzte Laufhistorie, neueste zuerst (Roadmap O4b).
+     *
+     * `[]` heißt: erfolgreich gelesen, aber noch keine Einträge vorhanden.
+     * `null` heißt: die Historie konnte nicht gelesen werden. Beide Fälle
+     * lassen die übrigen Health-Daten unberührt.
+     */
+    runHistory: FeedRunHistoryEntry[] | null;
 }
