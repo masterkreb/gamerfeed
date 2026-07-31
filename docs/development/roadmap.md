@@ -1030,7 +1030,10 @@ deployte Endpunkt `?mode=fingerprint` noch gar nicht.
   Limit ab und benennen jeden Ausgang eindeutig;
 - eigener manueller Workflow `.github/workflows/proxy-fingerprint.yml`
   (`workflow_dispatch`), ausdrücklich **nicht** Teil von `update-feeds.yml` und
-  ohne Datenbank- oder KV-Secrets.
+  ohne Datenbank- oder KV-Secrets;
+- für `FEED_PROXY_URL` gilt derselbe Adressvertrag wie im Feed-Lauf, über
+  dieselbe Funktion `readOptionalProxyUrl`: HTTPS ist Pflicht, und eine
+  abgelehnte Adresse löst keinerlei Netzwerkzugriff aus.
 
 **Abnahme:**
 

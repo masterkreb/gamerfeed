@@ -106,6 +106,23 @@ abweichender Fingerprint soll eine ruhige Betriebsentscheidung auslösen, keinen
 roten Cron-Lauf und keinen blockierten News-Publish. Er bekommt deshalb auch
 weder Datenbank- noch KV-Secrets.
 
+### Adressvertrag
+
+Der Fingerprint-Workflow akzeptiert **exakt denselben** `FEED_PROXY_URL`-Vertrag
+wie der Feed-Lauf – er benutzt dafür buchstäblich dieselbe Funktion
+(`readOptionalProxyUrl` in `scripts/feed-run-config.js`):
+
+- **HTTPS ist Pflicht.** Ein `http://` wird abgelehnt, statt still auf eine
+  unverschlüsselte Verbindung herunterzustufen.
+- Andere Protokolle, eingebettete Zugangsdaten (`https://nutzer:pw@…`) und
+  syntaktisch ungültige Adressen werden ebenfalls abgelehnt.
+- Vorhandene Queryparameter einer gültigen HTTPS-Adresse bleiben erhalten.
+
+Eine abgelehnte Adresse löst **keinerlei** Netzwerkzugriff aus: die Prüfung
+läuft vor dem Bau der Anfrageadresse, vor der DNS-Auflösung und vor jedem
+Abruf. Das Ergebnis ist `missing_configuration`, und die Meldung nennt nur den
+Variablennamen und den Grund – niemals Adresse, Host, Pfad oder Querystring.
+
 Lokal geht derselbe Vergleich mit gesetztem `FEED_PROXY_URL`:
 
 ```bash

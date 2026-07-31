@@ -909,6 +909,12 @@ Zeilenendenwechsel ist also kein Alarm).
 - Verglichen wird über `scripts/check-proxy-fingerprint.js` im **eigenen,
   manuellen** Workflow `.github/workflows/proxy-fingerprint.yml`. Ausdrücklich
   **nicht** im Feed-Lauf: der Vergleich darf einen News-Publish nie blockieren
+- Für `FEED_PROXY_URL` gilt **derselbe Adressvertrag wie im Feed-Lauf**, über
+  dieselbe Funktion `readOptionalProxyUrl`: HTTPS ist Pflicht, eingebettete
+  Zugangsdaten und fremde Protokolle sind abgelehnt. Eine abgelehnte Adresse
+  löst **keinen** Netzwerkzugriff aus – geprüft wird vor URL-Bau, DNS und fetch.
+  Bewusst **keine zweite** HTTPS-Prüfung: zwei Fassungen desselben Vertrags
+  laufen mit der Zeit auseinander
 - Der Workflow sieht nur `FEED_PROXY_URL`, keine Datenbank- und keine KV-Secrets
 - „Nicht erreichbar“ und „andere Version“ sind getrennte Ausgänge; aus einem
   Hosting-Ausfall folgt keine Aussage über die deployte Datei
