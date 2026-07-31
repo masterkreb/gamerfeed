@@ -292,20 +292,15 @@ Nicht enthalten und bewusst offen: **keine Alarmierung** – ein Workflow, der g
 nicht erst startet, hinterlässt keinen Eintrag, und diese Lücke schließt erst
 O4c. Ebenso **kein Proxy-Fingerprint** (O4d).
 
-**Stand 31. Juli 2026 (Branch `claude/o4d-proxy-fingerprint`):** **O4d** ist im
-Code fertig, das **Rollout-Gate bleibt offen**. `tools/feed-proxy.php` wird von
-Hand auf fremdes Hosting geladen und nirgends abgeglichen; „dort liegt die
-aktuelle Fassung“ war deshalb bisher eine Behauptung. Der Endpunkt beantwortet
-jetzt `?mode=fingerprint` mit dem SHA-256-Hash seines kanonisierten Quelltexts –
-ohne jeden Upstream-Abruf, ohne die Allowlist zu berühren und sogar auf einem
-Hosting ohne cURL. Verglichen wird über einen eigenen, ausschließlich manuell
-startbaren Workflow, der weder Datenbank- noch KV-Secrets sieht und den
-Feed-Lauf nicht anfassen kann. 895 zentrale Tests und 30 Browser-Abnahmen laufen
-erfolgreich.
-
-Erledigt ist O4d damit **noch nicht**: der deployte Proxy kennt den Modus erst
-nach dem nächsten manuellen Upload. Das Paket wird erst nach dem ersten echten
-Produktionsvergleich auf erledigt gesetzt.
+**Stand 31. Juli 2026:** **O4d ist abgeschlossen.** `tools/feed-proxy.php` wird
+von Hand auf fremdes Hosting geladen; `?mode=fingerprint` macht die deployte
+Fassung dennoch überprüfbar, ohne einen Upstream abzurufen oder die Allowlist
+zu berühren. Der ausschließlich manuell startbare Workflow sieht weder
+Datenbank- noch KV-Secrets und kann den Feed-Lauf nicht blockieren. Nach dem
+Upload auf Cyon bestätigte der Produktionslauf
+[30661491099](https://github.com/masterkreb/gamerfeed/actions/runs/30661491099),
+dass der deployte Fingerprint mit der Repository-Fassung am Merge-Commit
+`972d2ef` übereinstimmt. Das Rollout-Gate ist damit geschlossen.
 
 ## Empfohlene Reihenfolge
 
@@ -339,7 +334,7 @@ Produktionsvergleich auf erledigt gesetzt.
 | SEO4 | P3 | Entscheidung nötig | Eigene Domain und externe Reichweite festlegen |
 | O4b | P2 | erledigt | Begrenzte Laufhistorie |
 | O4c | P2 | Entscheidung nötig | Unabhängige Alarmierung |
-| O4d | P2 | Rollout-Gate offen | Isolierter Proxy-Fingerprint |
+| O4d | P2 | erledigt | Isolierter Proxy-Fingerprint |
 | D1 | P2 | Entscheidung nötig | Datenbankschema, Backup und Restore festlegen |
 | D2 | P2 | geplant | Lokale Produktionsschreibvorgänge explizit absichern |
 | S3 | P2 | Entscheidung nötig | Rate Limits und SMTP-Laufzeit festlegen |
@@ -1006,11 +1001,11 @@ offen.
 
 #### O4d – Isolierter Proxy-Fingerprint
 
-**Status:** Code fertig, **Rollout-Gate offen**. Erledigt ist O4d erst nach dem
-echten Produktionsvergleich: die geänderte `tools/feed-proxy.php` muss auf das
-Cyon-Hosting hochgeladen und der Workflow **Proxy-Fingerprint prüfen** einmal
-gegen die Produktion gestartet werden. Solange das aussteht, beantwortet der
-deployte Endpunkt `?mode=fingerprint` noch gar nicht.
+**Status:** Erledigt. Die geänderte `tools/feed-proxy.php` wurde auf das
+Cyon-Hosting hochgeladen. Der Workflow **Proxy-Fingerprint prüfen** bestätigte
+am 31. Juli 2026 im Produktionslauf
+[30661491099](https://github.com/masterkreb/gamerfeed/actions/runs/30661491099)
+die Übereinstimmung mit der Repository-Fassung am Merge-Commit `972d2ef`.
 
 - einen nicht geheimen Versionsfingerprint verwenden, damit der manuell
   deployte PHP-Proxy und das Repository verglichen werden können.
@@ -1046,8 +1041,10 @@ deployte Endpunkt `?mode=fingerprint` noch gar nicht.
 - „nicht erreichbar“ und „andere Version“ bleiben getrennte Ausgänge;
 - Authentifizierung und Rate Limit des Proxys bleiben ausschließlich X1.
 
-**Offen bis zum Rollout:** der erste echte Vergleich gegen das Cyon-Hosting.
-Erst er belegt, dass Deployment und Prüfweg in Produktion zusammenpassen.
+**Produktionsabnahme:** Der erste echte Vergleich gegen das Cyon-Hosting war
+erfolgreich. Erwarteter und gemeldeter SHA-256-Fingerprint waren identisch; der
+Workflow endete erfolgreich. Damit sind Deployment und Prüfweg gemeinsam in
+Produktion belegt.
 
 Erfüllt durch `tests/feeds/unit/proxy-fingerprint.test.js` und
 `tests/feeds/unit/feed-proxy-php.test.js` (führt das echte PHP-Skript aus).
