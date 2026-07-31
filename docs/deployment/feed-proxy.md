@@ -57,6 +57,93 @@ Danach den Workflow **Update RSS Feeds Cache** einmal manuell starten und im
 Log kontrollieren, ob bei einem fehlgeschlagenen Direktabruf
 `Feed proxy fetch successful` erscheint.
 
+## Fingerprint prüfen
+
+Seit O4d beantwortet der Proxy eine zweite, eng begrenzte Frage: **Liegt auf dem
+Hosting noch dieselbe Datei wie im Repository?** Der manuelle Upload wird
+nirgends automatisch abgeglichen, und eine vergessene Aktualisierung fällt sonst
+erst auf, wenn ein Feed dauerhaft ausfällt.
+
+### Der Modus
+
+```bash
+curl -i "https://proxy.example/feed-proxy.php?mode=fingerprint"
+```
+
+Erwartet wird HTTP 200 mit genau dieser Form:
+
+```json
+{"schemaVersion":1,"service":"gamerfeed-feed-proxy","algorithm":"sha256","fingerprint":"<64 Hexziffern>"}
+```
+
+Der Fingerprint ist der SHA-256-Hash des **kanonisierten** Dateiinhalts: CRLF
+und einzelne CR werden vor dem Hash zu LF. Ein Upload per FTP im Textmodus oder
+ein Windows-Editor ändert damit nichts am Ergebnis – nur eine echte inhaltliche
+Änderung tut das.
+
+Der Modus ist bewusst isoliert:
+
+- Er ruft **niemals** den Upstream-Feed ab und fasst die Allowlist nicht an.
+- Er steht **vor** der cURL-Prüfung; ein Hosting ohne cURL-Erweiterung meldet
+  seine Version trotzdem, statt nur „Proxy is not configured correctly“.
+- Ein mitgegebener `url`-Parameter wird ignoriert – der Modus gewinnt.
+- `Cache-Control: no-store` und `X-Content-Type-Options: nosniff` gelten
+  unverändert.
+
+> **Der Fingerprint ist nicht geheim.** Er ist der Hash einer Datei, die
+> öffentlich im Repository liegt, und verrät weder die Adresse des Endpunkts
+> noch irgendein Secret. Geheim bleibt allein `FEED_PROXY_URL`.
+
+### Der Vergleich
+
+Den Workflow **Proxy-Fingerprint prüfen** manuell starten
+(`.github/workflows/proxy-fingerprint.yml`, nur `workflow_dispatch`). Er
+berechnet den erwarteten Fingerprint aus `tools/feed-proxy.php`, ruft den
+Fingerprint-Modus über `FEED_PROXY_URL` ab und vergleicht beides.
+
+Der Workflow ist **ausdrücklich nicht** Teil von `update-feeds.yml`: ein
+abweichender Fingerprint soll eine ruhige Betriebsentscheidung auslösen, keinen
+roten Cron-Lauf und keinen blockierten News-Publish. Er bekommt deshalb auch
+weder Datenbank- noch KV-Secrets.
+
+Lokal geht derselbe Vergleich mit gesetztem `FEED_PROXY_URL`:
+
+```bash
+FEED_PROXY_URL="https://proxy.example/feed-proxy.php" node scripts/check-proxy-fingerprint.js
+```
+
+Der erwartete Fingerprint allein – ohne Abruf – lässt sich so berechnen:
+
+```bash
+node --input-type=module -e "
+import { readFile } from 'node:fs/promises';
+import { computeProxyFingerprint } from './scripts/proxy-fingerprint.js';
+console.log(computeProxyFingerprint(await readFile('tools/feed-proxy.php', 'utf8')));
+"
+```
+
+Derselbe Wert muss im Feld `fingerprint` der Endpunktantwort stehen.
+
+### Ergebnisse und ihre Bedeutung
+
+| Ausgang | Bedeutung | Nächster Schritt |
+|---|---|---|
+| `ok` | Deployte Datei entspricht der Hauptkopie | nichts zu tun |
+| `mismatch` | Der Endpunkt läuft mit einer **anderen** Fassung | Datei erneut hochladen, danach erneut prüfen |
+| `missing_configuration` | `FEED_PROXY_URL` fehlt oder ist unbrauchbar | Secret prüfen |
+| `unreadable_source` | `tools/feed-proxy.php` lokal nicht lesbar | Checkout prüfen |
+| `request_failed` | Endpunkt nicht erreichbar, Zeitgrenze oder Transportfehler | Hosting prüfen; **keine** Aussage über die Version |
+| `http_error` | Der Endpunkt antwortete mit einem Fehlerstatus | Hosting- und Serverprotokolle prüfen |
+| `response_too_large` | Antwort über 4 KiB – vermutlich eine Fehlerseite | Endpunktpfad prüfen |
+| `invalid_json` / `invalid_schema` | Antwort stammt nicht nachweislich von diesem Dienst | Pfad und hochgeladene Datei prüfen |
+
+„Nicht erreichbar“ ist ausdrücklich etwas anderes als „andere Version“. Aus
+einem Ausfall des Hostings darf keine Aussage über die deployte Datei abgeleitet
+werden – deshalb sind die Ausgänge getrennt benannt.
+
+Keine Meldung und kein Protokolleintrag enthält `FEED_PROXY_URL`, ihren
+Querystring oder den Host; der Checker bereinigt jeden Text doppelt.
+
 ## Schutzmaßnahmen und Grenzen
 
 Der Proxy:
@@ -66,7 +153,8 @@ Der Proxy:
 - folgt keinen Redirects;
 - erlaubt cURL ausschließlich HTTPS;
 - begrenzt die dekomprimierte Antwort auf 5 MiB;
-- reicht den HTTP-Status der Quelle durch.
+- reicht den HTTP-Status der Quelle durch;
+- beantwortet `?mode=fingerprint` ohne jeden Upstream-Abruf.
 
 Der aktuelle Endpunkt besitzt noch keine gemeinsame Token-Authentifizierung.
 Die Allowlist verhindert einen allgemeinen offenen Proxy, aber ein bekannter
@@ -89,7 +177,12 @@ automatisch auf das externe Hosting übertragen. Nach jeder Änderung:
 1. CI einschließlich PHP-Lint abwarten;
 2. Datei erneut hochladen;
 3. beide Smoke-Tests ausführen;
-4. den Feed-Workflow manuell starten.
+4. den Workflow **Proxy-Fingerprint prüfen** starten – er belegt, dass die
+   hochgeladene Datei wirklich die neue ist;
+5. den Feed-Workflow manuell starten.
+
+Schritt 4 ist der eigentliche Gewinn von O4d: bis dahin war „hochgeladen“ eine
+Behauptung, keine Feststellung.
 
 Falls sich Hostname oder Pfad des Proxys ändern, muss ausschließlich das
 GitHub-Secret `FEED_PROXY_URL` aktualisiert werden. Es ist keine Vercel-

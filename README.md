@@ -463,9 +463,16 @@ Diese Schlüssel werden **NICHT** in eine Datei im Projekt geschrieben. Sie werd
 | `KV_REST_API_URL`               | Der Wert von `KV_REST_API_URL` aus Vercel       | Verbindung zum News-Cache (KV Store)            |
 | `KV_REST_API_TOKEN`             | Der Wert von `KV_REST_API_TOKEN` aus Vercel     | Passwort für den News-Cache (KV Store)          |
 | `GROQ_API_KEY`                  | Dein Groq API Key                               | KI-Trend-Analyse (optional)                     |
-| `FEED_PROXY_URL`                | HTTPS-Adresse von `tools/feed-proxy.php`         | Optionaler Fallback für blockierte Feed-Quellen |
+| `FEED_PROXY_URL`                | HTTPS-Adresse von `tools/feed-proxy.php`         | Optionaler Fallback für blockierte Feed-Quellen; zugleich Ziel der Fingerprint-Prüfung |
 
 **Hinweis:** Andere von Vercel bereitgestellte Variablen wie `VERCEL_URL` werden für diesen Workflow nicht benötigt.
+
+Weil der Proxy von Hand hochgeladen wird, kann die deployte Fassung von der im
+Repository abweichen. Der Endpunkt beantwortet deshalb `?mode=fingerprint` mit
+dem SHA-256-Hash seines kanonisierten Quelltexts, und der manuelle Workflow
+**Proxy-Fingerprint prüfen** vergleicht ihn mit `tools/feed-proxy.php`. Der
+Vergleich ruft keinen Feed ab, fasst weder Cache noch Datenbank an und ist
+bewusst kein Teil des Feed-Laufs. Einzelheiten: [Feed-Proxy-Betriebsanleitung](docs/deployment/feed-proxy.md).
 
 Der Proxy ist ein separat und manuell betriebener Produktionsbestandteil. Vor
 dem Setzen des Secrets die
