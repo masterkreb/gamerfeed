@@ -282,3 +282,61 @@ test('der Sortierschlüssel ist finishedAt in Millisekunden', () => {
     assert.equal(runHistoryScore({}), null);
     assert.equal(runHistoryScore(null), null);
 });
+
+// === Strikte Schema-Version beim Lesen ===
+//
+// Die Version ist nur dann etwas wert, wenn sie beim Lesen tatsaechlich geprueft
+// wird. Ein Eintrag aus einem fremden Schema wuerde sonst stillschweigend als
+// aktueller gelesen: fehlende Felder erschienen als 0, null oder „unbekannt“,
+// ohne dass irgendwo sichtbar waere, dass hier geraten wurde.
+
+test('die aktuelle Schema-Version wird beim Lesen angenommen', () => {
+    const eintrag = normalizeRunHistoryEntry(finishedRun({
+        schemaVersion: FEED_RUN_HISTORY_SCHEMA_VERSION,
+    }));
+
+    assert.notEqual(eintrag, null);
+    assert.equal(eintrag.schemaVersion, FEED_RUN_HISTORY_SCHEMA_VERSION);
+});
+
+test('fehlende, ältere und zukünftige Schema-Versionen werden beim Lesen abgelehnt', () => {
+    const unbrauchbar = [undefined, null, 0, 2, 999, '1', -1, Number.NaN];
+
+    for (const schemaVersion of unbrauchbar) {
+        const raw = finishedRun();
+        if (schemaVersion === undefined) {
+            delete raw.schemaVersion;
+        } else {
+            raw.schemaVersion = schemaVersion;
+        }
+
+        assert.equal(
+            normalizeRunHistoryEntry(raw),
+            null,
+            `schemaVersion ${String(schemaVersion)} darf nicht als Version 1 gelesen werden`,
+        );
+    }
+});
+
+test('in einer gemischten Liste bleibt nur der Eintrag mit gültiger Schema-Version', () => {
+    const entries = normalizeRunHistory([
+        finishedRun({ runId: 'zu-neu', schemaVersion: 2, finishedAt: '2026-07-28T12:00:00.000Z' }),
+        finishedRun({ runId: 'gültig', finishedAt: '2026-07-28T11:40:00.000Z' }),
+        { ...finishedRun({ runId: 'ohne-version' }), schemaVersion: undefined },
+        finishedRun({ runId: 'zu-alt', schemaVersion: 0, finishedAt: '2026-07-28T11:20:00.000Z' }),
+    ]);
+
+    assert.deepEqual(entries.map(entry => entry.runId), ['gültig']);
+});
+
+test('der Builder verlangt keine History-Schema-Version am Laufstatus', () => {
+    // Ein Laufstatus traegt die Version des Heartbeat-Schemas, nicht die der
+    // Historie. Der Builder uebersetzt und vergibt die Version selbst; nur der
+    // Leser darf streng sein.
+    const ohneVersion = finishedRun();
+    delete ohneVersion.schemaVersion;
+
+    const eintrag = buildRunHistoryEntry(ohneVersion);
+    assert.notEqual(eintrag, null);
+    assert.equal(eintrag.schemaVersion, FEED_RUN_HISTORY_SCHEMA_VERSION);
+});

@@ -61,6 +61,11 @@ export const FEED_RUN_HISTORY_RESULTS = Object.freeze(['success', 'degraded', 'f
  * Der Aufrufer schreibt dann schlicht nichts; ein geratener Eintrag wäre
  * schlechter als eine Lücke.
  *
+ * Die Schema-Version des **Laufstatus** wird hier ausdrücklich nicht geprüft:
+ * diese Funktion übersetzt einen aktuellen Laufstatus in das aktuelle
+ * History-Schema und vergibt die Version dabei selbst. Erst beim Lesen ist die
+ * gespeicherte Version eine echte Aussage – siehe `normalizeRunHistoryEntry`.
+ *
  * @param {unknown} run abgeschlossener Laufstatus (`finishRunStatus`)
  * @param {{ redact?: (message: string) => string, secrets?: unknown[] }} [options]
  * @returns {object|null}
@@ -95,12 +100,25 @@ export function buildRunHistoryEntry(run, options = {}) {
 /**
  * Normalisiert einen **gelesenen** Historieneintrag.
  *
- * Dieselben Regeln wie beim Schreiben: was hier nicht durchkommt, ist
- * beschädigt und wird vom Leser einzeln übersprungen.
+ * Dieselben Regeln wie beim Schreiben, **zuzüglich** einer strikten Prüfung der
+ * gespeicherten Schema-Version: nur `FEED_RUN_HISTORY_SCHEMA_VERSION` wird
+ * angenommen.
+ *
+ * Das ist der eigentliche Zweck der Versionsangabe. Ohne diese Prüfung würde
+ * ein Eintrag aus einem anderen Schema stillschweigend als aktueller gelesen –
+ * fehlende Felder erschienen dann als `0`, `null` oder „unbekannt“, ohne dass
+ * irgendwo sichtbar wäre, dass hier ein fremdes Format geraten wurde. Eine
+ * fehlende, ältere oder zukünftige Version ist deshalb ein **einzelner**
+ * ungültiger Eintrag und wird übersprungen, nicht umgedeutet.
  *
  * @returns {object|null}
  */
 export function normalizeRunHistoryEntry(raw, options = {}) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+    // Strikt auf Gleichheit, nicht auf „mindestens“: ein zukünftiges Schema
+    // kennt diese Fassung genauso wenig wie ein vergangenes.
+    if (raw.schemaVersion !== FEED_RUN_HISTORY_SCHEMA_VERSION) return null;
+
     return buildRunHistoryEntry(raw, options);
 }
 

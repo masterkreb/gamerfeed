@@ -535,3 +535,21 @@ test('die Historie liefert keine Secrets aus, auch wenn sie welche enthielte', a
     assert.ok(!text.includes('pg-geheim'));
     assert.ok(!text.includes('proxy-geheim'));
 });
+
+test('Einträge mit fremder Schema-Version werden verworfen, die übrigen bleiben', async () => {
+    const { handler } = createHandler(healthyStore(), {
+        readHistory: async () => [
+            { ...historyEntry({ runId: 'zu-neu' }), schemaVersion: 999 },
+            historyEntry({ runId: 'gültig', finishedAgeMs: 20 * 60_000 }),
+            { ...historyEntry({ runId: 'ohne-version' }), schemaVersion: undefined },
+            { ...historyEntry({ runId: 'zu-alt' }), schemaVersion: 0 },
+        ],
+    });
+
+    const response = await handler(new Request('https://example.com/x'));
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(body.runHistory.map(eintrag => eintrag.runId), ['gültig']);
+    assert.equal(body.healthStatus.gamestar.status, 'success');
+});
