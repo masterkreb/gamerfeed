@@ -893,7 +893,15 @@ Wichtige Leitplanken:
 
 Baseline, gestufter Versuch und Abbruchkriterien:
 `docs/development/seo-indexing.md`. Die Pakete SEO0 bis SEO4 stehen in
-`docs/development/roadmap.md`.
+`docs/development/roadmap.md`; der aus dem 16-Monatsbefund abgeleitete Vertrag
+für SEO2a und den einzelnen SEO3-Piloten steht in
+`docs/development/seo-content-pilot.md`.
+
+Der historische Leistungsbericht ist kein positiver Reichweitennachweis:
+114 Impressionen und ein Klick betrafen ausschließlich die Startseite; normale
+Gaming-News-Suchanfragen fehlen, und Google meldet null erkannte externe wie
+interne Links. Eine frühere Indexierung allein begründet deshalb keine weiteren
+automatisch erzeugten Seiten.
 
 ## 🔌 Feed-Proxy
 

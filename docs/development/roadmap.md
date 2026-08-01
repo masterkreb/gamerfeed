@@ -262,6 +262,18 @@ erkannte Seiten; auch die URL-Prüfung nennt sie wieder normal. Die
 Antrag. Der dauerhafte Arbeitsstand steht in
 [`docs/development/seo-indexing.md`](seo-indexing.md).
 
+**Stand 1. August 2026 (SEO-Langzeitbefund):** Der maximale 16-Monatsbericht
+enthält Daten vom 17. Dezember 2025 bis 29. Juli 2026: 114 Impressionen, ein
+Klick und ausschließlich die Startseite. `pixelcritics` brachte 13
+Impressionen bei durchschnittlicher Position 76,2; die übrigen sichtbaren
+Suchanfragen sind überwiegend spezielle `site:vercel.app`-Operatorabfragen.
+Normale Gaming-News-Suchabsichten fehlen, der Links-Bericht steht bei null
+externen und null internen Links. Beide Live-Tests waren erneut erfolgreich,
+der Startseitenantrag wurde aber auch am 1. August wegen Tageskontingent
+abgelehnt; `/gaming-news` wurde danach nicht redundant versucht. Damit ist
+SEO2a als kleine Textkorrektur bereit und SEO3 als genau ein Quellenübersichts-
+Pilot vorbereitet. Vertrag: [`seo-content-pilot.md`](seo-content-pilot.md).
+
 **Stand 31. Juli 2026 (Branch `claude/o4b-run-history`):** **O4b** ist
 abgeschlossen. Der Heartbeat kannte genau einen Lauf; damit war nicht
 unterscheidbar, ob ein Ausfall ein Ausrutscher oder ein Muster ist. Ein neuer
@@ -342,7 +354,8 @@ Warnung. 914 zentrale Tests und 30 Browser-Abnahmen laufen erfolgreich.
 | SEO0 | P2 | erledigt | Search-Console-Baseline und SEO-Leitplanken festhalten |
 | SEO1 | P2 | erledigt | Crawlbare Einstiege und ehrliche Metadaten herstellen |
 | SEO2 | P2 | in Arbeit | Indexierungsanträge und Mess-Gate nach Production-Rollout |
-| SEO3 | P3 | später | Genau einen eigenständigen Content-Pilot aus Messdaten ableiten |
+| SEO2a | P2 | bereit | Ehrliche Metadaten und Bestandsaussagen auf `/gaming-news` |
+| SEO3 | P3 | vorbereitet | Genau eine Quellenübersicht als messbaren Content-Pilot prüfen |
 | SEO4 | P3 | Entscheidung nötig | Eigene Domain und externe Reichweite festlegen |
 | O4b | P2 | erledigt | Begrenzte Laufhistorie |
 | O4c | P2 | Entscheidung nötig | Unabhängige Alarmierung |
@@ -1670,9 +1683,11 @@ lautet jetzt „Gaming-News aus vielen Redaktionen“, die Abmessungen bleiben
 
 **Status:** in Arbeit seit 30. Juli 2026. SEO1 ist produktiv; beide Live-Tests
 sind erfolgreich. Die manuellen Indexierungsanträge sind noch nicht bestätigt,
-weil Google die Versuche am 30. und 31. Juli wegen des Tageskontingents
-ablehnte. Der Sitemap-Bericht ist erfolgreich und der vorübergehende
-widersprüchliche Hinweis aus der URL-Prüfung inzwischen verschwunden.
+weil Google die Versuche am 30. und 31. Juli sowie den Startseitenantrag am
+1. August wegen des Tageskontingents ablehnte. `/gaming-news` wurde danach
+nicht redundant gegen dasselbe Kontingent versucht. Der Sitemap-Bericht ist
+erfolgreich; wechselnde Sitemap-Hinweise der URL-Prüfung ändern diesen Befund
+nicht.
 
 SEO2 ist überwiegend eine manuelle Abnahme, kein neuer Funktionsblock:
 
@@ -1685,15 +1700,33 @@ SEO2 ist überwiegend eine manuelle Abnahme, kein neuer Funktionsblock:
 
 **Gate:** Mindestens eine indexierte URL oder echte thematische Impressionen
 sind ein positives Signal. Bleiben nach 28 Tagen beide URLs trotz erfolgreichem
-Live-Test ausgeschlossen, beginnt SEO3 nicht. Dann werden zuerst Inhalt,
-Domain, Canonical-Signale und der aktuelle Ausschlussgrund erneut geprüft.
+Live-Test ausgeschlossen, geht der vorbereitete SEO3-Pilot nicht in die
+Implementierung. Dann werden zuerst Inhalt, Domain, Canonical-Signale und der
+aktuelle Ausschlussgrund erneut geprüft.
+
+### SEO2a – Ehrliche News-Metadaten
+
+**Status:** bereit. Priorität P2, kleines Codepaket vor SEO3.
+
+- die aus drei gekürzten fremden Überschriften gebaute Meta-Description durch
+  eigenen zeitstabilen Text ersetzen;
+- den bis zu 60 Tage gehaltenen Bestand nicht „10.000 aktuelle Artikel“ nennen;
+- die 20 neuesten sichtbaren Meldungen klar vom Retentionsbestand trennen;
+- Social Preview, Canonical, Robots und bestehendes Snapshot-Protokoll
+  unverändert beziehungsweise konsistent halten.
+
+**Abnahme:** Keine fremden Titel oder falsche Aktualitätsaussage in Metadaten,
+keine neue URL und keine Änderung an Feed-/Cachelogik. Vollständiger Vertrag:
+[`seo-content-pilot.md`](seo-content-pilot.md).
 
 ### SEO3 – Ein eigenständiger Content-Pilot
 
-**Status:** später. Priorität P3, nur nach positivem SEO2-Gate.
+**Status:** vorbereitet. Priorität P3; Suchabsicht und Pflege müssen vor
+Codebeginn bestätigt werden.
 
-- aus echten Suchanfragen oder einem klaren Nutzerproblem genau einen
-  dauerhaft pflegbaren Seitentyp auswählen;
+- genau eine servergerenderte Quellenübersicht als Hypothese prüfen;
+- die Nachfrage für „Gaming News Seiten“/„Gaming News Quellen“ vorab mit
+  aktuellen externen Daten belegen;
 - eigenen Nutzen und eigene Einordnung liefern, statt nur fremde Titel neu zu
   gruppieren;
 - vor einer Vervielfältigung den einzelnen Pilot erneut messen.
@@ -1701,6 +1734,8 @@ Domain, Canonical-Signale und der aktuelle Ausschlussgrund erneut geprüft.
 **Abnahme:** Inhalt, URL-Lebenszyklus, Aktualisierung, Canonical, interne
 Verlinkung und Rückbau sind vor Implementierung festgelegt. Ohne belastbaren
 Pilot entstehen keine automatisch vervielfältigten SEO-Seiten.
+Details, Stoppregeln und ausgeschlossener Umfang:
+[`seo-content-pilot.md`](seo-content-pilot.md).
 
 ### SEO4 – Eigene Domain und externe Reichweite
 

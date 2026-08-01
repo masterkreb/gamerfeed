@@ -1,6 +1,6 @@
 # SEO, Indexierung und messbare Auffindbarkeit
 
-Stand: 31. Juli 2026
+Stand: 1. August 2026
 
 Dieses Dokument hält die gemessene Ausgangslage und die Leitplanken für
 SEO-Arbeit an GamerFeed fest. Es ist keine Zusage, viele Seiten zu erzeugen
@@ -35,6 +35,30 @@ waren fremde Artikelbilder; sie erklären die fehlende Indexierung nicht.
 Die Zahlen sind ein zeitgebundener Ausgangspunkt, kein dauerhaftes Urteil.
 Search-Console-Berichte laufen verzögert ein und Google entscheidet unabhängig,
 ob eine technisch indexierbare URL tatsächlich in den Index aufgenommen wird.
+
+### Historischer Leistungsbefund vom 1. August 2026
+
+Der maximal verfügbare Leistungszeitraum (16 Monate) enthält tatsächlich Daten
+vom 17. Dezember 2025 bis 29. Juli 2026. Er bestätigt, dass eine frühere
+Indexierung allein keinen relevanten Besucherstrom erzeugt hat:
+
+| Signal | Stand |
+|---|---|
+| Klicks | 1 |
+| Impressionen | 114 |
+| Durchschnittliche CTR | 0,9 % |
+| Durchschnittliche Position | 15,9 |
+| Seiten mit Impressionen | ausschließlich die Startseite |
+| Suchanfrage `pixelcritics` | 13 Impressionen, 1 Klick, durchschnittliche Position 76,2 |
+| Übrige sichtbare Suchanfragen | überwiegend spezielle `site:vercel.app`-Operatorabfragen ohne Gaming-Absicht |
+| Erkannte Links | 0 externe und 0 interne Links |
+
+Die durchschnittliche Gesamtposition ist deshalb kein belastbares
+Gaming-Ranking: sie wird überwiegend von ungewöhnlichen Operatorabfragen
+getragen. Es gibt in diesem Zeitraum keine sichtbaren Impressionen für normale
+Gaming-News-Suchabsichten. Das Hauptproblem lag damit schon während der
+früheren Indexierung bei Relevanz, eigenständigem Nutzen und Bekanntheit, nicht
+bei der Klickrate eines häufig gezeigten Ergebnisses.
 
 ## Was daraus folgt
 
@@ -153,9 +177,11 @@ eine Sichtprüfung.
 #### Bewusst offen geblieben
 
 Die Meta-Description von `/gaming-news` entsteht weiterhin aus den ersten drei
-Artikeltiteln. Das ist eine Auflistung, kein eigener redaktioneller Fließtext,
-und liegt außerhalb des SEO1-Umfangs. Ob sie auf einen eigenen zeitstabilen
-Text umgestellt wird, entscheidet SEO2 anhand der dann sichtbaren Snippets.
+Artikeltiteln. Das ist eine Auflistung, kein eigener redaktioneller Fließtext.
+Zusätzlich nennt die Seite den bis zu 60 Tage gehaltenen Gesamtbestand als
+„aktuelle Artikel“. Der Langzeitbefund reicht aus, diese Aussagen im kleinen
+Paket SEO2a zu bereinigen; dafür muss nicht auf ein Google-Snippet gewartet
+werden.
 
 `?search=` bleibt keine adressierbare Suche. Eine `SearchAction` darf erst
 wieder entstehen, wenn dieser Parameter tatsächlich als URL-Suche funktioniert.
@@ -180,11 +206,11 @@ mindestens diese Werte festgehalten:
 
 | Schritt | Status | Befund beziehungsweise nächste Aktion |
 |---|---|---|
-| Live-Test Startseite | erledigt | technisch abrufbar und indexierbar |
-| Live-Test `/gaming-news` | erledigt | technisch abrufbar und indexierbar |
-| Indexierungsantrag Startseite | offen | Google lehnte die Versuche am 30. und 31. Juli wegen des überschrittenen Tageskontingents ab; es liegt keine Annahmebestätigung vor |
-| Indexierungsantrag `/gaming-news` | offen | erst erneut versuchen, wenn Search Console wieder Anträge annimmt |
-| Sitemap-Befund abgleichen | erledigt | Der Sitemap-Bericht zeigt `/sitemap.xml` weiterhin als erfolgreich, zuletzt am 28. Juli gelesen, mit zwei erkannten Seiten; die URL-Prüfung nennt die Sitemap am 31. Juli ebenfalls wieder normal. Der vorübergehende Hinweis belegt keinen Defekt der öffentlichen Sitemap |
+| Live-Test Startseite | erledigt | am 1. August erneut technisch abrufbar und indexierbar |
+| Live-Test `/gaming-news` | erledigt | am 1. August erneut technisch abrufbar und indexierbar |
+| Indexierungsantrag Startseite | offen | auch am 1. August wegen überschrittenem Tageskontingent ausdrücklich abgelehnt; es liegt keine Annahmebestätigung vor |
+| Indexierungsantrag `/gaming-news` | offen | nach der Ablehnung der Startseite bewusst nicht nochmals gegen dasselbe Property-Kontingent versucht |
+| Sitemap-Befund abgleichen | erledigt | Der Sitemap-Bericht zeigt `/sitemap.xml` als erfolgreich, zuletzt am 28. Juli gelesen, mit zwei erkannten Seiten. Ein zeitweise abweichender Hinweis der URL-Prüfung ist kein Beleg für einen Defekt der öffentlich mit HTTP 200 ausgelieferten Sitemap |
 | Messpunkte nach 7, 14 und 28 Tagen | wartend | Fristen erst ab dem Tag zählen, an dem die Indexierungsanträge tatsächlich angenommen wurden |
 
 Die Eingabe `https://gamerfeed.vercel.app` ohne abschließenden Slash wird von
@@ -201,22 +227,41 @@ Eine Erinnerung ist nur eine Bedienhilfe und nicht die maßgebliche
 Aufgabenverwaltung. Falls zum Erinnerungszeitpunkt niemand online ist, bleiben
 alle offenen Schritte in dieser Tabelle bestehen.
 
+Beim nächsten Versuch wird die URL direkt geöffnet und **ohne vorherigen
+Live-Test** „Indexierung beantragen“ gewählt. Der Antrag führt seine eigene
+Prüfung aus. Um nicht unnötig weitere begrenzte URL-Prüfungen anzustoßen, wird
+vorher kein separater Live-Test mehr ausgeführt. Der zweite Antrag folgt nur
+nach bestätigter Annahme des ersten. Google veröffentlicht weder eine feste
+Kontingentgröße noch eine garantierte Uhrzeit für dessen Rücksetzung.
+
 Das Gate gilt als positives Signal, sobald mindestens eine URL indexiert ist
 und/oder echte thematische Impressionen erhält. Es ist keine Garantie für eine
 bestimmte Position oder Besucherzahl.
 
 Bleiben nach 28 Tagen beide URLs trotz erfolgreichem Live-Test ausgeschlossen,
-werden keine weiteren SEO-Seitentypen erzeugt. Dann werden zuerst Inhalt,
-Domain, kanonische Signale und Googles aktueller Ausschlussgrund erneut
-bewertet.
+geht auch der vorbereitete SEO3-Pilot nicht in die Implementierung. Dann werden
+zuerst Inhalt, Domain, kanonische Signale und Googles aktueller Ausschlussgrund
+erneut bewertet.
 
 ### Phase 3 – Ein Content-Pilot
 
-Nur nach positivem Gate wird genau **ein** zusätzlicher, dauerhaft pflegbarer
-Seitentyp gewählt. Die Auswahl folgt echten Suchanfragen oder einem klaren
-Nutzerproblem. Denkbar sind eine eigenständige kuratierte Zusammenfassung oder
-eine hilfreiche Plattformübersicht; automatisch vervielfältigte dünne
-Quellenseiten sind kein Ziel.
+Der historische Leistungsbefund erlaubt die **Vorbereitung** eines einzelnen
+Piloten schon während des Indexierungs-Gates: Die frühere Indexierung brachte
+über Monate keine normalen Gaming-News-Suchanfragen. Vorbereitung bedeutet
+noch keinen Production-Rollout und keine Vervielfältigung.
+
+Die konkrete Hypothese ist eine einzige servergerenderte Seite
+„Gaming-News-Quellen im Überblick“. Sie beantwortet die Frage, welche deutschen
+und internationalen Redaktionen GamerFeed bündelt, worin ihre Schwerpunkte
+liegen und wie die Auswahl beziehungsweise Aktualisierung funktioniert. Die
+Beschreibungen sind eigene, überprüfte Texte; Feed-Titel oder Anbietertexte
+werden nicht kopiert. Es entstehen insbesondere **keine** 39 automatischen
+Einzelseiten.
+
+Vor Implementierung wird die Suchabsicht einmal mit aktuellen externen Daten
+geprüft. Danach gelten die Abnahmekriterien aus
+[`seo-content-pilot.md`](seo-content-pilot.md). Liefert der einzelne Pilot nach
+der vereinbarten Messzeit kein Signal, wird er nicht vervielfältigt.
 
 Vor einer breiteren URL-Struktur wird entschieden, ob GamerFeed dauerhaft auf
 der Vercel-Subdomain oder auf einer eigenen Domain betrieben wird. Ein späterer
