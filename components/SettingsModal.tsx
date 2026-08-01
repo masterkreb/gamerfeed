@@ -591,6 +591,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 <div className="text-sm space-y-4 text-slate-700 dark:text-zinc-300">
                                     <p>{t('settings.about.description')}</p>
                                     <p>{t('settings.about.sources')}</p>
+                                    <p>
+                                        <a
+                                            href="/gaming-news"
+                                            className="text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"
+                                        >
+                                            {t('settings.about.gamingNewsLink')}
+                                        </a>
+                                    </p>
                                 </div>
                             </section>
 

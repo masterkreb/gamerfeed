@@ -4,10 +4,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseHTML } from 'linkedom';
 
-// SEO1: Das ausgelieferte `index.html` ist der einzige Inhalt, den ein Crawler
-// ohne JavaScript sieht. Diese Suite prueft die Quelldatei; das erzeugte
-// Production-HTML wird zusaetzlich in `tests/e2e/seo-entry.spec.ts` ohne
-// JavaScript im Browser geprueft.
+// Die SPA startet bewusst mit einem leeren React-Container. Damit blitzt auf
+// langsamen Mobilgeraeten keine zweite Textseite auf, bevor die App uebernimmt.
+// Crawlbare Artikel bleiben unter `/gaming-news` servergerendert verfuegbar.
 
 const INDEX_HTML = fs.readFileSync(
     path.join(process.cwd(), 'index.html'),
@@ -43,147 +42,46 @@ function staticSeoTexts(doc) {
     return texts.filter(Boolean);
 }
 
-/**
- * Verstecken heisst hier: fuer Menschen unsichtbar oder aus dem
- * Accessibility-Tree entfernt. Genau das darf ein Crawler-Fallback nicht sein.
- */
-function hidingReason(element) {
-    for (let node = element; node && node.getAttribute; node = node.parentElement) {
-        if (node.hasAttribute('hidden')) {
-            return `${node.tagName} traegt hidden`;
-        }
-        if (node.getAttribute('aria-hidden') === 'true') {
-            return `${node.tagName} traegt aria-hidden`;
-        }
-        if ((node.getAttribute('class') ?? '').split(/\s+/).includes('sr-only')) {
-            return `${node.tagName} traegt sr-only`;
-        }
-
-        const style = (node.getAttribute('style') ?? '').toLowerCase();
-        if (/display\s*:\s*none/.test(style)) {
-            return `${node.tagName} ist display:none`;
-        }
-        if (/visibility\s*:\s*hidden/.test(style)) {
-            return `${node.tagName} ist visibility:hidden`;
-        }
-        if (/opacity\s*:\s*0(?!\.)/.test(style)) {
-            return `${node.tagName} ist opacity:0`;
-        }
-        if (/(left|top|right|bottom|text-indent)\s*:\s*-\d/.test(style)) {
-            return `${node.tagName} liegt ausserhalb des Viewports`;
-        }
-        if (/(width|height)\s*:\s*(0|1)px/.test(style)) {
-            return `${node.tagName} ist auf Pixelgroesse geschrumpft`;
-        }
-    }
-
-    return null;
-}
-
-test('index.html liefert ohne JavaScript genau eine H1', () => {
-    const headings = document.querySelectorAll('h1');
-
-    assert.equal(
-        headings.length,
-        1,
-        `erwartet genau eine H1, gefunden ${headings.length}`,
-    );
-    assert.ok(
-        document.getElementById('root').contains(headings[0]),
-        'die H1 liegt nicht im React-Container und wuerde beim App-Start nicht ersetzt',
-    );
-    assert.ok(
-        (headings[0].textContent ?? '').trim().length >= 10,
-        'die H1 ist zu kurz, um den Zweck der Seite zu benennen',
-    );
-});
-
-test('index.html liefert ohne JavaScript eine eigene Beschreibung', () => {
-    const root = document.getElementById('root');
-    const paragraphs = [...root.querySelectorAll('p')]
-        .map(node => (node.textContent ?? '').trim())
-        .filter(text => text.length > 0);
-
-    assert.ok(paragraphs.length > 0, 'der Fallback enthaelt keinen Beschreibungstext');
-
-    const description = paragraphs.find(text => text.length >= 80);
-    assert.ok(
-        description,
-        `kein Absatz mit mindestens 80 Zeichen: ${JSON.stringify(paragraphs)}`,
-    );
-
-    const metaDescription = document
-        .querySelector('meta[name="description"]')
-        ?.getAttribute('content')
-        ?.trim();
-    assert.notEqual(
-        description,
-        metaDescription,
-        'der sichtbare Text ist eine wortgleiche Kopie der Meta-Description',
-    );
-});
-
-test('index.html verlinkt /gaming-news als gewoehnlichen Link', () => {
-    const root = document.getElementById('root');
-    const links = [...root.querySelectorAll('a')];
-    const link = links.find(node => {
-        const href = node.getAttribute('href') ?? '';
-        return href === '/gaming-news' || href.endsWith('/gaming-news');
-    });
-
-    assert.ok(link, 'kein Link auf /gaming-news im Fallback gefunden');
-    assert.ok(
-        (link.textContent ?? '').trim().length >= 5,
-        'der Link hat keinen sprechenden Text',
-    );
-    assert.equal(
-        link.getAttribute('onclick'),
-        null,
-        'der Link darf kein Skript brauchen',
-    );
-});
-
-test('der Fallback ist weder versteckt noch aus dem Viewport geschoben', () => {
+test('index.html startet mit einem leeren React-Container', () => {
     const root = document.getElementById('root');
     assert.ok(root, '#root fehlt');
-
-    const reason = hidingReason(root);
-    assert.equal(reason, null, `der Fallback ist verborgen: ${reason}`);
-
-    for (const element of root.querySelectorAll('*')) {
-        const elementReason = hidingReason(element);
-        assert.equal(
-            elementReason,
-            null,
-            `Fallback-Element ${element.tagName} ist verborgen: ${elementReason}`,
-        );
-    }
+    assert.equal(root.childElementCount, 0, '#root enthaelt sichtbare Elemente vor dem App-Start');
+    assert.equal((root.textContent ?? '').trim(), '', '#root enthaelt sichtbaren Zwischentext');
 });
 
-test('der Fallback kopiert keine Artikelliste in das HTML', () => {
+test('index.html enthaelt keinen alten sichtbaren SEO-Fallback mehr', () => {
+    assert.equal(document.querySelector('[data-seo="fallback"]'), null);
+    assert.equal(document.querySelector('.app-fallback'), null);
+    assert.ok(!INDEX_HTML.includes('.app-fallback'), 'Fallback-CSS ist noch vorhanden');
+});
+
+test('index.html zeigt ohne JavaScript keine vorgeschaltete Inhaltsseite', () => {
+    const bodyText = (document.body.textContent ?? '').trim();
+    assert.equal(bodyText, '', `unerwarteter sichtbarer Body-Text: ${bodyText}`);
+    assert.equal(document.body.querySelectorAll('h1, p, a').length, 0);
+});
+
+test('der leere Einstieg kopiert keine Artikel oder Navigation in das HTML', () => {
     const root = document.getElementById('root');
 
     assert.equal(
         root.querySelectorAll('article').length,
         0,
-        'der Fallback enthaelt Artikelelemente',
+        'der Einstieg enthaelt Artikelelemente',
     );
     assert.equal(
         root.querySelectorAll('ul, ol').length,
         0,
-        'der Fallback enthaelt eine Liste, die wie eine Artikelliste wirkt',
+        'der Einstieg enthaelt eine Liste',
     );
+    assert.equal(root.querySelectorAll('a').length, 0, 'der Einstieg enthaelt Navigation');
+});
 
-    const externalLinks = [...root.querySelectorAll('a')].filter(node => {
-        const href = node.getAttribute('href') ?? '';
-        return /^https?:\/\//i.test(href)
-            && !href.startsWith('https://gamerfeed.vercel.app');
-    });
-    assert.deepEqual(
-        externalLinks.map(node => node.getAttribute('href')),
-        [],
-        'der Fallback verlinkt fremde Artikel',
-    );
+test('SEO-Kernangaben bleiben im Head vorhanden', () => {
+    assert.ok((document.querySelector('title')?.textContent ?? '').trim());
+    assert.ok(document.querySelector('meta[name="description"]')?.getAttribute('content'));
+    assert.ok(document.querySelector('link[rel="canonical"]')?.getAttribute('href'));
+    assert.ok(document.querySelector('script[type="application/ld+json"]'));
 });
 
 test('kein statischer SEO-Text nennt eine feste Quellenzahl', () => {

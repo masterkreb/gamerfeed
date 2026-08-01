@@ -246,6 +246,16 @@ Metadaten nennen keine feste Quellenzahl mehr, und die nicht einlösbare
 `SearchAction` ist entfernt. 767 zentrale Tests und 30 Browser-Abnahmen laufen
 erfolgreich.
 
+**Stand 1. August 2026 (SEO1a – ruhiger SPA-Start):** Der sichtbare
+Startseiten-Fallback aus SEO1 wurde nach der mobilen Sichtprüfung wieder
+entfernt: Er blitzte vor dem React-Start wie eine vorgeschaltete Seite auf.
+`index.html` startet nun mit leerem `#root`, während sämtliche SEO-Kernangaben
+im `<head>` und die servergerenderte `/gaming-news`-Seite erhalten bleiben. Der
+hinter Infinite Scroll praktisch unerreichbare Footer ist entfernt; sein
+lokalisierter `/gaming-news`-Link liegt im Reiter „Über uns“. Infinite Scroll
+selbst ist unverändert. Diese bewusste UX-Abwägung wird nicht als
+SEO-Verbesserung ausgegeben.
+
 Ob die Änderungen wirken, entscheidet **nicht** dieser Branch: SEO2 beginnt
 erst nach Merge und Production-Rollout und ist eine manuelle Abnahme in der
 Search Console. Ein technisch indexierbares HTML erzwingt keine Indexierung.
@@ -1678,6 +1688,45 @@ Das über `og:image` ausgelieferte `public/social-preview.png` trug sichtbar
 „Gaming-News aus allen Quellen“ und gehörte damit zu SEO1. Sein Untertitel
 lautet jetzt „Gaming-News aus vielen Redaktionen“, die Abmessungen bleiben
 1200 × 630.
+
+### SEO1a – Ruhiger SPA-Start und erreichbare Zusatznavigation
+
+**Status:** erledigt. Priorität P1 als kleine UX-Korrektur am bestehenden
+Projekt; keine Architekturänderung.
+
+**Warum:** Der sichtbare SEO1-Fallback erschien auf langsameren Mobilgeräten
+kurz vor der eigentlichen App und wirkte wie eine Weiterleitungsseite. Der
+Footer war wegen Infinite Scroll für Besucher praktisch nicht erreichbar.
+
+**Umfang:**
+
+- den sichtbaren Fallback samt eigenem CSS vollständig aus `index.html`
+  entfernen und `#root` leer starten lassen;
+- Meta-Tags, Canonical, Robots, Open Graph, Twitter und JSON-LD unverändert
+  erhalten;
+- den nicht erreichbaren Footer entfernen, Infinite Scroll aber unverändert
+  lassen;
+- den normalen, lokalisierten `/gaming-news`-Link in den Reiter „Über uns“
+  verschieben;
+- Tests und SEO-Dokumentation an die bewusste UX/SEO-Abwägung angleichen.
+
+**Abnahme:**
+
+- Quell- und Browser-Test ohne JavaScript finden keinen vorgeschalteten
+  sichtbaren Body-Inhalt und keinen alten Fallback-Marker;
+- nach dem React-Start bleibt genau eine sichtbare H1 und die Artikelliste ist
+  weiterhin bedienbar;
+- die App rendert keinen Footer; „Über uns“ enthält den normalen Link in
+  Deutsch und Englisch;
+- `/gaming-news`, Sitemap und Head-Metadaten bleiben unangetastet;
+- zentrale Tests, TypeScript, Production-Build, Browser-Abnahmen und
+  Diff-Checks sind erfolgreich.
+
+**Bewusste Grenze:** Die ursprüngliche HTML-Antwort der Startseite enthält
+damit keinen sichtbaren Body-Inhalt. Das ist keine SEO-Verbesserung, sondern
+eine akzeptierte UX-Abwägung für die bestehende SPA. `/gaming-news` bleibt der
+servergerenderte News-Einstieg. Eine neue Architektur darf SSR und die
+interaktive Oberfläche später von Anfang an zusammenführen.
 
 ### SEO2 – Indexierungs- und Mess-Gate
 

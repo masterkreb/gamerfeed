@@ -283,22 +283,17 @@ Einzelheiten und Betriebshinweise stehen in der
 
 ---
 
-### Crawlbare Einstiege ohne JavaScript
+### SEO-Einstieg und ruhiger SPA-Start
 
-Die interaktive Anwendung bleibt eine React-SPA, aber das ausgelieferte
-`index.html` ist kein leerer Container mehr. Innerhalb von `#root` steht ein
-kleiner Fallback mit **genau einer H1**, einer eigenen Beschreibung und einem
-gewöhnlichen Link auf `/gaming-news`. React ersetzt ihn beim Start, weil
-`createRoot` den Container vor dem ersten Rendern leert; danach bleibt die H1
-der Kopfzeile die einzige sichtbare H1.
+Die interaktive Anwendung bleibt eine React-SPA. `index.html` startet mit
+einem leeren `#root`, damit auf langsamen Mobilgeräten keine vorgeschaltete
+Erklärungsseite kurz aufblitzt. Die SEO-Kernangaben bleiben vollständig im
+`<head>` erhalten.
 
-Der Fallback ist bewusst **nicht** versteckt, nicht aus dem Viewport geschoben
-und nicht mit `aria-hidden` markiert. Er enthält keine kopierte Artikelliste –
-ein Crawler sieht dort genau das, was ein Mensch ohne JavaScript sieht.
-
-`/gaming-news` bleibt die servergerenderte Einstiegsseite und ist über den
-Footer der laufenden App lokalisiert verlinkt. Beide Seiten verweisen damit
-wechselseitig aufeinander; eine Sitemap ersetzt diese Verlinkung nicht.
+`/gaming-news` ist die servergerenderte, ohne JavaScript nutzbare
+News-Einstiegsseite. Die laufende App verlinkt sie im dauerhaft erreichbaren
+Reiter „Über uns“. Auf einen Footer wird bewusst verzichtet: Hinter der
+endlosen Artikelliste wäre er für Besucher praktisch nicht erreichbar.
 
 Statische Meta-, Open-Graph-, Twitter- und JSON-LD-Texte sind zeitstabil
 formuliert und nennen **keine feste Quellenzahl** – die Zahl ändert sich, der
