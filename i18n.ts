@@ -161,6 +161,7 @@ const resources = {
             "settings.about.title": "About GamerFeed",
             "settings.about.description": "GamerFeed is a gaming news aggregator that collects articles from numerous German and international newsrooms to keep you updated on the latest gaming news.",
             "settings.about.sources": "All news articles are sourced from publicly available RSS feeds. We do not create original content but provide a convenient way to browse and discover gaming news from various trusted publishers.",
+            "settings.about.gamingNewsLink": "Today's gaming news overview",
             "settings.about.features.title": "Features",
             "settings.about.features.realtime": "Automatic news updates, planned roughly every 20 minutes (delays possible)",
             "settings.about.features.filters": "Advanced filtering by time, source, and language",
@@ -204,11 +205,6 @@ const resources = {
             "toast.newArticles_one": "🆕 {{count}} new article available",
             "toast.newArticles_other": "🆕 {{count}} new articles available",
             "toast.loadNewArticles": "Load",
-
-            // Footer
-            "footer.rights": "All rights reserved.",
-            "footer.tagline": "Made with ❤️ for gaming enthusiasts. News sourced from various public RSS feeds.",
-            "footer.gamingNews": "Today's gaming news overview",
 
             // Loading & Errors
             "loading.articles": "Loading articles...",
@@ -626,6 +622,7 @@ const resources = {
             "settings.about.title": "Über GamerFeed",
             "settings.about.description": "GamerFeed ist ein Gaming-News-Aggregator, der Artikel aus zahlreichen deutschen und internationalen Redaktionen sammelt, um dich über die neuesten Gaming-News auf dem Laufenden zu halten.",
             "settings.about.sources": "Alle Nachrichtenartikel stammen aus öffentlich zugänglichen RSS-Feeds. Wir erstellen keine eigenen Inhalte, sondern bieten eine bequeme Möglichkeit, Gaming-News von verschiedenen vertrauenswürdigen Verlagen zu durchsuchen und zu entdecken.",
+            "settings.about.gamingNewsLink": "Übersicht der aktuellen Gaming-News",
             "settings.about.features.title": "Funktionen",
             "settings.about.features.realtime": "Automatische News-Updates, ungefähr alle 20 Minuten geplant (Verzögerungen möglich)",
             "settings.about.features.filters": "Erweiterte Filterung nach Zeit, Quelle und Sprache",
@@ -669,11 +666,6 @@ const resources = {
             "toast.newArticles_one": "🆕 {{count}} neuer Artikel verfügbar",
             "toast.newArticles_other": "🆕 {{count}} neue Artikel verfügbar",
             "toast.loadNewArticles": "Laden",
-
-            // Footer
-            "footer.rights": "Alle Rechte vorbehalten.",
-            "footer.tagline": "Mit ❤️ für Gaming-Enthusiasten gemacht. News von verschiedenen öffentlichen RSS-Feeds.",
-            "footer.gamingNews": "Übersicht der aktuellen Gaming-News",
 
             // Loading & Errors
             "loading.articles": "Lade Artikel...",

@@ -65,30 +65,31 @@ bei der Klickrate eines häufig gezeigten Ergebnisses.
 Die React-SPA wird nicht pauschal ersetzt:
 
 - Google kann die heutige Anwendung im Live-Test rendern.
-- Die Startseite lieferte im ursprünglichen HTML trotzdem nur einen leeren
-  React-Container. Ein zusätzlicher Render-Schritt bleibt unnötig fragil und
-  andere Crawler müssen JavaScript nicht ausführen. Seit SEO1 steht dort
-  stattdessen ein kleiner, wahrer Fallback – kein Prerendering, keine
-  Artikelkopie.
+- Der in SEO1 ergänzte sichtbare Text-Fallback löste zwar den leeren
+  React-Container, blitzte auf langsameren Mobilgeräten aber als scheinbar
+  vorgeschaltete Seite auf. Die UX-Korrektur vom 1. August entfernt ihn wieder.
+  Die Startseite ist damit bewusst auf JavaScript-Rendering angewiesen.
 - `/gaming-news` liefert bereits fertiges HTML und bleibt die
-  servergerenderte SEO-Einstiegsseite. Seit SEO1 ist sie aus der laufenden App
-  über den Footer normal verlinkt und verweist ihrerseits zurück.
+  servergerenderte SEO-Einstiegsseite. Sie steht in der Sitemap, ist aus der
+  laufenden App unter „Über uns“ normal verlinkt und verweist ihrerseits zurück.
 - Speicherung und Darstellung sind getrennte Fragen. Ein Wechsel von KV zu
   einer Artikeldatenbank macht die Startseite nicht automatisch crawlbar oder
   schneller sichtbar.
 
-Das Ziel ist deshalb eine hybride Architektur: React bleibt für die
-interaktive App zuständig, während wichtige Einstiegsseiten bereits im ersten
-HTML sinnvolle, crawlbare Inhalte und normale interne Links liefern.
+Für dieses bestehende Projekt bleibt die bewusste Trennung: React ist für die
+interaktive Startseite zuständig, `/gaming-news` für den ohne JavaScript
+nutzbaren News-Einstieg. Eine spätere neue Architektur darf beides von Anfang
+an servergerendert zusammenführen; sie wird nicht in dieses Projekt
+hineingezwungen.
 
 ## Leitplanken
 
 - Kein kompletter Rewrite und keine Framework-Migration nur für SEO.
 - Kein versteckter, außerhalb des Viewports platzierter oder mit
   `aria-hidden` markierter Artikelblock für Crawler.
-- Ein HTML-Fallback der Startseite muss ohne JavaScript sichtbar, inhaltlich
-  wahr und der interaktiven Seite semantisch gleichwertig sein. React darf ihn
-  beim Start durch die App ersetzen.
+- Kein sichtbarer SEO-Zwischeninhalt, der Besuchern vor der eigentlichen App
+  kurz als zweite Seite erscheint. Es wird auch kein versteckter Ersatztext
+  eingeführt.
 - Keine statische exakte Quellenzahl in Meta-, Open-Graph-, Twitter- oder
   strukturierten Daten. Die Zahl ändert sich; statische Texte sprechen von
   zahlreichen deutschen und internationalen Quellen.
@@ -101,8 +102,8 @@ HTML sinnvolle, crawlbare Inhalte und normale interne Links liefern.
   Verzögerungen, nie als „Echtzeit“.
 - Keine `SearchAction`, solange `?search=` nicht tatsächlich als
   adressierbare Suche funktioniert.
-- Normale interne `<a href>`-Links verbinden Startseite und `/gaming-news` in
-  beide Richtungen. Eine Sitemap ersetzt diese Verlinkung nicht.
+- `/gaming-news` bleibt in der Sitemap, verlinkt normal zur App zurück und ist
+  in der App unter „Über uns“ als gewöhnlicher `<a href>` erreichbar.
 - Eigenständiger Text erklärt Nutzen, Auswahl und Aktualisierung von
   GamerFeed. Titel oder Zusammenfassungen fremder Anbieter werden nicht als
   eigene redaktionelle Inhalte ausgegeben.
@@ -120,8 +121,9 @@ inhaltliche Grundlage:
 
 1. ehrliche, zeitstabile Metadaten auf der Startseite;
 2. Entfernung der nicht funktionierenden `SearchAction`;
-3. ein sichtbarer, nicht versteckter HTML-Fallback im React-Container mit
-   Überschrift, kurzer eigener Beschreibung und Link zu `/gaming-news`;
+3. zunächst ein sichtbarer, nicht versteckter HTML-Fallback im
+   React-Container; dieser Punkt wurde mit der UX-Korrektur vom 1. August
+   bewusst wieder zurückgenommen;
 4. ein lokalisierter sichtbarer Link aus der laufenden App zu
    `/gaming-news`;
 5. ein stärkerer eigener Einleitungstext auf `/gaming-news`, ohne fremde
@@ -132,28 +134,33 @@ inhaltliche Grundlage:
 Sitemap-Umbau, neue URL-Typen, Datenbankmigration, Search-Console-API und
 automatisierte Indexierungsanträge gehören nicht zu SEO1.
 
-#### Wie der Fallback verschwindet
+#### UX-Korrektur vom 1. August 2026
 
-Der Fallback steht **innerhalb** von `#root` und trägt `data-seo="fallback"`.
-`ReactDOM.createRoot(container)` leert den Container vor dem ersten Rendern –
-genau deshalb braucht es weder ein Skript noch eine CSS-Regel, die ihn
-ausblendet. Wer ihn nach außerhalb von `#root` verschiebt, erzeugt eine zweite
-sichtbare H1 neben der Kopfzeile der App.
+Der Fallback wurde vollständig aus `index.html` entfernt. `#root` ist vor dem
+Modulstart leer; es gibt weder `data-seo="fallback"` noch zugehöriges CSS oder
+einen versteckten Ersatz. Dadurch erscheint auf langsamen Geräten keine
+Erklärungsseite mehr, bevor React übernimmt.
 
-Da Tailwind erst mit dem JavaScript-Modul geladen wird, bringt der Fallback
-seine wenigen CSS-Regeln in einem `<style>`-Block im `<head>` selbst mit. Keine
-dieser Regeln verbirgt etwas, verschiebt etwas aus dem Viewport oder schrumpft
-etwas auf Pixelgröße; die Tests prüfen genau das.
+Das ist eine bewusste Abwägung: Die ursprüngliche Startseitenantwort enthält
+weiterhin Titel, Description, Canonical, Robots, Open Graph, Twitter und
+JSON-LD, aber keinen sichtbaren Body-Inhalt. Google kann die App laut Live-Test
+rendern; einfache Crawler erhalten den servergerenderten News-Einstieg über
+`/gaming-news` und die Sitemap. Diese Entscheidung wird nicht als
+SEO-Verbesserung ausgegeben, sondern als UX-Korrektur des bestehenden Projekts.
+
+Der hinter Infinite Scroll praktisch unerreichbare Footer wurde ebenfalls
+entfernt. Sein normaler, lokalisierter `/gaming-news`-Link liegt nun im Reiter
+„Über uns“. Infinite Scroll selbst bleibt unverändert.
 
 #### Wo die Regeln getestet werden
 
 | Datei | Prüft |
 |---|---|
-| `tests/frontend/unit/seo-static-entry.test.js` | Quell-`index.html`: eine H1, eigene Beschreibung, interner Link, nichts Verstecktes, keine feste Quellenzahl, keine `SearchAction` |
-| `tests/frontend/unit/footer-gaming-news-link.test.js` | gerenderter Footer-Link, in DE und EN unterschiedlich |
+| `tests/frontend/unit/seo-static-entry.test.js` | Quell-`index.html`: leerer React-Container, kein alter Fallback, SEO-Kernangaben im Head, keine feste Quellenzahl, keine `SearchAction` |
+| `tests/frontend/unit/settings-gaming-news-link.test.js` | gerenderter Link unter „Über uns“, in DE und EN unterschiedlich |
 | `tests/frontend/unit/honest-product-claims.test.js` | sichtbare „Über uns“-Texte in DE und EN: keine feste Quellenzahl, keine Vollständigkeit, kein „Echtzeit“ |
 | `tests/server/unit/gaming-news-page.test.js` | `/gaming-news`: eine H1, eigener Einleitungstext, Canonical, Rückweg zur App |
-| `tests/e2e/seo-entry.spec.ts` | erzeugtes Production-HTML mit **und** ohne JavaScript, genau eine sichtbare H1 nach dem React-Start |
+| `tests/e2e/seo-entry.spec.ts` | ohne JavaScript keine vorgeschaltete Textseite; nach React-Start genau eine sichtbare H1, erreichbarer About-Link und kein Footer |
 
 #### Das Vorschaubild zählt mit
 

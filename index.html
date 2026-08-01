@@ -45,52 +45,9 @@
     }
     </script>
 
-    <!--
-        Der Fallback unten steht bewusst *im* React-Container und wird beim
-        Start der App durch sie ersetzt. Tailwind kommt erst mit dem Modul,
-        deshalb bringt er seine wenigen Regeln selbst mit. Nichts davon darf
-        etwas verbergen: Der Text ist genau das, was auch ein Mensch ohne
-        JavaScript sieht.
-    -->
-    <style>
-        .app-fallback {
-            max-width: 40rem;
-            margin: 0 auto;
-            padding: 2rem 1.25rem;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #1e293b;
-        }
-        .app-fallback h1 {
-            font-size: 1.5rem;
-            line-height: 1.3;
-            margin: 0 0 0.75rem;
-        }
-        .app-fallback p {
-            margin: 0 0 0.75rem;
-        }
-        .app-fallback a {
-            color: #4f46e5;
-        }
-    </style>
-
 </head>
 <body class="bg-slate-100 dark:bg-zinc-900">
-<div id="root"><div class="app-fallback" data-seo="fallback">
-    <h1>GamerFeed – Gaming-News aus vielen Redaktionen an einem Ort</h1>
-    <p>
-        GamerFeed sammelt Meldungen aus zahlreichen deutschen und internationalen
-        Gaming-Redaktionen und stellt sie in einer gemeinsamen, laufend
-        aktualisierten Übersicht zusammen. Verlinkt wird immer auf den
-        Originalartikel der jeweiligen Redaktion.
-    </p>
-    <p>
-        Die interaktive Ansicht mit Filtern, Favoriten und Suche benötigt
-        JavaScript. Die Übersicht der aktuellen Meldungen steht auch ohne
-        JavaScript als eigene Seite bereit:
-    </p>
-    <p><a href="/gaming-news">Zur Übersicht der aktuellen Gaming-News</a></p>
-</div></div>
+<div id="root"></div>
 
 <script type="module" src="/index.tsx"></script>
 </body>

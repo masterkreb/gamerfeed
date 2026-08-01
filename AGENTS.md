@@ -60,7 +60,6 @@
 │   ├── TrendsView.tsx      # KI-Trend-Anzeige
 │   ├── AnnouncementBanner.tsx
 │   ├── FavoritesHeader.tsx
-│   ├── Footer.tsx
 │   ├── Icons.tsx           # SVG Icons als Komponenten
 │   ├── ErrorBoundary.tsx
 │   ├── ErrorFallback.tsx
@@ -835,30 +834,26 @@ Deferred-Promise- und Chromium-Fälle sowie die bewussten Grenzen stehen in
 
 ## 🔎 Auffindbarkeit und SEO
 
-Die React-SPA bleibt die interaktive Anwendung; wichtige SEO-Einstiege sollen
-bereits im ersten HTML sinnvolle Inhalte und normale interne Links liefern.
-`/gaming-news` ist die bestehende servergerenderte Einstiegsseite. Ein
-kompletter Rewrite, eine Framework-Migration oder eine Artikeldatenbank sind
-keine Voraussetzung für den SEO-Pilot.
+Die React-SPA bleibt die interaktive Anwendung; `/gaming-news` ist die
+bestehende servergerenderte Einstiegsseite mit fertigem HTML. Ein kompletter
+Rewrite, eine Framework-Migration oder eine Artikeldatenbank sind keine
+Voraussetzung für den SEO-Pilot.
 
 Die Search-Console-Baseline vom 30. Juli 2026 zeigt 0 indexierte bei 2 nicht
 indexierten URLs, obwohl Sitemap und aktuelle Live-Tests technisch erfolgreich
 sind. Deshalb ist SEO1 vor O4b priorisiert. Das Paket arbeitet nur an
-crawlbaren Einstiegen, ehrlichen zeitstabilen Metadaten und wechselseitiger
-Verlinkung. Zusätzliche Seitentypen beginnen erst nach dem Mess-Gate.
+der crawlbaren News-Einstiegsseite, ehrlichen zeitstabilen Metadaten und
+erreichbarer Navigation. Zusätzliche Seitentypen beginnen erst nach dem
+Mess-Gate.
 
-**Umgesetzter Stand (SEO1):**
+**Umgesetzter Stand (SEO1 plus UX-Korrektur vom 1. August 2026):**
 
-- `index.html` liefert innerhalb von `#root` einen sichtbaren Fallback mit
-  genau einer H1, einer eigenen Beschreibung und einem gewöhnlichen Link auf
-  `/gaming-news`. Er trägt `data-seo="fallback"` und bringt seine wenigen
-  CSS-Regeln in einem `<style>`-Block selbst mit, weil Tailwind erst mit dem
-  Modul geladen wird.
-- **`createRoot` leert den Container vor dem ersten Rendern** – genau deshalb
-  darf der Fallback dort stehen und verschwindet ohne Zutun. Wer ihn nach
-  außerhalb von `#root` verschiebt, erzeugt eine zweite sichtbare H1.
-- Der Fallback ist weder versteckt noch aus dem Viewport geschoben und enthält
-  keine kopierte Artikelliste.
+- `index.html` enthält einen **leeren** React-Container. Der zuerst in SEO1
+  eingeführte sichtbare Text-Fallback ist wieder entfernt, weil er auf
+  langsamen Mobilgeräten als kurze vorgeschaltete Seite aufblitzte.
+- Titel, Description, Canonical, Robots, Open Graph, Twitter und JSON-LD
+  bleiben im `<head>` erhalten. Crawlbare Artikel stehen unter
+  `/gaming-news`, nicht als kopierter oder versteckter Block in `index.html`.
 - Statische Meta-, Open-Graph-, Twitter- und JSON-LD-Texte nennen keine feste
   Quellenzahl mehr; die `SearchAction` ist entfernt.
 - **Drei Ehrlichkeitsregeln gelten auch für sichtbare Produkttexte**, nicht nur
@@ -872,8 +867,10 @@ Verlinkung. Zusätzliche Seitentypen beginnen erst nach dem Mess-Gate.
   und `twitter:image` ausgeliefert. Sein Untertitel lautet „Gaming-News aus
   vielen Redaktionen“, passend zu Titel und Alt-Texten. Format und Abmessungen
   (1200 × 630) sind getestet, der Satz im Bild bleibt eine Sichtprüfung.
-- `components/Footer.tsx` wird seit SEO1 in `App.tsx` tatsächlich gerendert und
-  trägt den lokalisierten Link `footer.gamingNews` auf `/gaming-news`.
+- Die endlose Artikelliste rendert bewusst keinen Footer; er wäre praktisch
+  nie erreichbar. Der lokalisierte normale Link auf `/gaming-news` liegt im
+  dauerhaft erreichbaren Reiter „Über uns“ als
+  `settings.about.gamingNewsLink`.
 - `/gaming-news` hat unter der H1 einen eigenen Einleitungstext
   (`data-seo="intro"`) zu Nutzen, Quellenprinzip und Aktualisierung. Er ist
   zeitstabil und übernimmt keine fremden Artikeltexte. Die Zahlen daneben
@@ -1082,7 +1079,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** SEO0: Search-Console-Baseline mit 0 indexierten URLs trotz erfolgreicher Sitemap und Live-Tests; SEO1 als kleiner hybrider Crawlability-Pilot vor O4b eingeordnet
 - **Juli 2026:** Isolierter Proxy-Fingerprint (O4d): `?mode=fingerprint` meldet den SHA-256-Hash des kanonisierten Proxy-Quelltexts, verglichen über einen eigenen manuellen Workflow – ohne Upstream-Abruf, ohne Cache- oder Datenbankzugriff und ohne den Feed-Lauf zu berühren; der erfolgreiche Produktionslauf `30661491099` schloss das Rollout-Gate
 - **Juli 2026:** Begrenzte Laufhistorie (O4b): bis zu 72 abgeschlossene Läufe in einem Sorted Set `feed_run_history` mit atomarem Write und Kürzen in einer Transaktion, strikt geprüfter Schema-Version beim Lesen und einer Frist von 3 Sekunden je Zugriff, additiv in der geschützten Health-API und im Health Center sichtbar – ohne Alarmierung (O4c) und ohne Proxy-Fingerprint (O4d)
-- **Juli 2026:** Crawlbare Einstiege (SEO1): sichtbarer HTML-Fallback in `#root` mit genau einer H1 und Link auf `/gaming-news`, gerenderter Footer mit lokalisiertem Rückweg, eigener Einleitungstext auf `/gaming-news`, zeitstabile Metadaten ohne feste Quellenzahl und ohne `SearchAction`
+- **Juli/August 2026:** SEO1 plus UX-Korrektur: zeitstabile Metadaten ohne feste Quellenzahl und ohne `SearchAction`, servergerenderte `/gaming-news`-Seite; sichtbaren Start-Fallback wegen Aufblitzens wieder entfernt, unerreichbaren Footer entfernt und seinen lokalisierten Link nach „Über uns“ verschoben
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 bildbezogene externe Abrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **August 2026:** XboxDynasty-Bildfallback und Bildgesundheit (O2c): ein begrenzter WordPress-API-Batch statt wiederholter 401-Artikelseiten, additive Bild-/Platzhalterzahlen je Feed und automatische Admin-Warnung bei Bildlücken
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
