@@ -2,7 +2,7 @@
 //
 // O2a hat jeden **einzelnen** externen Aufruf begrenzt. Ihre Summe war damit
 // weiterhin ungedeckelt: 15+ Feeds mit Wiederholung, ein Proxy-Umweg und eine
-// unbegrenzte Zahl von Artikel-Seitenabrufen koennen zusammen das
+// unbegrenzte Zahl bildbezogener externer Abrufe koennen zusammen das
 // 30-Minuten-Hardlimit des GitHub-Workflows erreichen. Ein harter
 // Actions-Abbruch laeuft **nicht** durch den normalen Fehlerpfad: der Lauf
 // hinterlaesst dann einen halben Heartbeat und niemand erfaehrt, warum.
@@ -10,7 +10,7 @@
 // Dieses Modul haelt deshalb zwei Grenzen:
 //
 // - eine **Deadline** fuer die Kernphasen, gemessen ab Start des Skripts;
-// - ein **Seitenabruf-Budget** fuer neue OG-Bild-Scrapes und Backfills.
+// - ein **Bildabruf-Budget** fuer Quellen-Batches, neue OG-Scrapes und Backfills.
 //
 // Wird eine davon erreicht, wird die restliche Arbeit *kontrolliert*
 // zurueckgestellt statt abgeschnitten - und der Lauf endet als `degraded`,
@@ -33,7 +33,7 @@ export const WORKFLOW_HARD_LIMIT_MS = 30 * 60 * 1000;
  *
  * **Der Worst Case passt ausdruecklich nicht hinein, und das ist Absicht.**
  * Bei aktuell 40 konfigurierten Quellen ergeben zwei Versuche a 15 s allein
- * schon rund 20 Minuten, dazu kaemen bis zu 80 Seitenabrufe mit je 5 s Timeout
+ * schon rund 20 Minuten, dazu kaemen bis zu 80 Bildabrufe mit je 5 s Timeout
  * und 0,5 s Pause (rund 7,3 Minuten). Eine Deadline, die *das* abdeckt, gaebe
  * es unterhalb des 30-Minuten-Hardlimits nicht.
  *
@@ -51,10 +51,11 @@ export const CORE_DEADLINE_MS = 18 * 60 * 1000;
 export const CORE_DEADLINE_SAFETY_MARGIN_MS = WORKFLOW_HARD_LIMIT_MS - CORE_DEADLINE_MS;
 
 /**
- * Feste Obergrenze fuer Artikel-Seitenabrufe pro Lauf.
+ * Feste Obergrenze fuer bildbezogene externe Abrufe pro Lauf.
  *
- * Gilt gemeinsam fuer neue OG-Scrapes und den Backfill alter Artikel - beides
- * sind Abrufe fremder Artikelseiten und beide kosten dieselbe Laufzeit.
+ * Gilt gemeinsam fuer neue OG-Scrapes, quellspezifische Bild-Batches und den
+ * Backfill alter Artikel. Der XboxDynasty-Batch zaehlt dabei als genau ein
+ * Zugriff, nicht als einer je zurueckgegebenem Artikel.
  */
 export const MAX_ARTICLE_PAGE_FETCHES_PER_RUN = 80;
 
@@ -255,7 +256,7 @@ export function createRunBudget({
             return remainingMs() >= optionalPhaseMinRemainingMs;
         },
 
-        /** Ist noch Seitenabruf-Budget uebrig? */
+        /** Ist noch Budget fuer einen bildbezogenen externen Abruf uebrig? */
         hasPageFetchBudget() {
             return pageFetchesUsed < effectiveScrapeLimit;
         },

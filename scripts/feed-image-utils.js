@@ -20,6 +20,11 @@ export function isDestructoidSource(source) {
         .some(value => String(value).trim().toLowerCase() === 'destructoid');
 }
 
+export function isXboxDynastySource(source) {
+    return getSourceIdentifiers(source)
+        .some(value => String(value).trim().toLowerCase() === 'xboxdynasty');
+}
+
 export function isPlaceholderImageUrl(imageUrl) {
     if (!imageUrl) return false;
 
@@ -83,6 +88,7 @@ export function selectRssContentImageUrl(imageSources, feed) {
 
 export function shouldScrapeMissingImage(feed) {
     return isDestructoidSource(feed)
+        || isXboxDynastySource(feed)
         || Boolean(feed?.needs_scraping ?? feed?.needsScraping);
 }
 

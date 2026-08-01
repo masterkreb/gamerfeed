@@ -596,10 +596,10 @@ test('der Legenden-Reiter beschreibt die aktuelle Semantik ohne Dateinamen und o
         assert.match(panel.textContent, /meldet für diesen Feed `success`/);
         assert.match(panel.textContent, /exakt dieser Schreibweise im aktiven News-Snapshot/);
 
-        // Warnung: beide Ursachen, inklusive der zurückgestellten Quelle.
-        assert.match(panel.textContent, /meldet der letzte Backend-Lauf `warning`/);
-        assert.match(panel.textContent, /zurückgestellte Quelle/);
-        assert.match(panel.textContent, /belegt keinen erfolgreichen Abruf/);
+        // Warnung: Backend-Warnung, Snapshot-Lücke oder Platzhalterbilder.
+        assert.match(panel.textContent, /Backend-Lauf meldet `warning`/);
+        assert.match(panel.textContent, /Platzhalterbild/);
+        assert.match(panel.textContent, /belegen keinen erfolgreichen aktuellen Abruf/);
 
         await act(async () => {
             await i18n.changeLanguage('en');
@@ -610,7 +610,8 @@ test('der Legenden-Reiter beschreibt die aktuelle Semantik ohne Dateinamen und o
         assert.match(panel.textContent, /No single feed is checked live from your browser/);
         assert.match(panel.textContent, /reports `success` for this feed/);
         assert.match(panel.textContent, /reports `warning`/);
-        assert.match(panel.textContent, /does not prove a successful fetch/);
+        assert.match(panel.textContent, /placeholder image/);
+        assert.match(panel.textContent, /do not prove a successful current fetch/);
     } finally {
         await act(async () => {
             await i18n.changeLanguage('de');
@@ -690,6 +691,119 @@ test('ein gesunder Feed ausserhalb des Startcaches bekommt keinen Zusatz', () =>
     assert.equal(row.status, 'ok');
     assert.equal(row.detailKey, 'admin.health.detailOk');
     assert.deepEqual(row.detailParams, {}, 'kein Feedname fuer einen Startcache-Hinweis');
+});
+
+test('Platzhalterbilder werden je Quelle automatisch als Warnung sichtbar', () => {
+    const xbox = feed('xboxdynasty', 'XboxDynasty');
+    const base = {
+        feeds: [xbox],
+        sourcesInCache: ['XboxDynasty'],
+        activeSnapshot: ACTIVE_SNAPSHOT,
+        localCache: readLocalNewsCache(null, NOW),
+    };
+
+    const alle = buildAdminHealthReport({
+        ...base,
+        backendHealth: {
+            xboxdynasty: {
+                status: 'success',
+                message: 'ok',
+                articleCount: 10,
+                usableImageCount: 0,
+                placeholderImageCount: 10,
+            },
+        },
+    });
+    assert.equal(rowOf(alle, 'xboxdynasty').status, 'warning');
+    assert.equal(rowOf(alle, 'xboxdynasty').detailKey, 'admin.health.detailAllImagesMissing');
+    assert.deepEqual(rowOf(alle, 'xboxdynasty').detailParams, {
+        articleCount: '10',
+        placeholderImageCount: '10',
+    });
+
+    const einige = buildAdminHealthReport({
+        ...base,
+        backendHealth: {
+            xboxdynasty: {
+                status: 'success',
+                message: 'ok',
+                articleCount: 10,
+                usableImageCount: 8,
+                placeholderImageCount: 2,
+            },
+        },
+    });
+    assert.equal(rowOf(einige, 'xboxdynasty').status, 'warning');
+    assert.equal(rowOf(einige, 'xboxdynasty').detailKey, 'admin.health.detailSomeImagesMissing');
+
+    const vollstaendig = buildAdminHealthReport({
+        ...base,
+        backendHealth: {
+            xboxdynasty: {
+                status: 'success',
+                message: 'ok',
+                articleCount: 10,
+                usableImageCount: 10,
+                placeholderImageCount: 0,
+            },
+        },
+    });
+    assert.equal(rowOf(vollstaendig, 'xboxdynasty').status, 'ok');
+});
+
+test('alte Health-Daten ohne Bildmessung werden nicht nachträglich als Warnung geraten', () => {
+    const xbox = feed('xboxdynasty', 'XboxDynasty');
+    const report = buildAdminHealthReport({
+        feeds: [xbox],
+        backendHealth: { xboxdynasty: { status: 'success', message: 'ok', articleCount: 10 } },
+        sourcesInCache: ['XboxDynasty'],
+        activeSnapshot: ACTIVE_SNAPSHOT,
+        localCache: readLocalNewsCache(null, NOW),
+    });
+
+    assert.equal(rowOf(report, 'xboxdynasty').status, 'ok');
+    assert.equal(rowOf(report, 'xboxdynasty').detailKey, 'admin.health.detailOk');
+});
+
+test('das Admin zeigt eine gemessene Bildlücke direkt in Zeile und Warnungsliste', async () => {
+    const restoreConsole = silenceConsole();
+    const xbox = feed('xboxdynasty', 'XboxDynasty');
+    const testRoot = await renderAdminPanel(vite, {
+        feeds: [xbox],
+        healthResponse: {
+            healthStatus: {
+                xboxdynasty: {
+                    status: 'success',
+                    message: 'ok',
+                    articleCount: 10,
+                    usableImageCount: 0,
+                    placeholderImageCount: 10,
+                },
+            },
+            sourcesInCache: ['XboxDynasty'],
+            heartbeat: null,
+            snapshot: ACTIVE_SNAPSHOT,
+        },
+        localStorageEntries: {},
+    });
+
+    try {
+        await act(async () => {
+            click(testRoot.window, testRoot.container.querySelector('#admin-tab-health'));
+        });
+
+        const row = testRoot.container.querySelector('#admin-panel-health tbody tr');
+        assert.equal(row.querySelectorAll('td')[1].textContent.trim(), 'Warnung');
+        assert.match(row.textContent, /alle 10 Artikel.*Platzhalterbild/);
+
+        const warningList = testRoot.container.querySelector('#admin-warning-feeds-details');
+        assert.ok(warningList !== null);
+        assert.match(warningList.textContent, /XboxDynasty/);
+        assert.match(warningList.textContent, /alle 10 Artikel.*Platzhalterbild/);
+    } finally {
+        await testRoot.cleanup();
+        restoreConsole();
+    }
 });
 
 test('der Startcache aendert die Bewertung einer Feed-Zeile in keinem Fall', () => {

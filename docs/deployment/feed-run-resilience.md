@@ -57,6 +57,7 @@ Fehler der ganzen Quelle – das ist die richtige Aussage.
 | Feed direkt | 15 s | 5 MB |
 | Feed über Proxy | 20 s | 5 MB |
 | Artikelseite (OG-Scraping) | 5 s | 2 MB |
+| XboxDynasty WordPress-Bildbatch | 5 s | 128 KB |
 | Groq | 20 s | 256 KB |
 
 Alle Grenzen sind Parameter und damit ohne echte Wartezeit prüfbar.
@@ -122,10 +123,11 @@ Nur ausdrücklich freigegebene Quellen dürfen den externen PHP-Proxy versuchen.
 GamePro steht darauf, weil es Anfragen aus dem GitHub-Actions-Netz mit HTTP 403
 beantwortet – dafür gibt es den Umweg.
 
-**XboxDynasty steht bewusst nicht darauf.** Der dort einmalig beobachtete Timeout
-ist ein vorübergehendes Problem der Quelle und kein Grund, fremdes Hosting zu
-belasten. Vorher genügte irgendein fehlgeschlagener Direktabruf, um den Proxy zu
-bemühen.
+**XboxDynasty steht bewusst nicht darauf.** Seit Ende Juli 2026 liefern seine
+Artikelseiten bei automatisierten Abrufen HTTP 401. Die Bilder werden deshalb
+mit einem einzigen begrenzten Abruf aus der öffentlichen WordPress-API gelesen,
+nicht über das fremde PHP-Hosting. Einzelheiten und die automatische
+Bildgesundheit im Admin: [`feed-images.md`](feed-images.md).
 
 Die Entscheidung liegt bewusst auf dieser Seite und nicht beim PHP-Skript. Die
 exakte Allowlist des Proxys bleibt unverändert und zusätzlich wirksam;
