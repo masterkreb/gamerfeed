@@ -162,6 +162,31 @@ function resolveRow(
         };
     }
 
+    // Ein erfolgreicher Feed-Abruf und vorhandene Snapshot-Artikel sagen noch
+    // nichts über deren Bilder aus. Die Zahlen stammen aus genau diesem Lauf;
+    // alte Datensätze ohne Messung bleiben unverändert OK statt geraten.
+    const articleCount = entry.articleCount ?? null;
+    const placeholderImageCount = entry.placeholderImageCount ?? null;
+    if (
+        articleCount !== null
+        && articleCount > 0
+        && placeholderImageCount !== null
+        && placeholderImageCount > 0
+    ) {
+        const allImagesMissing = placeholderImageCount >= articleCount;
+        return {
+            ...base,
+            status: 'warning',
+            detailKey: allImagesMissing
+                ? 'admin.health.detailAllImagesMissing'
+                : 'admin.health.detailSomeImagesMissing',
+            detailParams: {
+                articleCount: String(articleCount),
+                placeholderImageCount: String(placeholderImageCount),
+            },
+        };
+    }
+
     return {
         ...base,
         status: 'ok',

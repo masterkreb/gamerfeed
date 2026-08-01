@@ -144,7 +144,8 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
     4.  Anschliessend schreibt das Skript diese Datensätze in den **Vercel KV Store**.
 *   **WICHTIG:** Der Workflow committet **keine Dateien** mehr in das Git-Repository. Der Prozess ist vollständig vom Code der Webseite getrennt.
 *   **Robustheit:** Der Prozess verhindert zuverlässig den Verlust bestehender Artikeldaten durch fehlerhafte Abrufe. Ein einzelnes kaputtes Feed-Element (etwa mit unlesbarem Datum) kostet nur dieses Element, nicht die ganze Quelle; jeder externe Abruf hat Timeout und Byte-Limit; die Pflichtkonfiguration wird geprüft, bevor die erste Verbindung aufgebaut wird. Einzelheiten: [Belastbarkeit des Cron-Laufs](docs/deployment/feed-run-resilience.md).
-*   **Laufzeit:** Neben den Einzelgrenzen hat der Lauf ein **globales Budget**: eine Deadline von 18 Minuten (mit 12 Minuten Reserve vor dem 30-Minuten-Hardlimit des Workflows) und höchstens 80 Artikel-Seitenabrufe pro Lauf. Wird eine Grenze erreicht, wird die restliche Arbeit *zurückgestellt* statt abgeschnitten: die betroffenen Quellen behalten ihre alten Artikel, offene Bild-Scrapes werden fair über die Quellen verteilt und im nächsten Lauf erneut versucht. Ein solcher Lauf endet als `degraded`, nie stillschweigend als `success`. Einzelheiten: [Zeitbudget und Ergebniszustände](docs/deployment/feed-run-budget.md).
+*   **Laufzeit:** Neben den Einzelgrenzen hat der Lauf ein **globales Budget**: eine Deadline von 18 Minuten (mit 12 Minuten Reserve vor dem 30-Minuten-Hardlimit des Workflows) und höchstens 80 bildbezogene externe Abrufe pro Lauf. Wird eine Grenze erreicht, wird die restliche Arbeit *zurückgestellt* statt abgeschnitten: die betroffenen Quellen behalten ihre alten Artikel, offene Bild-Scrapes werden fair über die Quellen verteilt und im nächsten Lauf erneut versucht. Ein solcher Lauf endet als `degraded`, nie stillschweigend als `success`. Einzelheiten: [Zeitbudget und Ergebniszustände](docs/deployment/feed-run-budget.md).
+*   **Artikelbilder:** XboxDynasty liefert seine Bilder wegen HTTP 401 auf automatisierten Artikelseiten über einen einzigen begrenzten WordPress-API-Batch. Der PHP-Proxy bleibt dafür unberührt. Bild- und Platzhalterzahlen werden je Quelle gemessen: [Artikelbilder und Bildgesundheit](docs/deployment/feed-images.md).
 
 #### 2. Der Datenabruf (Frontend-Anwendung)
 
@@ -178,13 +179,19 @@ Es basiert auf dem Abgleich von zwei Datensätzen, die vom "Datensammler" im Ver
 Die Statusanzeige wird wie folgt ermittelt:
 
 *   **Status: OK (Grün)**: Der Feed hat im `feed_health_status` den Status `success` **UND** die Quelle steht mit **exakt diesem Namen** im aktiven Snapshot.
-*   **Status: Warnung (Gelb)**: Entweder meldet der letzte Lauf für den Feed `warning` – etwa eine wegen des Zeitbudgets zurückgestellte Quelle oder einen Feed ohne gelieferte Artikel –, **ODER** der Feed hat `success`, seine Quelle steht aber nicht im aktiven Snapshot. (Mögliche Gründe für Letzteres: Feed ist leer, oder der Name stimmt nicht exakt überein.)
+*   **Status: Warnung (Gelb)**: Der letzte Lauf meldet `warning`, die erfolgreich abgerufene Quelle fehlt im aktiven Snapshot, oder mindestens ein Artikel des letzten Abrufs verwendet ein Platzhalterbild. Die Detailzeile nennt die konkrete Ursache und bei Bildern die gemessenen Zahlen.
 *   **Status: Fehler (Rot)**: Der Feed hat im `feed_health_status` den Status `error`. (Mögliche Gründe: URL nicht erreichbar, XML-Fehler, etc.)
 *   **Status: Unbekannt (Grau)**: Der gespeicherte Bericht wurde noch nicht geladen, oder der aktive Snapshot ist derzeit nicht belegbar.
 
 Eine Backend-Warnung bleibt immer eine Warnung. Eine zurückgestellte Quelle
 behält ihre **älteren** Artikel im aktiven Snapshot; deren Vorhandensein belegt
 keinen erfolgreichen Abruf und macht aus der Warnung deshalb nie ein „OK“.
+
+Nach jedem erfolgreich geparsten Feed speichert der Lauf zusätzlich
+`usableImageCount` und `placeholderImageCount`. Damit wird ein erneuter
+vollständiger Bildausfall nach dem nächsten Cron-Lauf im Admin sichtbar, ohne
+dass man alle Artikel im Frontend selbst durchsuchen muss. Eine aktive E-Mail-
+oder Push-Benachrichtigung ist damit noch nicht verbunden.
 
 Zugeordnet wird ausschließlich über **exakt gleiche Quellennamen**. Ein nur
 ähnlich geschriebener Name wird bewusst nicht mehr als gesund gemeldet;

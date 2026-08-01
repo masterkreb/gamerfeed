@@ -91,6 +91,7 @@
 │   ├── fetch-feeds.js      # Cron-Job Script (GitHub Actions)
 │   ├── feed-fetch-utils.js # Getesteter Feed-Abruf mit Retry/Proxy-Fallback
 │   ├── feed-image-utils.js # Bildauswahl und -validierung für Artikel
+│   ├── source-image-resolvers.js # Quellspezifische Bild-Batches (XboxDynasty)
 │   ├── feed-run-budget.js  # Zeit- und Scrape-Budget eines Laufs
 │   ├── feed-run-config.js  # Core- und optionale Konfiguration des Laufs
 │   ├── feed-run-recorder.js # Reihenfolge und Schreibregeln des Heartbeats
@@ -116,7 +117,7 @@
 │   └── feed-health-model.js     # Cron-Heartbeat, Frische, FEED_STALE_AFTER_MS
 ├── tests/                  # Zentrale Tests nach Fachbereich und Testart
 ├── docs/
-│   ├── deployment/        # Betrieb, Release, Rollback und Domain-Anleitungen
+│   ├── deployment/        # Betrieb inkl. feed-images.md, Release, Rollback und Domain
 │   └── development/
 │       ├── roadmap.md      # Priorisierte Arbeitspakete und Abnahmekriterien
 │       └── seo-indexing.md # Search-Console-Baseline und SEO-Mess-Gate
@@ -305,6 +306,15 @@ aktiven Snapshot liegen – ihre Präsenz belegt keinen erfolgreichen Abruf und 
 die Warnung nie in „OK“ umschlagen lassen. Die Snapshot-Aussage steht trotzdem
 daneben, und die bereits cron-seitig bereinigte Backend-Meldung erscheint in
 einem lokalisierten Satz.
+
+Die Bildgesundheit ist eine dritte, ebenfalls getrennte Aussage. Der Cron
+misst je erfolgreich geparstem Feed `usableImageCount` und
+`placeholderImageCount` für die Artikel dieses Abrufs. `null` bedeutet nicht
+gemessen, eine `0` ist eine echte Messung. Steht die Quelle im aktiven Snapshot
+und besitzt der letzte Abruf mindestens einen Platzhalter, wird die Admin-Zeile
+zur Warnung; der Text unterscheidet einige fehlende Bilder von einem
+vollständigen Ausfall. Alte Health-Daten ohne diese Felder bleiben unbekannt in
+Bezug auf Bilder und werden nicht nachträglich als Warnung geraten.
 
 Kann der gespeicherte Bericht gar nicht geladen werden, sind alle Zeilen
 **unbekannt**, nicht rot: Nicht die Feeds sind ausgefallen, sondern der Bericht
@@ -646,7 +656,8 @@ Der Lauf spricht mit Systemen, die er nicht kontrolliert. Die Regeln dafür:
   `item_error`). Der Bericht enthält **nur Grund und Anzahl** – keine Titel,
   Adressen oder Inhalte. `parseRssXml` bleibt als reine Artikelliste erhalten.
 - **Jeder externe Abruf hat Timeout und Byte-Limit:** Feed 15 s / 5 MB, Proxy
-  20 s / 5 MB, Artikelseite 5 s / 2 MB, Groq 20 s / 256 KB. Gelesen wird überall
+  20 s / 5 MB, Artikelseite 5 s / 2 MB, XboxDynasty-Bildbatch 5 s / 128 KB,
+  Groq 20 s / 256 KB. Gelesen wird überall
   über `scripts/limited-response.js`, das die real gelesenen Bytes zählt und den
   Stream abbricht – eine `Content-Length` allein genügt nicht.
 - **Trends sind optional.** `scripts/groq-client.js` liefert jeden Fehler als
@@ -663,6 +674,19 @@ Der Lauf spricht mit Systemen, die er nicht kontrolliert. Die Regeln dafür:
 
 Einzelheiten und die bewussten Grenzen: `docs/deployment/feed-run-resilience.md`.
 
+### XboxDynasty-Bilder
+
+XboxDynasty liefert je RSS-Artikel kein Bild und weist automatisierte
+Artikelseiten-Abrufe seit Ende Juli 2026 mit HTTP 401 ab. Die Quelle bleibt
+bewusst außerhalb des PHP-Proxys. `scripts/source-image-resolvers.js` liest
+stattdessen höchstens einmal pro Lauf den kompakten öffentlichen WordPress-
+Batch mit `link` und `yoast_head_json.og_image`. Er wird nur durch einen
+aktuellen fehlenden Bildkandidaten ausgelöst, zählt als ein Scrape-Zugriff und
+repariert passende gespeicherte Platzhalter opportunistisch. Direkte
+XboxDynasty-HTML-Scrapes und der allgemeine Backfill sind deaktiviert, damit
+ein API-Fehler keinen 401-Sturm erzeugt. Einzelheiten:
+`docs/deployment/feed-images.md`.
+
 ## ⏱️ Laufdeadline, Scrape-Budget und Ergebniszustände
 
 O2a hat jeden **einzelnen** Aufruf begrenzt, O2b ihre **Summe**. Der Workflow
@@ -676,9 +700,10 @@ Fehlerpfad und hinterlässt einen halben Heartbeat.
   40 Quellen mit je zwei Versuchen à 15 s wären allein rund 20 Minuten. Die
   Deadline ist keine Kapazitätsplanung, sondern die Zusage, dass Kern-Publish
   und Heartbeat immer vor dem Hardlimit fallen – der Rest wird zurückgestellt.
-- **80 Artikel-Seitenabrufe pro Lauf** (`FEED_SCRAPE_LIMIT`) gelten **gemeinsam**
-  für neue OG-Scrapes und den Backfill – sonst umginge der eine Weg die Grenze
-  des anderen.
+- **80 bildbezogene externe Abrufe pro Lauf** (`FEED_SCRAPE_LIMIT`) gelten
+  **gemeinsam** für neue OG-Scrapes, quellspezifische Bild-Batches und den
+  Backfill. Ein Batch zählt als ein Zugriff – sonst umginge der eine Weg die
+  Grenze des anderen.
 - **Zwei Mechanismen, nicht einer:** vor jeder Quelle und jedem Seitenabruf wird
   die Restzeit geprüft, *und* ein Timer bricht beim Erreichen der Deadline eine
   bereits laufende Anfrage über einen gemeinsamen `AbortController` ab.
@@ -1012,7 +1037,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - `npm run dev` nutzt für `/api` den Proxy zur produktiven GamerFeed-API
 - Für lokale Änderungen an Serverless Functions: `vercel dev` nutzen
 - GitHub Actions braucht die Core-Secrets `POSTGRES_URL`, `KV_REST_API_URL` und `KV_REST_API_TOKEN`; ohne sie endet der Lauf sofort. `GROQ_API_KEY` und `FEED_PROXY_URL` sind optional und schalten nur ihre Zusatzfunktion ab
-- `FEED_CORE_DEADLINE_MS` und `FEED_SCRAPE_LIMIT` sind optionale Grenzen; ohne sie gelten 18 Minuten und 80 Seitenabrufe
+- `FEED_CORE_DEADLINE_MS` und `FEED_SCRAPE_LIMIT` sind optionale Grenzen; ohne sie gelten 18 Minuten und 80 bildbezogene externe Abrufe
 - `NEWS_CACHE_*_MAX_BYTES` und `NEWS_CACHE_SAFETY_RESERVE_BYTES` sind optionale O3b-Grenzen; `NEWS_SNAPSHOT_LEGACY_ROLLBACK=true` ist eine bewusste, nie automatisch gesetzte Betriebsflagge
 - Der PHP-Feed-Proxy wird separat und manuell betrieben: `docs/deployment/feed-proxy.md`
 
@@ -1050,7 +1075,8 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Isolierter Proxy-Fingerprint (O4d): `?mode=fingerprint` meldet den SHA-256-Hash des kanonisierten Proxy-Quelltexts, verglichen über einen eigenen manuellen Workflow – ohne Upstream-Abruf, ohne Cache- oder Datenbankzugriff und ohne den Feed-Lauf zu berühren; der erfolgreiche Produktionslauf `30661491099` schloss das Rollout-Gate
 - **Juli 2026:** Begrenzte Laufhistorie (O4b): bis zu 72 abgeschlossene Läufe in einem Sorted Set `feed_run_history` mit atomarem Write und Kürzen in einer Transaktion, strikt geprüfter Schema-Version beim Lesen und einer Frist von 3 Sekunden je Zugriff, additiv in der geschützten Health-API und im Health Center sichtbar – ohne Alarmierung (O4c) und ohne Proxy-Fingerprint (O4d)
 - **Juli 2026:** Crawlbare Einstiege (SEO1): sichtbarer HTML-Fallback in `#root` mit genau einer H1 und Link auf `/gaming-news`, gerenderter Footer mit lokalisiertem Rückweg, eigener Einleitungstext auf `/gaming-news`, zeitstabile Metadaten ohne feste Quellenzahl und ohne `SearchAction`
-- **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 Seitenabrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
+- **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 bildbezogene externe Abrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
+- **August 2026:** XboxDynasty-Bildfallback und Bildgesundheit (O2c): ein begrenzter WordPress-API-Batch statt wiederholter 401-Artikelseiten, additive Bild-/Platzhalterzahlen je Feed und automatische Admin-Warnung bei Bildlücken
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 
 ---

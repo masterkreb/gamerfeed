@@ -29,6 +29,7 @@ import {
     chooseMergedImageUrl,
     hasUsableStoredImage,
     isKnownNonArticleImageUrl,
+    isXboxDynastySource,
     needsStoredImageRepair,
     selectRssContentImageUrl,
     shouldScrapeMissingImage,
@@ -39,6 +40,10 @@ import {
     isFeedXml,
     isProxyEligibleSource,
 } from './feed-fetch-utils.js';
+import {
+    fetchXboxDynastyImageMap,
+    getXboxDynastyArticleKey,
+} from './source-image-resolvers.js';
 import { publishNewsSnapshot } from './news-snapshot-publisher.js';
 import {
     buildPreflightFailureSummary,
@@ -1374,12 +1379,87 @@ export async function main({
             logger.log(`\n♻️  Reused ${reusedCachedImageCount} valid cached image(s); skipped redundant page scraping.`);
         }
 
+        // Umfasst alle bildbezogenen externen Abrufe dieser Phase: sowohl
+        // quellspezifische Batches als auch einzelne Artikel-Seiten.
+        const imageScrapeStartMs = Date.now();
+
+        // XboxDynasty liefert keine Artikelbilder im RSS und weist direkte
+        // automatisierte Abrufe seiner Artikelseiten inzwischen mit HTTP 401
+        // ab. Seine öffentliche WordPress-API liefert die Yoast-OG-Bilder
+        // dagegen gesammelt. Ein Batch ersetzt dadurch bis zu hundert
+        // einzelne Seitenabrufe. Nur neue RSS-Kandidaten lösen ihn aus; alte
+        // Platzhalter werden bei dieser Gelegenheit opportunistisch repariert,
+        // verursachen aber allein keinen endlosen Abruf alle 20 Minuten.
+        const xboxDynastyCandidates = newlyFetchedArticles.filter(article => (
+            article.needsScraping && isXboxDynastySource(article.source)
+        ));
+
+        if (xboxDynastyCandidates.length > 0) {
+            // Direkte HTML-Scrapes sind für diese Quelle kein Fallback mehr.
+            // Scheitert die kleine API-Abfrage, bleibt es bei genau einem
+            // Versuch pro Lauf statt bis zu 15 wiederholten 401-Antworten.
+            xboxDynastyCandidates.forEach(article => {
+                article.needsScraping = false;
+            });
+
+            const stopReason = !runBudget.hasPageFetchBudget()
+                ? DEFERRAL_REASONS.SCRAPE_BUDGET
+                : (runBudget.isDeadlineReached() ? DEFERRAL_REASONS.DEADLINE : null);
+
+            if (stopReason) {
+                runBudget.defer({
+                    reason: stopReason,
+                    kind: DEFERRAL_KINDS.IMAGE_SCRAPE,
+                    count: xboxDynastyCandidates.length,
+                });
+                logger.warn(`   ⏱️  XboxDynasty-Bildbatch zurückgestellt (${stopReason}).`);
+            } else {
+                runBudget.consumePageFetch();
+                const batchStart = Date.now();
+                try {
+                    const imageByArticleKey = await fetchXboxDynastyImageMap({
+                        createSignal: requestSignal,
+                        fetchImpl,
+                        lookup,
+                    });
+                    let resolvedCurrent = 0;
+                    let repairedStored = 0;
+
+                    for (const article of xboxDynastyCandidates) {
+                        const imageUrl = imageByArticleKey.get(getXboxDynastyArticleKey(article.link));
+                        if (!imageUrl) continue;
+                        article.imageUrl = imageUrl;
+                        resolvedCurrent++;
+                    }
+
+                    for (const article of oldArticles) {
+                        if (!isXboxDynastySource(article?.source) || !needsStoredImageRepair(article)) continue;
+                        const imageUrl = imageByArticleKey.get(getXboxDynastyArticleKey(article.link));
+                        if (!imageUrl) continue;
+                        article.imageUrl = imageUrl;
+                        repairedStored++;
+                    }
+
+                    logger.log(
+                        `   ✅ XboxDynasty image batch: ${resolvedCurrent}/${xboxDynastyCandidates.length} current, `
+                        + `${repairedStored} stored image(s) repaired (${formatDuration(Date.now() - batchStart)}).`,
+                    );
+                } catch (error) {
+                    logger.warn(
+                        `   ⚠️  XboxDynasty image batch unavailable after ${formatDuration(Date.now() - batchStart)}: `
+                        + redactMessage(error?.message ?? String(error)),
+                    );
+                }
+
+                if (hasTimeFor(SCRAPE_COURTESY_PAUSE_MS)) await sleep(SCRAPE_COURTESY_PAUSE_MS);
+            }
+        }
+
         // Reihum statt der Reihe nach: sonst frisst die erste Quelle das ganze
         // Scrape-Budget und alle folgenden gehen Lauf für Lauf leer aus.
         const articlesNeedingScraping = distributeBySourceFairly(
             newlyFetchedArticles.filter(a => a.needsScraping),
         );
-        const imageScrapeStartMs = Date.now();
         if (articlesNeedingScraping.length > 0) {
             logger.log(`\n🔎 Scraping images for ${articlesNeedingScraping.length} articles...\n`);
             const scrapeStats = { found: 0, missing: 0, failed: 0, totalMs: 0 };
@@ -1452,11 +1532,33 @@ export async function main({
             return article;
         });
 
+        // Bildgesundheit ist eine eigene, gemessene Aussage je Feed. Ein
+        // erfolgreicher RSS-Abruf kann trotzdem ausschließlich Platzhalter
+        // liefern; ohne diese beiden Zahlen blieb das im Admin unsichtbar.
+        const articlesBySource = new Map();
+        for (const article of newlyFetchedArticles) {
+            const sourceArticles = articlesBySource.get(article.source) ?? [];
+            sourceArticles.push(article);
+            articlesBySource.set(article.source, sourceArticles);
+        }
+        for (const feed of feeds) {
+            const entry = feedHealthStatus[feed.id];
+            if (!entry || entry.articleCount === null || entry.articleCount === undefined) continue;
+
+            const sourceArticles = articlesBySource.get(feed.name) ?? [];
+            entry.usableImageCount = sourceArticles.filter(hasUsableStoredImage).length;
+            entry.placeholderImageCount = sourceArticles.length - entry.usableImageCount;
+        }
+
         const newlyFetchedLinks = new Set(newlyFetchedArticles.map(article => article.link).filter(Boolean));
         const backfillSourceCounts = new Map();
         const imageBackfillArticles = distributeBySourceFairly(
             oldArticles
                 .filter(article => article?.link && needsStoredImageRepair(article) && !newlyFetchedLinks.has(article.link))
+                // XboxDynasty wird ausschließlich über den einen WordPress-
+                // Batch oben repariert. Direkte Artikelseiten liefern 401 und
+                // würden sonst in jedem Lauf erneut belastet.
+                .filter(article => !isXboxDynastySource(article?.source))
                 .filter(article => {
                     const source = article.source || 'Unknown';
                     const currentCount = backfillSourceCounts.get(source) || 0;

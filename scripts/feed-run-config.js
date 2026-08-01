@@ -149,7 +149,7 @@ export function readCoreDeadlineMs(env = {}) {
 }
 
 /**
- * Obergrenze der Artikel-Seitenabrufe pro Lauf (O2b).
+ * Obergrenze der bildbezogenen externen Abrufe pro Lauf (O2b/O2c).
  *
  * @param {Record<string, unknown>} env
  * @returns {{ value: number, skipReason: string|null }}

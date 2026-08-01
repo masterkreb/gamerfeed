@@ -221,6 +221,15 @@ export function normalizeFeedHealthEntry(raw) {
         skippedItemCount: raw?.skippedItemCount === undefined || raw?.skippedItemCount === null
             ? null
             : toNonNegativeInteger(raw.skippedItemCount),
+        // Bildabdeckung der in diesem Lauf geparsten Feed-Artikel. `null`
+        // heißt nicht gemessen (Abruffehler, Zurückstellung, alter Datensatz),
+        // eine echte 0 bleibt eine gemessene 0.
+        usableImageCount: raw?.usableImageCount === undefined || raw?.usableImageCount === null
+            ? null
+            : toNonNegativeInteger(raw.usableImageCount),
+        placeholderImageCount: raw?.placeholderImageCount === undefined || raw?.placeholderImageCount === null
+            ? null
+            : toNonNegativeInteger(raw.placeholderImageCount),
     };
 }
 

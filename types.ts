@@ -82,6 +82,10 @@ export interface BackendHealthEntry {
     articleCount?: number | null;
     /** Beim Parsen übersprungene Einzelelemente dieses Feeds. */
     skippedItemCount?: number | null;
+    /** Artikel des letzten Abrufs mit einem verwendbaren Bild. */
+    usableImageCount?: number | null;
+    /** Artikel des letzten Abrufs, die nur einen Platzhalter erhielten. */
+    placeholderImageCount?: number | null;
 }
 
 export type BackendHealthStatus = Record<string, BackendHealthEntry>;

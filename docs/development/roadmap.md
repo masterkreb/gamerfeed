@@ -1,6 +1,6 @@
 # GamerFeed – Projekt-Roadmap
 
-Stand: 30. Juli 2026
+Stand: 1. August 2026
 
 Diese Roadmap ordnet die technische Weiterentwicklung von GamerFeed. Sie ist
 kein fester Veröffentlichungskalender und keine automatische Freigabe, alle
@@ -98,7 +98,8 @@ Workflows – dort setzt O2b an.
 **Stand 28. Juli 2026 (Branch `claude/o2b-deadline-budget`):** O2b ist
 abgeschlossen. Der Lauf hat jetzt eine Deadline von 18 Minuten mit 12 Minuten
 Reserve vor dem 30-Minuten-Hardlimit, ein gemeinsames Budget von 80
-Artikel-Seitenabrufen und drei klar getrennte Ergebniszustände. Zurückgestellte
+bildbezogenen externen Abrufen und drei klar getrennte Ergebniszustände.
+Zurückgestellte
 Arbeit ergibt `degraded` statt stillschweigend `success`. 502 zentrale Tests und
 9 Browser-Abnahmen laufen erfolgreich. Das nächste Hauptrisiko liegt bei den
 zeitversetzt gecachten News-Endpunkten, die trotz Pointer verschiedene
@@ -302,6 +303,16 @@ Upload auf Cyon bestätigte der Produktionslauf
 dass der deployte Fingerprint mit der Repository-Fassung am Merge-Commit
 `972d2ef` übereinstimmt. Das Rollout-Gate ist damit geschlossen.
 
+**Stand 1. August 2026 (Branch `codex/xboxdynasty-image-health`):** **O2c** ist
+abgeschlossen. XboxDynasty liefert im RSS keine Artikelbilder mehr und weist
+automatisierte Artikelseiten-Abrufe mit HTTP 401 ab. Statt bis zu zehn aktuelle
+und fünf alte Seiten je Lauf erneut zu versuchen, liest ein einziger auf 5
+Sekunden und 128 KiB begrenzter WordPress-API-Batch die Yoast-OG-Bilder und
+repariert passende gespeicherte Platzhalter. Der PHP-Proxy bleibt unverändert.
+Zusätzlich misst jeder erfolgreich geparste Feed echte Bilder und Platzhalter;
+das Admin zeigt vollständige und teilweise Bildausfälle automatisch als
+Warnung. 914 zentrale Tests und 30 Browser-Abnahmen laufen erfolgreich.
+
 ## Empfohlene Reihenfolge
 
 | ID | Priorität | Status | Ergebnis |
@@ -315,6 +326,7 @@ dass der deployte Fingerprint mit der Repository-Fassung am Merge-Commit
 | S2 | P1 | erledigt | Admin-API-Payloads validieren und Fehlerausgaben härten |
 | O2a | P1 | erledigt | Einzelitem-Fehler, Secrets und Provider-Timeouts absichern |
 | O2b | P1 | erledigt | Feed-Kernlauf mit Deadline und Scrape-Budget begrenzen |
+| O2c | P1 | erledigt | XboxDynasty-Bilder gebündelt laden und Bildausfälle im Admin erkennen |
 | O3a | P1 | erledigt | Generationsgebundenes Leseprotokoll und Migration vorbereiten |
 | F1 | P1 | erledigt | Progressive News-Ladekette gegen veraltete Antworten absichern |
 | O3b | P1 | erledigt | News-Caches größenbegrenzt und konsistent veröffentlichen |
@@ -583,13 +595,14 @@ unterschiedlich behandelt und externe Aufrufe einzeln begrenzt werden.
 **Status:** erledigt. `scripts/feed-run-budget.js` führt ein globales Budget:
 `CORE_DEADLINE_MS` (18 Minuten ab Skriptstart, konfigurierbar über
 `FEED_CORE_DEADLINE_MS`, 12 Minuten Sicherheitsreserve vor dem
-30-Minuten-Hardlimit) und höchstens 80 Artikel-Seitenabrufe pro Lauf
-(`FEED_SCRAPE_LIMIT`) – gemeinsam für neue OG-Scrapes und den Backfill, damit
-der eine Weg die Grenze des anderen nicht umgeht. Der Worst Case passt bewusst
+30-Minuten-Hardlimit) und höchstens 80 bildbezogene externe Abrufe pro Lauf
+(`FEED_SCRAPE_LIMIT`) – gemeinsam für quellspezifische Bild-Batches, neue
+OG-Scrapes und den Backfill, damit kein Weg die Grenze der anderen umgeht. Der
+XboxDynasty-Batch zählt als genau ein Abruf. Der Worst Case passt bewusst
 nicht in die Deadline: 40 Quellen mit je zwei Versuchen à 15 s wären allein rund
 20 Minuten. Sie ist keine Kapazitätsplanung, sondern die Zusage, dass
 Kern-Publish und Heartbeat immer vor dem Hardlimit fallen. Die Restzeit wird vor jeder
-Quelle und jedem Seitenabruf geprüft **und** ein Timer bricht beim Erreichen der
+Quelle und jedem bildbezogenen Abruf geprüft **und** ein Timer bricht beim Erreichen der
 Deadline eine bereits laufende Anfrage über einen gemeinsamen
 `AbortController` ab; `requestSignal` kürzt zusätzlich jedes Einzeltimeout auf
 die Restzeit. Eine zurückgestellte Quelle bekommt `warning` statt `error` und
@@ -629,10 +642,51 @@ nicht zuverlässig durch den normalen Fehlerpfad.
   `CORE_DEADLINE_MS`;
 - alte Artikel ausgefallener Quellen bleiben innerhalb der bestehenden
   Retention und Artikelgrenze erhalten; das Bytebudget folgt in O3b;
-- es gibt keine unbegrenzte Zahl von Artikel-Seitenabrufen pro Lauf;
+- es gibt keine unbegrenzte Zahl bildbezogener externer Abrufe pro Lauf;
 - übersprungene Arbeit führt deterministisch zu `degraded`, nicht unbemerkt zu
   `success`;
 - kontrollierte Parallelität überschreitet nie das definierte Request-Limit.
+
+### O2c – Quellspezifische Bildauflösung und Bildgesundheit
+
+**Status:** erledigt. Seit dem 29. Juli 2026 tragen neue XboxDynasty-Artikel im
+Produktionscache nur noch Platzhalter. Der RSS-Feed liefert je Artikel kein
+Bild; sein einziges Channel-Bild ist ein allgemeines 32×32-Favicon. Direkte
+automatisierte Artikelseiten-Abrufe antworten mit HTTP 401, die öffentliche
+WordPress-REST-API liefert das jeweilige Yoast-OG-Bild weiterhin mit HTTP 200.
+
+**Warum:** Vor dem Ausfall wurden gespeicherte Bilder wiederverwendet und jede
+neue Artikelseite höchstens einmal benötigt. Nach dem Ausfall gelten
+Platzhalter dagegen als reparaturbedürftig: ohne Korrektur könnten pro Lauf bis
+zu zehn aktuelle und fünf alte XboxDynasty-Seiten erneut angefragt werden –
+theoretisch 1.080 erfolglose Seitenabrufe am Tag. Gleichzeitig wusste das Admin
+nicht, dass ein technisch erfolgreicher Feed keine Bilder mehr liefert.
+
+**Umfang:**
+
+- ein fester WordPress-Batch mit `per_page=100` und verschachtelter
+  `_fields`-Auswahl für Artikeladresse und OG-Bild;
+- 5 Sekunden Timeout, 128 KiB Limit, gemeinsame Outbound-/Redirect-Policy und
+  genau eine Einheit des globalen Scrape-Budgets;
+- Zuordnung über den XboxDynasty-Pfad, tolerant gegen Slash und Querystring;
+- direkte XboxDynasty-HTML-Scrapes und allgemeines Backfill für diese Quelle
+  deaktivieren; der PHP-Proxy und seine Allowlist bleiben unangetastet;
+- `usableImageCount` und `placeholderImageCount` additiv je erfolgreich
+  geparstem Feed speichern;
+- teilweise und vollständige Bildlücken im Admin als lokalisierte Warnung
+  anzeigen, ohne alte Health-Daten zu erraten.
+
+**Abnahme:**
+
+- zwei XboxDynasty-Artikel erzeugen genau einen RSS- und einen API-Abruf, aber
+  keinen Abruf einer einzelnen Artikelseite;
+- ein API-401 erzeugt nur Platzhalter und gemessene Bildzahlen, keinen
+  Wiederholungssturm;
+- Timeout, Byte-Limit, HTTPS-/Outbound-Policy und ungültige Einzelzeilen sind
+  getestet;
+- das Admin zeigt vollständige und teilweise Bildlücken in Zeile und
+  Warnungsliste; ein Legacy-Datensatz ohne Messung bleibt unverändert;
+- Betriebsvertrag: [`docs/deployment/feed-images.md`](../deployment/feed-images.md).
 
 ### O3a – Generationsgebundenes Leseprotokoll und Migration
 

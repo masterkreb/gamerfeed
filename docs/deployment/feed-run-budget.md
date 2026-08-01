@@ -23,7 +23,7 @@ veröffentlicht noch, schreibt den Heartbeat und benennt den Grund.
 |---|---|---|
 | `CORE_DEADLINE_MS` | 18 Minuten ab Skriptstart | `scripts/feed-run-budget.js` |
 | Sicherheitsreserve bis zum Hardlimit | 12 Minuten | ergibt sich aus 30 − 18 |
-| `MAX_ARTICLE_PAGE_FETCHES_PER_RUN` | 80 Seitenabrufe pro Lauf | `scripts/feed-run-budget.js` |
+| `MAX_ARTICLE_PAGE_FETCHES_PER_RUN` | 80 bildbezogene externe Abrufe pro Lauf | `scripts/feed-run-budget.js` |
 | Reserve für optionale Phasen | 3 Minuten Restzeit | `OPTIONAL_PHASE_MIN_REMAINING_MS` |
 
 ### Herleitung der 18 Minuten
@@ -39,8 +39,8 @@ Posten:
 
 **Der Worst Case passt ausdrücklich nicht in die 18 Minuten – und das ist
 Absicht.** Bei aktuell **40 konfigurierten Quellen** ergeben zwei Versuche à
-15 s allein schon rund 20 Minuten; dazu kämen bis zu 80 Seitenabrufe mit je 5 s
-Timeout und 0,5 s Pause, also weitere rund 7,3 Minuten. Eine Deadline, die das
+15 s allein schon rund 20 Minuten; dazu kämen bis zu 80 bildbezogene externe
+Abrufe mit je 5 s Timeout und 0,5 s Pause, also weitere rund 7,3 Minuten. Eine Deadline, die das
 abdeckt, gäbe es unterhalb des 30-Minuten-Hardlimits schlicht nicht.
 
 Die Deadline ist deshalb **keine Kapazitätsplanung, sondern eine Zusage**: der
@@ -61,11 +61,12 @@ Häufen sich degradierte Läufe, ist das ein Messwert und keine Fehlkonfiguratio
 dann gehört geprüft, welche Quellen die Zeit verbrauchen — die Beobachtbarkeit
 dafür (Historie, Alarm) ist O4.
 
-### Warum ein gemeinsames Seitenbudget
+### Warum ein gemeinsames Bildabruf-Budget
 
-Neue OG-Scrapes und der Backfill alter Artikel rufen **dieselbe Art** fremder
-Artikelseiten ab und kosten dieselbe Laufzeit. Zwei getrennte Budgets wären eine
-Einladung, die Obergrenze über den jeweils anderen Weg zu umgehen. Die
+Neue OG-Scrapes, quellspezifische Bild-Batches und der Backfill alter Artikel
+sind bildbezogene Zugriffe auf fremde Systeme. Getrennte Budgets wären eine
+Einladung, die Obergrenze über den jeweils anderen Weg zu umgehen. Ein Batch
+zählt als genau ein Zugriff, nicht als einer je zurückgegebenem Artikel. Die
 bestehenden Backfill-Grenzen (30 gesamt, 5 je Quelle) bleiben als *innere*
 Begrenzung erhalten.
 

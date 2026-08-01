@@ -8,6 +8,7 @@ import {
     createRunStatus,
     finishRunStatus,
     mergeFeedHealth,
+    normalizeFeedHealthEntry,
     normalizePublishStatus,
     normalizeRunStatus,
     progressRunStatus,
@@ -63,6 +64,21 @@ function reportAged(ageMs) {
 
 test('die dokumentierte Schwelle liegt bei 50 Minuten', () => {
     assert.equal(FEED_STALE_AFTER_MS, 50 * 60 * 1000);
+});
+
+test('Bildzahlen unterscheiden fehlende Messung von einer gemessenen Null', () => {
+    const legacy = normalizeFeedHealthEntry({ status: 'success', message: 'ok' });
+    assert.equal(legacy.usableImageCount, null);
+    assert.equal(legacy.placeholderImageCount, null);
+
+    const measured = normalizeFeedHealthEntry({
+        status: 'success',
+        message: 'ok',
+        usableImageCount: 7.9,
+        placeholderImageCount: 0,
+    });
+    assert.equal(measured.usableImageCount, 7);
+    assert.equal(measured.placeholderImageCount, 0);
 });
 
 test('direkt vor der Schwelle gilt alles als aktuell', () => {
