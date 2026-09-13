@@ -28,6 +28,10 @@ export function createFeedRefreshHandler({
                 'Der manuelle Feed-Start ist noch nicht eingerichtet.');
         }
 
+        // AbortController und Timer gehören zu den dokumentierten Edge-APIs.
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), DISPATCH_TIMEOUT_MS);
+
         try {
             const response = await fetchImpl(DISPATCH_URL, {
                 method: 'POST',
@@ -38,8 +42,10 @@ export function createFeedRefreshHandler({
                     'X-GitHub-Api-Version': '2022-11-28',
                 },
                 body: JSON.stringify({ ref: 'main' }),
-                redirect: 'error',
-                signal: AbortSignal.timeout(DISPATCH_TIMEOUT_MS),
+                // Auch bei einem GitHub-Redirect bleibt der Bearer-Header am
+                // fest verdrahteten Ziel; 3xx wird unten als Fehler behandelt.
+                redirect: 'manual',
+                signal: controller.signal,
             });
 
             if (response.status !== 204) {
@@ -52,10 +58,15 @@ export function createFeedRefreshHandler({
             // 204 bei GitHub bestaetigt nur die Annahme, nicht fertige News.
             return adminJsonResponse({ status: 'accepted' }, 202);
         } catch (error) {
+            const reason = error instanceof Error
+                ? `${error.name}: ${error.message.replaceAll(token, '[redacted]').replace(/[\r\n]/g, ' ').slice(0, 200)}`
+                : 'UnknownError';
             logger.error('GitHub feed workflow dispatch request failed',
-                error instanceof Error ? error.name : 'UnknownError');
+                reason);
             return adminErrorResponse(502, API_ERROR_CODES.DISPATCH_FAILED,
                 'GitHub hat den manuellen Feed-Start nicht angenommen.');
+        } finally {
+            clearTimeout(timeout);
         }
     };
 }
