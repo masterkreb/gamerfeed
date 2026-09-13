@@ -18,6 +18,7 @@ import {
 import { FeedFormModal } from './FeedFormModal';
 import { FeedManagementTab } from './FeedManagementTab';
 import { HealthCenterTab } from './HealthCenterTab';
+import { FeedRefreshControl } from './FeedRefreshControl';
 import { HealthLegendTab } from './HealthLegendTab';
 import { AnnouncementTab } from './AnnouncementTab';
 import type { HealthState } from './healthTypes';
@@ -133,6 +134,8 @@ export const AdminPanel: React.FC = () => {
     const [runHistory, setRunHistory] = useState<FeedRunHistoryEntry[] | null>(null);
     const [activeTab, setActiveTab] = useState<AdminTab>('management');
     const [isReloadingReport, setIsReloadingReport] = useState(false);
+    const { isMutating: isTriggeringRefresh, runExclusive: runFeedRefresh } = useMutationLatch();
+    const [refreshFeedback, setRefreshFeedback] = useState<'accepted' | 'unavailable' | 'failed' | null>(null);
     const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
     /** Zuletzt gelesener gespeicherter Statusbericht; `null` vor dem Laden. */
@@ -301,6 +304,23 @@ export const AdminPanel: React.FC = () => {
         }
     }, []);
 
+    const triggerFeedRefresh = async () => {
+        await runFeedRefresh(async () => {
+            setRefreshFeedback(null);
+            try {
+                const response = await fetch('/api/refresh-feeds', { method: 'POST' });
+                if (response.status !== 202) {
+                    setRefreshFeedback(response.status === 503 ? 'unavailable' : 'failed');
+                    return;
+                }
+                setRefreshFeedback('accepted');
+            } catch (error) {
+                console.error('Error requesting feed refresh:', error);
+                setRefreshFeedback('failed');
+            }
+        });
+    };
+
     useEffect(() => {
         if (feeds.length > 0) {
             void reloadStoredReport();
@@ -464,6 +484,11 @@ export const AdminPanel: React.FC = () => {
                     aria-labelledby={getTabId('health')}
                     hidden={activeTab !== 'health'}
                 >
+                    <FeedRefreshControl
+                        onTriggerRefresh={triggerFeedRefresh}
+                        isTriggeringRefresh={isTriggeringRefresh}
+                        refreshFeedback={refreshFeedback}
+                    />
                     {loadStatus === 'ready' ? (
                         <HealthCenterTab
                             report={healthReport}

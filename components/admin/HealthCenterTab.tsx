@@ -109,7 +109,7 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                                                                     heartbeat,
                                                                     runHistory,
                                                                     onReloadReport,
-                                                                    isReloadingReport
+                                                                    isReloadingReport,
                                                                 }) => {
     const { t } = useTranslation();
     const [sortConfig, setSortConfig] = useState<{ key: SortableKey; direction: SortDirection } | null>({ key: 'status', direction: 'ascending' });

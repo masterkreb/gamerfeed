@@ -30,6 +30,10 @@ export const API_ERROR_CODES = Object.freeze({
     VALIDATION_FAILED: 'validation_failed',
     /** 404 – der angesprochene Datensatz existiert nicht. */
     NOT_FOUND: 'not_found',
+    /** 503 – die GitHub-Dispatch-Verbindung ist nicht konfiguriert. */
+    DISPATCH_UNAVAILABLE: 'dispatch_unavailable',
+    /** 502 – GitHub hat den manuellen Start nicht angenommen. */
+    DISPATCH_FAILED: 'dispatch_failed',
     /** 500 – interner Fehler; Einzelheiten stehen ausschliesslich im Log. */
     INTERNAL_ERROR: 'internal_error',
 });

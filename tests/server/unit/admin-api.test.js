@@ -131,6 +131,8 @@ test('gültiges JSON, das kein Objekt ist, bekommt einen eigenen Code', async ()
 test('die Fehlercodes bleiben als Liste stabil', () => {
     assert.deepEqual(Object.values(API_ERROR_CODES).sort(), [
         'auth_unavailable',
+        'dispatch_failed',
+        'dispatch_unavailable',
         'forbidden',
         'internal_error',
         'invalid_json',
