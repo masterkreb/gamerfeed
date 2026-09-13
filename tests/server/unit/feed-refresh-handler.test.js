@@ -25,7 +25,7 @@ test('manueller Start fordert nur den festen Workflow auf main an', async () => 
     assert.equal(calls[0].options.method, 'POST');
     assert.deepEqual(JSON.parse(calls[0].options.body), { ref: 'main' });
     assert.equal(calls[0].options.headers.Authorization, 'Bearer secret-test-token');
-    assert.equal(calls[0].options.redirect, 'error');
+    assert.equal(calls[0].options.redirect, 'manual');
     assert.ok(calls[0].options.signal);
 });
 
@@ -63,4 +63,40 @@ test('fehlendes Token und GitHub-Fehler liefern keine internen Details aus', asy
     assert.equal(response.status, 502);
     assert.equal((await readJson(response)).code, 'dispatch_failed');
     assert.ok(!JSON.stringify(errors).includes('secret-test-token'));
+});
+
+test('GitHub-Redirect wird ohne Weiterleitung und ohne Geheimnis im Log abgelehnt', async () => {
+    const errors = [];
+    const handler = createFeedRefreshHandler({
+        env: ENV,
+        fetchImpl: async (_url, options) => {
+            assert.equal(options.redirect, 'manual');
+            return new Response(null, { status: 302, headers: { Location: 'https://other.example' } });
+        },
+        logger: { error: (...args) => errors.push(args) },
+    });
+
+    const response = await handler(adminRequest(PATH, { method: 'POST' }));
+    assert.equal(response.status, 502);
+    assert.equal((await readJson(response)).code, 'dispatch_failed');
+    assert.ok(!JSON.stringify(errors).includes('secret-test-token'));
+});
+
+test('ein Fetch-TypeError bleibt im Client generisch und wird im Log bereinigt', async () => {
+    const errors = [];
+    const handler = createFeedRefreshHandler({
+        env: ENV,
+        fetchImpl: async () => {
+            throw new TypeError('Invalid header secret-test-token\ninternal detail');
+        },
+        logger: { error: (...args) => errors.push(args) },
+    });
+
+    const response = await handler(adminRequest(PATH, { method: 'POST' }));
+    assert.equal(response.status, 502);
+    const body = await readJson(response);
+    assert.equal(body.code, 'dispatch_failed');
+    assert.ok(!JSON.stringify(body).includes('internal detail'));
+    assert.ok(!JSON.stringify(errors).includes('secret-test-token'));
+    assert.ok(!JSON.stringify(errors).includes('\\ninternal detail'));
 });
