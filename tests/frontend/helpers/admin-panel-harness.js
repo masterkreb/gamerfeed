@@ -68,6 +68,7 @@ export function installLocalStorage(window, entries = {}) {
  */
 export async function renderAdminPanel(vite, {
     feeds = [],
+    feedsStatusCode = 200,
     healthResponse,
     healthStatusCode = 200,
     localStorageEntries = {},
@@ -83,8 +84,11 @@ export async function renderAdminPanel(vite, {
             if (url.startsWith('/api/get-health-data')) {
                 return jsonResponse(healthResponse ?? null, healthStatusCode);
             }
+            if (url === '/api/refresh-feeds' && method === 'POST') {
+                return jsonResponse({ status: 'accepted' }, 202);
+            }
             if (url === '/api/feeds') {
-                return jsonResponse(feeds);
+                return jsonResponse(feedsStatusCode === 200 ? feeds : { error: 'Service unavailable' }, feedsStatusCode);
             }
             // Der Ankündigungs-Reiter ist dauerhaft mitgemountet.
             if (url.startsWith('/api/announcement')) {

@@ -69,6 +69,7 @@ Insbesondere gehören diese Werte nicht in die allgemeine Preview-Umgebung:
 - `RECAPTCHA_SECRET_KEY`
 - `GROQ_API_KEY`
 - `CRON_SECRET`
+- `GITHUB_FEED_DISPATCH_TOKEN` (manueller Feed-Start im Admin)
 
 Am 28. Juli 2026 wurde die bestehende Upstash-Ressource `gamerfeed-kv` vom
 Projekt getrennt und mit **Production** sowie aktivierter

@@ -2,9 +2,10 @@
 
 Stand: 28. Juli 2026 (Roadmap-Paket S2)
 
-Die geschützten Endpunkte `/api/feeds`, `/api/announcement` und
-`/api/get-health-data` prüfen eingehendes JSON zur Laufzeit, antworten mit
-stabilen Fehlercodes und liefern nichts Zwischenspeicherbares aus.
+Die geschützten Endpunkte `/api/feeds`, `/api/announcement`,
+`/api/get-health-data` und `/api/refresh-feeds` antworten mit stabilen
+Fehlercodes und liefern nichts Zwischenspeicherbares aus. Endpunkte mit
+JSON-Rumpf prüfen diesen zur Laufzeit.
 
 ## Antwortformat
 
@@ -35,6 +36,8 @@ Die Codes stehen in [`shared/api-errors.js`](../../shared/api-errors.js).
 | `validation_failed` | 400 | Objekt, aber ein Feld verletzt den Vertrag |
 | `not_found` | 404 | der angesprochene Datensatz existiert nicht |
 | `internal_error` | 500 | interner Fehler; Einzelheiten stehen ausschließlich im Log |
+| `dispatch_unavailable` | 503 | manuelles Start-Token fehlt in Vercel |
+| `dispatch_failed` | 502 | GitHub hat den Workflow-Start nicht angenommen |
 
 Die Trennung von `invalid_json` und `invalid_payload` ist Absicht: der Client
 erkennt daran, ob sein Serialisierer oder sein Datenmodell falsch liegt.
@@ -136,6 +139,25 @@ nicht an eine inaktive Ankündigung kommen. Jeder andere Parameterwert
 
 Damit kann der Admin eine abgeschaltete Ankündigung wieder laden, bearbeiten,
 aktivieren und löschen – vorher war sie für ihn unerreichbar.
+
+## Feed-Lauf manuell starten
+
+`POST /api/refresh-feeds` verlangt Basic Authentication und eine exakt passende
+Origin wie alle Admin-Mutationen. Der Endpunkt startet ausschließlich
+`.github/workflows/update-feeds.yml` auf `main` per GitHub `workflow_dispatch`.
+Er akzeptiert keine Angaben zu Repository, Workflow oder Branch aus dem Browser.
+Bei GitHub-Status 204 antwortet er mit HTTP 202 und `{ "status": "accepted" }`:
+Der Auftrag ist angenommen, die Artikel sind zu diesem Zeitpunkt noch nicht
+aktualisiert. Die GitHub-Queue und der Workflow entscheiden über den Abschluss.
+Der gespeicherte Statusbericht im Health Center wird danach separat neu geladen.
+
+In **Vercel Production** muss `GITHUB_FEED_DISPATCH_TOKEN` als sensitives Secret
+gesetzt sein. Ein Fine-grained Personal Access Token benötigt Zugriff nur auf
+`masterkreb/gamerfeed` mit Repository-Berechtigung **Actions: Read and write**.
+Das Token gehört weder in Preview/Development noch in den Frontend-Build oder
+ins Repository. Es ermöglicht GitHub-Workflow-Starts und sollte entsprechend
+geschützt und bei Bedarf widerrufen werden. Bei fehlendem Token liefert die API
+503; bei GitHub- oder Netzwerkfehlern 502, jeweils ohne Providerdetails.
 
 ## Testbarkeit
 

@@ -288,6 +288,14 @@ const resources = {
                     "ariaDelete": "Delete {{name}}"
                 },
                 "health": {
+                    "refreshTitle": "Fetch latest news",
+                    "refreshHint": "Starts the existing GitHub Actions feed workflow. GitHub may queue the run; new articles appear only after it finishes successfully.",
+                    "refreshButton": "Start feed update",
+                    "refreshRequesting": "Requesting update…",
+                    "refreshAccepted": "GitHub accepted the request. Check the workflow run and reload this report after it finishes.",
+                    "refreshUnavailable": "Manual feed updates are not configured yet. Ask the operator to add the GitHub dispatch token in Vercel.",
+                    "refreshFailed": "The feed update could not be started. Please try again later or use GitHub Actions.",
+                    "refreshWorkflowLink": "View workflow runs on GitHub",
                     "title": "Backend Feed Status",
                     "description": "Shows the stored result of the last automated backend run (GitHub Action).",
                     "reloadReport": "Reload saved status report",
@@ -749,6 +757,14 @@ const resources = {
                     "ariaDelete": "{{name}} löschen"
                 },
                 "health": {
+                    "refreshTitle": "Neueste Nachrichten abrufen",
+                    "refreshHint": "Startet den bestehenden Feed-Workflow bei GitHub Actions. GitHub kann den Lauf in eine Warteschlange stellen; neue Artikel erscheinen erst nach erfolgreichem Abschluss.",
+                    "refreshButton": "Feed-Aktualisierung starten",
+                    "refreshRequesting": "Aktualisierung wird angefordert…",
+                    "refreshAccepted": "GitHub hat den Auftrag angenommen. Prüfe den Workflow-Lauf und lade danach diesen Bericht neu.",
+                    "refreshUnavailable": "Der manuelle Feed-Start ist noch nicht eingerichtet. Dafür muss das GitHub-Token in Vercel hinterlegt werden.",
+                    "refreshFailed": "Die Feed-Aktualisierung konnte nicht gestartet werden. Versuche es später erneut oder nutze GitHub Actions.",
+                    "refreshWorkflowLink": "Workflow-Läufe auf GitHub ansehen",
                     "title": "Backend-Feed-Status",
                     "description": "Zeigt den gespeicherten Stand des letzten automatisierten Backend-Laufs (GitHub Action).",
                     "reloadReport": "Gespeicherten Statusbericht neu laden",

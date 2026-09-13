@@ -72,6 +72,44 @@ async function renderPanel() {
     });
 }
 
+test('manueller Feed-Start meldet Annahme und sperrt synchrone Doppelklicks', async () => {
+    const restoreConsole = silenceConsole();
+    const testRoot = await renderPanel();
+
+    try {
+        const button = Array.from(testRoot.container.querySelectorAll('button'))
+            .find(element => element.textContent.includes('Feed-Aktualisierung starten'));
+        assert.ok(button);
+
+        await act(async () => {
+            click(testRoot.window, button);
+            click(testRoot.window, button);
+            await new Promise(resolve => setImmediate(resolve));
+        });
+
+        assert.equal(testRoot.requests.filter(request => request.url === '/api/refresh-feeds').length, 1);
+        assert.match(testRoot.container.querySelector('[role="status"]')?.textContent ?? '', /GitHub hat den Auftrag angenommen/);
+    } finally {
+        await testRoot.cleanup();
+        restoreConsole();
+    }
+});
+
+test('der manuelle Start bleibt bei fehlender Feed-Liste im Status-Center sichtbar', async () => {
+    const restoreConsole = silenceConsole();
+    const testRoot = await renderAdminPanel(vite, { feedsStatusCode: 503 });
+
+    try {
+        const healthPanel = testRoot.container.querySelector('#admin-panel-health');
+        assert.ok(healthPanel);
+        assert.match(healthPanel.textContent, /Feed-Aktualisierung starten/);
+        assert.match(healthPanel.textContent, /Feed-Quellen konnten nicht geladen werden/);
+    } finally {
+        await testRoot.cleanup();
+        restoreConsole();
+    }
+});
+
 test('die Admin-Reiter tragen IDs, aria-controls, aria-labelledby und genau einen tabIndex 0', async () => {
     const restoreConsole = silenceConsole();
     const testRoot = await renderPanel();
