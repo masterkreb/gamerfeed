@@ -1650,7 +1650,10 @@ export async function main({
                 }
             }
         });
-        const cutoffDate = new Date();
+        // Der gesamte Lauf verwendet denselben festgehaltenen Startzeitpunkt.
+        // Das verhindert Grenzverschiebungen waehrend langer Laeufe und macht
+        // Retention-Tests unabhaengig vom aktuellen Kalenderdatum.
+        const cutoffDate = new Date(recorder.startedAt);
         cutoffDate.setDate(cutoffDate.getDate() - ARTICLE_RETENTION_DAYS);
         const articlesToKeep = Array.from(uniqueArticlesMap.values()).filter(article => new Date(article.publicationDate) >= cutoffDate);
         logger.log(`   - Total unique articles: ${uniqueArticlesMap.size}`);
