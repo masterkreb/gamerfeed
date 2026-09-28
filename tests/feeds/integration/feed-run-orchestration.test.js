@@ -166,8 +166,65 @@ test('eine andere Quelle erzeugt trotz Direktfehler keinen Proxy-Aufruf', async 
     assert.equal(
         spies.fetchCalls.filter(call => call.url.includes('proxy.example')).length,
         0,
-        'GameStar ist nicht für den Proxy freigegeben',
+        'Testquelle ist nicht für den Proxy freigegeben',
     );
+    // Der Direktversuch fand statt: der Test belegt damit den unterlassenen
+    // Proxy-Aufruf und nicht bloß eine Quelle, die nie abgerufen wurde.
+    assert.ok(
+        spies.fetchCalls.some(call => call.url === FEED_ROW.url),
+        'die Quelle wurde direkt abgerufen',
+    );
+});
+
+// Produktive Adressen der Quellen, die neben GamePro den Proxy nutzen dürfen.
+// Sie stehen genau so in der Allowlist von tools/feed-proxy.php; bei Play3 ist
+// es das Weiterleitungsziel, weil der Proxy keinen Redirects folgt. Die IDs
+// entsprechen dem Muster der Feed-Verwaltung (<Slug>-<Zeitstempel>): die
+// Freigabe hängt am Namen, nicht an der ID.
+const PROXY_QUELLEN = [
+    { id: 'gamestar-1758000000001', name: 'GameStar', url: 'https://www.gamestar.de/rss/gamestar.rss' },
+    { id: 'play3-1758000000002', name: 'Play3', url: 'https://www.play3.de/feed/' },
+    { id: 'playfront-1758000000003', name: 'PlayFront', url: 'https://playfront.de/feed/' },
+].map(feed => Object.freeze({
+    ...feed,
+    language: 'de',
+    priority: 'primary',
+    needs_scraping: false,
+}));
+
+test('GameStar, Play3 und PlayFront versuchen nach einem Direktfehler den Proxy mit ihrer Feed-Adresse', async () => {
+    for (const feed of PROXY_QUELLEN) {
+        const spies = createSpies({ feeds: [feed] });
+
+        await runMain(spies, {
+            fetchImpl: spies.makeFetchImpl(async url => (
+                url.includes('proxy.example')
+                    ? new Response(rssFeed(`Über den Proxy: ${feed.name}`), { status: 200 })
+                    : new Response('Forbidden', { status: 403 })
+            )),
+            groqFetch: spies.makeGroqFetch(async () => new Response(
+                JSON.stringify({ choices: [{ message: { content: '[]' } }] }),
+                { status: 200 },
+            )),
+        });
+
+        const proxyAufrufe = spies.fetchCalls.filter(call => call.url.includes('proxy.example'));
+        assert.equal(proxyAufrufe.length, 1, `${feed.name}: genau ein Proxy-Aufruf`);
+        assert.equal(
+            new URL(proxyAufrufe[0].url).searchParams.get('url'),
+            feed.url,
+            `${feed.name}: der Proxy bekommt die Feed-Adresse unverändert`,
+        );
+        assert.equal(
+            spies.fetchCalls[0].url,
+            feed.url,
+            `${feed.name}: zuerst der Direktabruf, dann erst der Proxy`,
+        );
+        assert.ok(
+            spies.kvSets.some(entry => entry.key === 'news_cache'),
+            `${feed.name}: der Kern-Publish findet statt`,
+        );
+    }
 });
 
 // === Optionale Trendfehler ===
@@ -447,9 +504,9 @@ test('ein einzelnes fehlerhaftes Item verwirft den Feed nicht', async () => {
     assert.equal(newsCache.value.length, 2, 'die gültigen Artikel bleiben erhalten');
 
     const health = spies.kvStore.feed_health_status;
-    assert.equal(health.gamestar.status, 'success');
-    assert.equal(health.gamestar.skippedItemCount, 1);
-    assert.match(health.gamestar.message, /invalid_date: 1/);
+    assert.equal(health.testquelle.status, 'success');
+    assert.equal(health.testquelle.skippedItemCount, 1);
+    assert.match(health.testquelle.message, /invalid_date: 1/);
 });
 
 // === GitHub-Step-Summary (O4a) ===============================================
@@ -499,7 +556,7 @@ test('ein erfolgreicher Lauf schreibt eine Zusammenfassung mit Ergebnis und Snap
     assert.match(markdown, /GamerFeed-Lauf/);
     assert.match(markdown, /success/);
     assert.match(markdown, /Aktive Generation/);
-    assert.match(markdown, /\| GameStar \|/, 'die Quelle steht in der Tabelle');
+    assert.match(markdown, /\| Testquelle \|/, 'die Quelle steht in der Tabelle');
     assert.match(markdown, /\bdirect\b/, 'der Direktabruf wird als Transport genannt');
     assert.match(markdown, /Fehlerquote/);
     assert.deepEqual(spies.exitCodes, [], 'ein erfolgreicher Lauf endet ohne Exit-Code');
@@ -553,7 +610,7 @@ test('ein endgültiger Abruffehler erscheint mit Transport none und seinem Statu
         writeSummary: writer.writeSummary,
     });
 
-    assert.match(writer.markdown, /\| GameStar \| error \|[^|]*\|[^|]*\|[^|]*\| none \| 500 \|/);
+    assert.match(writer.markdown, /\| Testquelle \| error \|[^|]*\|[^|]*\|[^|]*\| none \| 500 \|/);
 });
 
 test('ohne GITHUB_STEP_SUMMARY entsteht kein Schreibversuch', async () => {
@@ -793,9 +850,9 @@ test('ein endgültiger Abruffehler meldet keine gemessene Null', async () => {
         writeSummary: writer.writeSummary,
     });
 
-    assert.equal(gespeicherterStatus(spies, 'gamestar').status, 'error');
-    assert.equal(gespeicherterStatus(spies, 'gamestar').skippedItemCount, null);
-    assert.equal(uebersprungenZelle(writer.markdown, 'GameStar'), '–');
+    assert.equal(gespeicherterStatus(spies, 'testquelle').status, 'error');
+    assert.equal(gespeicherterStatus(spies, 'testquelle').skippedItemCount, null);
+    assert.equal(uebersprungenZelle(writer.markdown, 'Testquelle'), '–');
 });
 
 test('eine vor dem Abruf zurückgestellte Quelle meldet keine gemessene Null', async () => {
@@ -871,10 +928,10 @@ test('ein erfolgreich geparster Feed ohne verworfene Items meldet eine echte Nul
         writeSummary: writer.writeSummary,
     });
 
-    const status = gespeicherterStatus(spies, 'gamestar');
+    const status = gespeicherterStatus(spies, 'testquelle');
     assert.equal(status.status, 'success');
     assert.equal(status.skippedItemCount, 0, 'hier wurde wirklich gemessen');
-    assert.equal(uebersprungenZelle(writer.markdown, 'GameStar'), '0');
+    assert.equal(uebersprungenZelle(writer.markdown, 'Testquelle'), '0');
 });
 
 test('ein erfolgreich geparster Feed mit verworfenen Items meldet deren Zahl', async () => {
@@ -907,10 +964,10 @@ test('ein erfolgreich geparster Feed mit verworfenen Items meldet deren Zahl', a
         writeSummary: writer.writeSummary,
     });
 
-    const status = gespeicherterStatus(spies, 'gamestar');
+    const status = gespeicherterStatus(spies, 'testquelle');
     assert.equal(status.status, 'success');
     assert.equal(status.skippedItemCount, 1);
-    assert.equal(uebersprungenZelle(writer.markdown, 'GameStar'), '1');
+    assert.equal(uebersprungenZelle(writer.markdown, 'Testquelle'), '1');
 });
 
 test('die gerenderte Zusammenfassung enthält keine Zugangsdaten', async () => {

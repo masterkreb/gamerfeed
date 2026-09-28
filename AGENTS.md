@@ -902,13 +902,23 @@ automatisch erzeugten Seiten.
 
 ## 🔌 Feed-Proxy
 
-Einzelne Quellen – aktuell GamePro – beantworten Anfragen aus dem
-GitHub-Actions-Netz mit HTTP 403. Für diese Fälle gibt es `tools/feed-proxy.php`
-auf einem externen Webhosting.
+Einzelne Quellen – aktuell GamePro, GameStar, Play3 und PlayFront – beantworten
+Anfragen aus dem GitHub-Actions-Netz mit HTTP 403. Für diese Fälle gibt es
+`tools/feed-proxy.php` auf einem externen Webhosting.
 
 - Der Proxy wird **nur für Quellen aus `PROXY_ELIGIBLE_SOURCES`** versucht
-  (aktuell ausschließlich GamePro). Ein gewöhnlicher Timeout einer anderen
+  (aktuell GamePro, GameStar, Play3 und PlayFront), und auch dann erst nach
+  einem fehlgeschlagenen Direktabruf. Ein gewöhnlicher Timeout einer anderen
   Quelle führt nicht mehr zum Umweg über fremdes Hosting
+- **Eine Quelle braucht zwei Einträge:** ihren klein geschriebenen Namen in
+  `PROXY_ELIGIBLE_SOURCES` (`scripts/feed-fetch-utils.js`; Name oder ID der
+  Quelle muss bis auf Groß-/Kleinschreibung und Randleerzeichen genau
+  übereinstimmen) und ihre Adresse in `$allowed` von
+  `tools/feed-proxy.php`. Die Adresse steht dort **exakt** so wie in der
+  Feed-Verwaltung. Bei einer weiterleitenden Quelle ist das das
+  Weiterleitungsziel: Play3 gehört mit `https://www.play3.de/feed/` in Allowlist
+  und Feed-Verwaltung, nicht mit `/feed/rss/`, weil der Proxy keinen Redirects
+  folgt
 - **Wird nicht von Vercel deployt.** Nach jeder Änderung an der Datei muss sie
   manuell auf das Hosting hochgeladen werden
 - Die Adresse steht im GitHub-Actions-Secret `FEED_PROXY_URL`, nicht bei Vercel
@@ -1083,6 +1093,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **Juli 2026:** Laufdeadline und Scrape-Budget (O2b): 18-Minuten-Deadline mit kontrolliertem Gesamtabbruch, 80 bildbezogene externe Abrufe pro Lauf, faire Verteilung zurückgestellter Bild-Scrapes, Ergebniszustand `degraded` getrennt von `success` und `fatal`
 - **August 2026:** XboxDynasty-Bildfallback und Bildgesundheit (O2c): ein begrenzter WordPress-API-Batch statt wiederholter 401-Artikelseiten, additive Bild-/Platzhalterzahlen je Feed und automatische Admin-Warnung bei Bildlücken
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
+- **September 2026:** Proxy-Freigabe erweitert: GameStar, Play3 und PlayFront nutzen wie GamePro nach einem fehlgeschlagenen Direktabruf den PHP-Proxy. `PROXY_ELIGIBLE_SOURCES` und die exakte Allowlist in `tools/feed-proxy.php` wachsen gemeinsam, Play3 mit dem Weiterleitungsziel `https://www.play3.de/feed/`. Wirksam erst nach manuellem Upload der Datei, Fingerprint-Vergleich und Anpassung der Play3-Adresse in der Feed-Verwaltung
 
 ---
 

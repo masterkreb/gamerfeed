@@ -27,16 +27,23 @@ export const MAX_FEED_RESPONSE_BYTES = 5 * 1024 * 1024;
 /**
  * Quellen, fuer die der externe PHP-Proxy ueberhaupt versucht werden darf.
  *
- * GamePro beantwortet Anfragen aus dem GitHub-Actions-Netz mit HTTP 403 - dafuer
- * gibt es den Proxy. Alle anderen Quellen sind direkt erreichbar; ein
+ * GamePro, GameStar, Play3 und PlayFront beantworten Anfragen aus dem
+ * GitHub-Actions-Netz mit HTTP 403 - dafuer gibt es den Proxy. Alle anderen
+ * Quellen sind direkt erreichbar; ein
  * gewoehnlicher Timeout ist dort ein voruebergehendes Problem der Quelle und
  * kein Grund, den Umweg ueber fremdes Hosting zu nehmen.
+ *
+ * Grundregel: nur gelistete Quellen duerfen den Proxy nutzen, und auch sie erst
+ * nach einem fehlgeschlagenen Direktabruf. Die Eintraege sind klein
+ * geschrieben, weil isProxyEligibleSource id und name getrimmt und klein
+ * geschrieben vergleicht. Eine neue Quelle braucht zusaetzlich einen exakten
+ * Eintrag in der Allowlist von tools/feed-proxy.php.
  *
  * Die Liste steht bewusst hier und nicht im PHP-Skript: die Entscheidung gehoert
  * auf diese Seite und darf nicht von der Gegenstelle abhaengen. Die exakte
  * Allowlist des Proxys bleibt davon unberuehrt und zusaetzlich wirksam.
  */
-export const PROXY_ELIGIBLE_SOURCES = Object.freeze(['gamepro']);
+export const PROXY_ELIGIBLE_SOURCES = Object.freeze(['gamepro', 'gamestar', 'play3', 'playfront']);
 
 /**
  * Darf fuer diese Quelle der Proxy versucht werden?

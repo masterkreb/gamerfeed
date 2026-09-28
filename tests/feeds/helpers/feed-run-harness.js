@@ -23,10 +23,15 @@ export const ALLE_SECRETS = Object.freeze([
     'proxy-geheim',
 ]);
 
+// Standardquelle der Lauf-Tests: bewusst erfunden und nicht auf
+// PROXY_ELIGIBLE_SOURCES. Die Liste wächst mit jeder weiteren Quelle; ein
+// echter Name ließe jeden Test, in dem die Quelle direkt scheitert, still über
+// den Proxy-Pfad laufen (geschehen, als GameStar freigegeben wurde). Für den
+// Proxy-Pfad gibt es GAMEPRO_ROW.
 export const FEED_ROW = Object.freeze({
-    id: 'gamestar',
-    name: 'GameStar',
-    url: 'https://www.gamestar.de/feed.xml',
+    id: 'testquelle',
+    name: 'Testquelle',
+    url: 'https://testquelle.example/feed.xml',
     language: 'de',
     priority: 'primary',
     needs_scraping: false,

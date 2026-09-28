@@ -122,6 +122,13 @@ test('die Allowlist bleibt unverändert streng', { skip: !phpAvailable }, async 
         'https://example.com/feed.xml',
         'https://www.gamepro.de/rss/gamepro.rss?extra=1',
         'https://www.gamepro.de/rss/gamepro.rss/../andere',
+        // Die weiterleitende Play3-Adresse: erlaubt ist nur ihr Ziel.
+        'https://www.play3.de/feed/rss/',
+        // Auch für die übrigen Einträge zählt der exakte Vergleich, nicht eine
+        // ähnliche Schreibweise von Query, Slash oder Host.
+        'https://www.gamestar.de/rss/gamestar.rss?extra=1',
+        'https://www.play3.de/feed',
+        'https://www.playfront.de/feed/',
         '',
     ]) {
         const { status } = await runProxy({ get: { url } });
@@ -149,12 +156,43 @@ test('der Fingerprint-Zweig steht vor jedem cURL-Aufruf', { skip: !phpAvailable 
     assert.ok(fingerprintIndex < curlIndex, 'der Fingerprint-Zweig kommt zuerst');
 });
 
-test('die Allowlist enthält weiterhin genau die GamePro-Adresse', { skip: !phpAvailable }, async () => {
+/**
+ * Liest die Einträge von `$allowed` aus dem Quelltext.
+ *
+ * Rein statisch: Die beiden folgenden Tests führen kein PHP aus und tragen
+ * deshalb bewusst kein `skip` - die Allowlist ist der sicherheitsrelevante Kern
+ * dieses Skripts und soll auch ohne PHP-CLI geprüft sein.
+ */
+async function leseAllowlist() {
     const source = await readFile(PROXY_SOURCE_PATH, 'utf8');
     const allowlist = /\$allowed = \[(.*?)\];/s.exec(source)?.[1] ?? '';
-    const eintraege = [...allowlist.matchAll(/'([^']+)'/g)].map(match => match[1]);
+    return [...allowlist.matchAll(/'([^']+)'/g)].map(match => match[1]);
+}
 
-    assert.deepEqual(eintraege, ['https://www.gamepro.de/rss/gamepro.rss']);
+test('die Allowlist enthält genau die vier freigegebenen Adressen', async () => {
+    // Jede Adresse muss exakt der Adresse in der Feed-Verwaltung entsprechen; die
+    // Quellennamen dazu stehen in PROXY_ELIGIBLE_SOURCES (feed-fetch-utils.test.js).
+    assert.deepEqual(await leseAllowlist(), [
+        'https://www.gamepro.de/rss/gamepro.rss',
+        'https://www.gamestar.de/rss/gamestar.rss',
+        'https://www.play3.de/feed/',
+        'https://playfront.de/feed/',
+    ]);
+});
+
+test('die weiterleitende Play3-Adresse steht nicht in der Allowlist, ihr Ziel schon', async () => {
+    // https://www.play3.de/feed/rss/ antwortet mit 301 auf https://www.play3.de/feed/.
+    // Der Proxy folgt keinen Redirects (CURLOPT_FOLLOWLOCATION => false) und
+    // würde nur das 301 durchreichen. Erlaubt ist deshalb ausschließlich das
+    // Weiterleitungsziel, und nur dieses gehört auch in die Feed-Verwaltung.
+    const eintraege = await leseAllowlist();
+
+    assert.ok(eintraege.includes('https://www.play3.de/feed/'), 'das Weiterleitungsziel ist erlaubt');
+    assert.equal(
+        eintraege.includes('https://www.play3.de/feed/rss/'),
+        false,
+        'die alte Adresse würde vom Proxy nur als 301 zurückkommen',
+    );
 });
 
 test('das Skript ist syntaktisch fehlerfrei', { skip: !phpAvailable }, async () => {

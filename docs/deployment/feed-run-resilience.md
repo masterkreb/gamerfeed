@@ -116,12 +116,15 @@ Der API-Schlüssel steht ausschließlich im `Authorization`-Header.
 ## Der Proxy ist die Ausnahme
 
 ```js
-PROXY_ELIGIBLE_SOURCES = ['gamepro']
+PROXY_ELIGIBLE_SOURCES = ['gamepro', 'gamestar', 'play3', 'playfront']
 ```
 
-Nur ausdrücklich freigegebene Quellen dürfen den externen PHP-Proxy versuchen.
-GamePro steht darauf, weil es Anfragen aus dem GitHub-Actions-Netz mit HTTP 403
-beantwortet – dafür gibt es den Umweg.
+Nur ausdrücklich freigegebene Quellen dürfen den externen PHP-Proxy versuchen,
+und auch sie erst nach einem fehlgeschlagenen Direktabruf. GamePro, GameStar,
+Play3 und PlayFront stehen darauf, weil sie Anfragen aus dem
+GitHub-Actions-Netz mit HTTP 403 beantworten – dafür gibt es den Umweg. Wie
+eine Quelle freigeschaltet wird, steht in
+[`feed-proxy.md`](feed-proxy.md#neue-quelle-freischalten).
 
 **XboxDynasty steht bewusst nicht darauf.** Seit Ende Juli 2026 liefern seine
 Artikelseiten bei automatisierten Abrufen HTTP 401. Die Bilder werden deshalb
@@ -130,8 +133,8 @@ nicht über das fremde PHP-Hosting. Einzelheiten und die automatische
 Bildgesundheit im Admin: [`feed-images.md`](feed-images.md).
 
 Die Entscheidung liegt bewusst auf dieser Seite und nicht beim PHP-Skript. Die
-exakte Allowlist des Proxys bleibt unverändert und zusätzlich wirksam;
-`tools/feed-proxy.php` und das Hosting werden von O2a nicht angefasst.
+exakte Allowlist des Proxys ist zusätzlich wirksam: eine Quelle braucht beide
+Einträge. `tools/feed-proxy.php` und das Hosting hat O2a nicht angefasst.
 
 ## Konfiguration wird vorab geprüft
 

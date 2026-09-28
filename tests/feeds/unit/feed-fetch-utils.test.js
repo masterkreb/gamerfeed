@@ -332,7 +332,13 @@ test('baut Proxy-URLs ohne fehlerhafte doppelte Fragezeichen', () => {
 // === Proxy-Freigabe (O2a) ===
 
 test('nur ausdrücklich vorgesehene Quellen sind für den Proxy freigegeben', () => {
-    assert.deepEqual([...PROXY_ELIGIBLE_SOURCES], ['gamepro']);
+    // Genau diese vier beantworten Anfragen aus dem GitHub-Actions-Netz mit
+    // HTTP 403. Jeder Eintrag braucht zusätzlich seine exakte Adresse in der
+    // Allowlist von tools/feed-proxy.php (dort in feed-proxy-php.test.js geprüft).
+    assert.deepEqual(
+        [...PROXY_ELIGIBLE_SOURCES],
+        ['gamepro', 'gamestar', 'play3', 'playfront'],
+    );
 
     assert.equal(isProxyEligibleSource({ id: 'gamepro', name: 'GamePro' }), true);
     assert.equal(isProxyEligibleSource({ id: 'GamePro' }), true);
@@ -340,12 +346,28 @@ test('nur ausdrücklich vorgesehene Quellen sind für den Proxy freigegeben', ()
     assert.equal(isProxyEligibleSource('GamePro'), true);
 });
 
+test('GameStar, Play3 und PlayFront sind über ihren Namen für den Proxy freigegeben', () => {
+    // Schreibweise und Leerzeichen am Rand spielen keine Rolle, genau wie bei
+    // GamePro.
+    for (const name of ['GameStar', 'Play3', 'PlayFront']) {
+        assert.equal(isProxyEligibleSource({ name }), true, name);
+        assert.equal(isProxyEligibleSource({ name: name.toLowerCase() }), true, `${name} klein`);
+        assert.equal(isProxyEligibleSource({ name: name.toUpperCase() }), true, `${name} groß`);
+        assert.equal(isProxyEligibleSource({ name: `  ${name}  ` }), true, `${name} mit Leerzeichen`);
+        assert.equal(isProxyEligibleSource(name), true, `${name} als Text`);
+    }
+
+    // Die Feed-Verwaltung erzeugt IDs der Form <Slug>-<Zeitstempel>; sie stehen
+    // nicht in der Liste, der Name genügt trotzdem.
+    assert.equal(isProxyEligibleSource({ id: 'playfront-1758000000000', name: 'PlayFront' }), true);
+});
+
 test('XboxDynasty und andere Quellen sind nicht freigegeben', () => {
     // Der einmalig beobachtete Timeout ist ein vorübergehendes Problem der
     // Quelle und kein Grund, fremdes Hosting zu belasten.
     for (const feed of [
         { id: 'xboxdynasty', name: 'XboxDynasty' },
-        { id: 'gamestar', name: 'GameStar' },
+        { id: 'vg247', name: 'VG247' },
         { id: 'golem', name: 'Golem' },
         { id: 'gamepro-news', name: 'GamePro News' },
         {},
