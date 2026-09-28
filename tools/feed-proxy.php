@@ -72,6 +72,9 @@ if (!function_exists('curl_init')) {
 
 $allowed = [
     'https://www.gamepro.de/rss/gamepro.rss',
+    'https://www.gamestar.de/rss/gamestar.rss',
+    'https://www.play3.de/feed/',
+    'https://playfront.de/feed/',
 ];
 
 $url = $_GET['url'] ?? '';

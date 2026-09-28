@@ -1548,7 +1548,7 @@ geplantes Produktfeature.
 
 - separates Secret in einem Request-Header, nie in URL oder Querystring;
 - generische Authfehler, hostseitiges Rate Limit und bestehende exakte
-  GamePro-Allowlist beibehalten;
+  Allowlist beibehalten;
 - Node-Fallback, GitHub Secret und PHP-Datei gemeinsam umstellen;
 - Versionsfingerprint aus O4 für die Deploy-Prüfung verwenden.
 

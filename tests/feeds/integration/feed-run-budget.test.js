@@ -156,8 +156,8 @@ test('ein haengender Feed endet vor CORE_DEADLINE_MS ueber den Gesamtabbruch', a
     assert.equal(budget.signal.aborted, true, 'der Gesamtabbruch hat gegriffen');
     assert.ok(budget.elapsedMs() <= budget.deadlineMs + 1, 'nicht über die Deadline hinaus');
     assert.equal(spies.kvStore.feed_run_status.result, 'degraded');
-    assert.equal(spies.kvStore.feed_health_status.gamestar.status, 'warning');
-    assert.match(spies.kvStore.feed_health_status.gamestar.message, /Zeitbudget/);
+    assert.equal(spies.kvStore.feed_health_status.testquelle.status, 'warning');
+    assert.match(spies.kvStore.feed_health_status.testquelle.message, /Zeitbudget/);
 });
 
 test('ein haengender Bild-Scrape endet ebenfalls vor der Gesamtdeadline', async () => {
@@ -567,7 +567,7 @@ test('ein fataler Lauf ueberschreibt einen neueren Kern-Publish nicht', async ()
         durations: {},
     };
     spies.kvStore.feed_health_status = {
-        gamestar: {
+        testquelle: {
             status: 'success',
             message: 'älterer Erfolg',
             lastAttemptAt: '2026-07-28T11:00:00.000Z',
@@ -604,7 +604,7 @@ test('ein fataler Lauf ueberschreibt einen neueren Kern-Publish nicht', async ()
     );
     assert.equal(spies.kvStore.feed_publish_status.runId, 'frueherer-lauf');
     assert.equal(
-        spies.kvStore.feed_health_status.gamestar.lastSuccessAt,
+        spies.kvStore.feed_health_status.testquelle.lastSuccessAt,
         '2026-07-28T11:00:00.000Z',
         'auch der Feed-Erfolg bleibt stehen',
     );

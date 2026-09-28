@@ -15,6 +15,24 @@ Cache-Lauf aufgerufen, nachdem der direkte Feed-Abruf fehlgeschlagen ist.
 Der PHP-Proxy wird nicht von Vercel bereitgestellt und nicht automatisch
 deployt.
 
+## Freigegebene Quellen
+
+Der Proxy ruft ausschließlich diese Adressen ab. Sie stehen exakt so in `$allowed`
+von `tools/feed-proxy.php`, und die Feed-Verwaltung muss dieselbe Adresse
+verwenden:
+
+| Quelle | Adresse | Hinweis |
+|---|---|---|
+| GamePro | `https://www.gamepro.de/rss/gamepro.rss` | – |
+| GameStar | `https://www.gamestar.de/rss/gamestar.rss` | – |
+| Play3 | `https://www.play3.de/feed/` | Weiterleitungsziel von `/feed/rss/` |
+| PlayFront | `https://playfront.de/feed/` | Adresse ohne `www` |
+
+Auf der Node-Seite entscheidet zusätzlich `PROXY_ELIGIBLE_SOURCES` in
+`scripts/feed-fetch-utils.js`, welche Quellen den Proxy nach einem
+fehlgeschlagenen Direktabruf überhaupt versuchen. Wie beide Listen gepflegt
+werden, steht unter [Neue Quelle freischalten](#neue-quelle-freischalten).
+
 ## Deployment
 
 1. `tools/feed-proxy.php` auf das externe Hosting kopieren, beispielsweise in
@@ -53,9 +71,38 @@ liefern:
 curl -i "https://proxy.example/feed-proxy.php?url=https%3A%2F%2Fexample.com%2Ffeed.xml"
 ```
 
+Jede Adresse aus [Freigegebene Quellen](#freigegebene-quellen) einzeln prüfen.
+`--data-urlencode` kodiert die Adresse und hängt sie auch dann richtig an, wenn
+`FEED_PROXY_URL` schon einen Querystring enthält:
+
+```bash
+FEED_PROXY_URL="https://proxy.example/feed-proxy.php"   # echte Adresse aus dem Secret
+
+for feed in \
+  https://www.gamepro.de/rss/gamepro.rss \
+  https://www.gamestar.de/rss/gamestar.rss \
+  https://www.play3.de/feed/ \
+  https://playfront.de/feed/
+do
+  curl -s -o /dev/null -w "%{http_code}  %{size_download} Bytes  $feed\n" \
+    --get --data-urlencode "url=$feed" "$FEED_PROXY_URL"
+done
+```
+
+Der Proxy reicht den Status der Quelle durch. Deshalb bedeuten:
+
+| Status | Bedeutung |
+|---|---|
+| `200` | in Ordnung; mit `curl -i` einmal prüfen, dass der Rumpf ein RSS-Feed ist |
+| `422` | die Adresse steht nicht in der Allowlist der hochgeladenen Datei: Upload fehlt oder die Schreibweise weicht ab |
+| `403` | die Quelle weist auch das Hosting ab; der Proxy hilft ihr dann nicht |
+| `301`, `302` | die Adresse leitet weiter; das Weiterleitungsziel gehört in Allowlist und Feed-Verwaltung |
+| `502` | die Quelle war vom Hosting aus nicht erreichbar |
+
 Danach den Workflow **Update RSS Feeds Cache** einmal manuell starten und im
 Log kontrollieren, ob bei einem fehlgeschlagenen Direktabruf
-`Feed proxy fetch successful` erscheint.
+`Feed proxy fetch successful for <Quelle>` erscheint, für jede freigegebene
+Quelle, deren Direktabruf scheitert.
 
 ## Fingerprint prüfen
 
@@ -206,7 +253,7 @@ automatisch auf das externe Hosting übertragen. Nach jeder Änderung:
 
 1. CI einschließlich PHP-Lint abwarten;
 2. Datei erneut hochladen;
-3. beide Smoke-Tests ausführen;
+3. beide Smoke-Tests ausführen (den positiven für jede freigegebene Adresse);
 4. den Workflow **Proxy-Fingerprint prüfen** starten – er belegt, dass die
    hochgeladene Datei wirklich die neue ist;
 5. den Feed-Workflow manuell starten.
@@ -217,3 +264,27 @@ Behauptung, keine Feststellung.
 Falls sich Hostname oder Pfad des Proxys ändern, muss ausschließlich das
 GitHub-Secret `FEED_PROXY_URL` aktualisiert werden. Es ist keine Vercel-
 Umgebungsvariable.
+
+### Neue Quelle freischalten
+
+Eine Quelle nutzt den Proxy nur, wenn **beide** Listen sie kennen – eine allein
+genügt nicht:
+
+- `PROXY_ELIGIBLE_SOURCES` in `scripts/feed-fetch-utils.js` entscheidet, ob der
+  Proxy nach einem fehlgeschlagenen Direktabruf versucht wird. Eingetragen wird
+  der klein geschriebene Name (oder die ID) der Quelle; verglichen wird ohne
+  Rücksicht auf Groß-/Kleinschreibung und Randleerzeichen, sonst exakt.
+- `$allowed` in `tools/feed-proxy.php` lässt genau diese Adresse zu, Zeichen für
+  Zeichen wie in der Feed-Verwaltung: Schema, `www` oder nicht, Pfad und
+  abschließender Slash. Keine Präfixe, keine Wildcards.
+
+Danach gelten die fünf Schritte oben unverändert; die Tabelle unter
+[Freigegebene Quellen](#freigegebene-quellen) wird mitgeführt.
+
+**Leitet die Quelle weiter, gehört das Weiterleitungsziel in Allowlist und
+Feed-Verwaltung.** Der Proxy folgt keinen Redirects und würde nur das 301
+durchreichen. Beispiel Play3: `https://www.play3.de/feed/rss/` antwortet mit 301
+auf `https://www.play3.de/feed/`; deshalb steht nur die zweite Adresse in der
+Allowlist, und die Feed-Verwaltung muss vor dem nächsten Lauf auf sie zeigen,
+sonst antwortet der Proxy mit 422. Die Reihenfolge von Upload und Adressänderung
+ist unkritisch, solange beides vor dem nächsten Lauf geschehen ist.
