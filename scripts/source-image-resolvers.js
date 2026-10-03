@@ -6,6 +6,7 @@
 // Yoast-OG-Bild aber weiterhin bereit. Ein einziger kleiner Batchabruf ersetzt
 // deshalb bis zu hundert einzelne Seitenabrufe.
 
+import { DOMParser } from 'linkedom';
 import { normalizeContentUrl } from '../shared/url-policy.js';
 import { BROWSER_LIKE_HEADERS } from './feed-fetch-utils.js';
 import { readLimitedResponseText } from './limited-response.js';
@@ -15,6 +16,85 @@ export const XBOXDYNASTY_IMAGE_API_URL =
     'https://www.xboxdynasty.de/wp-json/wp/v2/posts?per_page=100&_fields=link,yoast_head_json.og_image';
 export const SOURCE_IMAGE_API_TIMEOUT_MS = 5000;
 export const MAX_SOURCE_IMAGE_API_BYTES = 128 * 1024;
+
+export const PLAY3_HOMEPAGE_URL = 'https://www.play3.de/';
+export const PLAY3_IMAGE_TIMEOUT_MS = 5000;
+export const MAX_PLAY3_HOMEPAGE_BYTES = 2 * 1024 * 1024;
+
+export function getPlay3ArticleKey(rawUrl) {
+    const normalized = normalizeContentUrl(rawUrl, { base: PLAY3_HOMEPAGE_URL });
+    if (!normalized) return null;
+    const url = new URL(normalized);
+    if (url.origin !== 'https://www.play3.de' || url.search || url.hash) return null;
+    if (!/^\/\d{4}\/\d{2}\/\d{2}\/[a-z0-9-]+\/?$/.test(url.pathname)) return null;
+    return url.pathname.replace(/\/$/, '');
+}
+
+function normalizePlay3ImageUrl(rawUrl) {
+    const normalized = normalizeContentUrl(rawUrl, { base: PLAY3_HOMEPAGE_URL });
+    if (!normalized) return null;
+    const url = new URL(normalized);
+    return url.origin === 'https://www.play3.de'
+        && /^\/wp-content\/uploads\/.+\.(?:jpe?g|png|webp|avif)$/i.test(url.pathname)
+        ? normalized : null;
+}
+
+/** Dieselbe genaue Link-Bild-Zuordnung fuer Diagnose und produktiven Batch. */
+export function parsePlay3Homepage(html) {
+    const document = new DOMParser().parseFromString(html, 'text/html');
+    const articles = new Set();
+    const imageByArticleKey = new Map();
+    for (const anchor of document.querySelectorAll('a[href]')) {
+        const key = getPlay3ArticleKey(anchor.getAttribute('href'));
+        if (!key) continue;
+        articles.add(key);
+        if (imageByArticleKey.has(key)) continue;
+
+        // Nur Bilder im Artikellink, keine Nachbarkarten. Die erste belegte
+        // Zuordnung bleibt stabil, auch wenn derselbe Artikel mehrfach erscheint.
+        for (const img of anchor.querySelectorAll('img')) {
+            const imageUrl = [
+                img.getAttribute('data-lazy-src'),
+                img.getAttribute('data-src'),
+                img.getAttribute('src'),
+            ].map(normalizePlay3ImageUrl).find(Boolean);
+            if (!imageUrl) continue;
+            imageByArticleKey.set(key, imageUrl);
+            break;
+        }
+    }
+    return { articles, imageByArticleKey };
+}
+
+/** Ein fester Startseitenabruf, ohne Artikel-, Proxy- oder Redirect-Fallback. */
+export async function fetchPlay3ImageMap({
+    createSignal = timeoutMs => AbortSignal.timeout(timeoutMs),
+    fetchImpl,
+    lookup,
+    maxBytes = MAX_PLAY3_HOMEPAGE_BYTES,
+    timeoutMs = PLAY3_IMAGE_TIMEOUT_MS,
+} = {}) {
+    const response = await fetchWithOutboundPolicy(PLAY3_HOMEPAGE_URL, {
+        fetchImpl,
+        lookup,
+        headers: BROWSER_LIKE_HEADERS,
+        signal: createSignal(timeoutMs),
+        maxRedirects: 0,
+    });
+    if (!response.ok) {
+        await response.body?.cancel?.().catch(() => {});
+        throw new Error(`Play3 homepage responded with HTTP ${response.status}.`);
+    }
+
+    // Anders als beim einzelnen OG-Scrape wird kein abgeschnittener Rumpf
+    // ausgewertet: fuer die Zuordnung brauchen wir die ganze Artikelliste.
+    const html = await readLimitedResponseText(response, maxBytes);
+    const { articles, imageByArticleKey } = parsePlay3Homepage(html);
+    if (articles.size === 0) {
+        throw new Error('Play3 homepage returned no recognizable article links.');
+    }
+    return imageByArticleKey;
+}
 
 /**
  * WordPress gibt kanonische Links mit abschließendem Slash aus; ein RSS-Link

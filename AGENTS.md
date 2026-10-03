@@ -90,8 +90,8 @@
 │   ├── fetch-feeds.js      # Cron-Job Script (GitHub Actions)
 │   ├── feed-fetch-utils.js # Getesteter Feed-Abruf mit Retry/Proxy-Fallback
 │   ├── feed-image-utils.js # Bildauswahl und -validierung für Artikel
-│   ├── source-image-resolvers.js # Quellspezifische Bild-Batches (XboxDynasty)
-│   ├── article-image-brake.js # Bremse pro Lauf für den Play3-Bildpfad (nur Speicher)
+│   ├── source-image-resolvers.js # Quellspezifische Bild-Batches (XboxDynasty, Play3)
+│   ├── article-image-brake.js # Kompatibler alter Bildpfad: Bremse, im Cron ungenutzt
 │   ├── feed-run-budget.js  # Zeit- und Scrape-Budget eines Laufs
 │   ├── feed-run-config.js  # Core- und optionale Konfiguration des Laufs
 │   ├── feed-run-recorder.js # Reihenfolge und Schreibregeln des Heartbeats
@@ -687,6 +687,20 @@ XboxDynasty-HTML-Scrapes und der allgemeine Backfill sind deaktiviert, damit
 ein API-Fehler keinen 401-Sturm erzeugt. Einzelheiten:
 `docs/deployment/feed-images.md`.
 
+### Play3-Bilder
+
+Play3 verwendet bei fehlenden RSS- und Cache-Bildern höchstens einen direkten
+Startseitenabruf pro Lauf (5 Sekunden, 2 MiB, eine Scrape-Budgeteinheit).
+`scripts/source-image-resolvers.js` ordnet Rasterbild-URLs innerhalb eines
+Artikellinks exakt dem kanonischen Play3-Pfad zu, inklusive Lazy-Loading.
+Diagnose und Cron verwenden denselben Parser. Fehlende Treffer lösen weder
+Artikel- noch Bildproxy-Abrufe aus. Passende alte Platzhalter werden bei einem
+ohnehin nötigen Batch repariert; alte Platzhalter allein lösen ihn nicht aus.
+Vorhandene Bilder und der RSS-Proxy-Fallback bleiben unverändert. Der
+PHP-Bildmodus bleibt kompatibel vorhanden, wird vom Cron aber nicht mehr
+verwendet. Kein PHP-Upload erforderlich. Grenzen und Abnahme:
+`docs/deployment/feed-images.md`.
+
 ## ⏱️ Laufdeadline, Scrape-Budget und Ergebniszustände
 
 O2a hat jeden **einzelnen** Aufruf begrenzt, O2b ihre **Summe**. Der Workflow
@@ -922,15 +936,11 @@ Anfragen aus dem GitHub-Actions-Netz mit HTTP 403. Für diese Fälle gibt es
   folgt
 - **Wird nicht von Vercel deployt.** Nach jeder Änderung an der Datei muss sie
   manuell auf das Hosting hochgeladen werden
-- Play3-Artikelseiten nutzen nach dem direkten Bildabruf den separaten Modus
-  `article-image`. Er akzeptiert nur HTTPS auf `www.play3.de` mit dem Pfad
-  `/JJJJ/MM/TT/slug/` (keine Ports, Zugangsdaten, Querystrings oder Fragmente)
-  und antwortet als `text/plain` mit `nosniff`, damit fremdes HTML nie als
-  Webseite unter der Proxy-Domain erscheint
-- Im Bildpfad kostet jede externe Anfrage eine Budgeteinheit, auch der
-  Proxyversuch. Eine Bremse pro Lauf (`scripts/article-image-brake.js`, nur im
-  Speicher, kein KV) setzt den Direktweg nach 401/403/429 und den Proxyweg nach
-  401/403/422/429 oder drei Fehlschlägen in Folge für den Rest des Laufs aus
+- Play3-Bilder kommen über den direkten Startseiten-Batch, nicht mehr über
+  einzelne Artikelseiten. Der vorhandene PHP-Modus `article-image` und sein
+  getesteter Node-Helfer bleiben kompatibel erhalten, werden im Cron aber
+  weder für neue Bilder noch für den Backfill aufgerufen. Seine Schutzregeln
+  (strenge Artikel-Allowlist, `text/plain`, `nosniff`) bleiben unverändert
 - Die Adresse steht im GitHub-Actions-Secret `FEED_PROXY_URL`, nicht bei Vercel
 - Der Proxy akzeptiert nur GET, vergleicht Feed-Ziele exakt gegen eine
   Allowlist, folgt keinen Redirects, erlaubt nur HTTPS und begrenzt die Antwort
