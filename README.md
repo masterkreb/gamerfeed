@@ -118,7 +118,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     *   `/api/contact`: Prüft Kontaktanfragen und versendet sie per Gmail SMTP
     *   `/api/gaming-news`: Servergerenderte HTML-Übersicht, über `vercel.json` als `/gaming-news` erreichbar
 6.  **Admin-Backend (mehrschichtiger Schutz)**: Die Middleware schützt die statische Admin-Seite. Die Admin-APIs prüfen Basic Authentication zusätzlich direkt im jeweiligen Handler und schützen schreibende Aufrufe per Same-Origin-Prüfung. Eingehendes JSON wird zur Laufzeit gegen gemeinsame Verträge geprüft; Fehler antworten mit stabilen Codes, interne Datenbank- und KV-Meldungen bleiben im Log. Einzelheiten: [Admin-API-Dokumentation](docs/deployment/admin-api.md).
-7.  **KI-Integration (Groq API)**: Automatische Trend-Analyse mit Groq's llama-3.1-8b-instant Modell für Gaming-News.
+7.  **KI-Integration (Groq API)**: Automatische Trend-Analyse mit Groqs Modell openai/gpt-oss-20b für Gaming-News.
 
 ---
 
@@ -510,7 +510,7 @@ Dieser Fehler tritt im GitHub Actions Log auf und ist der häufigste Konfigurati
 - **Datenbank**: Neon PostgreSQL (oder Vercel Postgres)
 - **Cache**: Vercel KV (Redis)
 - **CI/CD**: GitHub Actions
-- **KI**: Groq API (llama-3.1-8b-instant)
+- **KI**: Groq API (openai/gpt-oss-20b)
 - **Deployment**: Vercel
 
 
