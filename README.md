@@ -106,7 +106,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     - `news_snapshot_pointer`: aktive vollständige Cache-Generation
     - `news_snapshot:<id>:{full,preview,medium,meta}`: unveränderliche Payloads und Manifest
     - `daily_trends` & `weekly_trends`: KI-generierte Trends
-4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 20 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung. Falls eine freigegebene Quelle Anfragen aus dem GitHub-Actions-Netz mit HTTP 403 beantwortet, kann der Workflow optional auf den extern betriebenen PHP-Fallback `tools/feed-proxy.php` zurückgreifen. Derselbe Dienst besitzt einen streng auf kanonische Play3-Artikelseiten begrenzten Bildmodus. Einrichtung und Grenzen stehen in der [Feed-Proxy-Betriebsanleitung](docs/deployment/feed-proxy.md).
+4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 20 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung. Falls eine freigegebene Quelle Anfragen aus dem GitHub-Actions-Netz mit HTTP 403 beantwortet, kann der Workflow optional auf den extern betriebenen PHP-Fallback `tools/feed-proxy.php` zurückgreifen. Play3-Bilder kommen unabhängig davon über einen direkten Startseiten-Batch; der vorhandene PHP-Bildmodus wird vom Cron nicht mehr genutzt. Einrichtung und Grenzen stehen in der [Feed-Proxy-Betriebsanleitung](docs/deployment/feed-proxy.md).
 5.  **API-Schicht (Vercel Functions)**: Schlanke Edge Functions für Datenabrufe sowie eine Node.js Function für den SMTP-Versand:
     *   `/api/get-news-preview`: Liefert erste 16 Artikel für sofortiges Laden
     *   `/api/get-news-medium`: Liefert erste 64 Artikel für schnelles Nachladen
@@ -145,7 +145,7 @@ Eines der wichtigsten Konzepte dieses Projekts ist die **Entkopplung von Inhalts
 *   **WICHTIG:** Der Workflow committet **keine Dateien** mehr in das Git-Repository. Der Prozess ist vollständig vom Code der Webseite getrennt.
 *   **Robustheit:** Der Prozess verhindert zuverlässig den Verlust bestehender Artikeldaten durch fehlerhafte Abrufe. Ein einzelnes kaputtes Feed-Element (etwa mit unlesbarem Datum) kostet nur dieses Element, nicht die ganze Quelle; jeder externe Abruf hat Timeout und Byte-Limit; die Pflichtkonfiguration wird geprüft, bevor die erste Verbindung aufgebaut wird. Einzelheiten: [Belastbarkeit des Cron-Laufs](docs/deployment/feed-run-resilience.md).
 *   **Laufzeit:** Neben den Einzelgrenzen hat der Lauf ein **globales Budget**: eine Deadline von 18 Minuten (mit 12 Minuten Reserve vor dem 30-Minuten-Hardlimit des Workflows) und höchstens 80 bildbezogene externe Abrufe pro Lauf. Wird eine Grenze erreicht, wird die restliche Arbeit *zurückgestellt* statt abgeschnitten: die betroffenen Quellen behalten ihre alten Artikel, offene Bild-Scrapes werden fair über die Quellen verteilt und im nächsten Lauf erneut versucht. Ein solcher Lauf endet als `degraded`, nie stillschweigend als `success`. Einzelheiten: [Zeitbudget und Ergebniszustände](docs/deployment/feed-run-budget.md).
-*   **Artikelbilder:** XboxDynasty liefert seine Bilder wegen HTTP 401 auf automatisierten Artikelseiten über einen einzigen begrenzten WordPress-API-Batch. Der PHP-Proxy bleibt dafür unberührt. Bild- und Platzhalterzahlen werden je Quelle gemessen: [Artikelbilder und Bildgesundheit](docs/deployment/feed-images.md).
+*   **Artikelbilder:** XboxDynasty liefert Bilder über einen begrenzten WordPress-API-Batch, Play3 über höchstens einen direkten Startseiten-Batch pro Lauf. Beide vermeiden einzelne Artikelabrufe und verwenden keinen Bildproxy. Bild- und Platzhalterzahlen werden je Quelle gemessen: [Artikelbilder und Bildgesundheit](docs/deployment/feed-images.md).
 
 #### 2. Der Datenabruf (Frontend-Anwendung)
 
@@ -465,7 +465,7 @@ Diese Schlüssel werden **NICHT** in eine Datei im Projekt geschrieben. Sie werd
 | `KV_REST_API_URL`               | Der Wert von `KV_REST_API_URL` aus Vercel       | Verbindung zum News-Cache (KV Store)            |
 | `KV_REST_API_TOKEN`             | Der Wert von `KV_REST_API_TOKEN` aus Vercel     | Passwort für den News-Cache (KV Store)          |
 | `GROQ_API_KEY`                  | Dein Groq API Key                               | KI-Trend-Analyse (optional)                     |
-| `FEED_PROXY_URL`                | HTTPS-Adresse von `tools/feed-proxy.php`         | Optionaler Fallback für Feed-Quellen, die dem GitHub-Actions-Netz mit HTTP 403 antworten, und für Play3-Artikelbilder; zugleich Ziel der Fingerprint-Prüfung |
+| `FEED_PROXY_URL`                | HTTPS-Adresse von `tools/feed-proxy.php`         | Optionaler RSS-Fallback für freigegebene Feed-Quellen; zugleich Ziel der Fingerprint-Prüfung. Nicht für den Play3-Startseiten-Bildbatch verwendet |
 
 **Hinweis:** Andere von Vercel bereitgestellte Variablen wie `VERCEL_URL` werden für diesen Workflow nicht benötigt.
 

@@ -3,48 +3,19 @@ import { appendFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DOMParser } from 'linkedom';
-import { normalizeContentUrl } from '../shared/url-policy.js';
 import { BROWSER_LIKE_HEADERS } from './feed-fetch-utils.js';
 import { readLimitedResponseText } from './limited-response.js';
 import { fetchWithOutboundPolicy } from './outbound-policy.js';
+import { PLAY3_HOMEPAGE_URL, getPlay3ArticleKey, parsePlay3Homepage } from './source-image-resolvers.js';
 
-export const PLAY3_HOMEPAGE_URL = 'https://www.play3.de/';
+export { PLAY3_HOMEPAGE_URL };
 export const PLAY3_FEED_URL = 'https://www.play3.de/feed/';
 export const PROBE_TIMEOUT_MS = 15000;
 export const PROBE_MAX_BYTES = 2 * 1024 * 1024;
 
-function articleKey(rawUrl) {
-    const normalized = normalizeContentUrl(rawUrl, { base: PLAY3_HOMEPAGE_URL });
-    if (!normalized) return null;
-    const url = new URL(normalized);
-    if (url.origin !== 'https://www.play3.de' || url.search || url.hash) return null;
-    if (!/^\/\d{4}\/\d{2}\/\d{2}\/[a-z0-9-]+\/?$/.test(url.pathname)) return null;
-    return url.pathname.replace(/\/$/, '');
-}
-
-function isArticleImage(rawUrl) {
-    const normalized = normalizeContentUrl(rawUrl, { base: PLAY3_HOMEPAGE_URL });
-    if (!normalized) return false;
-    const url = new URL(normalized);
-    return url.origin === 'https://www.play3.de'
-        && /^\/wp-content\/uploads\/.+\.(?:jpe?g|png|webp|avif)$/i.test(url.pathname);
-}
-
 export function inspectHomepage(html) {
-    const document = new DOMParser().parseFromString(html, 'text/html');
-    const articles = new Set();
-    const withImage = new Set();
-    for (const anchor of document.querySelectorAll('a[href]')) {
-        const key = articleKey(anchor.getAttribute('href'));
-        if (!key) continue;
-        articles.add(key);
-        // Nur Bilder innerhalb desselben Artikellinks zuordnen, nie Nachbarkarten.
-        const hasImage = [...anchor.querySelectorAll('img')].some(img =>
-            [img.getAttribute('data-lazy-src'), img.getAttribute('data-src'), img.getAttribute('src')]
-                .some(candidate => candidate && isArticleImage(candidate)));
-        if (hasImage) withImage.add(key);
-    }
-    return { articles, withImage };
+    const { articles, imageByArticleKey } = parsePlay3Homepage(html);
+    return { articles, withImage: new Set(imageByArticleKey.keys()) };
 }
 
 function inspectFeed(xml) {
@@ -52,7 +23,7 @@ function inspectFeed(xml) {
     const channel = document.querySelector('rss > channel');
     if (!channel) return null;
     const items = [...channel.children].filter(element => element.tagName === 'item');
-    return items.map(item => articleKey(item.querySelector('link')?.textContent?.trim()));
+    return items.map(item => getPlay3ArticleKey(item.querySelector('link')?.textContent?.trim()));
 }
 
 const ERROR_LABELS = {

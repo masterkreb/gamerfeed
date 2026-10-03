@@ -58,6 +58,7 @@ Fehler der ganzen Quelle – das ist die richtige Aussage.
 | Feed über Proxy | 20 s | 5 MB |
 | Artikelseite (OG-Scraping) | 5 s | 2 MB |
 | XboxDynasty WordPress-Bildbatch | 5 s | 128 KB |
+| Play3 Startseiten-Bildbatch | 5 s | 2 MiB |
 | Groq | 20 s | 256 KB |
 
 Alle Grenzen sind Parameter und damit ohne echte Wartezeit prüfbar.

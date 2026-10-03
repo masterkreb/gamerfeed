@@ -3,6 +3,9 @@
 Isolierte Diagnose fuer die Frage, ob ein GitHub-Actions-Runner Bildadressen
 von Play3s Startseite den aktuellen RSS-Artikeln zuordnen kann. Die Diagnose
 ist **kein neuer Bildfallback** und repariert keine gespeicherten Artikel.
+Diagnose und [produktiver Startseiten-Fallback](feed-images.md#play3-ein-startseiten-batch)
+teilen sich die Zuordnungslogik in `scripts/source-image-resolvers.js`. Der
+Diagnoselauf selbst bleibt weiterhin rein lesend und unabhängig vom Feed-Cron.
 
 ## Start
 

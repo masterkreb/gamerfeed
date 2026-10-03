@@ -1,6 +1,6 @@
 # Artikelbilder und Bildgesundheit
 
-Stand: 1. August 2026 (Roadmap-Paket O2c)
+Stand: 3. Oktober 2026 (O2c und Play3-Startseiten-Fallback)
 
 GamerFeed bevorzugt Bilder, die ein Feed direkt je Artikel liefert. Fehlt ein
 verwendbares Bild und ist die Quelle dafür vorgesehen, folgt ein begrenzter
@@ -53,6 +53,62 @@ Vor dem Ausfall war die normale Last klein: 72 RSS-Abrufe pro Tag bei einem
 neuem Artikel. Erst die dauerhaft erfolglosen Platzhalter hätten ohne diese
 Korrektur wiederholte Reparaturversuche ausgelöst – theoretisch bis zu 15 je
 Lauf beziehungsweise 1.080 am Tag, soweit das globale Budget reicht.
+
+## Play3: ein Startseiten-Batch
+
+Der rein lesende [GitHub-Actions-Test vom 3. Oktober 2026](https://github.com/masterkreb/gamerfeed/actions/runs/37135968687)
+lieferte HTTP 200 für Startseite und RSS. Über die Startseite ließen sich 24
+von 25 RSS-Artikeln Bildadressen zuordnen. Das belegt diesen Lauf, nicht eine
+dauerhafte Erreichbarkeit, die Abrufbarkeit jeder Bilddatei oder eine Freigabe
+zur Weiterverwendung. Der RSS-Feed selbst enthielt weiterhin keine Artikelbilder.
+
+Der Feed-Lauf verwendet deshalb `fetchPlay3ImageMap` aus
+`scripts/source-image-resolvers.js`:
+
+- RSS-Bilder und vorhandene gültige Cache-Bilder haben wie bisher Vorrang.
+- Nur aktuelle RSS-Artikel ohne Bild und mit kanonischer Play3-Adresse lösen
+  den Batch aus, unabhängig vom Datenbank-Flag `needs_scraping`.
+- Höchstens ein GET auf `https://www.play3.de/` pro Lauf, mit bestehenden
+  Browser-Headern und Outbound-Policy, ohne Redirects, Retries oder Proxy.
+- Eine Einheit aus dem gemeinsamen Scrape-Budget, fünf Sekunden Einzeltimeout,
+  höchstens 2 MiB; die globale Deadline darf die Frist weiter verkürzen.
+- Nur Rasterbilder in einem zugehörigen Artikellink werden übernommen. Der
+  Parser berücksichtigt `data-lazy-src`, `data-src`, `src` und `noscript`,
+  akzeptiert ausschließlich HTTPS-Uploads von `www.play3.de` und errät keine
+  Bildadressen oder Zuordnungen aus Titeln. Die erste belegte Zuordnung je
+  Artikel bleibt stabil, auch bei mehrfachen Startseitenplatzierungen.
+- Passende alte Platzhalter werden mit derselben Map repariert, ohne weitere
+  Anfragen. Alte Platzhalter allein lösen keinen Batch aus. Nicht mehr auf
+  der Startseite enthaltene Artikel bleiben gegebenenfalls ohne Bild.
+
+Es gibt für Play3 **keinen zusätzlichen Artikel-Scrape oder Bildproxy-Fallback**,
+auch nicht nach HTTP 403, Timeout, unbekanntem HTML oder einem fehlenden Treffer.
+Der allgemeine Einzelartikel-Backfill überspringt Play3. Eine übergroße
+Startseite wird vollständig verworfen; die Teiltext-Auswertung großer einzelner
+OG-Seiten gilt für diesen Batch bewusst nicht.
+
+Ein ausgefallener Batch lässt Artikel und Kern-Publish bestehen. Die vorhandene
+Bildgesundheit zeigt fehlende Bilder als Warnung. Ein Budgetmangel oder Abbruch
+durch die globale Deadline zählt alle betroffenen aktuellen Kandidaten einmal
+als zurückgestellt und ergibt `degraded`. Beim nächsten Lauf werden fehlende
+Bilder erneut versucht, solange die Artikel noch im RSS auftauchen.
+
+Die Wiederverwendung und Merge-Regeln vorhandener Bilder sind unverändert:
+dies ist eine Reparatur fehlender Bilder, **keine** erneute Prüfung jedes schon
+gespeicherten Bilds auf spätere Änderungen oder Löschungen durch die Redaktion.
+
+### Aktivierung und Abnahme
+
+Nach geprüftem Merge des PRs verwendet der nächste Feed-Lauf auf `main` den
+Batch. Keine neue Umgebungsvariable, kein PHP-Upload und kein manuelles
+Cache-Löschen sind nötig. `FEED_PROXY_URL` bleibt für RSS-Fallbacks erhalten.
+
+Im Log nach `Play3 homepage image batch: N/M current, K stored image(s)
+repaired` suchen und danach die Bildzahlen im Health Center prüfen. Ein
+ausgefallener Batch meldet `Play3 homepage image batch unavailable` mit
+bereinigtem Grund. Ein `N` kleiner als `M` ist zulässig; es startet keine
+weiteren Anfragen. Der frühere PHP-Bildmodus bleibt kompatibel vorhanden,
+wird vom Cron aber nicht mehr genutzt.
 
 ## Automatische Erkennung im Admin
 

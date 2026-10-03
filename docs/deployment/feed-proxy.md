@@ -1,9 +1,11 @@
 # Externen Feed-Proxy betreiben
 
 Der optionale Feed-Proxy ist ein Fallback für einzelne RSS-Quellen, die
-Anfragen aus GitHub-Actions-Rechenzentren mit HTTP 403 beantworten. Zusätzlich
-darf er im eng begrenzten Modus `article-image` Play3-Artikelseiten für die
-Bildsuche abrufen. Die React-App und die Vercel Functions verwenden ihn nicht.
+Anfragen aus GitHub-Actions-Rechenzentren mit HTTP 403 beantworten. Der frühere
+Play3-Bildmodus `article-image` ist noch vorhanden, wird vom Feed-Cron aber
+nicht mehr verwendet. Play3-Bilder kommen über einen direkten Startseiten-Batch
+(siehe [Artikelbilder](feed-images.md#play3-ein-startseiten-batch)).
+Die React-App und die Vercel Functions verwenden den Proxy nicht.
 Er wird vom Workflow `.github/workflows/update-feeds.yml` oder bei einem
 manuellen lokalen Cache-Lauf aufgerufen, nachdem der direkte Abruf
 fehlgeschlagen ist.
@@ -35,13 +37,16 @@ Auf der Node-Seite entscheidet zusätzlich `PROXY_ELIGIBLE_SOURCES` in
 fehlgeschlagenen Direktabruf überhaupt versuchen. Wie beide Listen gepflegt
 werden, steht unter [Neue Quelle freischalten](#neue-quelle-freischalten).
 
-### Play3-Bildmodus
+### Play3-Bildmodus (Kompatibilität, im Cron ungenutzt)
 
 Play3 liefert in seinem RSS-Feed keine Artikelbilder. Der direkte Artikelabruf
 aus dem GitHub-Actions-Netz liefert HTTP 403, obwohl der Feed selbst
-erfolgreich abgerufen wird. Deshalb versucht der Cron bei Play3 immer zuerst
-den direkten Bildabruf und verwendet nur danach den Modus `article-image`
-desselben PHP-Endpunkts.
+erfolgreich abgerufen wird. Der zuvor eingeführte Artikelbild-Fallback über
+`article-image` wird im Cron durch den direkten Startseiten-Batch ersetzt.
+Die nachfolgenden Regeln dokumentieren den weiterhin vorhandenen PHP-Modus
+und den getesteten Node-Helfer. Beide werden bei der neuen Bildsuche und beim
+Backfill nicht aufgerufen. Dafür sind weder ein neuer PHP-Upload noch geänderte
+Proxy-Secrets nötig; der RSS-Fallback bleibt aktiv.
 
 Dieser Modus besitzt keine offene Host-Allowlist. Er akzeptiert ausschließlich
 HTTPS-Adressen auf `www.play3.de`, deren Pfad dem kanonischen Artikelschema
@@ -56,16 +61,16 @@ eine hochgeladene Datei hin, die den Modus noch nicht kennt.
 `Content-Type: text/plain; charset=utf-8`. Zusammen mit
 `X-Content-Type-Options: nosniff`, das für jede Antwort des Proxys gilt, wird
 fremdes HTML so nie als Webseite unter der Domain des Proxys dargestellt. Der
-Cron liest nur den Rumpf und wertet ihn unabhängig vom Content-Type als HTML
+kompatible Node-Helfer liest nur den Rumpf und wertet ihn unabhängig vom Content-Type als HTML
 aus. Feed-Antworten behalten `application/rss+xml`.
 
-**Budget.** Jede externe Bildanfrage kostet eine Einheit des Scrape-Budgets,
+**Bisheriges Budget im Artikelbild-Pfad.** Jede externe Bildanfrage kostet eine Einheit des Scrape-Budgets,
 auch der Proxyversuch nach dem Direktabruf (siehe
 [feed-run-budget.md](feed-run-budget.md)). Ist das Budget nach dem Direktabruf
 erschöpft, entfällt der Proxyversuch, und der Artikel gilt als zurückgestellt.
 
-**Bremse pro Lauf.** Damit nicht jeder Artikel dieselbe Ablehnung erneut
-provoziert, setzt der Lauf einen Weg nach einer Ablehnung für seinen Rest aus.
+**Bremse des bisherigen Artikelbild-Pfads.** Bei expliziter Verwendung des
+Node-Helfers setzt eine gemeinsame Bremse einen Weg nach einer Ablehnung aus.
 Der Zustand lebt nur im Arbeitsspeicher des Laufs: es gibt keinen KV-Schlüssel,
 und jeder neue Lauf beginnt ohne Bremse.
 
@@ -74,9 +79,9 @@ und jeder neue Lauf beginnt ohne Bremse.
 | Direktabruf | HTTP 401, 403 oder 429 |
 | Proxyabruf | HTTP 401, 403, 422 oder 429 sowie drei Fehlschlägen in Folge (Netzwerkfehler, Zeitüberschreitung oder 5xx-Antwort) |
 
-Der Direktweg wird im nächsten Lauf genau einmal neu geprüft; antwortet er
-wieder, braucht der Cron den Proxy nicht mehr. Ein 404 und „kein Bild
-gefunden“ betreffen nur den einzelnen Artikel und bremsen nie. Pro Bremse
+Bei einem neuen Bremsenobjekt ist der Direktweg wieder offen. Der aktuelle
+Cron prüft diese Artikelseiten aber nicht mehr. Ein 404 und „kein Bild
+gefunden“ betreffen im Helfer nur den einzelnen Artikel und bremsen nie. Pro Bremse
 erscheint eine Logzeile mit Quelle, Weg und Status, ohne Adressen und Secrets.
 
 ## Deployment
@@ -135,8 +140,8 @@ do
 done
 ```
 
-Den Play3-Bildmodus zusätzlich mit einer aktuellen, kanonischen Artikeladresse
-prüfen:
+Nur bei einer ausdrücklich gewünschten Wartung des alten PHP-Bildmodus, nicht
+für den aktuellen Feed-Lauf, lässt er sich separat prüfen:
 
 ```bash
 PLAY3_ARTICLE="https://www.play3.de/2026/10/03/beispiel-artikel/" # durch echte Adresse ersetzen
@@ -172,11 +177,10 @@ Der Proxy reicht den Status der Quelle durch. Deshalb bedeuten:
 Danach den Workflow **Update RSS Feeds Cache** einmal manuell starten und im
 Log kontrollieren, ob bei einem fehlgeschlagenen Direktabruf
 `Feed proxy fetch successful for <Quelle>` erscheint, für jede freigegebene
-Quelle, deren Direktabruf scheitert. Bei Play3-Bildern muss nach dem direkten
-403 außerdem `Found meta image via Play3 image proxy` erscheinen. Antwortet der
-Direktabruf weiterhin mit 403, entfällt er ab dem zweiten Artikel, und eine
-einzelne Zeile meldet, dass der Direktabruf für den Rest des Laufs ausgesetzt
-ist.
+Quelle, deren Direktabruf scheitert. Für Play3-Bilder gilt stattdessen die
+[Abnahme des direkten Startseiten-Batches](feed-images.md#aktivierung-und-abnahme).
+Die Zeile `Found meta image via Play3 image proxy` ist im aktuellen Cron nicht
+mehr zu erwarten.
 
 ## Fingerprint prüfen
 

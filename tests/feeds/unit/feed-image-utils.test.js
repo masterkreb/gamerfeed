@@ -59,6 +59,12 @@ test('fordert für Destructoid bei fehlendem RSS-Bild immer den OG-Fallback an',
     assert.equal(shouldScrapeMissingImage({ name: 'IGN', needs_scraping: true }), true);
 });
 
+test('fordert fuer Play3 fehlende Bilder auch ohne manuelles Scraping-Flag an', () => {
+    assert.equal(shouldScrapeMissingImage({ id: 'play3', needs_scraping: false }), true);
+    assert.equal(shouldScrapeMissingImage({ name: 'Play3', needs_scraping: false }), true);
+    assert.equal(shouldScrapeMissingImage({ name: 'play3.de', needs_scraping: false }), false);
+});
+
 test('markiert Placeholder und bestehende Destructoid-Icons zur Cache-Reparatur', () => {
     const validArticle = { source: 'Destructoid', imageUrl: UPLOAD_IMAGE };
     const iconArticle = { source: 'Destructoid', imageUrl: `https://www.destructoid.com${HEART_ICON}` };
