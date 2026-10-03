@@ -43,9 +43,11 @@ import {
     isPlay3ArticleUrl,
     isProxyEligibleSource,
 } from './feed-fetch-utils.js';
-import { ARTICLE_IMAGE_ROUTES, createArticleImageBrake } from './article-image-brake.js';
+import { ARTICLE_IMAGE_ROUTES } from './article-image-brake.js';
 import {
+    fetchPlay3ImageMap,
     fetchXboxDynastyImageMap,
+    getPlay3ArticleKey,
     getXboxDynastyArticleKey,
 } from './source-image-resolvers.js';
 import { publishNewsSnapshot } from './news-snapshot-publisher.js';
@@ -183,10 +185,9 @@ export async function getOgImageFromUrl(url, sourceName, {
         },
     ];
 
-    // Play3 liefert im RSS keine Bilder; die Artikelseiten antworten aus dem
-    // GitHub-Actions-Netz mit HTTP 403. Nur fuer diese Quelle darf nach dem
-    // Direktversuch der eng begrenzte article-image-Modus des eigenen
-    // PHP-Proxys einspringen. Der Endpunkt prueft Host und Pfad erneut.
+    // Kompatibler Artikelbild-Helfer fuer explizite Aufrufer. Der Cron nutzt
+    // fuer Play3 ausschliesslich den Startseiten-Batch und uebergibt hier
+    // keine Play3-Artikel oder Proxy-Adresse mehr.
     if (isPlay3 && proxyUrl) {
         if (!isPlay3ArticleUrl(url)) {
             // Der Proxy wuerde diese Adresse mit 422 abweisen. Ein 422 soll
@@ -1209,16 +1210,8 @@ export async function main({
     // die Deadline hinausreicht, kostet nur und bringt nichts.
     const hasTimeFor = ms => runBudget.hasTimeFor(ms);
 
-    // Bremse des Play3-Bildpfads. Sie lebt nur im Speicher dieses Laufs und wird
-    // von Neu-Scrape und Backfill gemeinsam genutzt: ein neuer Lauf beginnt immer
-    // ohne Bremse und prueft den Direktweg damit genau einmal neu.
-    const imageBrake = createArticleImageBrake();
-
-    // Jede einzelne externe Bildanfrage bucht eine Budgeteinheit - auch der
-    // Proxyversuch nach einem erfolglosen Direktabruf. Gebucht wird erst
-    // unmittelbar vor der Anfrage, nicht beim Eintritt in die Schleife, damit ein
-    // ausgesetzter Weg nichts kostet und `budgetDenied` genau dann gesetzt ist,
-    // wenn ein Versuch am Budget scheiterte.
+    // Gebucht wird unmittelbar vor jeder externen Bildanfrage. Quellen-Batches
+    // reservieren ihre einzelne Einheit separat; Play3 ruft hier keine Artikel ab.
     const createImageRequestReservation = () => {
         let budgetDenied = false;
         let reserved = 0;
@@ -1592,6 +1585,71 @@ export async function main({
             }
         }
 
+        const play3MissingImages = newlyFetchedArticles.filter(article => (
+            article.needsScraping && isPlay3Source(article.source)
+        ));
+        // Auch bei Fehler, fehlendem Treffer oder unbekannter Artikeladresse
+        // keine einzelnen Play3-Seiten oder Proxyversuche mehr anstossen.
+        play3MissingImages.forEach(article => { article.needsScraping = false; });
+        const play3Candidates = play3MissingImages.filter(article => getPlay3ArticleKey(article.link));
+        if (play3Candidates.length > 0) {
+            const stopReason = runBudget.isDeadlineReached()
+                ? DEFERRAL_REASONS.DEADLINE
+                : (!runBudget.hasPageFetchBudget() ? DEFERRAL_REASONS.SCRAPE_BUDGET : null);
+            if (stopReason) {
+                runBudget.defer({
+                    reason: stopReason,
+                    kind: DEFERRAL_KINDS.IMAGE_SCRAPE,
+                    count: play3Candidates.length,
+                });
+                logger.warn(`   Play3-Startseitenbilder zurückgestellt (${stopReason}).`);
+            } else {
+                runBudget.consumePageFetch();
+                const batchStart = Date.now();
+                try {
+                    const imageByArticleKey = await fetchPlay3ImageMap({
+                        createSignal: requestSignal,
+                        fetchImpl,
+                        lookup,
+                    });
+                    let resolvedCurrent = 0;
+                    let repairedStored = 0;
+                    for (const article of play3Candidates) {
+                        const imageUrl = imageByArticleKey.get(getPlay3ArticleKey(article.link));
+                        if (!imageUrl) continue;
+                        article.imageUrl = imageUrl;
+                        resolvedCurrent++;
+                    }
+                    // Alte Platzhalter allein loesen keinen Abruf aus. Wenn der
+                    // Batch ohnehin vorliegt, repariert er auch passende Altartikel.
+                    for (const article of oldArticles) {
+                        if (!isPlay3Source(article?.source) || !needsStoredImageRepair(article)) continue;
+                        const imageUrl = imageByArticleKey.get(getPlay3ArticleKey(article.link));
+                        if (!imageUrl) continue;
+                        article.imageUrl = imageUrl;
+                        repairedStored++;
+                    }
+                    logger.log(
+                        `   Play3 homepage image batch: ${resolvedCurrent}/${play3Candidates.length} current, `
+                        + `${repairedStored} stored image(s) repaired (${formatDuration(Date.now() - batchStart)}).`,
+                    );
+                } catch (error) {
+                    if (runBudget.signal.aborted) {
+                        runBudget.defer({
+                            reason: DEFERRAL_REASONS.DEADLINE,
+                            kind: DEFERRAL_KINDS.IMAGE_SCRAPE,
+                            count: play3Candidates.length,
+                        });
+                    }
+                    logger.warn(
+                        `   Play3 homepage image batch unavailable after ${formatDuration(Date.now() - batchStart)}: `
+                        + redactMessage(error?.message ?? String(error)),
+                    );
+                }
+                if (hasTimeFor(SCRAPE_COURTESY_PAUSE_MS)) await sleep(SCRAPE_COURTESY_PAUSE_MS);
+            }
+        }
+
         // Reihum statt der Reihe nach: sonst frisst die erste Quelle das ganze
         // Scrape-Budget und alle folgenden gehen Lauf für Lauf leer aus.
         const articlesNeedingScraping = distributeBySourceFairly(
@@ -1628,10 +1686,8 @@ export async function main({
                     const scrapedImage = await getOgImageFromUrl(article.link, article.source, {
                         createSignal: requestSignal,
                         fetchImpl,
-                        imageBrake,
                         logger,
                         lookup,
-                        proxyUrl: feedProxyUrl,
                         reserveRequest: reservation.reserve,
                     });
                     const articleScrapeDuration = Date.now() - articleScrapeStart;
@@ -1710,10 +1766,9 @@ export async function main({
         const imageBackfillArticles = distributeBySourceFairly(
             oldArticles
                 .filter(article => article?.link && needsStoredImageRepair(article) && !newlyFetchedLinks.has(article.link))
-                // XboxDynasty wird ausschließlich über den einen WordPress-
-                // Batch oben repariert. Direkte Artikelseiten liefern 401 und
-                // würden sonst in jedem Lauf erneut belastet.
-                .filter(article => !isXboxDynastySource(article?.source))
+                // Quellen-Batches reparieren ihren Bestand oben mit. Ein
+                // fehlender Treffer darf keine Einzelabrufe ausloesen.
+                .filter(article => !isXboxDynastySource(article?.source) && !isPlay3Source(article?.source))
                 .filter(article => {
                     const source = article.source || 'Unknown';
                     const currentCount = backfillSourceCounts.get(source) || 0;
@@ -1751,10 +1806,8 @@ export async function main({
                     const scrapedImage = await getOgImageFromUrl(article.link, article.source, {
                         createSignal: requestSignal,
                         fetchImpl,
-                        imageBrake,
                         logger,
                         lookup,
-                        proxyUrl: feedProxyUrl,
                         reserveRequest: reservation.reserve,
                     });
                     const articleBackfillDuration = Date.now() - articleBackfillStart;

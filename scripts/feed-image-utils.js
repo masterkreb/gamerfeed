@@ -94,6 +94,7 @@ export function selectRssContentImageUrl(imageSources, feed) {
 export function shouldScrapeMissingImage(feed) {
     return isDestructoidSource(feed)
         || isXboxDynastySource(feed)
+        || isPlay3Source(feed)
         || Boolean(feed?.needs_scraping ?? feed?.needsScraping);
 }
 
