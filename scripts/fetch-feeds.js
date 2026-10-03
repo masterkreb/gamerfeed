@@ -29,6 +29,7 @@ import {
     chooseMergedImageUrl,
     hasUsableStoredImage,
     isKnownNonArticleImageUrl,
+    isPlay3Source,
     isXboxDynastySource,
     needsStoredImageRepair,
     selectRssContentImageUrl,
@@ -36,10 +37,13 @@ import {
 } from './feed-image-utils.js';
 import {
     BROWSER_LIKE_HEADERS,
+    buildArticleImageProxyRequestUrl,
     fetchFeedXml,
     isFeedXml,
+    isPlay3ArticleUrl,
     isProxyEligibleSource,
 } from './feed-fetch-utils.js';
+import { ARTICLE_IMAGE_ROUTES, createArticleImageBrake } from './article-image-brake.js';
 import {
     fetchXboxDynastyImageMap,
     getXboxDynastyArticleKey,
@@ -114,27 +118,93 @@ function getFetchUrlForFeed(feed) {
 export const HTML_SCRAPE_TIMEOUT_MS = 5000;
 export const MAX_HTML_RESPONSE_BYTES = 2 * 1024 * 1024;
 
+// Die eine Logzeile, die entsteht, wenn eine Bremse des Play3-Bildpfads greift.
+// Sie nennt Quelle, Weg und Status - niemals eine Adresse oder ein Secret.
+function describeImageBrake(sourceName, engagement) {
+    const route = engagement.route === ARTICLE_IMAGE_ROUTES.DIRECT ? 'Direktabruf' : 'Proxyabruf';
+    const status = engagement.status === null ? 'ohne HTTP-Status' : `HTTP ${engagement.status}`;
+    const cause = engagement.reason === 'failures'
+        ? `${engagement.failures} Fehlschläge in Folge, zuletzt ${status}`
+        : status;
+
+    return `   ⏸️  ${sourceName}: ${route} der Artikelbilder für den Rest des Laufs ausgesetzt (${cause}).`;
+}
+
 export async function getOgImageFromUrl(url, sourceName, {
     // Vorgabe ist das reine Einzeltimeout aus O2a. Der Cron-Lauf reicht hier
     // das Signal seines Gesamtbudgets herein, damit ein haengender Scrape auch
     // dann endet, wenn die Laufdeadline zuerst greift (O2b).
     createSignal = timeoutMs => AbortSignal.timeout(timeoutMs),
     fetchImpl,
+    // Bremse des laufenden Laufs (scripts/article-image-brake.js). Sie gilt nur
+    // fuer Play3; jede andere Quelle ignoriert sie. Ohne Angabe gibt es keine.
+    imageBrake = null,
     lookup,
     logger = console,
     maxBytes = MAX_HTML_RESPONSE_BYTES,
+    proxyUrl = null,
+    // Reserviert unmittelbar vor **jeder einzelnen** externen Anfrage eine
+    // Einheit des Bildabruf-Budgets und meldet false, wenn keine mehr uebrig
+    // ist. Direktabruf und Proxyversuch sind zwei Anfragen und kosten zwei
+    // Einheiten; ein ausgesetzter Weg kostet keine, weil keine Anfrage entsteht.
+    // Ohne Angabe ist das Budget unbegrenzt.
+    reserveRequest = () => true,
     timeoutMs = HTML_SCRAPE_TIMEOUT_MS,
 } = {}) {
+    const isPlay3 = isPlay3Source(sourceName);
+    const brake = isPlay3 ? imageBrake : null;
     const fetchAttempts = [
         {
             name: 'direct',
+            route: ARTICLE_IMAGE_ROUTES.DIRECT,
             requestUrl: url,
             options: { headers: BROWSER_LIKE_HEADERS },
         },
     ];
 
+    // Play3 liefert im RSS keine Bilder; die Artikelseiten antworten aus dem
+    // GitHub-Actions-Netz mit HTTP 403. Nur fuer diese Quelle darf nach dem
+    // Direktversuch der eng begrenzte article-image-Modus des eigenen
+    // PHP-Proxys einspringen. Der Endpunkt prueft Host und Pfad erneut.
+    if (isPlay3 && proxyUrl) {
+        if (!isPlay3ArticleUrl(url)) {
+            // Der Proxy wuerde diese Adresse mit 422 abweisen. Ein 422 soll
+            // aber nur heissen, dass die PHP-Datei den Bildmodus nicht kennt,
+            // und deshalb nicht wegen eines einzelnen Artikels die Bremse
+            // ausloesen.
+            logger.log('      -> Play3 image proxy skipped: article URL is not a canonical Play3 article URL');
+        } else {
+            try {
+                fetchAttempts.push({
+                    name: 'Play3 image proxy',
+                    route: ARTICLE_IMAGE_ROUTES.PROXY,
+                    requestUrl: buildArticleImageProxyRequestUrl(proxyUrl, url),
+                    options: { headers: { Accept: 'text/html,application/xhtml+xml' } },
+                });
+            } catch {
+                logger.log('         ❌ Play3 image proxy is not configured with a valid URL');
+            }
+        }
+    }
+
+    // Meldet das Ergebnis eines Versuchs an die Bremse und protokolliert genau
+    // dann eine Zeile, wenn dadurch ein Weg ausgesetzt wurde.
+    const reportAttempt = (route, outcome) => {
+        const engagement = brake?.record(route, outcome);
+        if (engagement) logger.log(describeImageBrake(sourceName, engagement));
+    };
+
     const scrapeStart = Date.now();
     for (const attempt of fetchAttempts) {
+        // Die Bremse entscheidet vor dem Budget: ein ausgesetzter Weg kostet
+        // weder eine Anfrage noch eine Einheit.
+        if (brake?.isStopped(attempt.route)) continue;
+
+        if (!reserveRequest()) {
+            logger.log(`         ⏱️  ${attempt.name} skipped: no image request budget left`);
+            break;
+        }
+
         const attemptStart = Date.now();
         let response = null;
         try {
@@ -150,6 +220,7 @@ export async function getOgImageFromUrl(url, sourceName, {
             });
             const attemptDuration = Date.now() - attemptStart;
             logger.log(`         ${attempt.name} responded with ${response.status} in ${formatDuration(attemptDuration)}`);
+            reportAttempt(attempt.route, { status: response.status });
             if (!response.ok) {
                 await response.body?.cancel?.().catch(() => {});
                 continue;
@@ -216,6 +287,10 @@ export async function getOgImageFromUrl(url, sourceName, {
             // abgebrochene Antwort keine offene Verbindung hinterlaesst.
             await response?.body?.cancel?.().catch(() => {});
             logger.log(`         ❌ ${attempt.name} failed after ${formatDuration(Date.now() - attemptStart)}: ${redactMessage(error?.message ?? String(error))}`);
+            // Ohne Antwort gibt es keinen Status: ein Netzwerkfehler oder eine
+            // Zeitueberschreitung. Scheitert dagegen erst das Lesen einer bereits
+            // empfangenen Antwort, hat deren Status die Bremse schon erreicht.
+            if (response === null) reportAttempt(attempt.route, { failed: true });
         }
     }
     logger.log(`      -> No image found after ${formatDuration(Date.now() - scrapeStart)} across all image fetch attempts`);
@@ -1109,6 +1184,43 @@ export async function main({
     // die Deadline hinausreicht, kostet nur und bringt nichts.
     const hasTimeFor = ms => runBudget.hasTimeFor(ms);
 
+    // Bremse des Play3-Bildpfads. Sie lebt nur im Speicher dieses Laufs und wird
+    // von Neu-Scrape und Backfill gemeinsam genutzt: ein neuer Lauf beginnt immer
+    // ohne Bremse und prueft den Direktweg damit genau einmal neu.
+    const imageBrake = createArticleImageBrake();
+
+    // Jede einzelne externe Bildanfrage bucht eine Budgeteinheit - auch der
+    // Proxyversuch nach einem erfolglosen Direktabruf. Gebucht wird erst
+    // unmittelbar vor der Anfrage, nicht beim Eintritt in die Schleife, damit ein
+    // ausgesetzter Weg nichts kostet und `budgetDenied` genau dann gesetzt ist,
+    // wenn ein Versuch am Budget scheiterte.
+    const createImageRequestReservation = () => {
+        let budgetDenied = false;
+        let reserved = 0;
+
+        return {
+            get budgetDenied() {
+                return budgetDenied;
+            },
+            // Ohne Anfrage gibt es keinen Server, dem eine Pause zugutekaeme.
+            get requestsReserved() {
+                return reserved;
+            },
+            reserve() {
+                // Nach der Deadline beginnt keine neue Anfrage mehr; den Grund
+                // ordnet der Aufrufer ueber das Abbruchsignal des Budgets ein.
+                if (runBudget.isDeadlineReached()) return false;
+                if (runBudget.consumePageFetch()) {
+                    reserved += 1;
+                    return true;
+                }
+
+                budgetDenied = true;
+                return false;
+            },
+        };
+    };
+
     const runStartMs = Date.now();
     const durations = {};
     const recorder = createRecorder({
@@ -1481,16 +1593,21 @@ export async function main({
                     logger.warn(`   ⏱️  ${offen} Bild-Scrape(s) zurückgestellt (${stopReason}).`);
                     break;
                 }
-                runBudget.consumePageFetch();
 
+                // Die Einheiten werden je Anfrage innerhalb von
+                // getOgImageFromUrl gebucht; hier genügt die Vorprüfung oben.
+                const reservation = createImageRequestReservation();
                 const articleScrapeStart = Date.now();
                 try {
                     logger.log(`   🖼️  Scraping: ${article.source} - ${article.title.substring(0, 40)}...`);
                     const scrapedImage = await getOgImageFromUrl(article.link, article.source, {
                         createSignal: requestSignal,
                         fetchImpl,
+                        imageBrake,
                         logger,
                         lookup,
+                        proxyUrl: feedProxyUrl,
+                        reserveRequest: reservation.reserve,
                     });
                     const articleScrapeDuration = Date.now() - articleScrapeStart;
                     scrapeStats.totalMs += articleScrapeDuration;
@@ -1510,11 +1627,24 @@ export async function main({
                             kind: DEFERRAL_KINDS.IMAGE_SCRAPE,
                         });
                         logger.warn(`      ⏱️  Bild-Scrape zurückgestellt (Zeitbudget während des Abrufs erschöpft)`);
+                    } else if (reservation.budgetDenied) {
+                        // Der Direktversuch hat die letzte Einheit verbraucht und
+                        // der Proxyversuch entfällt. Das ist keine fehlende
+                        // Bildquelle, sondern wie jeder Budgetmangel eine
+                        // Zurückstellung: der Artikel bleibt Kandidat für den
+                        // nächsten Lauf.
+                        runBudget.defer({
+                            reason: DEFERRAL_REASONS.SCRAPE_BUDGET,
+                            kind: DEFERRAL_KINDS.IMAGE_SCRAPE,
+                        });
+                        logger.warn(`      ⏱️  Bild-Scrape zurückgestellt (Scrape-Budget während des Artikels erschöpft)`);
                     } else {
                         scrapeStats.missing++;
                         logger.log(`      ⚠️  No image found, using placeholder (${formatDuration(articleScrapeDuration)})`);
                     }
-                    if (hasTimeFor(SCRAPE_COURTESY_PAUSE_MS)) await sleep(SCRAPE_COURTESY_PAUSE_MS);
+                    if (reservation.requestsReserved > 0 && hasTimeFor(SCRAPE_COURTESY_PAUSE_MS)) {
+                        await sleep(SCRAPE_COURTESY_PAUSE_MS);
+                    }
                 } catch (error) {
                     const articleScrapeDuration = Date.now() - articleScrapeStart;
                     scrapeStats.totalMs += articleScrapeDuration;
@@ -1588,16 +1718,19 @@ export async function main({
                     logger.warn(`   ⏱️  ${offen} Bild-Backfill(s) zurückgestellt (${stopReason}).`);
                     break;
                 }
-                runBudget.consumePageFetch();
 
+                const reservation = createImageRequestReservation();
                 const articleBackfillStart = Date.now();
                 try {
                     logger.log(`   🖼️  Backfill: ${article.source} - ${article.title.substring(0, 40)}...`);
                     const scrapedImage = await getOgImageFromUrl(article.link, article.source, {
                         createSignal: requestSignal,
                         fetchImpl,
+                        imageBrake,
                         logger,
                         lookup,
+                        proxyUrl: feedProxyUrl,
+                        reserveRequest: reservation.reserve,
                     });
                     const articleBackfillDuration = Date.now() - articleBackfillStart;
                     backfillStats.totalMs += articleBackfillDuration;
@@ -1613,11 +1746,21 @@ export async function main({
                             kind: DEFERRAL_KINDS.IMAGE_BACKFILL,
                         });
                         logger.warn(`      ⏱️  Bild-Backfill zurückgestellt (Zeitbudget während des Abrufs erschöpft)`);
+                    } else if (reservation.budgetDenied) {
+                        // Wie beim Neu-Scrape: der Proxyversuch entfiel, der
+                        // Artikel bleibt Kandidat für den nächsten Lauf.
+                        runBudget.defer({
+                            reason: DEFERRAL_REASONS.SCRAPE_BUDGET,
+                            kind: DEFERRAL_KINDS.IMAGE_BACKFILL,
+                        });
+                        logger.warn(`      ⏱️  Bild-Backfill zurückgestellt (Scrape-Budget während des Artikels erschöpft)`);
                     } else {
                         backfillStats.missing++;
                         logger.log(`      ⚠️  Still no image found (${formatDuration(articleBackfillDuration)})`);
                     }
-                    if (hasTimeFor(SCRAPE_COURTESY_PAUSE_MS)) await sleep(SCRAPE_COURTESY_PAUSE_MS);
+                    if (reservation.requestsReserved > 0 && hasTimeFor(SCRAPE_COURTESY_PAUSE_MS)) {
+                        await sleep(SCRAPE_COURTESY_PAUSE_MS);
+                    }
                 } catch (error) {
                     const articleBackfillDuration = Date.now() - articleBackfillStart;
                     backfillStats.totalMs += articleBackfillDuration;

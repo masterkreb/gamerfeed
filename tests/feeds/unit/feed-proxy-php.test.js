@@ -8,9 +8,12 @@
 // - Die übrigen Fälle enden in der Allowlist beziehungsweise der
 //   Methodenprüfung, also noch vor jedem cURL-Aufruf.
 //
-// Ein erfolgreicher Upstream-Abruf wird hier bewusst **nicht** geprüft; er
-// bräuchte einen echten Feed-Anbieter. Diese Seite deckt
-// tests/feeds/unit/feed-fetch-utils.js mit gestelltem Transport ab.
+// Ein erfolgreicher Upstream-Abruf wird hier bewusst **nicht** gegen einen
+// echten Anbieter geprüft. Die Antwortlogik des Skripts - Content-Type,
+// Statusweitergabe, Accept-Header - läuft trotzdem am echten Skript:
+// runProxyMitAttrappen() ersetzt ausschließlich cURL und header() durch
+// Attrappen. Den Abruf selbst deckt tests/feeds/unit/feed-fetch-utils.js mit
+// gestelltem Transport ab.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -25,6 +28,7 @@ import {
     PROXY_FINGERPRINT_SERVICE,
     computeProxyFingerprint,
 } from '../../../scripts/proxy-fingerprint.js';
+import { PLAY3_ARTICLE_URL_PATTERN } from '../../../scripts/feed-fetch-utils.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -48,7 +52,7 @@ const phpAvailable = await (async () => {
  * echte Datei eingebunden. `header()` ist in der CLI wirkungslos, der Rumpf und
  * `http_response_code()` sind es nicht.
  *
- * @param {{ get?: Record<string, string>, method?: string, phpArgs?: string[] }} [options]
+ * @param {{ get?: Record<string, string | string[]>, method?: string, phpArgs?: string[] }} [options]
  */
 async function runProxy({ get = {}, method = 'GET', phpArgs = [] } = {}) {
     const prelude = [
@@ -69,6 +73,77 @@ async function runProxy({ get = {}, method = 'GET', phpArgs = [] } = {}) {
 
     const status = Number(/STATUS=(\d+)/.exec(stderr)?.[1] ?? 0);
     return { body: stdout, status, stderr };
+}
+
+/**
+ * Führt das Skript bis zur fertigen Antwort aus - mit Attrappen statt cURL und
+ * header().
+ *
+ * Ein echter Abruf kommt nicht in Frage, und die CLI behält keine
+ * Antwort-Header: `headers_list()` bleibt dort leer. Beide Funktionsgruppen
+ * werden deshalb abgeschaltet und im Prelude durch eigene Fassungen ersetzt. Sie
+ * halten fest, was das Skript senden *würde*, und liefern die vorgegebene
+ * Antwort der Gegenstelle. Alles Übrige - Moduswahl, Allowlist, Header,
+ * Statusweitergabe - läuft unverändert am echten Skript.
+ *
+ * Alle Werte reisen als Base64, damit weder Anführungszeichen noch `$` im
+ * Antworttext die Kommandozeile oder PHP-Zeichenketten stören.
+ *
+ * @param {{
+ *   get: Record<string, string | string[]>,
+ *   upstreamBody?: string,
+ *   upstreamStatus?: number,
+ * }} options
+ */
+async function runProxyMitAttrappen({ get, upstreamBody = '', upstreamStatus = 200 }) {
+    const base64 = wert => Buffer.from(JSON.stringify(wert)).toString('base64');
+    // Ohne die cURL-Erweiterung gibt es diese Konstanten nicht. Ihre Werte sind
+    // hier beliebig, weil nur die Attrappen sie lesen.
+    const konstanten = [
+        'CURLOPT_FOLLOWLOCATION', 'CURLOPT_PROTOCOLS', 'CURLPROTO_HTTPS', 'CURLOPT_CONNECTTIMEOUT',
+        'CURLOPT_TIMEOUT', 'CURLOPT_ENCODING', 'CURLOPT_WRITEFUNCTION', 'CURLOPT_HTTPHEADER',
+        'CURLINFO_HTTP_CODE',
+    ].map(name => `'${name}'`).join(', ');
+
+    const prelude = [
+        `$GLOBALS['attrappe'] = json_decode(base64_decode('${base64({ body: upstreamBody, status: upstreamStatus })}'), true);`,
+        `$GLOBALS['gesendet'] = [];`,
+        `$GLOBALS['curl'] = [];`,
+        `foreach ([${konstanten}] as $__index => $__name) { if (!defined($__name)) { define($__name, 90000 + $__index); } }`,
+        `function header($zeile, $ersetzen = true, $code = 0) { $GLOBALS['gesendet'][strtolower(trim(explode(':', $zeile, 2)[0]))] = $zeile; }`,
+        `function curl_init($url = null) { $GLOBALS['curl']['url'] = $url; return new stdClass(); }`,
+        `function curl_setopt_array($ch, $optionen) { $GLOBALS['curl']['optionen'] = $optionen; return true; }`,
+        `function curl_exec($ch) { $schreiben = $GLOBALS['curl']['optionen'][CURLOPT_WRITEFUNCTION]; $schreiben($ch, $GLOBALS['attrappe']['body']); return true; }`,
+        `function curl_getinfo($ch, $option = 0) { return $GLOBALS['attrappe']['status']; }`,
+        `function curl_error($ch) { return ''; }`,
+        `function curl_close($ch) { }`,
+        // Der Bericht geht über einen Shutdown-Handler nach stderr: das Skript
+        // beendet sich mit `exit`, danach liefe kein nachgestellter Code mehr.
+        // stdout bleibt dadurch genau der Antwortrumpf.
+        `register_shutdown_function(static function (): void {`
+            + ` $optionen = $GLOBALS['curl']['optionen'] ?? [];`
+            + ` $bericht = ['status' => http_response_code(), 'header' => $GLOBALS['gesendet'],`
+            + ` 'curlUrl' => $GLOBALS['curl']['url'] ?? null, 'httpHeader' => $optionen[CURLOPT_HTTPHEADER] ?? null,`
+            + ` 'redirects' => $optionen[CURLOPT_FOLLOWLOCATION] ?? null,`
+            + ` 'nurHttps' => ($optionen[CURLOPT_PROTOCOLS] ?? null) === CURLPROTO_HTTPS];`
+            + ` fwrite(STDERR, 'BERICHT=' . base64_encode(json_encode($bericht)) . "\\n"); });`,
+        `$_SERVER['REQUEST_METHOD'] = 'GET';`,
+        `$_GET = json_decode(base64_decode('${base64(get)}'), true);`,
+        `include ${JSON.stringify(PROXY_SOURCE_PATH)};`,
+    ].join(' ');
+
+    const abgeschaltet = [
+        'curl_init', 'curl_setopt_array', 'curl_exec', 'curl_getinfo', 'curl_error', 'curl_close', 'header',
+    ].join(',');
+
+    const { stdout, stderr } = await execFileAsync(
+        'php',
+        ['-d', `disable_functions=${abgeschaltet}`, '-r', prelude],
+        { cwd: REPO_ROOT, timeout: 20_000 },
+    );
+
+    const bericht = JSON.parse(Buffer.from(/BERICHT=(\S+)/.exec(stderr)?.[1] ?? '', 'base64').toString('utf8'));
+    return { body: stdout, bericht, stderr };
 }
 
 test('der Fingerprint-Modus meldet denselben Hash, den Node erwartet', { skip: !phpAvailable }, async () => {
@@ -115,6 +190,134 @@ test('ein unbekannter Modus fällt in den gewöhnlichen Abrufpfad zurück', { sk
 
     assert.equal(status, 422, 'die Allowlist entscheidet wie bisher');
     assert.match(body, /Not allowed/);
+});
+
+test('der Bildmodus akzeptiert nur kanonische Play3-Artikelseiten', { skip: !phpAvailable }, async () => {
+    const articleUrl = 'https://www.play3.de/2026/10/03/test-artikel/';
+    const accepted = await runProxy({
+        get: { mode: 'article-image', url: articleUrl },
+        // HTTP 500 statt 422 belegt ohne Netzwerkzugriff, dass die Adresse die
+        // Modus-Allowlist passiert und erst an der cURL-Pruefung endet.
+        phpArgs: ['-d', 'disable_functions=curl_init'],
+    });
+
+    assert.equal(accepted.status, 500);
+    assert.match(accepted.body, /not configured correctly/);
+
+    for (const url of [
+        'http://www.play3.de/2026/10/03/test-artikel/',
+        'https://play3.de/2026/10/03/test-artikel/',
+        'https://www.play3.de.evil.example/2026/10/03/test-artikel/',
+        'https://www.play3.de:443/2026/10/03/test-artikel/',
+        // Ein leerer Port ist kein Port im Sinn von parse_url(); die Adresse
+        // muss trotzdem als Ganzes dem kanonischen Muster entsprechen.
+        'https://www.play3.de:/2026/10/03/test-artikel/',
+        'https://nutzer:pass@www.play3.de/2026/10/03/test-artikel/',
+        'https://www.play3.de/2026/10/03/test-artikel/?ref=rss',
+        'https://www.play3.de/2026/10/03/test-artikel/#inhalt',
+        'https://www.play3.de/feed/',
+        'https://www.play3.de/2026/10/03/test-artikel',
+        'https://www.play3.de/2026/10/03/../feed/',
+        'https://www.play3.de/2026/10/03/test-artikel/\n',
+        '',
+    ]) {
+        const refused = await runProxy({ get: { mode: 'article-image', url } });
+        assert.equal(refused.status, 422, JSON.stringify(url) || '(leer)');
+        assert.match(refused.body, /Not allowed/);
+    }
+});
+
+test('der Bildmodus weist ein Array als Adresse ab, statt mit einem Fehler zu enden', { skip: !phpAvailable }, async () => {
+    // ?url[]=... ergibt in PHP ein Array. Mit strict_types=1 wäre das bei einer
+    // string-Signatur ein TypeError samt Fehlertext in der Antwort gewesen.
+    const refused = await runProxy({
+        get: { mode: 'article-image', url: ['https://www.play3.de/2026/10/03/test-artikel/'] },
+    });
+
+    assert.equal(refused.status, 422);
+    assert.match(refused.body, /Not allowed/);
+    assert.doesNotMatch(refused.body, /Fatal error|TypeError|feed-proxy\.php/);
+});
+
+// === Antwortlogik mit gestelltem cURL ===
+
+const PLAY3_ARTIKEL = 'https://www.play3.de/2026/10/03/test-artikel/';
+const FEED_ACCEPT = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+const BILD_ACCEPT = 'Accept: text/html,application/xhtml+xml';
+// Eine Seite mit eingebettetem Skript: genau das darf ein Browser unter der
+// Domain des Proxys nie als Webseite ausführen.
+const FREMDE_SEITE = '<!doctype html><html><head><meta property="og:image" content="https://bilder.play3.de/a.jpg"><script>window.name = 1;</script></head><body>Artikel</body></html>';
+
+test('der Bildmodus liefert fremdes HTML ausschließlich als text/plain mit nosniff', { skip: !phpAvailable }, async () => {
+    const { body, bericht } = await runProxyMitAttrappen({
+        get: { mode: 'article-image', url: PLAY3_ARTIKEL },
+        upstreamBody: FREMDE_SEITE,
+    });
+
+    assert.equal(bericht.status, 200);
+    assert.equal(bericht.header['content-type'], 'Content-Type: text/plain; charset=utf-8');
+    assert.equal(bericht.header['x-content-type-options'], 'X-Content-Type-Options: nosniff');
+    assert.equal(bericht.header['cache-control'], 'Cache-Control: no-store');
+    assert.equal(body, FREMDE_SEITE, 'der Rumpf kommt unverändert an');
+    assert.equal(bericht.curlUrl, PLAY3_ARTIKEL, 'abgerufen wird genau die angefragte Artikelseite');
+});
+
+test('der Bildmodus reicht den Status der Quelle durch - ebenfalls als text/plain', { skip: !phpAvailable }, async () => {
+    for (const upstreamStatus of [403, 404, 429, 503]) {
+        const { bericht } = await runProxyMitAttrappen({
+            get: { mode: 'article-image', url: PLAY3_ARTIKEL },
+            upstreamBody: FREMDE_SEITE,
+            upstreamStatus,
+        });
+
+        assert.equal(bericht.status, upstreamStatus);
+        assert.equal(bericht.header['content-type'], 'Content-Type: text/plain; charset=utf-8', `HTTP ${upstreamStatus}`);
+        assert.equal(bericht.header['x-content-type-options'], 'X-Content-Type-Options: nosniff');
+    }
+});
+
+test('der Bildmodus fragt nur nach HTML und ruft ausschließlich per HTTPS ohne Redirects ab', { skip: !phpAvailable }, async () => {
+    const { bericht } = await runProxyMitAttrappen({
+        get: { mode: 'article-image', url: PLAY3_ARTIKEL },
+        upstreamBody: FREMDE_SEITE,
+    });
+
+    assert.ok(bericht.httpHeader.includes(BILD_ACCEPT), 'eigener Accept-Header des Bildmodus');
+    assert.equal(bericht.httpHeader.includes(FEED_ACCEPT), false);
+    assert.equal(bericht.redirects, false, 'keine Redirects');
+    assert.equal(bericht.nurHttps, true, 'nur HTTPS');
+});
+
+test('der Feed-Modus bleibt unverändert: application/rss+xml und der bisherige Accept-Header', { skip: !phpAvailable }, async () => {
+    const feed = '<?xml version="1.0"?><rss version="2.0"><channel><title>Play3</title></channel></rss>';
+
+    for (const upstreamStatus of [200, 403]) {
+        const { body, bericht } = await runProxyMitAttrappen({
+            get: { url: 'https://www.play3.de/feed/' },
+            upstreamBody: feed,
+            upstreamStatus,
+        });
+
+        assert.equal(bericht.status, upstreamStatus);
+        assert.equal(bericht.header['content-type'], 'Content-Type: application/rss+xml; charset=utf-8');
+        assert.equal(bericht.header['x-content-type-options'], 'X-Content-Type-Options: nosniff');
+        assert.equal(body, feed);
+        assert.equal(bericht.curlUrl, 'https://www.play3.de/feed/');
+        assert.ok(bericht.httpHeader.includes(FEED_ACCEPT), 'exakt der bisherige Accept-Header');
+        assert.equal(bericht.httpHeader.includes(BILD_ACCEPT), false);
+        assert.equal(bericht.redirects, false);
+        assert.equal(bericht.nurHttps, true);
+    }
+});
+
+test('ein unbekannter Modus liefert wie bisher application/rss+xml', { skip: !phpAvailable }, async () => {
+    const { bericht } = await runProxyMitAttrappen({
+        get: { mode: 'irgendwas', url: 'https://www.gamepro.de/rss/gamepro.rss' },
+        upstreamBody: '<rss version="2.0"></rss>',
+    });
+
+    assert.equal(bericht.header['content-type'], 'Content-Type: application/rss+xml; charset=utf-8');
+    assert.ok(bericht.httpHeader.includes(FEED_ACCEPT));
 });
 
 test('die Allowlist bleibt unverändert streng', { skip: !phpAvailable }, async () => {
@@ -193,6 +396,32 @@ test('die weiterleitende Play3-Adresse steht nicht in der Allowlist, ihr Ziel sc
         false,
         'die alte Adresse würde vom Proxy nur als 301 zurückkommen',
     );
+});
+
+test('das Play3-Muster des Bildmodus ist in PHP und Node dasselbe', async () => {
+    // Die Node-Seite schickt nur Adressen an den Proxy, die er annimmt. Das
+    // klappt nur, solange beide Fassungen übereinstimmen - sonst löste eine
+    // abweichende Adresse ein 422 aus, und das hieße fälschlich, die PHP-Datei
+    // kenne den Bildmodus nicht.
+    const source = await readFile(PROXY_SOURCE_PATH, 'utf8');
+    const phpMuster = /preg_match\('~(.+?)~D', \$candidate\)/.exec(source)?.[1];
+
+    assert.ok(phpMuster, 'das Muster steht im Quelltext von isAllowedPlay3ArticleUrl()');
+    assert.equal(phpMuster, PLAY3_ARTICLE_URL_PATTERN);
+});
+
+test('keine Antwort liefert fremden Inhalt als text/html aus', async () => {
+    // Statisch, damit die Zusage auch ohne PHP-CLI geprüft ist: Der Accept-Header
+    // der Anfrage nennt text/html (er beschreibt, was erwartet wird); ein
+    // Content-Type der Antwort darf es nie nennen.
+    const source = await readFile(PROXY_SOURCE_PATH, 'utf8');
+
+    assert.doesNotMatch(source, /Content-Type:[^'"\r\n]*text\/html/i);
+    assert.match(source, /header\('Content-Type: text\/plain; charset=utf-8'\);\s*\} else \{\s*header\('Content-Type: application\/rss\+xml; charset=utf-8'\);/);
+
+    const nosniff = source.indexOf("header('X-Content-Type-Options: nosniff');");
+    assert.ok(nosniff > 0, 'nosniff wird gesetzt');
+    assert.ok(nosniff < source.indexOf('exit;'), 'nosniff gilt vor der ersten möglichen Antwort');
 });
 
 test('das Skript ist syntaktisch fehlerfrei', { skip: !phpAvailable }, async () => {

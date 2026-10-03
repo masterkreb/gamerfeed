@@ -91,6 +91,7 @@
 │   ├── feed-fetch-utils.js # Getesteter Feed-Abruf mit Retry/Proxy-Fallback
 │   ├── feed-image-utils.js # Bildauswahl und -validierung für Artikel
 │   ├── source-image-resolvers.js # Quellspezifische Bild-Batches (XboxDynasty)
+│   ├── article-image-brake.js # Bremse pro Lauf für den Play3-Bildpfad (nur Speicher)
 │   ├── feed-run-budget.js  # Zeit- und Scrape-Budget eines Laufs
 │   ├── feed-run-config.js  # Core- und optionale Konfiguration des Laufs
 │   ├── feed-run-recorder.js # Reihenfolge und Schreibregeln des Heartbeats
@@ -921,8 +922,17 @@ Anfragen aus dem GitHub-Actions-Netz mit HTTP 403. Für diese Fälle gibt es
   folgt
 - **Wird nicht von Vercel deployt.** Nach jeder Änderung an der Datei muss sie
   manuell auf das Hosting hochgeladen werden
+- Play3-Artikelseiten nutzen nach dem direkten Bildabruf den separaten Modus
+  `article-image`. Er akzeptiert nur HTTPS auf `www.play3.de` mit dem Pfad
+  `/JJJJ/MM/TT/slug/` (keine Ports, Zugangsdaten, Querystrings oder Fragmente)
+  und antwortet als `text/plain` mit `nosniff`, damit fremdes HTML nie als
+  Webseite unter der Proxy-Domain erscheint
+- Im Bildpfad kostet jede externe Anfrage eine Budgeteinheit, auch der
+  Proxyversuch. Eine Bremse pro Lauf (`scripts/article-image-brake.js`, nur im
+  Speicher, kein KV) setzt den Direktweg nach 401/403/429 und den Proxyweg nach
+  401/403/422/429 oder drei Fehlschlägen in Folge für den Rest des Laufs aus
 - Die Adresse steht im GitHub-Actions-Secret `FEED_PROXY_URL`, nicht bei Vercel
-- Der Proxy akzeptiert nur GET, vergleicht die Ziel-URL exakt gegen eine
+- Der Proxy akzeptiert nur GET, vergleicht Feed-Ziele exakt gegen eine
   Allowlist, folgt keinen Redirects, erlaubt nur HTTPS und begrenzt die Antwort
 - `FEED_PROXY_URL` verbirgt nur die Adresse und ist **kein** Authentifizierungs-Token
 - Ohne das Secret läuft der Cron-Job weiter, nur ohne Fallback
@@ -1094,6 +1104,7 @@ wählt React einen Polyfill-Pfad und `onChange` feuert bei Textfeldern nie.
 - **August 2026:** XboxDynasty-Bildfallback und Bildgesundheit (O2c): ein begrenzter WordPress-API-Batch statt wiederholter 401-Artikelseiten, additive Bild-/Platzhalterzahlen je Feed und automatische Admin-Warnung bei Bildlücken
 - **Juli 2026:** Belastbarkeit des Cron-Laufs (O2a): fehlerhafte Items einzeln überspringen, Timeout und Byte-Limit für HTML- und Groq-Abrufe, Proxy nur für GamePro, Core-Konfiguration vor dem ersten externen Zugriff geprüft
 - **September 2026:** Proxy-Freigabe erweitert: GameStar, Play3 und PlayFront nutzen wie GamePro nach einem fehlgeschlagenen Direktabruf den PHP-Proxy. `PROXY_ELIGIBLE_SOURCES` und die exakte Allowlist in `tools/feed-proxy.php` wachsen gemeinsam, Play3 mit dem Weiterleitungsziel `https://www.play3.de/feed/`. Wirksam erst nach manuellem Upload der Datei, Fingerprint-Vergleich und Anpassung der Play3-Adresse in der Feed-Verwaltung
+- **Oktober 2026:** Play3-Bildfallback abgesichert: Nach dem Direktversuch darf ausschließlich Play3 den eng begrenzten Proxy-Modus `article-image` für kanonische Artikelseiten versuchen. Der Modus antwortet als `text/plain` mit `nosniff`, jede Bildanfrage kostet eine Budgeteinheit, und eine Bremse pro Lauf setzt einen Weg nach einer Ablehnung für den Rest des Laufs aus. Der RSS-Abruf bleibt unverändert; wirksam wird der Bildmodus erst nach manuellem Upload der PHP-Datei und erfolgreicher Fingerprint-Prüfung
 
 ---
 

@@ -1,10 +1,12 @@
 # Externen Feed-Proxy betreiben
 
-Der optionale Feed-Proxy ist ein Fallback für einzelne RSS-Quellen, deren
-Bot-Schutz Anfragen von GitHub-Actions-Rechenzentren blockiert. Die React-App
-und die Vercel Functions verwenden ihn nicht. Er wird vom Workflow
-`.github/workflows/update-feeds.yml` oder bei einem manuellen lokalen
-Cache-Lauf aufgerufen, nachdem der direkte Feed-Abruf fehlgeschlagen ist.
+Der optionale Feed-Proxy ist ein Fallback für einzelne RSS-Quellen, die
+Anfragen aus GitHub-Actions-Rechenzentren mit HTTP 403 beantworten. Zusätzlich
+darf er im eng begrenzten Modus `article-image` Play3-Artikelseiten für die
+Bildsuche abrufen. Die React-App und die Vercel Functions verwenden ihn nicht.
+Er wird vom Workflow `.github/workflows/update-feeds.yml` oder bei einem
+manuellen lokalen Cache-Lauf aufgerufen, nachdem der direkte Abruf
+fehlgeschlagen ist.
 
 ## Voraussetzungen
 
@@ -32,6 +34,50 @@ Auf der Node-Seite entscheidet zusätzlich `PROXY_ELIGIBLE_SOURCES` in
 `scripts/feed-fetch-utils.js`, welche Quellen den Proxy nach einem
 fehlgeschlagenen Direktabruf überhaupt versuchen. Wie beide Listen gepflegt
 werden, steht unter [Neue Quelle freischalten](#neue-quelle-freischalten).
+
+### Play3-Bildmodus
+
+Play3 liefert in seinem RSS-Feed keine Artikelbilder. Der direkte Artikelabruf
+aus dem GitHub-Actions-Netz liefert HTTP 403, obwohl der Feed selbst
+erfolgreich abgerufen wird. Deshalb versucht der Cron bei Play3 immer zuerst
+den direkten Bildabruf und verwendet nur danach den Modus `article-image`
+desselben PHP-Endpunkts.
+
+Dieser Modus besitzt keine offene Host-Allowlist. Er akzeptiert ausschließlich
+HTTPS-Adressen auf `www.play3.de`, deren Pfad dem kanonischen Artikelschema
+`/JJJJ/MM/TT/slug/` entspricht. Ports, Zugangsdaten, Querystrings, Fragmente,
+Redirects, der Feed-Pfad und alle anderen Hosts werden abgewiesen. Die
+HTML-Antwort ist auf 2 MiB begrenzt. Die Node-Seite schickt ihm nur Adressen
+dieses Musters (`PLAY3_ARTICLE_URL_PATTERN` in `scripts/feed-fetch-utils.js`);
+ein Test hält beide Fassungen gleich. Ein 422 des Bildmodus deutet deshalb auf
+eine hochgeladene Datei hin, die den Modus noch nicht kennt.
+
+**Antwortformat.** Der Bildmodus antwortet mit
+`Content-Type: text/plain; charset=utf-8`. Zusammen mit
+`X-Content-Type-Options: nosniff`, das für jede Antwort des Proxys gilt, wird
+fremdes HTML so nie als Webseite unter der Domain des Proxys dargestellt. Der
+Cron liest nur den Rumpf und wertet ihn unabhängig vom Content-Type als HTML
+aus. Feed-Antworten behalten `application/rss+xml`.
+
+**Budget.** Jede externe Bildanfrage kostet eine Einheit des Scrape-Budgets,
+auch der Proxyversuch nach dem Direktabruf (siehe
+[feed-run-budget.md](feed-run-budget.md)). Ist das Budget nach dem Direktabruf
+erschöpft, entfällt der Proxyversuch, und der Artikel gilt als zurückgestellt.
+
+**Bremse pro Lauf.** Damit nicht jeder Artikel dieselbe Ablehnung erneut
+provoziert, setzt der Lauf einen Weg nach einer Ablehnung für seinen Rest aus.
+Der Zustand lebt nur im Arbeitsspeicher des Laufs: es gibt keinen KV-Schlüssel,
+und jeder neue Lauf beginnt ohne Bremse.
+
+| Weg | Aussetzung für den Rest des Laufs bei |
+|---|---|
+| Direktabruf | HTTP 401, 403 oder 429 |
+| Proxyabruf | HTTP 401, 403, 422 oder 429 sowie drei Fehlschlägen in Folge (Netzwerkfehler, Zeitüberschreitung oder 5xx-Antwort) |
+
+Der Direktweg wird im nächsten Lauf genau einmal neu geprüft; antwortet er
+wieder, braucht der Cron den Proxy nicht mehr. Ein 404 und „kein Bild
+gefunden“ betreffen nur den einzelnen Artikel und bremsen nie. Pro Bremse
+erscheint eine Logzeile mit Quelle, Weg und Status, ohne Adressen und Secrets.
 
 ## Deployment
 
@@ -89,6 +135,30 @@ do
 done
 ```
 
+Den Play3-Bildmodus zusätzlich mit einer aktuellen, kanonischen Artikeladresse
+prüfen:
+
+```bash
+PLAY3_ARTICLE="https://www.play3.de/2026/10/03/beispiel-artikel/" # durch echte Adresse ersetzen
+
+curl -i --get \
+  --data-urlencode "mode=article-image" \
+  --data-urlencode "url=$PLAY3_ARTICLE" \
+  "$FEED_PROXY_URL"
+```
+
+Erwartet wird HTTP 200 mit `Content-Type: text/plain; charset=utf-8`. Der
+Rumpf ist der HTML-Text der Seite und enthält ein `og:image`- oder
+`twitter:image`-Metafeld. Eine fremde Adresse muss auch in diesem Modus HTTP 422
+liefern:
+
+```bash
+curl -i --get \
+  --data-urlencode "mode=article-image" \
+  --data-urlencode "url=https://example.com/2026/10/03/test/" \
+  "$FEED_PROXY_URL"
+```
+
 Der Proxy reicht den Status der Quelle durch. Deshalb bedeuten:
 
 | Status | Bedeutung |
@@ -102,7 +172,11 @@ Der Proxy reicht den Status der Quelle durch. Deshalb bedeuten:
 Danach den Workflow **Update RSS Feeds Cache** einmal manuell starten und im
 Log kontrollieren, ob bei einem fehlgeschlagenen Direktabruf
 `Feed proxy fetch successful for <Quelle>` erscheint, für jede freigegebene
-Quelle, deren Direktabruf scheitert.
+Quelle, deren Direktabruf scheitert. Bei Play3-Bildern muss nach dem direkten
+403 außerdem `Found meta image via Play3 image proxy` erscheinen. Antwortet der
+Direktabruf weiterhin mit 403, entfällt er ab dem zweiten Artikel, und eine
+einzelne Zeile meldet, dass der Direktabruf für den Rest des Laufs ausgesetzt
+ist.
 
 ## Fingerprint prüfen
 
@@ -226,10 +300,12 @@ Querystring oder den Host; der Checker bereinigt jeden Text doppelt.
 Der Proxy:
 
 - akzeptiert nur `GET`;
-- vergleicht die Zieladresse exakt mit seiner Allowlist;
+- vergleicht Feed-Zieladressen exakt mit seiner Allowlist;
+- erlaubt im Bildmodus ausschließlich kanonische Play3-Artikeladressen und
+  liefert deren Seiten nur als `text/plain` mit `nosniff` aus;
 - folgt keinen Redirects;
 - erlaubt cURL ausschließlich HTTPS;
-- begrenzt die dekomprimierte Antwort auf 5 MiB;
+- begrenzt dekomprimierte Feed-Antworten auf 5 MiB und Bildseiten auf 2 MiB;
 - reicht den HTTP-Status der Quelle durch;
 - beantwortet `?mode=fingerprint` ohne jeden Upstream-Abruf.
 
@@ -253,7 +329,8 @@ automatisch auf das externe Hosting übertragen. Nach jeder Änderung:
 
 1. CI einschließlich PHP-Lint abwarten;
 2. Datei erneut hochladen;
-3. beide Smoke-Tests ausführen (den positiven für jede freigegebene Adresse);
+3. die Feed- und Bildmodus-Smoke-Tests ausführen (den positiven Feed-Test für
+   jede freigegebene Adresse);
 4. den Workflow **Proxy-Fingerprint prüfen** starten – er belegt, dass die
    hochgeladene Datei wirklich die neue ist;
 5. den Feed-Workflow manuell starten.

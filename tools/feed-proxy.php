@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 // Feed-Proxy fuer Quellen, deren Bot-Schutz die GitHub-Actions-Runner blockt.
+// Zusaetzlich bedient die Datei im Modus article-image den eng begrenzten
+// Play3-Artikelbild-Fallback.
 //
 // Deployment: Diese Datei gehoert auf das externe Webhosting, nicht ins
 // Vercel-Deployment. Sie laeuft dort unter public_html/gamerfeed/feed-proxy.php.
@@ -63,13 +65,6 @@ if (($_GET['mode'] ?? '') === 'fingerprint') {
     exit;
 }
 
-if (!function_exists('curl_init')) {
-    http_response_code(500);
-    header('Content-Type: text/plain; charset=utf-8');
-    echo "Proxy is not configured correctly\n";
-    exit;
-}
-
 $allowed = [
     'https://www.gamepro.de/rss/gamepro.rss',
     'https://www.gamestar.de/rss/gamestar.rss',
@@ -77,11 +72,41 @@ $allowed = [
     'https://playfront.de/feed/',
 ];
 
+$mode = $_GET['mode'] ?? '';
 $url = $_GET['url'] ?? '';
+$isArticleImageMode = $mode === 'article-image';
+
+/**
+ * Der Bildmodus ist kein allgemeiner Host-Proxy. Er akzeptiert nur kanonische
+ * Play3-Artikelseiten ohne Port, Zugangsdaten, Querystring oder Fragment.
+ *
+ * Der Vergleich laeuft als ein einziger verankerter Ausdruck ueber die gesamte
+ * Zeichenkette statt ueber parse_url(): so bleibt kein Randfall wie ein leerer
+ * Port uebrig, und ein Array aus ?url[]=... wird abgewiesen, statt einen
+ * TypeError auszuloesen. Das Muster steht in scripts/feed-fetch-utils.js
+ * (PLAY3_ARTICLE_URL_PATTERN) ein zweites Mal; ein Test vergleicht beide.
+ *
+ * Bewusst ohne Parametertyp: `mixed` gibt es erst ab PHP 8, und die
+ * PHP-Version des Hostings ist nicht belegt. Ein Parse-Fehler wuerde den
+ * gesamten Proxy und damit jeden Feed-Fallback ausfallen lassen.
+ *
+ * @param mixed $candidate
+ */
+function isAllowedPlay3ArticleUrl($candidate): bool
+{
+    return is_string($candidate)
+        && preg_match('~^https://www\.play3\.de/[0-9]{4}/[0-9]{2}/[0-9]{2}/[a-z0-9-]+/$~D', $candidate) === 1;
+}
 
 // Exakter Vergleich gegen die Liste - keine Praefix- oder Wildcard-Pruefung,
 // sonst laesst sich die Allowlist mit praeparierten URLs umgehen.
-if (!in_array($url, $allowed, true)) {
+// Der article-image-Modus besitzt daneben seine eigene strikte Host- und
+// Pfadpruefung; unbekannte Modi fallen wie bisher in die Feed-Allowlist.
+$isAllowed = $isArticleImageMode
+    ? isAllowedPlay3ArticleUrl($url)
+    : in_array($url, $allowed, true);
+
+if (!$isAllowed) {
     // 422 unterscheidet die lokale Allowlist von einem echten Upstream-403.
     http_response_code(422);
     header('Content-Type: text/plain; charset=utf-8');
@@ -89,7 +114,14 @@ if (!in_array($url, $allowed, true)) {
     exit;
 }
 
-$maxBytes = 5 * 1024 * 1024;
+if (!function_exists('curl_init')) {
+    http_response_code(500);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "Proxy is not configured correctly\n";
+    exit;
+}
+
+$maxBytes = $isArticleImageMode ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
 $body = '';
 $bodyLength = 0;
 $tooLarge = false;
@@ -122,7 +154,9 @@ try {
         },
         CURLOPT_HTTPHEADER     => [
             'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
-            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            $isArticleImageMode
+                ? 'Accept: text/html,application/xhtml+xml'
+                : 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language: de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
         ],
     ]);
@@ -172,5 +206,15 @@ if ($status < 100 || $status > 599) {
 
 // Status der Quelle durchreichen, damit ein 403 nicht als Erfolg ankommt.
 http_response_code($status);
-header('Content-Type: application/rss+xml; charset=utf-8');
+if ($isArticleImageMode) {
+    // Fremdes Play3-HTML wird bewusst als reiner Text ausgeliefert. Mit
+    // text/html wuerde ein Browser es unter der Domain dieses Proxys als
+    // Webseite darstellen. Die Node-Seite wertet nur den Rumpf aus und liest
+    // ihn unabhaengig vom Content-Type als HTML. Der Header
+    // X-Content-Type-Options: nosniff steht am Anfang der Datei, gilt fuer jede
+    // Antwort und verhindert, dass ein Browser den Typ umdeutet.
+    header('Content-Type: text/plain; charset=utf-8');
+} else {
+    header('Content-Type: application/rss+xml; charset=utf-8');
+}
 echo $body;

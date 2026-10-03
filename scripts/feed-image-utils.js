@@ -25,6 +25,11 @@ export function isXboxDynastySource(source) {
         .some(value => String(value).trim().toLowerCase() === 'xboxdynasty');
 }
 
+export function isPlay3Source(source) {
+    return getSourceIdentifiers(source)
+        .some(value => String(value).trim().toLowerCase() === 'play3');
+}
+
 export function isPlaceholderImageUrl(imageUrl) {
     if (!imageUrl) return false;
 

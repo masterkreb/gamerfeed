@@ -124,8 +124,48 @@ export function isFeedXml(value) {
 export function buildFeedProxyRequestUrl(feedProxyUrl, feedUrl) {
     const proxyRequestUrl = new URL(feedProxyUrl);
     proxyRequestUrl.hash = '';
+    proxyRequestUrl.searchParams.delete('mode');
     proxyRequestUrl.searchParams.set('url', feedUrl);
     return proxyRequestUrl.href;
+}
+
+/**
+ * Baut den eng begrenzten Proxy-Abruf einer Play3-Artikelseite.
+ *
+ * Die Node-Seite entscheidet nur, wann dieser Modus verwendet wird. Ob die
+ * Zieladresse wirklich eine erlaubte Play3-Artikelseite ist, prueft der
+ * externe PHP-Endpunkt nochmals selbst.
+ */
+export function buildArticleImageProxyRequestUrl(feedProxyUrl, articleUrl) {
+    const proxyRequestUrl = new URL(feedProxyUrl);
+    proxyRequestUrl.hash = '';
+    proxyRequestUrl.searchParams.set('mode', 'article-image');
+    proxyRequestUrl.searchParams.set('url', articleUrl);
+    return proxyRequestUrl.href;
+}
+
+/**
+ * Quelltext des regulaeren Ausdrucks, den der Bildmodus von tools/feed-proxy.php
+ * auf die Zieladresse anwendet (ohne Trennzeichen und Modifikatoren).
+ *
+ * Er steht hier ein zweites Mal, damit die Node-Seite keine Adresse an den Proxy
+ * schickt, die er ohnehin mit 422 abweisen wuerde. Ein 422 soll ausschliesslich
+ * heissen, dass die PHP-Datei den Bildmodus nicht kennt - nicht, dass ein
+ * einzelner Artikel eine ungewoehnliche Adresse hat. Ein Test vergleicht beide
+ * Fassungen Zeichen fuer Zeichen, damit sie nicht auseinanderlaufen.
+ */
+export const PLAY3_ARTICLE_URL_PATTERN = '^https://www\\.play3\\.de/[0-9]{4}/[0-9]{2}/[0-9]{2}/[a-z0-9-]+/$';
+
+const PLAY3_ARTICLE_URL_REGEX = new RegExp(PLAY3_ARTICLE_URL_PATTERN);
+
+/**
+ * Ist das eine kanonische Play3-Artikeladresse, die der Bildmodus annimmt?
+ *
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+export function isPlay3ArticleUrl(value) {
+    return typeof value === 'string' && PLAY3_ARTICLE_URL_REGEX.test(value);
 }
 
 // Eine Ablehnung durch die Outbound-Policy ist deterministisch: erneutes
