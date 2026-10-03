@@ -113,6 +113,20 @@ Providerfehlertexte werden auf 200 Zeichen gekürzt und laufen durch die
 Bereinigung. Ungültiges JSON wird ohne Rohtext gemeldet – er stammt vom Provider.
 Der API-Schlüssel steht ausschließlich im `Authorization`-Header.
 
+**Das Modell wechselt von Zeit zu Zeit.** Groq hat `llama-3.1-8b-instant` am
+16. August 2026 abgeschaltet. Danach endeten alle Trendanfragen mit
+`status 404 … model_not_found`, während der Lauf grün blieb: Das ist die Folge
+der Optionalität, fehlende Trends fallen im Lauf selbst nicht auf. Der Client
+nutzt jetzt `openai/gpt-oss-20b` (`GROQ_MODEL`). Wer Trends vermisst, sucht im
+Protokoll zuerst nach `Groq API error` und prüft die
+[Deprecation-Liste von Groq](https://console.groq.com/docs/deprecations).
+
+gpt-oss ist ein Reasoning-Modell. Der Client fordert deshalb
+`reasoning_effort: "low"` und `include_reasoning: false` an und setzt
+`max_completion_tokens` auf das Antwortbudget des Aufrufers plus eine feste
+Reserve von 2048 Tokens für den Denkweg. Reicht auch das nicht, endet der Aufruf
+mit `token limit reached` statt mit dem unspezifischen `empty content`.
+
 ## Der Proxy ist die Ausnahme
 
 ```js

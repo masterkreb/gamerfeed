@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
     GROQ_ENDPOINT,
+    GROQ_MODEL,
+    GROQ_REASONING_EFFORT,
+    GROQ_REASONING_RESERVE_TOKENS,
     MAX_GROQ_RESPONSE_BYTES,
     parseGroqJsonContent,
     requestGroqCompletion,
@@ -30,6 +33,25 @@ function jsonResponse(payload, { status = 200, headers = {} } = {}) {
 
 function completion(content) {
     return jsonResponse({ choices: [{ message: { content } }] });
+}
+
+/** Führt einen Aufruf aus und liefert den JSON-Rumpf, der an Groq gesendet wurde. */
+async function gesendeterRumpf(optionen = {}) {
+    const { logger } = silentLogger();
+    let rumpf = null;
+
+    await requestGroqCompletion({
+        apiKey: API_KEY,
+        messages: MESSAGES,
+        fetchImpl: async (_url, init) => {
+            rumpf = JSON.parse(init.body);
+            return completion('[]');
+        },
+        logger,
+        ...optionen,
+    });
+
+    return rumpf;
 }
 
 /** Antwort, die stückweise streamt – ohne Content-Length. */
@@ -93,7 +115,52 @@ test('schickt Schlüssel, Modell und Abort-Signal mit', async () => {
     assert.equal(gesehen.url, GROQ_ENDPOINT);
     assert.equal(gesehen.init.headers.Authorization, `Bearer ${API_KEY}`);
     assert.ok(gesehen.init.signal, 'ohne Signal könnte die Anfrage ewig hängen');
-    assert.equal(JSON.parse(gesehen.init.body).model, 'llama-3.1-8b-instant');
+    assert.equal(JSON.parse(gesehen.init.body).model, 'openai/gpt-oss-20b');
+});
+
+test('fragt nicht mehr das abgeschaltete Modell an', async () => {
+    // Groq hat llama-3.1-8b-instant am 16.08.2026 abgeschaltet; seither
+    // beantwortet es jede Anfrage mit 404 model_not_found.
+    const rumpf = await gesendeterRumpf();
+
+    assert.equal(GROQ_MODEL, 'openai/gpt-oss-20b');
+    assert.equal(rumpf.model, GROQ_MODEL);
+    assert.notEqual(rumpf.model, 'llama-3.1-8b-instant');
+});
+
+test('fragt das Reasoning-Modell mit niedrigem Aufwand und ohne Denkweg an', async () => {
+    const rumpf = await gesendeterRumpf();
+
+    assert.equal(GROQ_REASONING_EFFORT, 'low');
+    assert.equal(rumpf.reasoning_effort, 'low');
+    assert.equal(rumpf.include_reasoning, false, 'der Denkweg wird nicht in die Antwort geschrieben');
+    // Bei gpt-oss gibt es reasoning_format nicht, und es schließt
+    // include_reasoning aus: Groq würde die Anfrage ablehnen.
+    assert.equal('reasoning_format' in rumpf, false);
+    // Kein Modus, der ein JSON-Objekt erzwingt: die Tagestrends sind ein Array.
+    assert.equal('response_format' in rumpf, false);
+});
+
+test('das Tokenlimit lässt dem Denkweg Platz neben der sichtbaren Antwort', async () => {
+    const standard = await gesendeterRumpf();
+    const knapp = await gesendeterRumpf({ maxTokens: 700 });
+
+    // max_tokens ist bei Groq veraltet; der Denkweg zählt zu max_completion_tokens.
+    assert.equal('max_tokens' in standard, false);
+    assert.equal(standard.max_completion_tokens, 1500 + GROQ_REASONING_RESERVE_TOKENS);
+    assert.equal(knapp.max_completion_tokens, 700 + GROQ_REASONING_RESERVE_TOKENS);
+    assert.ok(
+        GROQ_REASONING_RESERVE_TOKENS >= 1024,
+        'weniger als Groqs Vorgabe von 1024 Tokens lässt den Denkweg die Antwort verdrängen',
+    );
+});
+
+test('die Temperatur liegt im von Groq für Reasoning-Modelle empfohlenen Bereich', async () => {
+    const standard = await gesendeterRumpf();
+    const eigene = await gesendeterRumpf({ temperature: 0.7 });
+
+    assert.ok(standard.temperature >= 0.5 && standard.temperature <= 0.7, String(standard.temperature));
+    assert.equal(eigene.temperature, 0.7, 'ein ausdrücklich gesetzter Wert bleibt maßgeblich');
 });
 
 test('ein hängender Aufruf endet über das Abort-Signal', async () => {
@@ -190,6 +257,61 @@ test('eine Antwort ohne Inhalt endet kontrolliert', async () => {
         assert.equal(content, null, JSON.stringify(payload));
         assert.equal(error, 'empty content');
     }
+});
+
+test('ein im Denkweg verbrauchtes Tokenlimit wird als solches gemeldet', async () => {
+    const { logger, errors } = silentLogger();
+
+    // Der Denkweg hat das Limit aufgebraucht, bevor die Antwort begann.
+    const { content, error } = await requestGroqCompletion({
+        apiKey: API_KEY,
+        messages: MESSAGES,
+        fetchImpl: async () => jsonResponse({
+            choices: [{ message: { content: '' }, finish_reason: 'length' }],
+        }),
+        logger,
+    });
+
+    assert.equal(content, null);
+    assert.equal(error, 'token limit reached');
+    assert.match(errors.join('\n'), /token limit/);
+
+    // Eine leere Antwort aus anderem Grund bleibt eine leere Antwort.
+    const regulaer = await requestGroqCompletion({
+        apiKey: API_KEY,
+        messages: MESSAGES,
+        fetchImpl: async () => jsonResponse({
+            choices: [{ message: { content: '' }, finish_reason: 'stop' }],
+        }),
+        logger,
+    });
+    assert.equal(regulaer.error, 'empty content');
+});
+
+test('geliefert wird nur die endgültige Antwort, nie der Denkweg', async () => {
+    const { logger } = silentLogger();
+
+    // Groq legt den Denkweg von gpt-oss in ein eigenes Feld. Selbst wenn es trotz
+    // include_reasoning: false mitgeschickt würde, darf es nicht zur Antwort werden.
+    const { content, error } = await requestGroqCompletion({
+        apiKey: API_KEY,
+        messages: MESSAGES,
+        fetchImpl: async () => jsonResponse({
+            choices: [{
+                message: {
+                    role: 'assistant',
+                    content: '[{"topic":"GTA 6"}]',
+                    reasoning: 'We need to output JSON only. Count the titles first ...',
+                },
+                finish_reason: 'stop',
+            }],
+        }),
+        logger,
+    });
+
+    assert.equal(error, null);
+    assert.equal(content, '[{"topic":"GTA 6"}]');
+    assert.deepEqual(parseGroqJsonContent(content), [{ topic: 'GTA 6' }]);
 });
 
 test('ein Providerfehler wird begrenzt und bereinigt gemeldet', async () => {

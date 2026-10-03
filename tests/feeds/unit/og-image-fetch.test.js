@@ -216,7 +216,7 @@ test('ein Stream ohne Content-Length wird beim Byte-Limit beendet', async () => 
         maxBytes: 500,
     });
 
-    assert.equal(image, null, 'eine abgeschnittene Seite liefert kein Bild');
+    assert.equal(image, null, 'ein Bild hinter der Grenze bleibt unsichtbar');
     assert.equal(stream.wasCancelled(), true, 'der Stream wird geschlossen');
     assert.ok(stream.deliveredChunks() < 5, 'es wird nicht bis zum Ende gelesen');
     assert.ok(lines.some(line => line.includes('byte limit')));
@@ -242,6 +242,181 @@ test('eine Seite knapp unter dem Limit wird noch ausgewertet', async () => {
 
 test('die dokumentierten Vorgaben sind gesetzt', () => {
     assert.equal(MAX_HTML_RESPONSE_BYTES, 2 * 1024 * 1024);
+});
+
+// === Zu große Seiten: der gelesene Anfang wird ausgewertet ===
+//
+// og:image steht fast immer ganz am Anfang im <head>. Eine Seite, die die
+// Grenze überschreitet, verliert ihr Bild deshalb nicht mehr mit dem Rest.
+
+// Neutrale Quelle und Adresse: es geht um die Größe der Seite, nicht um ihren Absender.
+const GROSSE_SEITE_URL = 'https://www.beispiel.example/artikel/gross';
+
+/** Ein Abruf, der zählt, wie oft das Netz angefragt wurde. */
+function zaehlenderAbruf(antwort) {
+    const stand = { anfragen: 0 };
+    return {
+        stand,
+        fetchImpl: async () => {
+            stand.anfragen += 1;
+            return antwort;
+        },
+    };
+}
+
+test('eine Seite über dem Limit wird mit dem gelesenen Anfang ausgewertet', async () => {
+    const { logger, lines } = silentLogger();
+    const reservierung = createReservierung();
+    const stream = streamingHtmlResponse([
+        '<html><head><title>Große Seite</title>'
+            + '<meta property="og:image" content="https://bilder.example/gross.jpg"></head><body>',
+        'x'.repeat(2000),
+        'y'.repeat(2000),
+        'z'.repeat(2000),
+    ]);
+    const abruf = zaehlenderAbruf(stream.response);
+
+    const image = await getOgImageFromUrl(GROSSE_SEITE_URL, 'Beispiel', {
+        fetchImpl: abruf.fetchImpl,
+        logger,
+        lookup,
+        maxBytes: 1000,
+        reserveRequest: reservierung.reserveRequest,
+    });
+
+    assert.equal(image, 'https://bilder.example/gross.jpg');
+    assert.equal(abruf.stand.anfragen, 1, 'es bleibt bei einer einzigen Anfrage');
+    assert.deepEqual(reservierung.stand, { abgelehnt: 0, genutzt: 1 }, 'und bei einer Budgeteinheit');
+    assert.equal(stream.wasCancelled(), true, 'der Stream wird geschlossen');
+    assert.equal(stream.deliveredChunks(), 2, 'nach der Überschreitung wird nicht weitergelesen');
+    assert.ok(
+        lines.some(line => line.includes('1000 byte limit')),
+        'die gekürzte Auswertung steht im Log',
+    );
+    assert.ok(!lines.some(line => line.includes('failed after')), 'es ist kein Fehlschlag');
+});
+
+test('eine Seite über dem Limit ohne Bild im gelesenen Anfang liefert kein Bild und keinen Absturz', async () => {
+    const { logger, lines } = silentLogger();
+    const reservierung = createReservierung();
+    const stream = streamingHtmlResponse([
+        '<html><head><title>Große Seite</title>',
+        'x'.repeat(2000),
+        // Hinter der Grenze: wird nie gelesen.
+        '<meta property="og:image" content="https://bilder.example/zu-spaet.jpg">',
+    ]);
+    const abruf = zaehlenderAbruf(stream.response);
+
+    const image = await getOgImageFromUrl(GROSSE_SEITE_URL, 'Beispiel', {
+        fetchImpl: abruf.fetchImpl,
+        logger,
+        lookup,
+        maxBytes: 1000,
+        reserveRequest: reservierung.reserveRequest,
+    });
+
+    assert.equal(image, null);
+    assert.equal(abruf.stand.anfragen, 1);
+    assert.equal(reservierung.stand.genutzt, 1);
+    assert.equal(stream.deliveredChunks(), 2, 'der Chunk mit dem späten Tag wird nicht mehr gelesen');
+    assert.ok(lines.some(line => line.includes('No image candidate')), 'die Suche läuft regulär zu Ende');
+    assert.ok(!lines.some(line => line.includes('failed after')), 'es ist kein Fehlschlag');
+});
+
+test('ausgewertet wird höchstens die Grenze, auch im Chunk, der sie überschreitet', async () => {
+    const { logger } = silentLogger();
+    const kopf = '<html><head><title>Große Seite</title>';
+    const seite = kopf + 'x'.repeat(50)
+        + '<meta property="og:image" content="https://bilder.example/hinter-der-grenze.jpg">';
+    const grenze = encoder.encode(kopf).byteLength + 50;
+
+    // Ein einziger Chunk überschreitet die Grenze. Das vollständige Meta-Tag
+    // liegt dahinter und damit schon im Speicher - gesehen werden darf es nicht.
+    const gekuerzt = await getOgImageFromUrl(GROSSE_SEITE_URL, 'Beispiel', {
+        fetchImpl: async () => streamingHtmlResponse([seite]).response,
+        logger,
+        lookup,
+        maxBytes: grenze,
+    });
+    assert.equal(gekuerzt, null);
+
+    // Kontrolle: dieselbe Seite innerhalb einer ausreichenden Grenze liefert das Bild.
+    const vollstaendig = await getOgImageFromUrl(GROSSE_SEITE_URL, 'Beispiel', {
+        fetchImpl: async () => streamingHtmlResponse([seite]).response,
+        logger,
+        lookup,
+        maxBytes: 100_000,
+    });
+    assert.equal(vollstaendig, 'https://bilder.example/hinter-der-grenze.jpg');
+});
+
+test('ein von der Grenze mitten im Tag abgeschnittenes og:image liefert kein halbes Bild', async () => {
+    const { logger } = silentLogger();
+    const kopf = '<html><head><meta property="og:image" content="https://bilder.example/halb';
+    const seite = `${kopf}.jpg"></head><body>${'x'.repeat(500)}</body></html>`;
+    // Die Grenze fällt mitten in die Adresse.
+    const grenze = encoder.encode(kopf).byteLength - 3;
+
+    const image = await getOgImageFromUrl(GROSSE_SEITE_URL, 'Beispiel', {
+        fetchImpl: async () => streamingHtmlResponse([seite.slice(0, 40), seite.slice(40)]).response,
+        logger,
+        lookup,
+        maxBytes: grenze,
+    });
+
+    assert.equal(image, null, 'eine abgeschnittene Adresse wäre ein kaputtes Bild');
+});
+
+test('ein an der Grenze zerschnittenes UTF-8-Zeichen führt nicht zum Absturz', async () => {
+    const { logger } = silentLogger();
+    const davor = '<html><head><meta property="og:image" content="https://bilder.example/umlaut.jpg"><title>Gr';
+    // Die Grenze fällt in die Mitte des zweibyteigen ö.
+    const grenze = encoder.encode(davor).byteLength + 1;
+
+    const image = await getOgImageFromUrl(GROSSE_SEITE_URL, 'Beispiel', {
+        fetchImpl: async () => streamingHtmlResponse([
+            `${davor}öße der Welt</title></head><body>${'x'.repeat(500)}`,
+        ]).response,
+        logger,
+        lookup,
+        maxBytes: grenze,
+    });
+
+    assert.equal(image, 'https://bilder.example/umlaut.jpg');
+});
+
+test('auch der YouTube-Fallback arbeitet auf dem gelesenen Anfang', async () => {
+    const { logger } = silentLogger();
+    const stream = streamingHtmlResponse([
+        '<html><head><title>Video</title></head><body>'
+            + '<iframe src="https://www.youtube.com/embed/abc123XYZ"></iframe>',
+        'x'.repeat(3000),
+    ]);
+
+    const image = await getOgImageFromUrl(GROSSE_SEITE_URL, 'Beispiel', {
+        fetchImpl: async () => stream.response,
+        logger,
+        lookup,
+        maxBytes: 1000,
+    });
+
+    assert.equal(image, 'https://img.youtube.com/vi/abc123XYZ/hqdefault.jpg');
+});
+
+test('auch eine Antwort ohne Stream wird über dem Limit mit ihrem Anfang ausgewertet', async () => {
+    const { logger } = silentLogger();
+    // Attrappen und manche Runtimes liefern den fertigen Text statt eines Streams.
+    const seite = '<html><head><meta property="og:image" content="https://bilder.example/ohne-stream.jpg">'
+        + `</head><body>${'x'.repeat(5000)}</body></html>`;
+
+    const image = await getOgImageFromUrl(GROSSE_SEITE_URL, 'Beispiel', {
+        fetchImpl: async () => htmlResponse(seite),
+        logger,
+        lookup,
+        maxBytes: 1000,
+    });
+
+    assert.equal(image, 'https://bilder.example/ohne-stream.jpg');
 });
 
 test('eine Fehlerantwort schließt den Rumpf und liefert kein Bild', async () => {
@@ -621,13 +796,20 @@ test('Proxyweg: ein Fehler beim Lesen der Antwort ist kein Netzwerkfehler', asyn
     // erlaubt. Das belegt, dass der Weg funktioniert: der Zähler beginnt neu und
     // das Lesen selbst zählt nicht als weiterer Fehlschlag. Würde es zählen,
     // wären die Netzwerkfehler 4 und 5 schon der dritte und vierte in Folge.
+    //
+    // Hier kündigt schon die Content-Length eine Größe über der Grenze an. Streamt
+    // eine Seite erst während des Lesens über die Grenze, wird ihr Anfang
+    // ausgewertet und es entsteht gar kein Lesefehler mehr (siehe "Zu große
+    // Seiten" oben).
     const ablauf = ['fehler', 'fehler', 'zu gross', 'fehler', 'fehler', 'antwort'];
     const netz = createPlay3Netz({
         direkt: () => htmlResponse('Nicht gefunden', { status: 404 }),
         proxy: nummer => {
             const schritt = ablauf[nummer - 1];
             if (schritt === 'fehler') throw new Error('Netz weg');
-            if (schritt === 'zu gross') return htmlResponse('x'.repeat(500));
+            if (schritt === 'zu gross') {
+                return htmlResponse('x'.repeat(500), { headers: { 'content-length': '500' } });
+            }
             return htmlResponse('Nicht gefunden', { status: 404 });
         },
     });

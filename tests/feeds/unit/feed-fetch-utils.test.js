@@ -271,6 +271,27 @@ test('lehnt HTML und übergroße Antworten auch vom Proxy ab', async () => {
     assert.equal(oversizedFetcher.calls.length, 1);
 });
 
+test('ein beim Streamen zu großer Feed scheitert weiterhin an der Grenze', async () => {
+    // Halbes XML ist wertlos: ohne sein Ende fehlen Artikel, und niemand würde
+    // es merken. Anders als bei einer Artikelseite wird hier deshalb kein Anfang
+    // ausgewertet. Die Antwort trägt keine Content-Length; gemessen werden die
+    // real gelesenen Bytes.
+    const grosserFeed = RSS_XML.replace(
+        '</channel>',
+        `<item><title>${'x'.repeat(5000)}</title></item></channel>`,
+    );
+    const fetcher = createFetchSequence(response(grosserFeed));
+
+    const result = await fetchTestFeed({
+        fetchImpl: fetcher.fetchImpl,
+        maxResponseBytes: 1000,
+    });
+
+    assert.equal(result.xmlString, null);
+    assert.match(result.lastError, /exceeds the 1000 byte limit/);
+    assert.equal(fetcher.calls.length, 1, 'ein zu großer Feed wird nicht wiederholt');
+});
+
 test('meldet leere erfolgreiche Antworten als ungültigen Feed', async () => {
     const fetcher = createFetchSequence(
         response(''),
