@@ -104,7 +104,7 @@ an der Injektion vorbeischreibt – sonst liefe jeder Secret-Test ins Leere.
 
 Groq-Aufrufe laufen über `scripts/groq-client.js`. Jeder Fehler – Timeout,
 Providerfehler, zu große oder ungültige Antwort – endet als
-`{ content: null, error }` und **nie** als geworfene Ausnahme.
+`{ content: null, error, finishReason }` und **nie** als geworfene Ausnahme.
 
 Die Trendphase läuft nach dem Kern-Publish und fängt ihre Fehler selbst ab. Ein
 bereits veröffentlichter Lauf wird dadurch nicht nachträglich zu `fatal` und
@@ -127,6 +127,28 @@ gpt-oss ist ein Reasoning-Modell. Der Client fordert deshalb
 `max_completion_tokens` auf das Antwortbudget des Aufrufers plus eine feste
 Reserve von 2048 Tokens für den Denkweg. Reicht auch das nicht, endet der Aufruf
 mit `token limit reached` statt mit dem unspezifischen `empty content`.
+
+**Strikte Antwortschemas.** Beide Trendaufrufe schicken `response_format` mit
+`type: "json_schema"` und `strict: true` (Groq Structured Outputs). Die Tagesliste
+kommt als `{ "trends": [{ topic, summary, articleCount }] }`, die Woche als
+`{ "overallSummary", "trends": [...] }`. Bei `strict` verlangt Groq, dass alle
+Felder `required` sind und jedes Objekt `additionalProperties: false` setzt; die
+Wurzel ist ein Objekt, weil alle dokumentierten Beispiele eines haben. Deshalb
+steht die Tagesliste unter `trends` und nicht als Array an der Wurzel. Der Client
+reicht das Schema über den optionalen Parameter `responseFormat` unverändert
+weiter, ohne ihn bleibt der Rumpf unverändert. **Die Groq-Doku sagt nicht, ob
+sich `json_schema` mit `reasoning_effort` und `include_reasoning: false`
+verträgt.** Lehnt Groq die Kombination ab, steht `Groq API error: status 400 …`
+im Protokoll, und der Lauf bleibt grün.
+
+Passt eine Antwort trotzdem nicht (kein JSON, abgeschnitten, falsche Form), wird
+sie übersprungen und es erscheint eine Zeile mit `Response shape:`: Länge des
+Inhalts, `finish_reason` (der Client liefert ihn als `finishReason` mit), Typ der
+obersten Ebene (`array`, `object`, `string`, `null` oder `unparsable`) und bei einem
+Objekt höchstens fünf Schlüsselnamen. Nie steht dort ein Inhalt, ein Titel oder eine
+Zusammenfassung; Namen erscheinen nur, wenn sie kurz und bezeichnerartig sind, sonst
+als `?`. `finish_reason=length` zusammen mit `top_level=unparsable` heißt
+abgeschnitten.
 
 ## Der Proxy ist die Ausnahme
 

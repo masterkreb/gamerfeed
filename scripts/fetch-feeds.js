@@ -22,7 +22,7 @@ import {
     createRunBudget,
     distributeBySourceFairly,
 } from './feed-run-budget.js';
-import { parseGroqJsonContent, requestGroqCompletion } from './groq-client.js';
+import { describeGroqResponseShape, parseGroqJsonContent, requestGroqCompletion } from './groq-client.js';
 import { ResponseTooLargeError, readLimitedResponseText } from './limited-response.js';
 import { fetchWithOutboundPolicy } from './outbound-policy.js';
 import {
@@ -672,6 +672,59 @@ export function parseRssXml(xmlString, feed, options) {
 
 // === TREND GENERATION WITH GROQ ===
 
+// Strikte Antwortschemas (Groq Structured Outputs, `strict: true`). Das Modell
+// kann damit nur noch genau diese Form erzeugen; ein Prompt allein hat es nicht
+// zuverlässig geschafft (Tagestrends scheiterten mit "not a JSON array").
+//
+// Groqs Regeln für `strict: true` (https://console.groq.com/docs/structured-outputs):
+// alle Felder sind `required`, jedes Objekt setzt `additionalProperties: false`.
+// Alle dokumentierten Beispiele haben ein Objekt als Wurzel, deshalb steht auch
+// die Tagesliste unter `trends` statt als Array an der Wurzel. Ändert sich eine
+// Form, muss der Beispielblock im jeweiligen Prompt mitziehen.
+const TREND_ITEM_SCHEMA = {
+    type: 'object',
+    properties: {
+        topic: { type: 'string' },
+        summary: { type: 'string' },
+        articleCount: { type: 'integer' },
+    },
+    required: ['topic', 'summary', 'articleCount'],
+    additionalProperties: false,
+};
+
+const DAILY_TRENDS_RESPONSE_FORMAT = {
+    type: 'json_schema',
+    json_schema: {
+        name: 'daily_trends',
+        strict: true,
+        schema: {
+            type: 'object',
+            properties: {
+                trends: { type: 'array', items: TREND_ITEM_SCHEMA },
+            },
+            required: ['trends'],
+            additionalProperties: false,
+        },
+    },
+};
+
+const WEEKLY_TRENDS_RESPONSE_FORMAT = {
+    type: 'json_schema',
+    json_schema: {
+        name: 'weekly_trends',
+        strict: true,
+        schema: {
+            type: 'object',
+            properties: {
+                overallSummary: { type: 'string' },
+                trends: { type: 'array', items: TREND_ITEM_SCHEMA },
+            },
+            required: ['overallSummary', 'trends'],
+            additionalProperties: false,
+        },
+    },
+};
+
 // Helper: Get date key in YYYY-MM-DD format
 function getDateKey(daysAgo = 0) {
     const d = new Date();
@@ -777,12 +830,14 @@ Titel:
 ${titlesText}
 
 Antworte NUR im JSON-Format, keine Erklärungen:
-[
-  {"topic": "GTA 6", "summary": "Release-Termin bekannt, neue Gameplay-Details enthüllt", "articleCount": 5},
-  {"topic": "Steam Sale", "summary": "Herbst-Sale mit großen Rabatten gestartet", "articleCount": 3}
-]`;
+{
+  "trends": [
+    {"topic": "GTA 6", "summary": "Release-Termin bekannt, neue Gameplay-Details enthüllt", "articleCount": 5},
+    {"topic": "Steam Sale", "summary": "Herbst-Sale mit großen Rabatten gestartet", "articleCount": 3}
+  ]
+}`;
 
-    const { content } = await requestGroqCompletion({
+    const { content, finishReason } = await requestGroqCompletion({
         apiKey: GROQ_API_KEY,
         fetchImpl: groqFetch,
         messages: [
@@ -790,6 +845,7 @@ Antworte NUR im JSON-Format, keine Erklärungen:
             { role: 'user', content: prompt },
         ],
         maxTokens: 1500,
+        responseFormat: DAILY_TRENDS_RESPONSE_FORMAT,
         logger,
         redact: redactMessage,
     });
@@ -798,9 +854,14 @@ Antworte NUR im JSON-Format, keine Erklärungen:
         return null;
     }
 
-    const trends = parseGroqJsonContent(content);
+    // Die Wurzel ist ein Objekt (siehe DAILY_TRENDS_RESPONSE_FORMAT); die Liste
+    // liegt darin unter `trends`. Weiter unten bekommt alles wie bisher ein Array.
+    const trends = parseGroqJsonContent(content)?.trends;
     if (!Array.isArray(trends)) {
-        logger.error('   ❌ Groq daily trends are not a JSON array. Skipping.');
+        // Nur die Form der Antwort, nie ihr Inhalt: so zeigt der nächste
+        // Fehlschlag, ob ein falsches Objekt, abgeschnittener Text oder gar kein
+        // JSON ankam.
+        logger.error(`   ❌ Groq daily trends are not an object with a "trends" array. Skipping. Response shape: ${describeGroqResponseShape({ content, finishReason })}`);
         return null;
     }
 
@@ -837,7 +898,7 @@ async function generateWeeklyTrendsFromArchive({ groqApiKey, groqFetch, logger =
     }
 
     if (archiveData.length < 5) {
-        logger.log(`   ⚠️  Not enough archive data found (${archiveData.length} entries). Need at least 5 days.`);
+        logger.log(`   ⚠️  Not enough archive data found (${archiveData.length} entries). Need at least 5 trend entries.`);
         return null;
     }
 
@@ -893,7 +954,7 @@ Antworte NUR im JSON-Format:
   ]
 }`;
 
-    const { content } = await requestGroqCompletion({
+    const { content, finishReason } = await requestGroqCompletion({
         apiKey: GROQ_API_KEY,
         fetchImpl: groqFetch,
         messages: [
@@ -901,6 +962,7 @@ Antworte NUR im JSON-Format:
             { role: 'user', content: prompt },
         ],
         maxTokens: 2000,
+        responseFormat: WEEKLY_TRENDS_RESPONSE_FORMAT,
         logger,
         redact: redactMessage,
     });
@@ -911,7 +973,8 @@ Antworte NUR im JSON-Format:
 
     const weeklyData = parseGroqJsonContent(content);
     if (!weeklyData || typeof weeklyData !== 'object' || Array.isArray(weeklyData)) {
-        logger.error('   ❌ Groq weekly trends are not a JSON object. Skipping.');
+        // Nur die Form der Antwort, nie ihr Inhalt (siehe die Tagestrends).
+        logger.error(`   ❌ Groq weekly trends are not a JSON object. Skipping. Response shape: ${describeGroqResponseShape({ content, finishReason })}`);
         return null;
     }
 
