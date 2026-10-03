@@ -106,7 +106,7 @@ Das Projekt ist so konzipiert, dass es vollständig im kostenlosen Kontingent ve
     - `news_snapshot_pointer`: aktive vollständige Cache-Generation
     - `news_snapshot:<id>:{full,preview,medium,meta}`: unveränderliche Payloads und Manifest
     - `daily_trends` & `weekly_trends`: KI-generierte Trends
-4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 20 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung. Falls eine freigegebene Quelle GitHub-Runner blockiert, kann der Workflow optional auf den extern betriebenen PHP-Fallback `tools/feed-proxy.php` zurückgreifen. Einrichtung und Grenzen stehen in der [Feed-Proxy-Betriebsanleitung](docs/deployment/feed-proxy.md).
+4.  **Datenerfassung (GitHub Actions Cron Job)**: Ein Node.js-Skript (`scripts/fetch-feeds.js`), das alle 20 Minuten automatisch über einen GitHub-Workflow ausgeführt wird. Es ist das Herzstück der Datenaktualisierung. Falls eine freigegebene Quelle Anfragen aus dem GitHub-Actions-Netz mit HTTP 403 beantwortet, kann der Workflow optional auf den extern betriebenen PHP-Fallback `tools/feed-proxy.php` zurückgreifen. Derselbe Dienst besitzt einen streng auf kanonische Play3-Artikelseiten begrenzten Bildmodus. Einrichtung und Grenzen stehen in der [Feed-Proxy-Betriebsanleitung](docs/deployment/feed-proxy.md).
 5.  **API-Schicht (Vercel Functions)**: Schlanke Edge Functions für Datenabrufe sowie eine Node.js Function für den SMTP-Versand:
     *   `/api/get-news-preview`: Liefert erste 16 Artikel für sofortiges Laden
     *   `/api/get-news-medium`: Liefert erste 64 Artikel für schnelles Nachladen
@@ -465,7 +465,7 @@ Diese Schlüssel werden **NICHT** in eine Datei im Projekt geschrieben. Sie werd
 | `KV_REST_API_URL`               | Der Wert von `KV_REST_API_URL` aus Vercel       | Verbindung zum News-Cache (KV Store)            |
 | `KV_REST_API_TOKEN`             | Der Wert von `KV_REST_API_TOKEN` aus Vercel     | Passwort für den News-Cache (KV Store)          |
 | `GROQ_API_KEY`                  | Dein Groq API Key                               | KI-Trend-Analyse (optional)                     |
-| `FEED_PROXY_URL`                | HTTPS-Adresse von `tools/feed-proxy.php`         | Optionaler Fallback für blockierte Feed-Quellen; zugleich Ziel der Fingerprint-Prüfung |
+| `FEED_PROXY_URL`                | HTTPS-Adresse von `tools/feed-proxy.php`         | Optionaler Fallback für Feed-Quellen, die dem GitHub-Actions-Netz mit HTTP 403 antworten, und für Play3-Artikelbilder; zugleich Ziel der Fingerprint-Prüfung |
 
 **Hinweis:** Andere von Vercel bereitgestellte Variablen wie `VERCEL_URL` werden für diesen Workflow nicht benötigt.
 

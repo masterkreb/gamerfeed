@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import {
     BROWSER_LIKE_HEADERS,
     PROXY_ELIGIBLE_SOURCES,
+    buildArticleImageProxyRequestUrl,
     buildFeedProxyRequestUrl,
     fetchFeedXml,
     isFeedXml,
+    isPlay3ArticleUrl,
     isProxyEligibleSource,
 } from '../../../scripts/feed-fetch-utils.js';
 
@@ -321,12 +323,66 @@ test('nutzt bei einem abgelehnten Direktziel auch den Proxy nicht', async () => 
 
 test('baut Proxy-URLs ohne fehlerhafte doppelte Fragezeichen', () => {
     const result = new URL(buildFeedProxyRequestUrl(
-        'https://proxy.example.com/feed-proxy.php?instance=main',
+        'https://proxy.example.com/feed-proxy.php?instance=main&mode=article-image#ignored',
         FEED_URL,
     ));
 
+    assert.equal(result.hash, '');
     assert.equal(result.searchParams.get('instance'), 'main');
+    assert.equal(result.searchParams.get('mode'), null);
     assert.equal(result.searchParams.get('url'), FEED_URL);
+});
+
+test('baut den Play3-Bildmodus und erhaelt bestehende Proxy-Parameter', () => {
+    const articleUrl = 'https://www.play3.de/2026/10/03/test-artikel/';
+    const result = new URL(buildArticleImageProxyRequestUrl(
+        'https://proxy.example.com/feed-proxy.php?instance=main#ignored',
+        articleUrl,
+    ));
+
+    assert.equal(result.hash, '');
+    assert.equal(result.searchParams.get('instance'), 'main');
+    assert.equal(result.searchParams.get('mode'), 'article-image');
+    assert.equal(result.searchParams.get('url'), articleUrl);
+});
+
+test('erkennt genau die kanonischen Play3-Artikeladressen des Bildmodus', () => {
+    for (const adresse of [
+        'https://www.play3.de/2026/10/03/test-artikel/',
+        'https://www.play3.de/2025/01/31/gta-6-2-0/',
+        'https://www.play3.de/2026/10/03/42/',
+    ]) {
+        assert.equal(isPlay3ArticleUrl(adresse), true, adresse);
+    }
+
+    for (const adresse of [
+        'http://www.play3.de/2026/10/03/test-artikel/',
+        'https://play3.de/2026/10/03/test-artikel/',
+        'https://www.play3.de.evil.example/2026/10/03/test-artikel/',
+        'https://evil.example/https://www.play3.de/2026/10/03/test-artikel/',
+        'https://www.play3.de:443/2026/10/03/test-artikel/',
+        'https://www.play3.de:/2026/10/03/test-artikel/',
+        'https://nutzer:pass@www.play3.de/2026/10/03/test-artikel/',
+        'https://www.play3.de/2026/10/03/test-artikel/?ref=rss',
+        'https://www.play3.de/2026/10/03/test-artikel/?',
+        'https://www.play3.de/2026/10/03/test-artikel/#inhalt',
+        'https://www.play3.de/2026/10/03/test-artikel',
+        'https://www.play3.de/2026/10/03/test-artikel/\n',
+        'https://www.play3.de/2026/10/03/Test-Artikel/',
+        'https://www.play3.de/2026/10/03/test_artikel/',
+        'https://www.play3.de/2026/10/03/gr%C3%B6%C3%9Fe/',
+        'https://www.play3.de/2026/10/03/../feed/',
+        'https://www.play3.de//2026/10/03/test-artikel/',
+        'https://www.play3.de/feed/',
+        'https://www.play3.de/',
+        '',
+        null,
+        undefined,
+        42,
+        ['https://www.play3.de/2026/10/03/test-artikel/'],
+    ]) {
+        assert.equal(isPlay3ArticleUrl(adresse), false, String(adresse) || '(leer)');
+    }
 });
 
 // === Proxy-Freigabe (O2a) ===

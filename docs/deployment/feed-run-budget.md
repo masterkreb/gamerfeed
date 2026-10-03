@@ -70,6 +70,23 @@ zählt als genau ein Zugriff, nicht als einer je zurückgegebenem Artikel. Die
 bestehenden Backfill-Grenzen (30 gesamt, 5 je Quelle) bleiben als *innere*
 Begrenzung erhalten.
 
+### Jede Bildanfrage zählt
+
+Gezählt wird je **externer Anfrage**, nicht je Artikel. Für Play3 entstehen
+deshalb bis zu zwei Einheiten: der Direktabruf und der anschließende
+Proxyversuch im Modus `article-image`. Beide werden unmittelbar vor der
+jeweiligen Anfrage gebucht, und nach der Deadline beginnt auch kein
+Proxyversuch mehr.
+
+Ist das Budget nach dem Direktabruf erschöpft, entfällt der Proxyversuch. Der
+Artikel gilt dann wie bei jedem Budgetmangel als zurückgestellt
+(`scrape_budget`, beim Backfill entsprechend), bekommt einen Platzhalter und
+bleibt Kandidat für den nächsten Lauf; der Lauf endet `degraded`. Ein Weg, den
+die Bremse des Laufs ausgesetzt hat (siehe
+[`feed-proxy.md`](feed-proxy.md#play3-bildmodus)), verbraucht keine Einheit,
+weil gar keine Anfrage entsteht. Quellen mit nur einem Versuch zählen
+unverändert eine Einheit je Artikel.
+
 ## Wie die Deadline wirkt
 
 Zwei Mechanismen, weil einer allein nicht reicht:
