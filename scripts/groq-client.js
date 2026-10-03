@@ -11,7 +11,29 @@
 import { ResponseTooLargeError, readLimitedResponseText } from './limited-response.js';
 
 export const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
-export const GROQ_MODEL = 'llama-3.1-8b-instant';
+
+// Groq hat llama-3.1-8b-instant am 16.08.2026 abgeschaltet und empfiehlt als
+// Ersatz openai/gpt-oss-20b, ein Modell im Produktionsstatus
+// (https://console.groq.com/docs/deprecations). Eine abgeschaltete Modell-ID
+// zeigt sich als `404 model_not_found`; weil Trends optional sind, bleibt der
+// Lauf dabei grün. Groq löst Modelle regelmäßig ab: die Deprecation-Liste
+// gehört zur Pflege dieser Konstante.
+export const GROQ_MODEL = 'openai/gpt-oss-20b';
+
+// gpt-oss ist ein Reasoning-Modell und denkt vor seiner Antwort. Die Aufgaben
+// hier sind einfach (Titel zu Themen verdichten), deshalb genügt der niedrigste
+// Aufwand. `include_reasoning: false` lässt den Denkweg aus der Antwort weg,
+// `content` enthält ohnehin nur die endgültige Antwort. `reasoning_format` wird
+// bei gpt-oss nicht unterstützt und darf nicht zusammen mit
+// `include_reasoning` gesendet werden.
+export const GROQ_REASONING_EFFORT = 'low';
+
+// Der Denkweg zählt zur erzeugten Tokenzahl. Ein Limit, das nur für die
+// sichtbare Antwort reicht, endet deshalb mit leerem `content` und
+// `finish_reason: "length"`. `maxTokens` bleibt das Budget der Antwort; diese
+// Reserve kommt für den Denkweg hinzu. Das Gesamtlimit bleibt klein genug für
+// das Token-pro-Minute-Limit des kostenlosen Tarifs (8K für gpt-oss-20b).
+export const GROQ_REASONING_RESERVE_TOKENS = 2048;
 
 /** Groq antwortet auf unsere Prompts mit wenigen Kilobyte. */
 export const GROQ_TIMEOUT_MS = 20000;
@@ -35,6 +57,10 @@ function describeError(error) {
 /**
  * Fragt eine Chat-Completion an und liefert den reinen Textinhalt.
  *
+ * `maxTokens` ist das Budget der sichtbaren Antwort. Der Denkweg des Modells
+ * bekommt zusätzlich `GROQ_REASONING_RESERVE_TOKENS`; als `max_completion_tokens`
+ * geht die Summe an Groq.
+ *
  * @param {{
  *   apiKey: string,
  *   messages: Array<{ role: string, content: string }>,
@@ -52,7 +78,10 @@ export async function requestGroqCompletion({
     apiKey,
     messages,
     maxTokens = 1500,
-    temperature = 0.3,
+    // Groq empfiehlt für Reasoning-Modelle 0.5-0.7, damit sich die Ausgabe nicht
+    // wiederholt oder unzusammenhängend wird (https://console.groq.com/docs/reasoning).
+    // 0.5 liegt dem früheren 0.3 am nächsten.
+    temperature = 0.5,
     fetchImpl = globalThis.fetch,
     timeoutMs = GROQ_TIMEOUT_MS,
     maxBytes = MAX_GROQ_RESPONSE_BYTES,
@@ -75,7 +104,11 @@ export async function requestGroqCompletion({
                 model: GROQ_MODEL,
                 messages,
                 temperature,
-                max_tokens: maxTokens,
+                // `max_tokens` ist bei Groq zugunsten von `max_completion_tokens`
+                // veraltet.
+                max_completion_tokens: maxTokens + GROQ_REASONING_RESERVE_TOKENS,
+                reasoning_effort: GROQ_REASONING_EFFORT,
+                include_reasoning: false,
             }),
             signal: AbortSignal.timeout(timeoutMs),
         });
@@ -121,8 +154,16 @@ export async function requestGroqCompletion({
         return { content: null, error: 'invalid json' };
     }
 
-    const content = payload?.choices?.[0]?.message?.content;
+    const choice = payload?.choices?.[0];
+    const content = choice?.message?.content;
     if (typeof content !== 'string' || content.trim() === '') {
+        // Bei einem Reasoning-Modell ist ein im Denkweg verbrauchtes Limit der
+        // naheliegende Grund für eine leere Antwort. Das soll im Protokoll als
+        // solches erkennbar sein und nicht wie eine stumme Antwort aussehen.
+        if (choice?.finish_reason === 'length') {
+            logger.error?.('   ❌ Groq response reached the token limit before an answer was produced');
+            return { content: null, error: 'token limit reached' };
+        }
         logger.error?.('   ❌ No content in Groq response');
         return { content: null, error: 'empty content' };
     }

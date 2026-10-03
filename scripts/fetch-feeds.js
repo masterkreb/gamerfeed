@@ -23,7 +23,7 @@ import {
     distributeBySourceFairly,
 } from './feed-run-budget.js';
 import { parseGroqJsonContent, requestGroqCompletion } from './groq-client.js';
-import { readLimitedResponseText } from './limited-response.js';
+import { ResponseTooLargeError, readLimitedResponseText } from './limited-response.js';
 import { fetchWithOutboundPolicy } from './outbound-policy.js';
 import {
     chooseMergedImageUrl,
@@ -117,6 +117,27 @@ function getFetchUrlForFeed(feed) {
 // fuer die Bildsuche wertlos und nur ein Speicherrisiko.
 export const HTML_SCRAPE_TIMEOUT_MS = 5000;
 export const MAX_HTML_RESPONSE_BYTES = 2 * 1024 * 1024;
+
+// Liest eine Artikelseite begrenzt. Ueberschreitet sie die Grenze, wird das
+// bereits Gelesene nicht verworfen: og:image steht fast immer ganz am Anfang im
+// <head>, und genau dieser Anfang liegt dann schon vor. Ausgewertet werden
+// hoechstens `maxBytes`; nach der Ueberschreitung wird nichts mehr gelesen, und
+// es bleibt bei der einen Anfrage.
+//
+// Nur diese Stelle wertet einen Teiltext aus. Feed-XML ist ohne sein Ende
+// wertlos und scheitert weiterhin an der Grenze. Wurde nichts gelesen, etwa weil
+// schon `Content-Length` die Grenze uebersteigt, scheitert auch die Artikelseite
+// wie bisher.
+async function readArticleHtml(response, maxBytes, { attemptName, logger }) {
+    try {
+        return await readLimitedResponseText(response, maxBytes, { keepPartialText: true });
+    } catch (error) {
+        if (!(error instanceof ResponseTooLargeError) || !error.partialText) throw error;
+
+        logger.log(`         ⚠️  ${attemptName}: page exceeds the ${maxBytes} byte limit, checking only the part read so far`);
+        return error.partialText;
+    }
+}
 
 // Die eine Logzeile, die entsteht, wenn eine Bremse des Play3-Bildpfads greift.
 // Sie nennt Quelle, Weg und Status - niemals eine Adresse oder ein Secret.
@@ -227,8 +248,12 @@ export async function getOgImageFromUrl(url, sourceName, {
             }
 
             // Begrenzt gelesen: eine Seite ohne Content-Length koennte sonst
-            // beliebig lange streamen.
-            const html = await readLimitedResponseText(response, maxBytes);
+            // beliebig lange streamen. Eine zu grosse Seite wird nur mit dem
+            // schon gelesenen Anfang ausgewertet (siehe readArticleHtml).
+            const html = await readArticleHtml(response, maxBytes, {
+                attemptName: attempt.name,
+                logger,
+            });
             const doc = new DOMParser().parseFromString(html, 'text/html');
 
             let imageUrl = null;

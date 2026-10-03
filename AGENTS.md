@@ -26,7 +26,7 @@
 | Cache | Vercel KV (Artikel, Trends, Announcements) |
 | Cron | GitHub Actions (geplant zu Minute 7/27/47, Start kann sich verzögern) |
 | Feed-Fallback | Externes PHP/cURL-Hosting (optional) |
-| KI-API | Groq (llama-3.1-8b-instant) für Trends |
+| KI-API | Groq (openai/gpt-oss-20b) für Trends |
 
 ---
 

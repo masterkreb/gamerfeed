@@ -80,6 +80,14 @@ Eine E-Mail- oder externe Alarmierung gehört weiterhin zu O4c. Die Messung
 bezieht sich auf die Artikel des letzten Feed-Abrufs, nicht auf alle bis zu
 10.000 Artikel des aktiven Snapshots.
 
+## Große Artikelseiten
+
+Überschreitet eine Artikelseite beim Bild-Scrape die Grenze von 2 MiB, wertet der
+Lauf den bis dahin gelesenen Anfang aus (dort steht `og:image`), statt ihn zu
+verwerfen. Es bleibt bei einer Anfrage und einer Budgeteinheit; eine schon per
+`Content-Length` als zu groß angekündigte Seite wird weiter ohne Lesen
+abgelehnt.
+
 ## Wenn eine weitere Quelle ihre Ausgabe ändert
 
 Der allgemeine Bildzähler macht den Ausfall sichtbar. Die Reparatur bleibt
