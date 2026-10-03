@@ -1,0 +1,44 @@
+name: Play3-Startseite pruefen
+
+# Ein erster Lauf schon im PR, ohne Merge. Danach nur manuell; kein Cron und
+# kein erneuter Live-Abruf bei jedem Commit auf einem bestehenden PR.
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened]
+    paths:
+      - '.github/workflows/check-play3-homepage.yml'
+      - 'scripts/check-play3-homepage.js'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: play3-homepage-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    name: Play3-Startseite und RSS rein lesend vergleichen
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Abhaengigkeiten installieren
+        run: npm ci --ignore-scripts
+
+      - name: Diagnose offline testen
+        run: node --test tests/feeds/unit/play3-homepage-probe.test.js
+
+      - name: Startseite einmalig pruefen
+        run: node scripts/check-play3-homepage.js
