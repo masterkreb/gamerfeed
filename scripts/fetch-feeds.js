@@ -37,6 +37,7 @@ import {
 } from './feed-image-utils.js';
 import {
     BROWSER_LIKE_HEADERS,
+    MAX_FEED_RESPONSE_BYTES,
     buildArticleImageProxyRequestUrl,
     fetchFeedXml,
     isFeedXml,
@@ -126,10 +127,12 @@ export const MAX_HTML_RESPONSE_BYTES = 2 * 1024 * 1024;
 // hoechstens `maxBytes`; nach der Ueberschreitung wird nichts mehr gelesen, und
 // es bleibt bei der einen Anfrage.
 //
-// Nur diese Stelle wertet einen Teiltext aus. Feed-XML ist ohne sein Ende
-// wertlos und scheitert weiterhin an der Grenze. Wurde nichts gelesen, etwa weil
-// schon `Content-Length` die Grenze uebersteigt, scheitert auch die Artikelseite
-// wie bisher.
+// Ein Teiltext wird nur hier unmittelbar ausgewertet. Feed-XML ist ohne sein Ende
+// kaputt; ein zu grosser Feed wird deshalb erst auf seine vollstaendigen
+// Eintraege gekuerzt (salvageTruncatedFeed in scripts/feed-fetch-utils.js) und
+// scheitert weiterhin an der Grenze, wenn das nicht sauber gelingt. Wurde nichts
+// gelesen, etwa weil schon `Content-Length` die Grenze uebersteigt, scheitert auch
+// die Artikelseite wie bisher.
 async function readArticleHtml(response, maxBytes, { attemptName, logger }) {
     try {
         return await readLimitedResponseText(response, maxBytes, { keepPartialText: true });
@@ -1430,6 +1433,8 @@ export async function main({
                 budgetExhausted,
                 transport,
                 httpStatus,
+                truncated,
+                salvagedEntryCount,
             } = await fetchFeedXml({
                 // Nur ausdrücklich vorgesehene Quellen dürfen über den Proxy.
                 allowProxy: isProxyEligibleSource(feed),
@@ -1470,6 +1475,17 @@ export async function main({
             };
 
             if (xmlString) {
+                // Ein zu grosser Feed wurde auf seine vollstaendig gelesenen
+                // Eintraege gekuerzt. Das ist ein Erfolg (es kommen Artikel an),
+                // aber kein stiller: genau eine Zeile je Quelle, nur mit Name,
+                // Grenze und Anzahl - keine Adresse, kein Inhalt.
+                if (truncated) {
+                    logger.warn(
+                        `   ⚠️  ${feed.name}: Antwort über dem Limit von ${MAX_FEED_RESPONSE_BYTES} Bytes. `
+                        + `Ausgewertet werden nur die vollständigen Einträge davor (${salvagedEntryCount}), `
+                        + 'der abgeschnittene Rest entfällt.',
+                    );
+                }
                 try {
                     const { articles: feedArticles, skipped, warnings } = parseFeedItems(xmlString, feed, { logger });
                     // Nur Anzahl und Grund - keine Titel, Adressen oder Inhalte.

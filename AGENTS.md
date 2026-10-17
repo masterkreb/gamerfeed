@@ -659,7 +659,11 @@ Der Lauf spricht mit Systemen, die er nicht kontrolliert. Die Regeln dafür:
   20 s / 5 MB, Artikelseite 5 s / 2 MB, XboxDynasty-Bildbatch 5 s / 128 KB,
   Groq 20 s / 256 KB. Gelesen wird überall
   über `scripts/limited-response.js`, das die real gelesenen Bytes zählt und den
-  Stream abbricht – eine `Content-Length` allein genügt nicht.
+  Stream abbricht – eine `Content-Length` allein genügt nicht. Ein Feed über der
+  Grenze wird auf seine bis dahin vollständig gelesenen Einträge gekürzt
+  (`salvageTruncatedFeedXml`, Quelle bleibt `success`, eine Logzeile je Quelle,
+  kein Retry, Grenze unverändert); nur wenn sich kein sauberer Schnitt bilden
+  lässt, bleibt es beim Fehler.
 - **Trends sind optional.** `scripts/groq-client.js` liefert jeden Fehler als
   Wert statt als Ausnahme; die Trendphase fängt ihre Fehler selbst ab, damit ein
   bereits erfolgter Kern-Publish nicht nachträglich zu `fatal` wird.
