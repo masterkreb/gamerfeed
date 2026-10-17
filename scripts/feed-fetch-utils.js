@@ -121,6 +121,314 @@ export function isFeedXml(value) {
     }
 }
 
+// === Rettung abgeschnittener Feeds ===
+//
+// Ein Feed ueber der Byte-Grenze ist nicht zwingend unbrauchbar: liefert eine
+// Redaktion jeden Artikel doppelt (`content:encoded` und `dc:content`), liegen
+// schon 50 Eintraege knapp darueber, und die allermeisten davon sind bis zur
+// Grenze vollstaendig gelesen. Statt den ganzen Feed zu verwerfen, werden genau
+// diese Eintraege ausgewertet; nur der abgeschnittene Rest faellt weg.
+//
+// Die Rettung kuerzt den gelesenen Anfang auf das Ende des letzten
+// vollstaendigen Eintrags und schliesst die noch offenen Elemente. Sie ist rein:
+// kein Netz, keine Uhr, kein Log. Ein einfaches `lastIndexOf('</item>')` genuegt
+// dafuer nicht, denn ein `</item>` kann als Text in einem CDATA-Abschnitt, in
+// einem Kommentar oder in einer Verarbeitungsanweisung stehen; dort zu schneiden
+// lieferte kaputtes XML. Ein kleiner lexikalischer Scanner liest den Text deshalb
+// einmal von vorn und fuehrt einen Stapel der offenen Elemente. Nur ein echtes
+// Ende-Tag auf der richtigen Ebene zaehlt als Schnittstelle.
+//
+// Im Zweifel gilt: lieber nichts als etwas Halbes. Was der Scanner nicht sicher
+// lesen kann, beendet das Lesen an dieser Stelle; geschnitten wird nur an einem
+// Eintragsende davor. Gibt es keines, ist das Ergebnis `null`, und es bleibt beim
+// bisherigen Fehler.
+
+// Leerraum nach XML 1.0: Leerzeichen, Tabulator, CR, LF.
+function skipXmlWhitespace(text, index) {
+    while (index < text.length) {
+        const code = text.charCodeAt(index);
+        if (code !== 0x20 && code !== 0x09 && code !== 0x0A && code !== 0x0D) break;
+        index += 1;
+    }
+    return index;
+}
+
+// Namen: ASCII-Buchstaben, `_`, `:` und alles ausserhalb von ASCII am Anfang;
+// dazu Ziffern, `.` und `-` im Rest. Absichtlich enger als ein nachsichtiger
+// Parser: ein `<` vor etwas anderem ist hier kein Tag.
+function isXmlNameStart(code) {
+    return (code >= 0x41 && code <= 0x5A)
+        || (code >= 0x61 && code <= 0x7A)
+        || code === 0x5F
+        || code === 0x3A
+        || code >= 0x80;
+}
+
+function isXmlNameChar(code) {
+    return isXmlNameStart(code)
+        || (code >= 0x30 && code <= 0x39)
+        || code === 0x2E
+        || code === 0x2D;
+}
+
+// Index hinter dem Namen, der an `index` beginnt; `index` selbst, wenn dort keiner steht.
+function readXmlName(text, index) {
+    if (index >= text.length || !isXmlNameStart(text.charCodeAt(index))) return index;
+
+    let end = index + 1;
+    while (end < text.length && isXmlNameChar(text.charCodeAt(end))) end += 1;
+    return end;
+}
+
+// Liest das Start-Tag, dessen `<` an `start` steht. Liefert { name, selfClosing,
+// end } oder `null`, wenn es sich nicht bis zum Ende lesen laesst. Dass der Text
+// mitten im Tag endet, ist beim abgeschnittenen Feed der Normalfall, ein
+// unquotiertes Attribut ein Formfehler; beide beenden das Lesen gleich.
+function readStartTag(text, start) {
+    const nameEnd = readXmlName(text, start + 1);
+    if (nameEnd === start + 1) return null;
+    const name = text.slice(start + 1, nameEnd);
+
+    let index = nameEnd;
+    for (;;) {
+        const afterSpace = skipXmlWhitespace(text, index);
+        const hadWhitespace = afterSpace > index;
+        index = afterSpace;
+        if (index >= text.length) return null;
+
+        const char = text[index];
+        if (char === '>') return { name, selfClosing: false, end: index + 1 };
+        if (char === '/') {
+            return text[index + 1] === '>'
+                ? { name, selfClosing: true, end: index + 2 }
+                : null;
+        }
+
+        // Ein Attribut braucht Leerraum davor, einen Namen, `=` und einen Wert in
+        // Anfuehrungszeichen. Alles andere ist nicht wohlgeformt.
+        if (!hadWhitespace) return null;
+        const attributeEnd = readXmlName(text, index);
+        if (attributeEnd === index) return null;
+
+        index = skipXmlWhitespace(text, attributeEnd);
+        if (text[index] !== '=') return null;
+
+        index = skipXmlWhitespace(text, index + 1);
+        const quote = text[index];
+        if (quote !== '"' && quote !== "'") return null;
+
+        const valueEnd = text.indexOf(quote, index + 1);
+        if (valueEnd === -1) return null;
+        // Ein `<` im Attributwert ist in XML verboten. Hier deutet es meist auf
+        // ein fehlendes schliessendes Anfuehrungszeichen hin; der Scanner hielte
+        // dann Teile des Dokuments fuer den Wert.
+        if (text.slice(index + 1, valueEnd).includes('<')) return null;
+        index = valueEnd + 1;
+    }
+}
+
+// Liest das Ende-Tag, dessen `</` an `start` steht. Liefert { name, end } oder
+// `null`, wenn es sich nicht bis zum Ende lesen laesst.
+function readEndTag(text, start) {
+    const nameEnd = readXmlName(text, start + 2);
+    if (nameEnd === start + 2) return null;
+
+    const closing = skipXmlWhitespace(text, nameEnd);
+    return text[closing] === '>'
+        ? { name: text.slice(start + 2, nameEnd), end: closing + 1 }
+        : null;
+}
+
+// Index hinter einer einfachen DOCTYPE-Deklaration (`<!DOCTYPE` steht an
+// `start`), sonst -1. Ein internes Subset in `[...]` bleibt unberuecksichtigt:
+// darin koennen Entities stehen, die der Scanner nicht kennt.
+function skipDoctype(text, start) {
+    let index = start + '<!DOCTYPE'.length;
+    while (index < text.length) {
+        const char = text[index];
+        if (char === '>') return index + 1;
+        if (char === '[') return -1;
+        if (char === '"' || char === "'") {
+            const closing = text.indexOf(char, index + 1);
+            if (closing === -1) return -1;
+            index = closing + 1;
+        } else {
+            index += 1;
+        }
+    }
+    return -1;
+}
+
+function getXmlLocalName(qualifiedName) {
+    return qualifiedName.toLowerCase().split(':').pop();
+}
+
+const CDATA_OPEN = '<![CDATA[';
+const COMMENT_OPEN = '<!--';
+
+/**
+ * Sucht im abgeschnittenen Text das Ende des letzten vollstaendigen Eintrags.
+ *
+ * Ein Eintrag ist `item` (RSS, RDF) beziehungsweise `entry` (Atom) direkt unter
+ * der Wurzel oder unter deren `channel`. Der Stapel der offenen Elemente an dieser
+ * Stelle liefert die Ende-Tags, die das Dokument wieder schliessen: bei RSS 2.0
+ * `</channel></rss>`, bei RDF nur das Wurzel-Tag (dort steht `channel` neben den
+ * Eintraegen), bei Atom `</feed>`. Alle Namen stammen aus dem Text selbst, also
+ * in dessen Schreibweise und mit dessen Praefix.
+ *
+ * @param {string} text
+ * @returns {{ cutIndex: number, closers: string, entryCount: number } | null}
+ */
+function scanFeedEntries(text) {
+    // --- Prolog: Leerraum, XML-Deklaration, Kommentare, Anweisungen, DOCTYPE ---
+    let index = text.charCodeAt(0) === 0xFEFF ? 1 : 0;
+    for (;;) {
+        index = skipXmlWhitespace(text, index);
+        if (text.startsWith('<?', index)) {
+            const end = text.indexOf('?>', index + 2);
+            if (end === -1) return null;
+            index = end + 2;
+        } else if (text.startsWith(COMMENT_OPEN, index)) {
+            const end = text.indexOf('-->', index + COMMENT_OPEN.length);
+            if (end === -1) return null;
+            index = end + 3;
+        } else if (text.startsWith('<!DOCTYPE', index)) {
+            index = skipDoctype(text, index);
+            if (index === -1) return null;
+        } else {
+            break;
+        }
+    }
+
+    if (text[index] !== '<') return null;
+    const rootTag = readStartTag(text, index);
+    if (rootTag === null || rootTag.selfClosing) return null;
+
+    // Dieselbe Wurzelpruefung wie in isFeedXml.
+    const rootLowerName = rootTag.name.toLowerCase();
+    const isAtom = rootLowerName === 'feed' || rootLowerName.endsWith(':feed');
+    if (!isAtom && rootLowerName !== 'rss' && rootLowerName !== 'rdf:rdf') return null;
+    const entryName = isAtom ? 'entry' : 'item';
+
+    const openElements = [rootTag.name];
+    let cutIndex = -1;
+    let closers = '';
+    let entryCount = 0;
+
+    // `openElements` enthaelt bei jedem Aufruf nur die Vorfahren des Eintrags.
+    const registerEntryEnd = end => {
+        const isDirectChild = openElements.length === 1;
+        const isChannelChild = openElements.length === 2
+            && getXmlLocalName(openElements[1]) === 'channel';
+        if (!isDirectChild && !isChannelChild) return;
+
+        entryCount += 1;
+        cutIndex = end;
+        closers = openElements.map(name => `</${name}>`).reverse().join('');
+    };
+
+    index = rootTag.end;
+    while (index < text.length) {
+        const tagStart = text.indexOf('<', index);
+        if (tagStart === -1) break;
+
+        // Abschnitte, in denen `<` und `</item>` nur Text sind, werden als Ganzes
+        // uebersprungen. Fehlt ihr Ende, ist der Text mitten darin abgeschnitten.
+        if (text.startsWith(COMMENT_OPEN, tagStart)) {
+            const end = text.indexOf('-->', tagStart + COMMENT_OPEN.length);
+            if (end === -1) break;
+            index = end + 3;
+        } else if (text.startsWith(CDATA_OPEN, tagStart)) {
+            const end = text.indexOf(']]>', tagStart + CDATA_OPEN.length);
+            if (end === -1) break;
+            index = end + 3;
+        } else if (text.startsWith('<?', tagStart)) {
+            const end = text.indexOf('?>', tagStart + 2);
+            if (end === -1) break;
+            index = end + 2;
+        } else if (text.startsWith('<!', tagStart)) {
+            // Der Text kann mitten im Markierer enden (`<![CD`); jede andere
+            // Deklaration im Dokument ist unerwartet.
+            break;
+        } else if (text.startsWith('</', tagStart)) {
+            const tag = readEndTag(text, tagStart);
+            if (tag === null) break;
+            // Ein anderes Element als das zuletzt geoeffnete: die Schachtelung
+            // stimmt nicht mehr, ab hier ist dem Text nicht zu trauen.
+            if (tag.name !== openElements[openElements.length - 1]) break;
+
+            openElements.pop();
+            if (openElements.length === 0) {
+                // Die Wurzel ist geschlossen: der Text enthaelt den ganzen Feed.
+                // Das passiert, wenn nur Leerraum hinter ihm die Grenze sprengt.
+                cutIndex = tag.end;
+                closers = '';
+                break;
+            }
+            if (getXmlLocalName(tag.name) === entryName) registerEntryEnd(tag.end);
+            index = tag.end;
+        } else {
+            const tag = readStartTag(text, tagStart);
+            if (tag === null) break;
+
+            if (!tag.selfClosing) {
+                openElements.push(tag.name);
+            } else if (getXmlLocalName(tag.name) === entryName) {
+                registerEntryEnd(tag.end);
+            }
+            index = tag.end;
+        }
+    }
+
+    return cutIndex === -1 ? null : { cutIndex, closers, entryCount };
+}
+
+/**
+ * Kuerzt einen abgeschnittenen Feed auf seine vollstaendigen Eintraege.
+ *
+ * Wie {@link salvageTruncatedFeedXml}, nennt aber zusaetzlich die Zahl der
+ * Eintraege im Ergebnis. Wirft nie: Die Rettung laeuft im Fehlerpfad einer
+ * Antwort, und eine Ausnahme dort wuerde als Netzwerkfehler gewertet und den
+ * Abruf wiederholen.
+ *
+ * @param {unknown} partialText der bis zur Grenze gelesene Anfang der Antwort
+ * @returns {{ xml: string, entryCount: number } | null}
+ */
+export function salvageTruncatedFeed(partialText) {
+    if (typeof partialText !== 'string' || partialText.length === 0) return null;
+
+    try {
+        const scan = scanFeedEntries(partialText);
+        if (!scan || scan.entryCount === 0) return null;
+
+        const xml = partialText.slice(0, scan.cutIndex) + scan.closers;
+        return isFeedXml(xml) ? { xml, entryCount: scan.entryCount } : null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Macht aus dem Anfang eines zu grossen Feeds ein gueltiges, vollstaendiges
+ * Feed-XML, das nur die Eintraege enthaelt, die bis dahin ganz gelesen wurden.
+ *
+ * - RSS 2.0: bis zum letzten `</item>`, dann `</channel>` und das Wurzel-Tag.
+ * - RSS 1.0 (RDF): bis zum letzten `</item>`, dann das Wurzel-Tag in der
+ *   Schreibweise des Dokuments, etwa `</rdf:RDF>`.
+ * - Atom: bis zum letzten `</entry>`, dann `</feed>`; traegt die Wurzel ein
+ *   Praefix (`atom:feed`), tragen es die Ende-Tags auch.
+ *
+ * Das Ergebnis besteht {@link isFeedXml} und enthaelt mindestens einen
+ * vollstaendigen Eintrag. Sonst - kein Feed, kein vollstaendiger Eintrag, Schnitt
+ * im Prolog - ist es `null`.
+ *
+ * @param {unknown} partialText der bis zur Grenze gelesene Anfang der Antwort
+ * @returns {string | null}
+ */
+export function salvageTruncatedFeedXml(partialText) {
+    return salvageTruncatedFeed(partialText)?.xml ?? null;
+}
+
 export function buildFeedProxyRequestUrl(feedProxyUrl, feedUrl) {
     const proxyRequestUrl = new URL(feedProxyUrl);
     proxyRequestUrl.hash = '';
@@ -237,12 +545,33 @@ async function fetchTextWithRetry({
             }
 
             try {
-                const text = await readLimitedResponseText(response, maxBytes);
+                // `keepPartialText` liest nichts zusaetzlich: Grenze und
+                // Bytezaehlung bleiben dieselben. Der Anfang wird nur gebraucht,
+                // wenn die Antwort zu gross ist (siehe unten).
+                const text = await readLimitedResponseText(response, maxBytes, { keepPartialText: true });
                 return { error: null, status: response.status, text };
             } catch (error) {
                 lastError = `${requestLabel} response could not be read: ${getErrorMessage(error)}`;
                 await response.body?.cancel().catch(() => {});
-                if (!(error instanceof ResponseTooLargeError) && attempt < attempts) {
+
+                if (error instanceof ResponseTooLargeError) {
+                    // Zu gross: nicht wiederholen, aber auch nicht alles verwerfen.
+                    // Lassen sich aus dem bis zur Grenze gelesenen Anfang saubere,
+                    // vollstaendige Eintraege gewinnen, ist das ein Erfolg - mit
+                    // Kennzeichen, damit der Aufrufer ihn melden kann. Sonst bleibt
+                    // es beim bisherigen Fehler. Eine schon per `Content-Length`
+                    // abgelehnte Antwort wurde nicht gelesen und hat keinen Anfang.
+                    const salvaged = salvageTruncatedFeed(error.partialText);
+                    if (salvaged) {
+                        return {
+                            error: null,
+                            salvagedEntryCount: salvaged.entryCount,
+                            status: response.status,
+                            text: salvaged.xml,
+                            truncated: true,
+                        };
+                    }
+                } else if (attempt < attempts) {
                     if (!hasTimeFor(retryDelayMs)) return budgetExhausted();
                     logger?.log?.(`   ↻ ${requestLabel} failed for ${feedName} (${redact(lastError)}). Retrying once...`);
                     await sleep(retryDelayMs);
@@ -337,7 +666,12 @@ export async function fetchFeedXml({
             httpStatus: directResult.status ?? null,
             lastError: null,
             proxyError: null,
+            // `truncated` heisst: die Antwort war ueber der Grenze, `xmlString`
+            // enthaelt nur ihre vollstaendig gelesenen Eintraege (siehe
+            // salvageTruncatedFeed). Beide Felder stehen nur bei einem Erfolg.
+            salvagedEntryCount: directResult.salvagedEntryCount ?? null,
             transport: 'direct',
+            truncated: directResult.truncated === true,
             usedProxy: false,
             xmlString: directResult.text,
         };
@@ -417,7 +751,9 @@ export async function fetchFeedXml({
             httpStatus: proxyResult.status ?? null,
             lastError: null,
             proxyError: null,
+            salvagedEntryCount: proxyResult.salvagedEntryCount ?? null,
             transport: 'proxy',
+            truncated: proxyResult.truncated === true,
             usedProxy: true,
             xmlString: proxyResult.text,
         };

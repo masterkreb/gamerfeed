@@ -69,6 +69,19 @@ Stream ab. Eine `Content-Length` allein genügt nicht – ohne diesen Header kö
 eine Gegenstelle beliebig lange senden. Bei Überschreitung wird der Stream über
 `reader.cancel()` geschlossen, damit keine Verbindung offen weiterläuft.
 
+**Ein zu großer Feed wird nicht mehr komplett verworfen.** Überschreitet ein Feed
+die Grenze, wertet der Lauf die bis dahin vollständig gelesenen Einträge aus, nur
+der abgeschnittene Rest fällt weg (`salvageTruncatedFeedXml` in
+`scripts/feed-fetch-utils.js`). Dafür wird hinter dem letzten vollständigen
+`</item>` beziehungsweise `</entry>` abgeschnitten und werden die offenen Elemente
+geschlossen; ein `</item>` als Text in CDATA oder Kommentar zählt nicht.
+Üblicherweise stehen die neuesten Einträge zuerst und bleiben erhalten. Die Quelle
+bleibt `success`, eine Logzeile nennt Grenze und Zahl der Einträge. Grenze und
+Bytezählung bleiben unverändert, es wird nichts wiederholt. Lässt sich kein
+sauberer Schnitt bilden, bleibt es beim bisherigen Fehler – ebenso bei einer per
+`Content-Length` als zu groß angekündigten Antwort (sie wird nicht gelesen) und
+bei der Proxy-Antwort 413 (sie hat keinen Rumpf).
+
 Der SSRF- und Redirect-Schutz aus `scripts/outbound-policy.js` bleibt unverändert
 davor: ein abgelehntes Ziel erreicht das Netz nicht, jeder Weiterleitungsschritt
 wird erneut geprüft.

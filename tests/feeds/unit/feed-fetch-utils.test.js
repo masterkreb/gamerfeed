@@ -271,14 +271,15 @@ test('lehnt HTML und übergroße Antworten auch vom Proxy ab', async () => {
     assert.equal(oversizedFetcher.calls.length, 1);
 });
 
-test('ein beim Streamen zu großer Feed scheitert weiterhin an der Grenze', async () => {
-    // Halbes XML ist wertlos: ohne sein Ende fehlen Artikel, und niemand würde
-    // es merken. Anders als bei einer Artikelseite wird hier deshalb kein Anfang
-    // ausgewertet. Die Antwort trägt keine Content-Length; gemessen werden die
-    // real gelesenen Bytes.
+test('ein beim Streamen zu großer Feed ohne vollständigen Eintrag scheitert weiterhin an der Grenze', async () => {
+    // Ein Feed über der Grenze wird nur ausgewertet, wenn sich bis zur Grenze
+    // mindestens ein vollständiger Eintrag lesen ließ (tests/feeds/unit/
+    // feed-truncated-salvage.test.js). Hier liegt die Grenze mitten im ersten und
+    // einzigen Eintrag: nichts ist sauber zu retten, es bleibt beim Fehler. Die
+    // Antwort trägt keine Content-Length; gemessen werden die real gelesenen Bytes.
     const grosserFeed = RSS_XML.replace(
-        '</channel>',
-        `<item><title>${'x'.repeat(5000)}</title></item></channel>`,
+        '<item><title>News</title></item>',
+        `<item><title>${'x'.repeat(5000)}</title></item>`,
     );
     const fetcher = createFetchSequence(response(grosserFeed));
 
